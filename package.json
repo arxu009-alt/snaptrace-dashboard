@@ -13,6 +13,7 @@
     "next": "16.3.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "resend": "^6.24.0",
     "source-map-js": "^1.2.1"
   },
   "devDependencies": {
