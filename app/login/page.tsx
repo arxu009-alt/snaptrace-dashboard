@@ -1,126 +1,90 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+import { Mail, Lock, ArrowRight, Activity, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        router.push('/dashboard');
-      }
-    };
-
-    checkSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        router.push('/dashboard');
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [router]);
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage('');
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        setMessage(`Error: ${error.message}`);
-      } else if (data.session) {
-        router.push('/dashboard');
-      }
-    } catch (err: any) {
-      setMessage(`Unexpected error: ${err.message || 'Failed to sign in'}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setMessage('');
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`,
-      },
-    });
-
-    if (error) {
-      setMessage(`Google Auth Error: ${error.message}`);
-    }
+    setIsLoading(true);
+    // Simulate auth delay
+    setTimeout(() => setIsLoading(false), 1500);
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '80px auto', padding: '24px', borderRadius: '8px', border: '1px solid #333', backgroundColor: '#111', color: '#fff', fontFamily: 'sans-serif' }}>
-      <h2 style={{ marginBottom: '20px', fontSize: '20px' }}>SnapTrace Log In</h2>
-      <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ padding: '10px', borderRadius: '4px', border: '1px solid #444', backgroundColor: '#222', color: '#fff' }}
-        />
-        <input
-          type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ padding: '10px', borderRadius: '4px', border: '1px solid #444', backgroundColor: '#222', color: '#fff' }}
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ padding: '10px', borderRadius: '4px', border: 'none', backgroundColor: '#2563eb', color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
-        >
-          {loading ? 'Logging In...' : 'Log In'}
-        </button>
-      </form>
+    <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden selection:bg-indigo-500/30">
+      {/* Subtle Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div style={{ margin: '16px 0', textAlign: 'center', color: '#666' }}>OR</div>
+      <div className="w-full max-w-md z-10">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-12 h-12 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-black/50">
+            <Activity className="w-6 h-6 text-indigo-500" />
+          </div>
+          <h1 className="text-2xl font-semibold text-slate-50 tracking-tight">Welcome back</h1>
+          <p className="text-sm text-slate-400 mt-2">Sign in to your SnapTrace account</p>
+        </div>
 
-      <button
-        type="button"
-        onClick={handleGoogleLogin}
-        style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #444', backgroundColor: '#ffffff', color: '#000000', cursor: 'pointer', fontWeight: 'bold' }}
-      >
-        Sign in with Google
-      </button>
+        {/* Auth Card */}
+        <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-8 shadow-2xl">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-300">Email address</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-slate-500" />
+                </div>
+                <input
+                  type="email"
+                  required
+                  className="block w-full pl-10 pr-3 py-2.5 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all sm:text-sm"
+                  placeholder="you@company.com"
+                />
+              </div>
+            </div>
 
-      {message && (
-        <p style={{ marginTop: '16px', color: message.startsWith('Error') ? '#ef4444' : '#10b981', fontSize: '14px' }}>
-          {message}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-slate-300">Password</label>
+                <Link href="#" className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-slate-500" />
+                </div>
+                <input
+                  type="password"
+                  required
+                  className="block w-full pl-10 pr-3 py-2.5 bg-slate-950/50 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all sm:text-sm"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 focus:ring-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign In'}
+              {!isLoading && <ArrowRight className="w-4 h-4" />}
+            </button>
+          </form>
+        </div>
+
+        <p className="text-center text-sm text-slate-400 mt-6">
+          Don't have an account?{' '}
+          <Link href="/signup" className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors">
+            Sign up
+          </Link>
         </p>
-      )}
-
-      <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '14px', color: '#aaa' }}>
-        Don't have an account?{' '}
-        <Link href="/signup" style={{ color: '#2563eb', textDecoration: 'none' }}>
-          Sign Up
-        </Link>
-      </p>
+      </div>
     </div>
   );
 }
