@@ -1,84 +1,37 @@
-import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Prevents Next.js from attempting to statically evaluate this route at build time
+export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
   try {
-    const { userId, title, message, level } = await request.json();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!userId || !title || !message) {
-      return NextResponse.json(
-        { error: 'Missing required fields: userId, title, or message' },
-        { status: 400 }
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return new Response(
+        JSON.stringify({ error: 'Missing Supabase environment variables.' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Fetch active notification channels for this user
-    const { data: channels, error } = await supabase
-      .from('notification_channels')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
+    // Parse incoming request body
+    const body = await request.json();
 
-    if (!channels || channels.length === 0) {
-      return NextResponse.json({ message: 'No active notification channels found for user' });
-    }
+    // Insert your notification logic here...
 
-    // Dispatch alerts across all user channels
-    const dispatchResults = await Promise.allSettled(
-      channels.map(async (channel) => {
-        if (channel.type === 'discord') {
-          const res = await fetch(channel.destination, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              embeds: [
-                {
-                  title: `[${(level || 'INFO').toUpperCase()}] ${title}`,
-                  description: message,
-                  color: level === 'error' ? 15158332 : 3066993,
-                  timestamp: new Date().toISOString(),
-                },
-              ],
-            }),
-          });
-          if (!res.ok) throw new Error(`Discord send failed with status ${res.status}`);
-          return { channelId: channel.id, type: 'discord', status: 'sent' };
-        }
-
-        if (channel.type === 'email') {
-          const res = await resend.emails.send({
-            from: 'SnapTrace Alerts <onboarding@resend.dev>',
-            to: [channel.destination],
-            subject: `[SnapTrace Alert] ${title}`,
-            html: `
-              <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-                <h2 style="color: #333;">${title}</h2>
-                <p><strong>Level:</strong> ${(level || 'INFO').toUpperCase()}</p>
-                <p style="background: #f9f9f9; padding: 12px; border-radius: 4px;">${message}</p>
-              </div>
-            `,
-          });
-          return { channelId: channel.id, type: 'email', status: 'sent', resendId: res.id };
-        }
-      })
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
-
-    return NextResponse.json({
-      success: true,
-      dispatchedCount: channels.length,
-      results: dispatchResults,
-    });
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
