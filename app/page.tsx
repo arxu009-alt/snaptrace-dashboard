@@ -1,22 +1,25 @@
-'use client'
+import Link from 'next/link';
 
-export default function Home() {
-  const triggerCrash = () => {
-    // This will throw inside the app context and trigger window.onerror
-    throw new Error(`SDK Live Pipeline Test #${Date.now()}`)
-  }
-
+export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#090D16] text-white flex flex-col items-center justify-center p-8 gap-4 font-sans">
-      <h1 className="text-2xl font-bold">SnapTrace SDK Test Environment</h1>
-      <p className="text-slate-400 text-sm">Click the button below to simulate an uncaught browser crash.</p>
+    <div style={{ maxWidth: '600px', margin: '100px auto', textAlign: 'center', color: '#fff', fontFamily: 'sans-serif' }}>
+      <h1 style={{ fontSize: '32px', marginBottom: '12px' }}>Welcome to SnapTrace</h1>
+      <p style={{ margin: '20px 0', color: '#aaa' }}>Application performance and crash monitoring platform.</p>
       
-      <button
-        onClick={triggerCrash}
-        className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 font-semibold rounded-lg text-sm transition shadow-lg shadow-rose-600/20"
-      >
-        Trigger Test Crash 💥
-      </button>
-    </main>
-  )
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginTop: '24px' }}>
+        <Link
+          href="/login"
+          style={{ padding: '10px 20px', borderRadius: '6px', backgroundColor: '#10b981', color: '#fff', textDecoration: 'none', fontWeight: 'bold' }}
+        >
+          Log In
+        </Link>
+        <Link
+          href="/signup"
+          style={{ padding: '10px 20px', borderRadius: '6px', border: '1px solid #444', backgroundColor: '#222', color: '#fff', textDecoration: 'none' }}
+        >
+          Sign Up
+        </Link>
+      </div>
+    </div>
+  );
 }
