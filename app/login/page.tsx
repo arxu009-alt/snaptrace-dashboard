@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function LoginPage() {
@@ -11,7 +12,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Check if user was already logged in by clicking the email verification link
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -22,7 +22,6 @@ export default function LoginPage() {
 
     checkSession();
 
-    // Listen for auth state changes from URL confirmation tokens
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         router.push('/dashboard');
@@ -115,6 +114,13 @@ export default function LoginPage() {
           {message}
         </p>
       )}
+
+      <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '14px', color: '#aaa' }}>
+        Don't have an account?{' '}
+        <Link href="/signup" style={{ color: '#2563eb', textDecoration: 'none' }}>
+          Sign Up
+        </Link>
+      </p>
     </div>
   );
 }
