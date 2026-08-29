@@ -17,17 +17,28 @@ export default function SignupPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/login`,
-      },
     });
 
     if (error) {
       setMessage(`Error: ${error.message}`);
     } else {
-      setMessage('Verification email sent! Check your inbox (including Spam).');
+      setMessage('Check your email for the confirmation link!');
     }
     setLoading(false);
+  };
+
+  const handleGoogleLogin = async () => {
+    setMessage('');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+
+    if (error) {
+      setMessage(`Google Auth Error: ${error.message}`);
+    }
   };
 
   return (
@@ -55,9 +66,20 @@ export default function SignupPage() {
           disabled={loading}
           style={{ padding: '10px', borderRadius: '4px', border: 'none', backgroundColor: '#2563eb', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
         >
-          {loading ? 'Sending Request...' : 'Sign Up'}
+          {loading ? 'Signing Up...' : 'Sign Up'}
         </button>
       </form>
+
+      <div style={{ margin: '16px 0', textAlign: 'center', color: '#666' }}>OR</div>
+
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #444', backgroundColor: '#ffffff', color: '#000000', cursor: 'pointer', fontWeight: 'bold' }}
+      >
+        Sign up with Google
+      </button>
+
       {message && <p style={{ marginTop: '16px', color: message.startsWith('Error') ? '#ef4444' : '#10b981' }}>{message}</p>}
     </div>
   );
