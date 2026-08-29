@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -11,22 +11,49 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Check if user was already logged in by clicking the email verification link
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.push('/dashboard');
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth state changes from URL confirmation tokens
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        router.push('/dashboard');
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [router]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setMessage(`Error: ${error.message}`);
+      if (error) {
+        setMessage(`Error: ${error.message}`);
+      } else if (data.session) {
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      setMessage(`Unexpected error: ${err.message || 'Failed to sign in'}`);
+    } finally {
       setLoading(false);
-    } else {
-      setMessage('Successfully logged in! Redirecting...');
-      router.push('/dashboard');
     }
   };
 
@@ -45,7 +72,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '80px auto', padding: '24px', borderRadius: '8px', border: '1px solid #333', backgroundColor: '#111', color: '#fff' }}>
+    <div style={{ maxWidth: '400px', margin: '80px auto', padding: '24px', borderRadius: '8px', border: '1px solid #333', backgroundColor: '#111', color: '#fff', fontFamily: 'sans-serif' }}>
       <h2 style={{ marginBottom: '20px', fontSize: '20px' }}>SnapTrace Log In</h2>
       <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <input
@@ -67,9 +94,9 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          style={{ padding: '10px', borderRadius: '4px', border: 'none', backgroundColor: '#10b981', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
+          style={{ padding: '10px', borderRadius: '4px', border: 'none', backgroundColor: '#2563eb', color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: 'bold' }}
         >
-          {loading ? 'Authenticating...' : 'Log In'}
+          {loading ? 'Logging In...' : 'Log In'}
         </button>
       </form>
 
@@ -83,7 +110,11 @@ export default function LoginPage() {
         Sign in with Google
       </button>
 
-      {message && <p style={{ marginTop: '16px', color: message.startsWith('Error') ? '#ef4444' : '#10b981' }}>{message}</p>}
+      {message && (
+        <p style={{ marginTop: '16px', color: message.startsWith('Error') ? '#ef4444' : '#10b981', fontSize: '14px' }}>
+          {message}
+        </p>
+      )}
     </div>
   );
 }
