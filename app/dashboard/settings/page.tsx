@@ -1,95 +1,148 @@
 'use client';
 
-import { useState } from 'react';
-import { Settings, Shield, Sparkles, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function SettingsPage() {
-  const [selectedTier, setSelectedTier] = useState<'free' | 'pro'>('pro');
+  const [discordUrl, setDiscordUrl] = useState('');
+  const [alertEmail, setAlertEmail] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('discord_webhook_url, alert_email')
+          .limit(1)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error(error.message);
+        } else if (data) {
+          setDiscordUrl(data.discord_webhook_url || '');
+          setAlertEmail(data.alert_email || '');
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadSettings();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      // Fetch the first project row ID
+      const { data: project } = await supabase.from('projects').select('id').limit(1).single();
+
+      if (!project) {
+        throw new Error('No project found. Create a project first.');
+      }
+
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          discord_webhook_url: discordUrl.trim() || null,
+          alert_email: alertEmail.trim() || null,
+        })
+        .eq('id', project.id);
+
+      if (error) throw error;
+
+      setMessage({ type: 'success', text: 'Alert channels updated successfully.' });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Failed to save settings.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-gray-400 p-8 flex items-center justify-center font-mono text-xs">
+        Loading alert configuration...
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-8 w-full">
-      <header className="pb-6 mb-8 border-b border-slate-800">
-        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-          <Settings className="w-6 h-6 text-indigo-400" />
-          Settings & Subscription Tiers
-        </h1>
-        <p className="text-sm text-slate-400 mt-1">Configure your AI error solution preferences and account parameters.</p>
-      </header>
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-8 font-sans">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold tracking-tight mb-1">Notification Settings</h1>
+        <p className="text-sm text-gray-400 mb-8">
+          Configure real-time alerts for critical exceptions captured by SnapTrace.
+        </p>
 
-      <div className="max-w-4xl space-y-8">
-        {/* Tier Selector Card */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-indigo-400" />
-            AI Error Intelligence Tier
-          </h2>
-          <p className="text-sm text-slate-400 mb-6">
-            Configure how SnapTrace analyzes incoming runtime errors.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Free Tier */}
-            <div
-              onClick={() => setSelectedTier('free')}
-              className={`border rounded-xl p-5 cursor-pointer transition-all ${
-                selectedTier === 'free'
-                  ? 'bg-slate-900 border-indigo-500 ring-1 ring-indigo-500'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-semibold text-white">Freemium Tier</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Plain English Error Summaries</p>
-                </div>
-                {selectedTier === 'free' && <CheckCircle2 className="w-5 h-5 text-indigo-400" />}
-              </div>
-              <ul className="text-xs text-slate-400 space-y-2 mt-4">
-                <li className="flex items-center gap-2">• Translates stack traces into human-readable summaries</li>
-                <li className="flex items-center gap-2">• Basic uncaught error categorization</li>
-                <li className="flex items-center gap-2">• Up to 10,000 telemetry events/month</li>
-              </ul>
-            </div>
-
-            {/* Pro Tier */}
-            <div
-              onClick={() => setSelectedTier('pro')}
-              className={`border rounded-xl p-5 cursor-pointer transition-all ${
-                selectedTier === 'pro'
-                  ? 'bg-indigo-950/30 border-indigo-500 ring-1 ring-indigo-500'
-                  : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-white">Pro Tier</h3>
-                    <span className="text-[10px] font-bold bg-indigo-600 text-white px-2 py-0.5 rounded">Active</span>
-                  </div>
-                  <p className="text-xs text-indigo-300 mt-0.5">Automated Code Patches & Root Cause Fixes</p>
-                </div>
-                {selectedTier === 'pro' && <CheckCircle2 className="w-5 h-5 text-indigo-400" />}
-              </div>
-              <ul className="text-xs text-slate-300 space-y-2 mt-4">
-                <li className="flex items-center gap-2">• Generates automated before/after code fixes</li>
-                <li className="flex items-center gap-2">• Root cause analysis & instant code suggestions</li>
-                <li className="flex items-center gap-2">• Unlimited monthly error telemetry</li>
-              </ul>
-            </div>
+        {message && (
+          <div
+            className={`p-4 rounded-lg mb-6 text-xs font-mono border ${
+              message.type === 'success'
+                ? 'bg-emerald-950/40 border-emerald-800 text-emerald-300'
+                : 'bg-red-950/40 border-red-800 text-red-300'
+            }`}
+          >
+            {message.text}
           </div>
-        </div>
+        )}
 
-        {/* Security Summary */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-indigo-400" />
-            Ingestion Security
-          </h2>
-          <div className="text-xs text-slate-400 space-y-2 leading-relaxed">
-            <p>• Cross-Origin Resource Sharing (CORS) is enabled on <code className="text-slate-200 bg-slate-950 px-2 py-1 rounded border border-slate-800">/api/v1/ingest</code> to accept client browser payloads.</p>
-            <p>• Payloads are strictly verified using project API keys (<code className="text-slate-200 bg-slate-950 px-2 py-1 rounded border border-slate-800">sk_live_...</code>).</p>
+        <form onSubmit={handleSave} className="space-y-6">
+          <div className="bg-gray-900/40 border border-gray-800 rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-gray-200 mb-4 font-mono">
+              Discord Webhook Integration
+            </h2>
+            <label className="block text-xs text-gray-400 mb-2">
+              Discord Webhook URL
+            </label>
+            <input
+              type="url"
+              placeholder="https://discord.com/api/webhooks/..."
+              value={discordUrl}
+              onChange={(e) => setDiscordUrl(e.target.value)}
+              className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3.5 py-2 text-xs font-mono text-gray-200 focus:outline-none focus:border-red-500"
+            />
+            <p className="text-[11px] text-gray-500 mt-2">
+              SnapTrace will dispatch formatted embed cards directly into your Discord channel upon new exception events.
+            </p>
           </div>
-        </div>
+
+          <div className="bg-gray-900/40 border border-gray-800 rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-gray-200 mb-4 font-mono">
+              Email Alert Dispatch
+            </h2>
+            <label className="block text-xs text-gray-400 mb-2">
+              Recipient Email Address
+            </label>
+            <input
+              type="email"
+              placeholder="developer@example.com"
+              value={alertEmail}
+              onChange={(e) => setAlertEmail(e.target.value)}
+              className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3.5 py-2 text-xs font-mono text-gray-200 focus:outline-none focus:border-red-500"
+            />
+            <p className="text-[11px] text-gray-500 mt-2">
+              Receive immediate email dispatches containing exception messages and runtime host metadata.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-medium text-xs py-2.5 rounded-lg transition-colors font-mono"
+          >
+            {saving ? 'Saving...' : 'Save Channel Preferences'}
+          </button>
+        </form>
       </div>
     </div>
   );
