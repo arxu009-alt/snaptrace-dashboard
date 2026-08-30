@@ -1,66 +1,73 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { AlertCircle, Key, Settings } from 'lucide-react';
 
 export default function DashboardLayout({ children }) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
-  const navItems = [
-    { id: 'issues', label: 'Error Stream', icon: '⚡', href: '/dashboard' },
-    { id: 'webhooks', label: 'Webhooks', icon: '🔔', href: '/dashboard/webhooks' },
-    { id: 'keys', label: 'API Keys', icon: '🔑', href: '/dashboard/api-keys' },
-    { id: 'settings', label: 'Project Settings', icon: '⚙️', href: '/dashboard/settings' }
-  ]
+  const navigation = [
+    { name: 'Projects & Keys', href: '/dashboard', icon: Key },
+    { name: 'Error Stream', href: '/dashboard/errors', icon: AlertCircle },
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#090D16] text-slate-100 font-sans flex antialiased">
-      {/* Shared Sidebar Navigation */}
-      <aside className="w-64 bg-[#0D1322] border-r border-slate-800/60 flex flex-col justify-between hidden md:flex h-screen sticky top-0">
-        <div className="p-6 space-y-8">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+      {/* Primary Navigation Sidebar */}
+      <aside className="w-64 bg-slate-900/80 border-r border-slate-800 flex flex-col justify-between p-4 shrink-0">
+        <div>
+          {/* Brand Header */}
+          <div className="flex items-center gap-3 px-3 py-4 mb-6 border-b border-slate-800/60">
+            <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center font-bold text-white text-base shadow-lg shadow-indigo-600/30">
               ST
             </div>
             <div>
-              <h1 className="font-bold tracking-tight text-white text-base">SnapTrace</h1>
-              <span className="text-[10px] text-blue-400 font-medium px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">v1.0 Pro</span>
+              <h1 className="font-bold text-white text-base leading-tight tracking-tight">SnapTrace</h1>
+              <span className="text-[10px] font-semibold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                v1.0 Pro
+              </span>
             </div>
           </div>
 
+          {/* Navigation Links */}
           <nav className="space-y-1">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
               return (
                 <Link
-                  key={item.id}
+                  key={item.name}
                   href={item.href}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition ${
-                    isActive 
-                      ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' 
-                      : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200'
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
                   }`}
                 >
-                  <span>{item.icon}</span>
-                  {item.label}
+                  <Icon className="w-4 h-4" />
+                  {item.name}
                 </Link>
-              )
+              );
             })}
           </nav>
         </div>
 
-        <div className="p-4 border-t border-slate-800/60 bg-[#0B101D]">
-          <div className="flex items-center gap-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs text-slate-400 font-medium">Telemetry Online</span>
-          </div>
+        {/* Live System Indicator */}
+        <div className="p-3 bg-slate-950/80 border border-slate-800/80 rounded-xl flex items-center gap-2.5">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span className="text-xs font-medium text-slate-300">Telemetry Online</span>
         </div>
       </aside>
 
-      {/* Main Page Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Workspace Area */}
+      <main className="flex-1 overflow-y-auto">
         {children}
-      </div>
+      </main>
     </div>
-  )
+  );
 }
