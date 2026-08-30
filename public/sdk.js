@@ -12,12 +12,6 @@
   }
 
   var INGEST_ENDPOINT = 'https://snaptrace-dashboard.vercel.app/api/v1/ingest';
-  if (currentScript && currentScript.src) {
-    try {
-      var scriptUrl = new URL(currentScript.src);
-      INGEST_ENDPOINT = scriptUrl.origin + '/api/v1/ingest';
-    } catch (e) {}
-  }
 
   function sendError(payload) {
     payload.api_key = apiKey;
@@ -26,26 +20,25 @@
 
     fetch(INGEST_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload),
-      mode: 'cors',
-      credentials: 'omit',
-      keepalive: true
+      headers: {
+        'Content-Type': 'text/plain;charset=UTF-8'
+      },
+      body: JSON.stringify(payload)
     }).catch(function (err) {
-      console.error('[SnapTrace] Transmission failed:', err);
+      console.error('[SnapTrace] Transmission error:', err);
     });
   }
 
-  // Global uncaught JavaScript exception handler
+  // Intercept uncaught JavaScript runtime errors
   window.addEventListener('error', function (event) {
     sendError({
-      message: event.message || 'Script error',
-      stack: event.error && event.error.stack ? event.error.stack : (event.filename + ':' + event.lineno + ':' + event.colno),
+      message: event.message || 'Uncaught JavaScript Error',
+      stack: event.error && event.error.stack ? event.error.stack : (event.filename + ':' + event.lineno),
       environment: 'production'
     });
   });
 
-  // Global unhandled promise rejection handler
+  // Intercept unhandled promise rejections
   window.addEventListener('unhandledrejection', function (event) {
     var message = 'Unhandled Promise Rejection';
     var stack = null;

@@ -3,18 +3,16 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-function getCorsHeaders() {
-  return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  };
-}
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
 
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
-    headers: getCorsHeaders(),
+    headers: corsHeaders,
   });
 }
 
@@ -25,23 +23,35 @@ export async function POST(request: Request) {
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json(
-        { error: 'Server configuration missing.' },
-        { status: 500, headers: getCorsHeaders() }
+        { error: 'Server environment variables missing on server.' },
+        { status: 500, headers: corsHeaders }
       );
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const body = await request.json();
+    
+    // Parse incoming payload text to avoid content-type mismatch errors
+    const rawBody = await request.text();
+    let body;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid JSON body format.' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
     const { api_key, message, stack, url, user_agent, environment } = body;
 
     if (!api_key || !message) {
       return NextResponse.json(
-        { error: 'Missing required parameters: api_key and message.' },
-        { status: 400, headers: getCorsHeaders() }
+        { error: 'Missing required fields: api_key and message.' },
+        { status: 400, headers: corsHeaders }
       );
     }
 
-    // Verify valid project API Key
+    // Verify valid project API Key in database
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id')
@@ -50,12 +60,12 @@ export async function POST(request: Request) {
 
     if (projectError || !project) {
       return NextResponse.json(
-        { error: 'Invalid API Key.' },
-        { status: 401, headers: getCorsHeaders() }
+        { error: 'Invalid or missing API Key.' },
+        { status: 401, headers: corsHeaders }
       );
     }
 
-    // Insert error log linked to the project
+    // Insert error telemetry event into the database
     const { error: insertError } = await supabase.from('errors').insert([
       {
         project_id: project.id,
@@ -70,18 +80,18 @@ export async function POST(request: Request) {
     if (insertError) {
       return NextResponse.json(
         { error: insertError.message },
-        { status: 500, headers: getCorsHeaders() }
+        { status: 500, headers: corsHeaders }
       );
     }
 
     return NextResponse.json(
       { success: true },
-      { status: 200, headers: getCorsHeaders() }
+      { status: 200, headers: corsHeaders }
     );
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || 'Internal server error.' },
-      { status: 500, headers: getCorsHeaders() }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
