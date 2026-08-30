@@ -11,7 +11,7 @@
     return;
   }
 
-  var INGEST_ENDPOINT = '/api/v1/ingest';
+  var INGEST_ENDPOINT = 'https://snaptrace-dashboard.vercel.app/api/v1/ingest';
   if (currentScript && currentScript.src) {
     try {
       var scriptUrl = new URL(currentScript.src);
@@ -24,19 +24,16 @@
     payload.url = payload.url || window.location.href;
     payload.user_agent = payload.user_agent || navigator.userAgent;
 
-    if (navigator.sendBeacon) {
-      var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-      navigator.sendBeacon(INGEST_ENDPOINT, blob);
-    } else {
-      fetch(INGEST_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true
-      }).catch(function (err) {
-        console.error('[SnapTrace] Transmission failed:', err);
-      });
-    }
+    fetch(INGEST_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload),
+      mode: 'cors',
+      credentials: 'omit',
+      keepalive: true
+    }).catch(function (err) {
+      console.error('[SnapTrace] Transmission failed:', err);
+    });
   }
 
   // Global uncaught JavaScript exception handler
