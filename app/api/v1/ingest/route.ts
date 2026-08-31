@@ -1,13 +1,22 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const gmailUser = process.env.GMAIL_USER || process.env.OWNER_EMAIL;
+const gmailPass = process.env.GMAIL_APP_PASSWORD;
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: gmailUser,
+    pass: gmailPass,
+  },
+});
 
 export async function POST(req: Request) {
   try {
@@ -29,7 +38,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
     }
 
-    // 2. Insert error record
+    // 2. Insert error record into database
     const { data: errorRecord, error: dbError } = await supabase
       .from('errors')
       .insert({
@@ -46,7 +55,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
-    // 3. Discord Dispatch
+    // 3. Dispatch alert to Discord Webhook (if configured)
     if (project.discord_webhook) {
       fetch(project.discord_webhook, {
         method: 'POST',
@@ -67,38 +76,38 @@ export async function POST(req: Request) {
       }).catch((err) => console.error('Discord Webhook Error:', err));
     }
 
-    // 4. Resend Dispatch
+    // 4. Dispatch alert via Gmail SMTP (Nodemailer)
     let emailStatus = null;
     const targetEmail = project.alert_email || process.env.OWNER_EMAIL;
 
-    if (targetEmail && process.env.RESEND_API_KEY) {
-      const emailRes = await resend.emails.send({
-        from: 'SnapTrace Alerts <onboarding@resend.dev>',
-        to: [targetEmail],
-        subject: `[SnapTrace Error] ${message}`,
-        html: `
-          <div style="font-family: monospace; padding: 20px; background: #0f172a; color: #f8fafc;">
-            <h2 style="color: #ef4444;">🚨 New Exception Event</h2>
-            <p><strong>Message:</strong> ${message}</p>
-            <p><strong>Environment:</strong> ${environment || 'production'}</p>
-            <p><strong>URL:</strong> ${url || 'N/A'}</p>
-            <hr style="border-color: #334155;"/>
-            <pre style="background: #1e293b; padding: 12px; border-radius: 4px;">${stack || 'No stack trace provided'}</pre>
-          </div>
-        `,
-      });
-
-      if (emailRes.error) {
-        emailStatus = { success: false, error: emailRes.error };
-      } else {
-        emailStatus = { success: true, id: emailRes.data?.id };
+    if (targetEmail && gmailUser && gmailPass) {
+      try {
+        const info = await transporter.sendMail({
+          from: `"SnapTrace Alerts" <${gmailUser}>`,
+          to: targetEmail,
+          subject: `[SnapTrace Error] ${message}`,
+          html: `
+            <div style="font-family: monospace; padding: 20px; background: #0f172a; color: #f8fafc; border-radius: 8px;">
+              <h2 style="color: #ef4444;">🚨 New Exception Event</h2>
+              <p><strong>Message:</strong> ${message}</p>
+              <p><strong>Environment:</strong> ${environment || 'production'}</p>
+              <p><strong>URL:</strong> ${url || 'N/A'}</p>
+              <hr style="border-color: #334155;"/>
+              <pre style="background: #1e293b; padding: 12px; border-radius: 4px; overflow-x: auto;">${stack || 'No stack trace provided'}</pre>
+            </div>
+          `,
+        });
+        emailStatus = { success: true, messageId: info.messageId };
+      } catch (mailErr: any) {
+        console.error('Gmail Dispatch Error:', mailErr);
+        emailStatus = { success: false, error: mailErr.message };
       }
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      id: errorRecord.id, 
-      email_status: emailStatus 
+    return NextResponse.json({
+      success: true,
+      id: errorRecord.id,
+      email_status: emailStatus,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
