@@ -1,32 +1,10 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import SnapTraceProvider from "@/components/SnapTraceProvider";
-import "./globals.css";
+import { SnapTraceProvider } from '@/components/SnapTraceProvider';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "SnapTrace Engine Dashboard",
-  description: "Real-time Telemetry & Error Ingestion Engine",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <SnapTraceProvider>
+      <body>
+        <SnapTraceProvider apiKey="sk_live_iuog5ef58kgz0j57u3ncj">
           {children}
         </SnapTraceProvider>
       </body>
