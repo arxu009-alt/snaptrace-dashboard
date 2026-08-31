@@ -21,6 +21,10 @@ export default function ErrorFeedPage() {
   const [errors, setErrors] = useState<ErrorLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
+  
+  // Search & Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'development'>('all');
 
   useEffect(() => {
     fetchErrors();
@@ -39,30 +43,85 @@ export default function ErrorFeedPage() {
     setLoading(false);
   }
 
+  async function deleteError(id: number, e: React.MouseEvent) {
+    e.stopPropagation();
+    const { error } = await supabase.from('errors').delete().eq('id', id);
+    if (!error) {
+      setErrors((prev) => prev.filter((err) => err.id !== id));
+      if (selectedError?.id === id) setSelectedError(null);
+    }
+  }
+
+  // Client-side filtering
+  const filteredErrors = errors.filter((err) => {
+    const matchesSearch =
+      err.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (err.url && err.url.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (err.stack && err.stack.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesEnv =
+      envFilter === 'all' ? true : err.environment.toLowerCase() === envFilter;
+
+    return matchesSearch && matchesEnv;
+  });
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-8 font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="flex justify-between items-center border-b border-slate-800 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white">Exception Logs</h1>
             <p className="text-sm text-slate-400">Real-time error stream ingested by SnapTrace</p>
           </div>
           <button
             onClick={fetchErrors}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg border border-slate-700 transition"
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg border border-slate-700 transition self-start sm:self-auto"
           >
             Refresh Feed
           </button>
+        </div>
+
+        {/* Controls Bar: Search & Filter */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+          {/* Search Input */}
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search error messages, URLs, or stack traces..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+            />
+          </div>
+
+          {/* Environment Filter Pills */}
+          <div className="flex items-center space-x-1 bg-slate-950 border border-slate-800 p-1 rounded-lg self-start sm:self-auto">
+            {(['all', 'production', 'development'] as const).map((env) => (
+              <button
+                key={env}
+                onClick={() => setEnvFilter(env)}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md capitalize transition ${
+                  envFilter === env
+                    ? 'bg-purple-600 text-white'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {env}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Error Table */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
           {loading ? (
             <div className="p-8 text-center text-slate-400">Loading exception logs...</div>
-          ) : errors.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">No errors logged yet.</div>
+          ) : filteredErrors.length === 0 ? (
+            <div className="p-8 text-center text-slate-400">
+              {errors.length === 0 ? 'No errors logged yet.' : 'No matching errors found for your query.'}
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-300">
@@ -72,11 +131,11 @@ export default function ErrorFeedPage() {
                     <th className="py-3 px-4">Message</th>
                     <th className="py-3 px-4">Environment</th>
                     <th className="py-3 px-4">URL</th>
-                    <th className="py-3 px-4 text-right">Action</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
-                  {errors.map((err) => (
+                  {filteredErrors.map((err) => (
                     <tr key={err.id} className="hover:bg-slate-800/40 transition">
                       <td className="py-3 px-4 whitespace-nowrap text-slate-400 font-mono text-xs">
                         {new Date(err.created_at).toLocaleString()}
@@ -98,12 +157,18 @@ export default function ErrorFeedPage() {
                       <td className="py-3 px-4 truncate max-w-xs text-slate-400 font-mono text-xs">
                         {err.url || 'N/A'}
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-4 text-right space-x-2">
                         <button
                           onClick={() => setSelectedError(err)}
-                          className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-medium rounded border border-slate-700"
+                          className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-medium rounded border border-slate-700 transition"
                         >
                           Inspect
+                        </button>
+                        <button
+                          onClick={(e) => deleteError(err.id, e)}
+                          className="px-2 py-1 bg-red-950/40 hover:bg-red-900/60 text-xs text-red-400 font-medium rounded border border-red-800/50 transition"
+                        >
+                          Delete
                         </button>
                       </td>
                     </tr>
