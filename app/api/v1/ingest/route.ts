@@ -76,24 +76,25 @@ export async function POST(req: Request) {
       }).catch((err) => console.error('Discord Webhook Error:', err));
     }
 
-    // 4. Dispatch alert via Gmail SMTP (Nodemailer)
+    // 4. Dispatch alert via Gmail SMTP (Nodemailer) with custom display branding
     let emailStatus = null;
     const targetEmail = project.alert_email || process.env.OWNER_EMAIL;
 
     if (targetEmail && gmailUser && gmailPass) {
       try {
         const info = await transporter.sendMail({
-          from: `"SnapTrace Alerts" <${gmailUser}>`,
+          from: `"SnapTrace System Alerts" <${gmailUser}>`,
+          replyTo: `"SnapTrace Support" <${gmailUser}>`,
           to: targetEmail,
           subject: `[SnapTrace Error] ${message}`,
           html: `
-            <div style="font-family: monospace; padding: 20px; background: #0f172a; color: #f8fafc; border-radius: 8px;">
-              <h2 style="color: #ef4444;">🚨 New Exception Event</h2>
-              <p><strong>Message:</strong> ${message}</p>
-              <p><strong>Environment:</strong> ${environment || 'production'}</p>
-              <p><strong>URL:</strong> ${url || 'N/A'}</p>
-              <hr style="border-color: #334155;"/>
-              <pre style="background: #1e293b; padding: 12px; border-radius: 4px; overflow-x: auto;">${stack || 'No stack trace provided'}</pre>
+            <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 24px; background: #0f172a; color: #f8fafc; border-radius: 8px; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #ef4444; margin-top: 0; font-size: 20px;">🚨 New Exception Event</h2>
+              <p style="margin: 8px 0;"><strong>Message:</strong> ${message}</p>
+              <p style="margin: 8px 0;"><strong>Environment:</strong> ${environment || 'production'}</p>
+              <p style="margin: 8px 0;"><strong>URL:</strong> ${url || 'N/A'}</p>
+              <hr style="border: 0; border-top: 1px solid #334155; margin: 16px 0;"/>
+              <pre style="background: #1e293b; padding: 12px; border-radius: 6px; overflow-x: auto; font-family: monospace; font-size: 13px; color: #cbd5e1; border: 1px solid #334155;">${stack || 'No stack trace provided'}</pre>
             </div>
           `,
         });
