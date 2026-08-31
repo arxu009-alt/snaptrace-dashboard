@@ -1,10 +1,16 @@
+import './globals.css';
+import React from 'react';
 import { SnapTraceProvider } from '@/components/SnapTraceProvider';
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en">
       <body>
-        <SnapTraceProvider apiKey="sk_live_iuog5ef58kgz0j57u3ncj">
+        <SnapTraceProvider apiKey={process.env.SNAPTRACE_API_KEY || ''}>
           {children}
         </SnapTraceProvider>
       </body>
