@@ -4,7 +4,6 @@ import { createClient } from '@supabase/supabase-js';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  // Lazy initialize to prevent top-level build evaluation crashes on Vercel
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
@@ -28,7 +27,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Verify Project API Key
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id')
@@ -42,7 +40,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Insert Ingested Error Log
     const { error: insertError } = await supabase.from('errors').insert({
       project_id: project.id,
       message,
