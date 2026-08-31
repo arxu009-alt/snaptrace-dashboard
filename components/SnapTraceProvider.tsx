@@ -1,51 +1,52 @@
 'use client';
 
-import React from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
-export class SnapTraceProvider extends React.Component {
-  constructor(props) {
+interface SnapTraceProviderProps {
+  children: ReactNode;
+  apiKey?: string;
+  fallback?: ReactNode;
+}
+
+interface SnapTraceProviderState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+export class SnapTraceProvider extends Component<SnapTraceProviderProps, SnapTraceProviderState> {
+  constructor(props: SnapTraceProviderProps) {
     super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    const apiKey = this.props.apiKey;
-    if (!apiKey) return;
-
-    const payload = {
-      api_key: apiKey,
-      message: error.message || 'Unhandled Client Exception',
-      stack: error.stack || errorInfo?.componentStack || 'No stack trace available',
-      environment: process.env.NODE_ENV || 'production',
-      url: typeof window !== 'undefined' ? window.location.href : '',
+    this.state = {
+      hasError: false,
+      error: null,
     };
+  }
 
-    fetch('https://snaptrace-dashboard.vercel.app/api/v1/ingest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    }).catch((err) => console.error('SnapTrace SDK Ingest Failed:', err));
+  static getDerivedStateFromError(error: Error): SnapTraceProviderState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+    console.error('SnapTrace Error Boundary caught an error:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
         this.props.fallback || (
-          <div className="p-6 bg-red-950/40 border border-red-800 rounded-lg text-red-200 max-w-lg mx-auto my-8 font-sans">
-            <h3 className="font-bold text-lg mb-1">Something went wrong</h3>
-            <p className="text-xs text-red-300">
-              An unexpected application error occurred and has been logged to SnapTrace.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-3 py-1.5 bg-red-800 hover:bg-red-700 text-white rounded text-xs font-semibold transition"
-            >
-              Reload Page
-            </button>
+          <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-6">
+            <div className="max-w-md w-full p-6 border border-border rounded-lg bg-card text-center shadow-sm">
+              <h2 className="text-xl font-semibold mb-2 text-destructive">Something went wrong</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                An unexpected error occurred. Please try refreshing the page.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Reload Page
+              </button>
+            </div>
           </div>
         )
       );
