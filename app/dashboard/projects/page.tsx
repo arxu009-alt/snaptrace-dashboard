@@ -1,12 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import Link from 'next/link';
-import { Key, Copy, Check, RefreshCw } from 'lucide-react';
-
-// Disable static prerendering at build time to prevent build-worker evaluation crashes
-export const dynamic = 'force-dynamic';
+import { useEffect, useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 interface Project {
   id: string;
@@ -16,103 +11,205 @@ interface Project {
 }
 
 export default function ProjectsPage() {
+  const supabase = createClientComponentClient();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchProjects() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        setProjects(data);
-      }
-      setLoading(false);
-    }
-
     fetchProjects();
   }, []);
 
-  const copyToClipboard = (text: string) => {
+  const fetchProjects = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setProjects(data);
+    }
+    setLoading(false);
+  };
+
+  const generateApiKey = () => {
+    const randomHex = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return `sk_live_${randomHex}`;
+  };
+
+  const handleCreateProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProjectName.trim()) return;
+
+    setCreating(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setCreating(false);
+      return;
+    }
+
+    const apiKey = generateApiKey();
+
+    const { data, error } = await supabase
+      .from("projects")
+      .insert([
+        {
+          name: newProjectName.trim(),
+          api_key: apiKey,
+          user_id: user.id,
+        },
+      ])
+      .select();
+
+    if (!error && data) {
+      setProjects([data[0], ...projects]);
+      setNewProjectName("");
+      setIsModalOpen(false);
+    }
+    setCreating(false);
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this project? All associated logs will be removed.")) return;
+
+    const { error } = await supabase.from("projects").delete().eq("id", id);
+    if (!error) {
+      setProjects(projects.filter((p) => p.id !== id));
+    }
+  };
+
+  const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedKey(text);
-    setTimeout(() => setCopiedKey(null), 2000);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-8 font-sans">
-      <div className="max-w-5xl mx-auto space-y-8">
-        
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Project API Keys</h1>
-            <p className="text-sm text-slate-400">Manage integration credentials and project identifiers for SnapTrace</p>
-          </div>
-          <Link
-            href="/dashboard"
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition"
-          >
-            ← Back to Overview
-          </Link>
+    <div className="p-8 max-w-6xl mx-auto text-white">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Project API Keys</h1>
+          <p className="text-gray-400 text-sm">
+            Manage integration credentials and project identifiers for SnapTrace.
+          </p>
         </div>
-
-        {loading ? (
-          <div className="p-8 text-center text-slate-400">Loading API keys...</div>
-        ) : (
-          <div className="space-y-4">
-            {projects.length === 0 ? (
-              <div className="p-6 bg-slate-900 border border-slate-800 rounded-xl text-center text-sm text-slate-400">
-                No active projects found. Check your Supabase database setup.
-              </div>
-            ) : (
-              projects.map((project) => (
-                <div
-                  key={project.id}
-                  className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl space-y-4"
-                >
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-white">{project.name}</h2>
-                    <span className="text-xs text-slate-500 font-mono">
-                      ID: {project.id}
-                    </span>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                      API Key
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-indigo-400 truncate">
-                        {project.api_key}
-                      </code>
-                      <button
-                        onClick={() => copyToClipboard(project.api_key)}
-                        className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition flex items-center gap-1.5 text-xs font-medium"
-                      >
-                        {copiedKey === project.api_key ? (
-                          <>
-                            <Check className="w-4 h-4 text-emerald-400" /> Copied
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-4 h-4" /> Copy
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-colors text-sm"
+        >
+          + Create New Project
+        </button>
       </div>
+
+      {loading ? (
+        <div className="text-gray-400 text-sm">Loading projects...</div>
+      ) : projects.length === 0 ? (
+        <div className="bg-[#111827] border border-gray-800 rounded-xl p-8 text-center text-gray-400">
+          No projects found. Click "+ Create New Project" to generate your first API key.
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              className="bg-[#111827] border border-gray-800 rounded-xl p-6 relative shadow-sm"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-white">{project.name}</h2>
+                  <p className="text-xs text-gray-500">ID: {project.id}</p>
+                </div>
+                <button
+                  onClick={() => handleDeleteProject(project.id)}
+                  className="text-red-400 hover:text-red-300 text-xs px-2 py-1 bg-red-950/40 border border-red-900/50 rounded"
+                >
+                  Delete Project
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-gray-400 mb-1">
+                  API KEY
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={project.api_key}
+                    className="w-full bg-[#0a0f1d] border border-gray-800 rounded-md px-3 py-2 text-sm text-gray-300 font-mono focus:outline-none"
+                  />
+                  <button
+                    onClick={() => copyToClipboard(project.api_key, project.id)}
+                    className="bg-[#1f293d] hover:bg-[#2c3b57] text-gray-200 text-xs px-3 py-2 rounded-md font-medium min-w-[65px]"
+                  >
+                    {copiedId === project.id ? "Copied!" : "Copy"}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1">
+                  QUICK INTEGRATION SNIPPET
+                </label>
+                <pre className="bg-[#0a0f1d] border border-gray-800 rounded-md p-3 text-xs text-purple-300 font-mono overflow-x-auto">
+{`import { initSnapTrace } from '@snaptrace/js';
+
+initSnapTrace({
+  apiKey: '${project.api_key}'
+});`}
+                </pre>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal for Creating New Project */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-[#111827] border border-gray-800 rounded-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-white mb-2">Create New Project</h3>
+            <p className="text-gray-400 text-xs mb-4">
+              Enter a project name to generate a dedicated API key.
+            </p>
+            <form onSubmit={handleCreateProject}>
+              <input
+                type="text"
+                required
+                placeholder="e.g. My Next.js Web App"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                className="w-full bg-[#0a0f1d] border border-gray-800 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500 mb-4"
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-400 hover:text-white text-xs px-3 py-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs px-4 py-2 rounded-md transition-colors"
+                >
+                  {creating ? "Creating..." : "Create Project"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
