@@ -14,7 +14,6 @@ export default function DashboardLayout({ children }) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-    // If Supabase credentials are missing, block access and send to login
     if (!supabaseUrl || !supabaseAnonKey) {
       router.replace('/login');
       return;
@@ -22,7 +21,6 @@ export default function DashboardLayout({ children }) {
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    // 1. Initial Session Verification
     async function verifySession() {
       const {
         data: { session },
@@ -37,7 +35,6 @@ export default function DashboardLayout({ children }) {
 
     verifySession();
 
-    // 2. Real-time Authentication Listener
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
@@ -55,10 +52,10 @@ export default function DashboardLayout({ children }) {
     { name: 'Overview', href: '/dashboard', icon: '📊' },
     { name: 'Exception Logs', href: '/dashboard/errors', icon: '🚨' },
     { name: 'API Keys & Snippets', href: '/dashboard/projects', icon: '🔑' },
+    { name: 'Language Integrations', href: '/dashboard/integrations', icon: '🌐' },
     { name: 'Alert Settings', href: '/dashboard/settings', icon: '⚙️' },
   ];
 
-  // Block screen rendering until session is confirmed
   if (authChecking) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center font-sans">
@@ -74,9 +71,7 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
-      {/* Sidebar Header */}
       <aside className="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex-shrink-0 flex flex-col">
-        {/* Brand */}
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center space-x-2">
             <span className="text-xl font-black tracking-tight text-white">
@@ -88,7 +83,6 @@ export default function DashboardLayout({ children }) {
           </span>
         </div>
 
-        {/* Navigation Links */}
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -109,13 +103,11 @@ export default function DashboardLayout({ children }) {
           })}
         </nav>
 
-        {/* Footer info */}
         <div className="p-4 border-t border-slate-800 text-[11px] text-slate-500">
           <p>Real-time Telemetry & Monitoring</p>
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );
