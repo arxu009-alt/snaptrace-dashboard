@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
-// Prevent Vercel static build evaluation errors
 export const dynamic = "force-dynamic";
 
-// Initialize Supabase lazily during request execution
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
@@ -20,6 +18,8 @@ function getSupabaseClient() {
 }
 
 export async function POST(req) {
+  const debugLogs = [];
+
   try {
     const supabase = getSupabaseClient();
     const body = await req.json();
@@ -32,7 +32,7 @@ export async function POST(req) {
       );
     }
 
-    // 1. Fetch project details and configured channels
+    // 1. Fetch project details
     const { data: project, error: projectError } = await supabase
       .from("projects")
       .select("*")
@@ -41,22 +41,40 @@ export async function POST(req) {
 
     if (projectError || !project) {
       return NextResponse.json(
-        { error: "Invalid API key" },
+        { error: "Invalid API key or project not found" },
         { status: 401 }
       );
     }
 
+    // Resolve Discord Webhook URL across schema variants
     const discordWebhookUrl =
-      project.discord_webhook_url || project.discord_webhook;
+      project.discord_webhook_url ||
+      project.discord_webhook ||
+      project.webhook_url ||
+      project.discord_url;
+
+    // Resolve Recipient Email across schema variants
     const recipientEmail =
       project.alert_email ||
       project.alert_email_address ||
-      project.email;
+      project.email ||
+      project.owner_email;
+
+    // Resolve SMTP Sender Credentials from Vercel Environment Variables
+    const smtpUser =
+      process.env.OWNER_EMAIL ||
+      process.env.GMAIL_USER ||
+      process.env.SMTP_USER;
+
+    const smtpPass =
+      process.env.GMAIL_APP_PASSWORD ||
+      process.env.SMTP_PASS;
 
     // 2. Dispatch Discord Webhook Alert
+    let discordSent = false;
     if (discordWebhookUrl) {
       try {
-        await fetch(discordWebhookUrl, {
+        const discordRes = await fetch(discordWebhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -84,22 +102,29 @@ export async function POST(req) {
             ],
           }),
         });
+
+        if (discordRes.ok) {
+          discordSent = true;
+          debugLogs.push("Discord notification sent successfully.");
+        } else {
+          const text = await discordRes.text();
+          debugLogs.push(`Discord Webhook error (${discordRes.status}): ${text}`);
+        }
       } catch (discordErr) {
-        console.error("Discord alert error:", discordErr);
+        debugLogs.push(`Discord dispatch failed: ${discordErr.message}`);
       }
+    } else {
+      debugLogs.push("Discord skipped: No webhook URL configured in project row.");
     }
 
     // 3. Dispatch Email Alert via Nodemailer (SMTP)
-    const smtpUser =
-      process.env.SMTP_USER ||
-      process.env.GMAIL_USER ||
-      "arxu009@gmail.com";
-    const smtpPass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
-
-    if (recipientEmail && smtpPass) {
+    let emailSent = false;
+    if (recipientEmail && smtpUser && smtpPass) {
       try {
         const transporter = nodemailer.createTransport({
-          service: "gmail",
+          host: "smtp.gmail.com",
+          port: 465,
+          secure: true,
           auth: {
             user: smtpUser,
             pass: smtpPass,
@@ -107,7 +132,7 @@ export async function POST(req) {
         });
 
         await transporter.sendMail({
-          from: `"SnapTrace Alerts" <${smtpUser}>`,
+          from: `"SnapTrace System Alerts" <${smtpUser}>`,
           to: recipientEmail,
           subject: `[SnapTrace Error] ${message || "New Exception Event"}`,
           html: `
@@ -121,12 +146,18 @@ export async function POST(req) {
             </div>
           `,
         });
+        emailSent = true;
+        debugLogs.push(`Email sent successfully to ${recipientEmail}.`);
       } catch (emailErr) {
-        console.error("SMTP Email alert error:", emailErr);
+        debugLogs.push(`SMTP Email failed: ${emailErr.message}`);
       }
+    } else {
+      debugLogs.push(
+        `Email skipped: recipientEmail (${recipientEmail || "MISSING"}), smtpUser (${smtpUser || "MISSING"}), smtpPass (${smtpPass ? "PRESENT" : "MISSING"}).`
+      );
     }
 
-    // 4. Record error entry in Supabase database
+    // 4. Save to Supabase Database
     try {
       await supabase.from("errors").insert([
         {
@@ -138,17 +169,23 @@ export async function POST(req) {
           user_agent: userAgent || null,
         },
       ]);
+      debugLogs.push("Error event recorded in database.");
     } catch (dbErr) {
-      console.error("Database insert error:", dbErr);
+      debugLogs.push(`Database insertion failed: ${dbErr.message}`);
     }
 
     return NextResponse.json(
-      { success: true, message: "Error log recorded and alerts dispatched" },
+      {
+        success: true,
+        message: "Telemetry processed",
+        notifications: { discord: discordSent, email: emailSent },
+        debugLogs,
+      },
       { status: 200 }
     );
   } catch (err) {
     return NextResponse.json(
-      { error: "Internal Server Error", details: err.message },
+      { error: "Internal Server Error", details: err.message, debugLogs },
       { status: 500 }
     );
   }
