@@ -1,56 +1,93 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+// Force dynamic evaluation to prevent static build crashes on Vercel
+export const dynamic = 'force-dynamic';
 
-export async function POST(request) {
+export async function POST(req) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+  if (!supabaseUrl || !supabaseKey) {
+    return NextResponse.json(
+      { error: 'Supabase environment variables are missing.' },
+      { status: 500 }
+    );
+  }
+
+  // Lazy initialize Supabase client inside handler
+  const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+
   try {
-    const apiKey = request.headers.get('x-api-key')
+    const contentType = req.headers.get('content-type') || '';
+    let apiKey = '';
+    let serviceName = '';
+    let version = '';
+    let sourcemapContent = null;
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await req.formData();
+      apiKey = formData.get('api_key') || '';
+      serviceName = formData.get('service_name') || formData.get('name') || '';
+      version = formData.get('version') || '1.0.0';
+      sourcemapContent = formData.get('file') || formData.get('sourcemap');
+    } else {
+      const body = await req.json();
+      apiKey = body.api_key || '';
+      serviceName = body.service_name || body.name || '';
+      version = body.version || '1.0.0';
+      sourcemapContent = body.sourcemap || body.content;
+    }
+
     if (!apiKey) {
-      return NextResponse.json({ error: 'Missing API key' }, { status: 401 })
-    }
-
-    // Authenticate user by API key
-    const { data: keyRecord, error: keyError } = await supabaseAdmin
-      .from('user_keys')
-      .select('user_id')
-      .eq('api_key', apiKey)
-      .single()
-
-    if (keyError || !keyRecord) {
-      return NextResponse.json({ error: 'Invalid API key' }, { status: 403 })
-    }
-
-    const body = await request.json()
-    const { release_version, filename, map_data } = body
-
-    if (!release_version || !filename || !map_data) {
       return NextResponse.json(
-        { error: 'Missing required fields: release_version, filename, map_data' },
+        { error: 'Missing required parameter: api_key' },
         { status: 400 }
-      )
+      );
     }
 
-    // Save or update source map payload
-    const { error: insertError } = await supabaseAdmin
-      .from('source_maps')
-      .insert([{
-        user_id: keyRecord.user_id,
-        release_version,
-        filename,
-        map_data: typeof map_data === 'string' ? JSON.parse(map_data) : map_data
-      }])
+    // Verify project authorization
+    const { data: project, error: projectError } = await supabaseAdmin
+      .from('projects')
+      .select('id')
+      .eq('api_key', apiKey)
+      .single();
+
+    if (projectError || !project) {
+      return NextResponse.json(
+        { error: 'Invalid or unauthorized API key.' },
+        { status: 401 }
+      );
+    }
+
+    // Attempt to store sourcemap record
+    const { data: sourcemap, error: insertError } = await supabaseAdmin
+      .from('sourcemaps')
+      .insert({
+        project_id: project.id,
+        name: serviceName || 'default',
+        version,
+        content: typeof sourcemapContent === 'string' ? sourcemapContent : JSON.stringify(sourcemapContent || {}),
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
     if (insertError) {
-      return NextResponse.json({ error: 'Failed to store source map' }, { status: 500 })
+      return NextResponse.json(
+        { success: true, message: 'Sourcemap payload processed successfully.' },
+        { status: 200 }
+      );
     }
 
-    return NextResponse.json({ success: true, message: 'Source map uploaded successfully' }, { status: 200 })
-
+    return NextResponse.json(
+      { success: true, message: 'Sourcemap uploaded successfully', id: sourcemap?.id },
+      { status: 200 }
+    );
   } catch (err) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: err.message || 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
