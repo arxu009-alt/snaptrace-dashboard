@@ -4,11 +4,6 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 interface ErrorLog {
   id: number;
   message: string;
@@ -26,6 +21,17 @@ export default function DashboardOverviewPage() {
 
   useEffect(() => {
     async function loadDashboardData() {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        setLoading(false);
+        return;
+      }
+
+      // Initialize Supabase client inside the hook to prevent build-time crashes
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
       setLoading(true);
 
       // Fetch error metrics
