@@ -225,7 +225,8 @@ fun sendSnapTraceError(exception: Throwable, environment: String = "production")
         put("stackTrace", sw.toString())
         put("environment", environment)
         put("url", "Android Native App")
-        put("userAgent", "Kotlin/${KotlinVersion.CURRENT}")
+        // ✅ CORRECTED
+put("userAgent", "Kotlin/\${KotlinVersion.CURRENT}")
     }
 
     val body = jsonPayload.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
