@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export async function POST(req: Request) {
+export async function POST(req) {
   try {
     const body = await req.json();
     const { apiKey, message, stackTrace, environment, url, userAgent } = body;
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       { success: true, message: "Error log recorded successfully" },
       { status: 200 }
     );
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
       { error: "Internal Server Error", details: err.message },
       { status: 500 }
