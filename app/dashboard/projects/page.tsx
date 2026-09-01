@@ -27,11 +27,22 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  const fetchProjects = async () => {
+ const fetchProjects = async () => {
     setLoading(true);
+    
+    // 1. Find out exactly who is logged in right now
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    // 2. ONLY fetch projects that belong to this specific user
     const { data, error } = await supabase
       .from("projects")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (!error && data) {
