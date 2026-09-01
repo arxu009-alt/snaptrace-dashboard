@@ -29,33 +29,53 @@ export default function DashboardOverviewPage() {
         return;
       }
 
-      // Initialize Supabase client inside the hook to prevent build-time crashes
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
       setLoading(true);
 
-      // Fetch error metrics
-      const { data: errors, error } = await supabase
+      // 1. Get authenticated user session
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fetch projects owned ONLY by the logged-in user
+      const { data: userProjects, error: projectError } = await supabase
+        .from('projects')
+        .select('id, api_key')
+        .eq('user_id', user.id);
+
+      if (projectError || !userProjects || userProjects.length === 0) {
+        setTotalErrors(0);
+        setProdErrors(0);
+        setDevErrors(0);
+        setRecentErrors([]);
+        setProjectKey('No active API key found');
+        setLoading(false);
+        return;
+      }
+
+      // Set the first active project API key for display
+      setProjectKey(userProjects[0].api_key);
+
+      // Extract array of project IDs belonging to this account
+      const projectIds = userProjects.map((p) => p.id);
+
+      // 3. Fetch errors filtered strictly by the user's project IDs
+      const { data: errors, error: errorsError } = await supabase
         .from('errors')
         .select('id, message, environment, created_at')
+        .in('project_id', projectIds)
         .order('created_at', { ascending: false });
 
-      if (!error && errors) {
+      if (!errorsError && errors) {
         setTotalErrors(errors.length);
         setProdErrors(errors.filter((e) => e.environment === 'production').length);
         setDevErrors(errors.filter((e) => e.environment === 'development').length);
         setRecentErrors(errors.slice(0, 5));
-      }
-
-      // Fetch active API key
-      const { data: project } = await supabase
-        .from('projects')
-        .select('api_key')
-        .limit(1)
-        .single();
-
-      if (project) {
-        setProjectKey(project.api_key);
       }
 
       setLoading(false);
@@ -129,7 +149,7 @@ export default function DashboardOverviewPage() {
                 </div>
 
                 {recentErrors.length === 0 ? (
-                  <p className="text-xs text-slate-500">No recent errors logged.</p>
+                  <p className="text-xs text-slate-500">No recent errors logged for this account.</p>
                 ) : (
                   <div className="space-y-3">
                     {recentErrors.map((err) => (
