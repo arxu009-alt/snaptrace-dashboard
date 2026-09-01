@@ -6,6 +6,9 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
+// Disables static prerendering during build to prevent build-worker execution errors
+export const dynamic = 'force-dynamic';
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
