@@ -18,7 +18,7 @@ export async function POST(req) {
       );
     }
 
-    // 1. Fetch project details and alert configuration
+    // 1. Fetch project details and credentials
     const { data: project, error: projectError } = await supabase
       .from("projects")
       .select("*")
@@ -32,26 +32,7 @@ export async function POST(req) {
       );
     }
 
-    // 2. Save exception log to Supabase
-    const { error: insertError } = await supabase.from("errors").insert([
-      {
-        project_id: project.id,
-        message: message || "Unknown Error",
-        stack_trace: stackTrace || null,
-        environment: environment || "production",
-        url: url || null,
-        user_agent: userAgent || null,
-      },
-    ]);
-
-    if (insertError) {
-      return NextResponse.json(
-        { error: "Failed to log telemetry", details: insertError.message },
-        { status: 500 }
-      );
-    }
-
-    // 3. Dispatch Discord Webhook Alert
+    // 2. Dispatch Discord Webhook Alert
     const discordWebhookUrl = project.discord_webhook_url || project.discord_webhook;
     if (discordWebhookUrl) {
       try {
@@ -74,11 +55,11 @@ export async function POST(req) {
           }),
         });
       } catch (discordErr) {
-        console.error("Failed to send Discord notification:", discordErr);
+        console.error("Discord alert error:", discordErr);
       }
     }
 
-    // 4. Dispatch Email Alert via Resend
+    // 3. Dispatch Email Alert via Resend API
     const alertEmail = project.alert_email || project.email;
     if (alertEmail && process.env.RESEND_API_KEY) {
       try {
@@ -105,12 +86,24 @@ export async function POST(req) {
           }),
         });
       } catch (emailErr) {
-        console.error("Failed to send Email notification:", emailErr);
+        console.error("Email alert error:", emailErr);
       }
     }
 
+    // 4. Save exception event to Supabase database
+    await supabase.from("errors").insert([
+      {
+        project_id: project.id,
+        message: message || "Unknown Error",
+        stack_trace: stackTrace || null,
+        environment: environment || "production",
+        url: url || null,
+        user_agent: userAgent || null,
+      },
+    ]);
+
     return NextResponse.json(
-      { success: true, message: "Error log recorded and notifications sent" },
+      { success: true, message: "Error log recorded and alerts dispatched" },
       { status: 200 }
     );
   } catch (err) {
