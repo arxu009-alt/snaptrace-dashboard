@@ -18,7 +18,7 @@ export async function POST(req) {
       );
     }
 
-    // 1. Fetch project details and notification settings
+    // 1. Fetch project details and alert configuration
     const { data: project, error: projectError } = await supabase
       .from("projects")
       .select("*")
@@ -32,7 +32,7 @@ export async function POST(req) {
       );
     }
 
-    // 2. Save incoming error event to database
+    // 2. Save exception log to Supabase
     const { error: insertError } = await supabase.from("errors").insert([
       {
         project_id: project.id,
@@ -74,7 +74,7 @@ export async function POST(req) {
           }),
         });
       } catch (discordErr) {
-        console.error("Failed to send Discord alert:", discordErr);
+        console.error("Failed to send Discord notification:", discordErr);
       }
     }
 
@@ -91,7 +91,7 @@ export async function POST(req) {
           body: JSON.stringify({
             from: "SnapTrace System <onboarding@resend.dev>",
             to: [alertEmail],
-            subject: `[SnapTrace Error] ${message || "New Exception Event"} - 🚨 New Exception Event Message`,
+            subject: `[SnapTrace Error] ${message || "New Exception Event"}`,
             html: `
               <div style="font-family: sans-serif; padding: 20px; color: #333;">
                 <h2 style="color: #e53e3e;">🚨 SnapTrace Exception Alert</h2>
@@ -105,12 +105,12 @@ export async function POST(req) {
           }),
         });
       } catch (emailErr) {
-        console.error("Failed to send Email alert:", emailErr);
+        console.error("Failed to send Email notification:", emailErr);
       }
     }
 
     return NextResponse.json(
-      { success: true, message: "Error log recorded and alerts dispatched successfully" },
+      { success: true, message: "Error log recorded and notifications sent" },
       { status: 200 }
     );
   } catch (err) {
