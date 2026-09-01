@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-type LanguageKey = 'js' | 'python' | 'curl' | 'ruby' | 'kotlin' | 'php';
+// ✅ NEW (Updated with html and css)
+type LanguageKey = 'js' | 'html' | 'css' | 'python' | 'curl' | 'ruby' | 'kotlin' | 'php';
 
 interface IntegrationSnippet {
   name: string;
@@ -89,6 +90,80 @@ try {
   sendSnapTraceError(err, 'production');
 }`,
     },
+   html: {
+      name: 'HTML5 / Script Tag',
+      icon: '🌐',
+      installCmd: '<!-- Place script tag inside your HTML <head> or <body> -->',
+      guide: [
+        'Include this lightweight script directly inside your HTML pages.',
+        'Automatically captures unhandled JavaScript exceptions (window.onerror) and uncaught Promise rejections.',
+        'Requires zero npm dependencies or build steps.',
+      ],
+      code: (key) => `<!-- SnapTrace Global Telemetry Listener for HTML5 -->
+<script>
+  (function() {
+    function dispatchSnapTrace(message, stack) {
+      fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: '${key}',
+          message: message,
+          stackTrace: stack || null,
+          environment: 'production',
+          url: window.location.href,
+          userAgent: navigator.userAgent
+        })
+      }).catch(function(err) {
+        console.error('SnapTrace logging error:', err);
+      });
+    }
+
+    // Catch runtime errors
+    window.addEventListener('error', function(e) {
+      dispatchSnapTrace(e.message, e.error ? e.error.stack : null);
+    });
+
+    // Catch unhandled promises
+    window.addEventListener('unhandledrejection', function(e) {
+      dispatchSnapTrace('Unhandled Promise Rejection: ' + e.reason, null);
+    });
+  })();
+</script>`,
+    },
+    css: {
+      name: 'CSS / Resource Monitoring',
+      icon: '🎨',
+      installCmd: '<!-- Add resource failure monitor in HTML head where CSS stylesheets are loaded -->',
+      guide: [
+        'CSS stylesheet load failures cannot send HTTP requests directly; use this DOM event capture listener.',
+        'Monitors failing <link rel="stylesheet"> tags, webfonts, and broken background images.',
+        'Dispatches immediate error logs when critical stylesheets fail to load from CDN.',
+      ],
+      code: (key) => `<!-- SnapTrace CSS & Asset Load Failure Reporter -->
+<script>
+  document.addEventListener('error', function(event) {
+    var target = event.target || event.srcElement;
+    if (target && (target.tagName === 'LINK' || target.tagName === 'IMG')) {
+      fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: '${key}',
+          message: 'Resource load failure: ' + (target.href || target.src),
+          stackTrace: 'Failed DOM Node: <' + target.tagName.toLowerCase() + '>',
+          environment: 'production',
+          url: window.location.href,
+          userAgent: navigator.userAgent
+        })
+      });
+    }
+  }, true); // Captures loading errors before event bubbling
+</script>`,
+    },
+   
+   
+   
     python: {
       name: 'Python',
       icon: '🐍',
