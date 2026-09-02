@@ -17,12 +17,15 @@ export default function ExceptionLogsPage() {
   useEffect(() => {
     async function loadInitialLogs() {
       setLoading(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('error_logs')
-        .select('*')
-        .order('id', { ascending: false });
+        .select('*');
 
-      if (data) setLogs(data);
+      if (error) {
+        console.error('Supabase fetch error:', error.message, error.details);
+      } else if (data) {
+        setLogs(data.reverse());
+      }
       setLoading(false);
     }
 
@@ -97,8 +100,8 @@ export default function ExceptionLogsPage() {
                 </td>
               </tr>
             ) : (
-              logs.map((log) => (
-                <tr key={log.id} className="hover:bg-[#14182b] transition">
+              logs.map((log, idx) => (
+                <tr key={log.id || idx} className="hover:bg-[#14182b] transition">
                   <td className="p-4 font-semibold text-gray-200">
                     {log.error_msg || log.message || 'No description'}
                   </td>
