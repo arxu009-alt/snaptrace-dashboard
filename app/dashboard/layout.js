@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
+import ProjectSwitcher from '@/components/ProjectSwitcher';
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
@@ -70,8 +71,7 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
-      <aside className="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex-shrink-0 flex flex-col">
+    {/* Brand */}
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center space-x-2">
             <span className="text-xl font-black tracking-tight text-white">
@@ -81,6 +81,11 @@ export default function DashboardLayout({ children }) {
           <span className="text-[10px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded">
             v1.0
           </span>
+        </div>
+
+        {/* Global Project Selector */}
+        <div className="px-6 py-3 border-b border-slate-800/60 bg-slate-950/40">
+          <ProjectSwitcher />
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
