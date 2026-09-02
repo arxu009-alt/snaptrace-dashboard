@@ -53,7 +53,6 @@ export default function DashboardLayout({ children }) {
     { name: 'Overview', href: '/dashboard', icon: '📊' },
     { name: 'Exception Logs', href: '/dashboard/errors', icon: '🚨' },
     { name: 'API Keys & Snippets', href: '/dashboard/projects', icon: '🔑' },
-    { name: 'Language Integrations', href: '/dashboard/integrations', icon: '🌐' },
     { name: 'Alert Settings', href: '/dashboard/settings', icon: '⚙️' },
   ];
 
@@ -71,7 +70,10 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    {/* Brand */}
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
+      {/* Sidebar */}
+      <aside className="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex-shrink-0 flex flex-col">
+        {/* Brand */}
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center space-x-2">
             <span className="text-xl font-black tracking-tight text-white">
@@ -83,11 +85,12 @@ export default function DashboardLayout({ children }) {
           </span>
         </div>
 
-        {/* Global Project Selector */}
+        {/* Global Project Switcher Dropdown */}
         <div className="px-6 py-3 border-b border-slate-800/60 bg-slate-950/40">
           <ProjectSwitcher />
         </div>
 
+        {/* Navigation Links */}
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -108,11 +111,13 @@ export default function DashboardLayout({ children }) {
           })}
         </nav>
 
+        {/* Footer */}
         <div className="p-4 border-t border-slate-800 text-[11px] text-slate-500">
           <p>Real-time Telemetry & Monitoring</p>
         </div>
       </aside>
 
+      {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );
