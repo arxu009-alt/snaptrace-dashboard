@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { parseStackTrace, ParsedFrame } from '@/lib/stackParser';
+import Link from 'next/link';
 
 interface ErrorLog {
   id: number;
@@ -25,9 +26,16 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
   const [aiLoading, setAiLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [copiedRaw, setCopiedRaw] = useState(false);
 
   const rawStack = log.stack_trace || log.stack || '';
   const parsedFrames: ParsedFrame[] = parseStackTrace(rawStack);
+
+  const handleCopyRaw = () => {
+    navigator.clipboard.writeText(rawStack || log.message);
+    setCopiedRaw(true);
+    setTimeout(() => setCopiedRaw(false), 2000);
+  };
 
   const handleAnalyzeWithAI = async () => {
     setAiLoading(true);
@@ -38,7 +46,7 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
       const savedApiKey = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_openai_key') : null;
 
       if (!savedApiKey) {
-        setAiError('No OpenAI API key found. Please add your key in Alert Settings to enable AI diagnosis.');
+        setAiError('NO_KEY');
         setAiLoading(false);
         return;
       }
@@ -54,11 +62,11 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
           messages: [
             {
               role: 'system',
-              content: 'You are an expert software engineer and crash diagnostic AI. Analyze the given exception and stack trace. Provide a concise 3-part diagnosis: 1. Plain English Summary, 2. Probable Root Cause, 3. Proposed Code Fix with a snippet.',
+              content: 'You are an expert software engineer and crash diagnostic AI. Analyze the given exception and stack trace. Provide a clean 3-part response: 1. Plain English Summary, 2. Root Cause, 3. Proposed Code Fix with snippet.',
             },
             {
               role: 'user',
-              content: `Error Message: ${log.message}\nEnvironment: ${log.environment}\nURL: ${log.url || 'N/A'}\nStack Trace:\n${rawStack}`,
+              content: `Error: ${log.message}\nEnvironment: ${log.environment}\nURL: ${log.url || 'N/A'}\nStack Trace:\n${rawStack}`,
             },
           ],
           temperature: 0.2,
@@ -84,7 +92,7 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
       <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden font-sans">
         
         {/* Modal Header */}
-        <div className="p-6 border-b border-slate-800 flex items-start justify-between bg-slate-950/60 gap-4">
+        <div className="p-6 border-b border-slate-800 flex items-start justify-between bg-slate-950/70 gap-4">
           <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span
@@ -97,7 +105,7 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
                 {log.environment || 'production'}
               </span>
               <span className="text-xs text-slate-400 font-mono">
-                ID #{log.id} • {new Date(log.created_at).toLocaleString()}
+                Event #{log.id} • {new Date(log.created_at).toLocaleString()}
               </span>
             </div>
             <h2 className="text-base font-bold text-red-400 font-mono break-words">
@@ -122,30 +130,30 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
           </div>
         </div>
 
-        {/* Metadata Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-slate-950/40 border-b border-slate-800/80 text-xs">
-          <div>
+        {/* Metadata Details Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-slate-950/40 border-b border-slate-800 text-xs">
+          <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Trigger URL</span>
-            <span className="text-slate-300 font-mono truncate block" title={log.url || 'N/A'}>
+            <span className="text-slate-200 font-mono truncate block mt-0.5" title={log.url || 'N/A'}>
               {log.url || 'N/A'}
             </span>
           </div>
-          <div>
+          <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">User Agent</span>
-            <span className="text-slate-300 font-mono truncate block" title={log.user_agent || 'N/A'}>
-              {log.user_agent || 'Telemetry Engine'}
+            <span className="text-slate-200 font-mono truncate block mt-0.5" title={log.user_agent || 'Telemetry Engine'}>
+              {log.user_agent || 'Telemetry Client'}
             </span>
           </div>
-          <div>
-            <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Logged At</span>
-            <span className="text-slate-300 font-mono">
+          <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 col-span-2 sm:col-span-1">
+            <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">First Logged</span>
+            <span className="text-slate-200 font-mono block mt-0.5">
               {new Date(log.created_at).toLocaleTimeString()}
             </span>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-800 bg-slate-950/20 px-6 gap-6 text-xs">
+        <div className="flex border-b border-slate-800 bg-slate-950/40 px-6 gap-6 text-xs">
           <button
             onClick={() => setActiveTab('stack')}
             className={`py-3 font-semibold border-b-2 transition cursor-pointer ${
@@ -155,6 +163,16 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
             }`}
           >
             Formatted Stack ({parsedFrames.length} frames)
+          </button>
+          <button
+            onClick={() => setActiveTab('raw')}
+            className={`py-3 font-semibold border-b-2 transition cursor-pointer ${
+              activeTab === 'raw'
+                ? 'border-purple-500 text-purple-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Raw Trace
           </button>
           <button
             onClick={() => setActiveTab('ai')}
@@ -167,45 +185,46 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
             <span>✨ AI Diagnosis</span>
             {aiAnalysis && <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>}
           </button>
-          <button
-            onClick={() => setActiveTab('raw')}
-            className={`py-3 font-semibold border-b-2 transition cursor-pointer ${
-              activeTab === 'raw'
-                ? 'border-purple-500 text-purple-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Raw Trace
-          </button>
         </div>
 
         {/* Tab Content Body */}
         <div className="p-6 overflow-y-auto flex-1 bg-slate-950/60">
+          
+          {/* 1. Formatted Stack Trace */}
           {activeTab === 'stack' && (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {parsedFrames.length === 0 ? (
-                <pre className="p-4 bg-slate-900 border border-slate-800 rounded-xl font-mono text-xs text-slate-400">
+                <div className="p-6 bg-slate-900 border border-slate-800 rounded-xl text-center text-slate-400 text-xs font-mono">
                   {rawStack || 'No stack trace captured for this event.'}
-                </pre>
+                </div>
               ) : (
                 parsedFrames.map((frame, idx) => (
                   <div
                     key={idx}
-                    className={`p-3 rounded-xl border font-mono text-xs transition ${
+                    className={`p-3.5 rounded-xl border font-mono text-xs transition ${
                       idx === 0
-                        ? 'bg-red-950/20 border-red-500/40 text-red-200'
-                        : 'bg-slate-900/60 border-slate-800/80 text-slate-300 hover:bg-slate-900'
+                        ? 'bg-red-950/20 border-red-500/50 shadow-sm'
+                        : 'bg-slate-900/80 border-slate-800/80 hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-purple-400">{frame.functionName}()</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-bold ${idx === 0 ? 'text-red-400' : 'text-purple-300'}`}>
+                          {frame.functionName}()
+                        </span>
+                        {idx === 0 && (
+                          <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[9px] font-bold rounded">
+                            CRASH ORIGIN
+                          </span>
+                        )}
+                      </div>
                       {frame.lineNumber && (
-                        <span className="text-slate-500 text-[11px]">
+                        <span className="px-2 py-0.5 bg-slate-950 text-purple-300 border border-slate-800 rounded text-[11px] font-semibold">
                           Line {frame.lineNumber}:{frame.columnNumber}
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-500 truncate mt-1">
+                    <div className="text-[11px] text-slate-400 truncate mt-1.5 font-mono">
                       {frame.fileName}
                     </div>
                   </div>
@@ -214,22 +233,55 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
             </div>
           )}
 
+          {/* 2. Raw Trace View */}
+          {activeTab === 'raw' && (
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Raw Stack Payload</span>
+                <button
+                  onClick={handleCopyRaw}
+                  className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white rounded text-xs transition cursor-pointer font-medium"
+                >
+                  {copiedRaw ? '✓ Copied' : '📋 Copy Raw Trace'}
+                </button>
+              </div>
+              <pre className="p-4 bg-slate-950 border border-slate-800 rounded-xl font-mono text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed shadow-inner">
+                {rawStack || 'No raw stack trace provided.'}
+              </pre>
+            </div>
+          )}
+
+          {/* 3. AI Diagnosis View */}
           {activeTab === 'ai' && (
             <div className="space-y-4">
               {aiLoading ? (
                 <div className="p-12 flex flex-col items-center justify-center space-y-3">
                   <div className="h-8 w-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-xs text-slate-400 font-mono">Analyzing stack trace with AI model...</p>
+                  <p className="text-xs text-slate-400 font-mono">Analyzing stack trace with AI...</p>
+                </div>
+              ) : aiError === 'NO_KEY' ? (
+                <div className="p-6 bg-slate-900 border border-purple-500/30 rounded-2xl text-center space-y-3">
+                  <div className="text-2xl">🔑</div>
+                  <h3 className="text-sm font-bold text-white">No OpenAI API Key Configured</h3>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                    Add your OpenAI API key in your Settings panel to enable instant AI bug summaries, root-cause diagnosis, and code patches.
+                  </p>
+                  <Link
+                    href="/dashboard/settings"
+                    className="inline-block px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold transition shadow-lg shadow-purple-600/20"
+                  >
+                    ⚙️ Open Settings to Add Key
+                  </Link>
                 </div>
               ) : aiError ? (
-                <div className="p-4 bg-red-950/30 border border-red-500/30 rounded-xl space-y-2">
+                <div className="p-4 bg-red-950/30 border border-red-500/30 rounded-xl space-y-1">
                   <p className="text-xs font-semibold text-red-400">⚠️ AI Diagnosis Error</p>
                   <p className="text-xs text-slate-300">{aiError}</p>
                 </div>
               ) : aiAnalysis ? (
                 <div className="p-5 bg-purple-950/20 border border-purple-500/30 rounded-xl space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-bold text-purple-300 uppercase tracking-wider">
-                    <span>✨ AI Diagnosis & Code Patch</span>
+                  <div className="flex items-center gap-2 text-xs font-bold text-purple-300 uppercase tracking-wider border-b border-purple-500/20 pb-2">
+                    <span>✨ AI Diagnosis & Code Fix</span>
                   </div>
                   <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap font-sans">
                     {aiAnalysis}
@@ -243,14 +295,9 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
             </div>
           )}
 
-          {activeTab === 'raw' && (
-            <pre className="p-4 bg-slate-900 border border-slate-800 rounded-xl font-mono text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed">
-              {rawStack || 'No raw stack trace provided.'}
-            </pre>
-          )}
         </div>
 
-        {/* Footer */}
+        {/* Modal Footer */}
         <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
           <div>
             {onDelete && (
@@ -259,7 +306,7 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
                   onDelete(log.id);
                   onClose();
                 }}
-                className="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-semibold rounded-lg transition cursor-pointer"
+                className="px-3.5 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-semibold rounded-lg transition cursor-pointer"
               >
                 Delete Log
               </button>
