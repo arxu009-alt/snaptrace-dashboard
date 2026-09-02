@@ -23,13 +23,10 @@ export async function POST(req) {
   try {
     const supabase = getSupabaseClient();
     const body = await req.json();
-    const { apiKey, message, stackTrace, environment, url, userAgent } = body;
+    const { apiKey, message, stackTrace, environment, url, userAgent, fingerprint, occurrenceCount } = body;
 
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "API Key is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "API Key is required" }, { status: 400 });
     }
 
     // 1. Fetch project details
@@ -40,28 +37,22 @@ export async function POST(req) {
       .single();
 
     if (projectError || !project) {
-      return NextResponse.json(
-        { error: "Invalid API key or project not found" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid API key or project not found" }, { status: 401 });
     }
 
-    // Resolve Discord Webhook URL across schema variants
     const discordWebhookUrl =
       project.discord_webhook_url ||
       project.discord_webhook ||
       project.webhook_url ||
       project.discord_url;
 
-    // Resolve Recipient Email across schema variants
-   // Resolve Recipient Email across schema variants
     const recipientEmail =
       project.recipient_email ||
       project.alert_email ||
       project.alert_email_address ||
       project.email ||
       project.owner_email;
-    // Resolve SMTP Sender Credentials from Vercel Environment Variables
+
     const smtpUser =
       process.env.OWNER_EMAIL ||
       process.env.GMAIL_USER ||
@@ -75,28 +66,22 @@ export async function POST(req) {
     let discordSent = false;
     if (discordWebhookUrl) {
       try {
+        const countText = occurrenceCount && occurrenceCount > 1 ? ` (Occurred ${occurrenceCount} times)` : "";
         const discordRes = await fetch(discordWebhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             embeds: [
               {
-                title: `🚨 ${message || "New Exception Event"}`,
+                title: `🚨 ${message || "New Exception Event"}${countText}`,
                 description: stackTrace
-                  ? `\`\`\`\n${stackTrace}\n\`\`\``
+                  ? `\`\`\`\n${stackTrace.slice(0, 1000)}\n\`\`\``
                   : "No stack trace provided",
                 color: 15158332,
                 fields: [
-                  {
-                    name: "Environment",
-                    value: environment || "production",
-                    inline: true,
-                  },
-                  {
-                    name: "URL",
-                    value: url || "https://snaptrace-dashboard.vercel.app/",
-                    inline: true,
-                  },
+                  { name: "Environment", value: environment || "production", inline: true },
+                  { name: "Occurrences", value: String(occurrenceCount || 1), inline: true },
+                  { name: "URL", value: url || "N/A", inline: false },
                 ],
                 timestamp: new Date().toISOString(),
               },
@@ -104,18 +89,10 @@ export async function POST(req) {
           }),
         });
 
-        if (discordRes.ok) {
-          discordSent = true;
-          debugLogs.push("Discord notification sent successfully.");
-        } else {
-          const text = await discordRes.text();
-          debugLogs.push(`Discord Webhook error (${discordRes.status}): ${text}`);
-        }
+        if (discordRes.ok) discordSent = true;
       } catch (discordErr) {
-        debugLogs.push(`Discord dispatch failed: ${discordErr.message}`);
+        debugLogs.push(`Discord error: ${discordErr.message}`);
       }
-    } else {
-      debugLogs.push("Discord skipped: No webhook URL configured in project row.");
     }
 
     // 3. Dispatch Email Alert via Nodemailer (SMTP)
@@ -126,39 +103,34 @@ export async function POST(req) {
           host: "smtp.gmail.com",
           port: 465,
           secure: true,
-          auth: {
-            user: smtpUser,
-            pass: smtpPass,
-          },
+          auth: { user: smtpUser, pass: smtpPass },
         });
+
+        const countHeader = occurrenceCount && occurrenceCount > 1 ? `[x${occurrenceCount}] ` : "";
 
         await transporter.sendMail({
           from: `"SnapTrace System Alerts" <${smtpUser}>`,
           to: recipientEmail,
-          subject: `[SnapTrace Error] ${message || "New Exception Event"}`,
+          subject: `🚨 [SnapTrace] ${countHeader}${message || "New Exception Event"}`,
           html: `
             <div style="font-family: sans-serif; padding: 20px; background: #0f172a; color: #ffffff; border-radius: 8px;">
               <h2 style="color: #ef4444; margin-top: 0;">🚨 New Exception Event</h2>
               <p><strong>Message:</strong> ${message || "Unknown Error"}</p>
+              <p><strong>Occurrences:</strong> ${occurrenceCount || 1}</p>
               <p><strong>Environment:</strong> ${environment || "production"}</p>
-              <p><strong>URL:</strong> <a href="${url || "https://snaptrace-dashboard.vercel.app/"}" style="color: #38bdf8;">${url || "https://snaptrace-dashboard.vercel.app/"}</a></p>
+              <p><strong>Trigger URL:</strong> ${url || "N/A"}</p>
               <h3 style="color: #cbd5e1;">Stack Trace:</h3>
               <pre style="background: #1e293b; color: #f87171; padding: 14px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap;">${stackTrace || "No stack trace provided"}</pre>
             </div>
           `,
         });
         emailSent = true;
-        debugLogs.push(`Email sent successfully to ${recipientEmail}.`);
       } catch (emailErr) {
-        debugLogs.push(`SMTP Email failed: ${emailErr.message}`);
+        debugLogs.push(`SMTP Email error: ${emailErr.message}`);
       }
-    } else {
-      debugLogs.push(
-        `Email skipped: recipientEmail (${recipientEmail || "MISSING"}), smtpUser (${smtpUser || "MISSING"}), smtpPass (${smtpPass ? "PRESENT" : "MISSING"}).`
-      );
     }
 
-    // 4. Save to Supabase Database
+    // 4. Save Event into Database
     try {
       await supabase.from("errors").insert([
         {
@@ -170,9 +142,8 @@ export async function POST(req) {
           user_agent: userAgent || null,
         },
       ]);
-      debugLogs.push("Error event recorded in database.");
     } catch (dbErr) {
-      debugLogs.push(`Database insertion failed: ${dbErr.message}`);
+      debugLogs.push(`Database insertion error: ${dbErr.message}`);
     }
 
     return NextResponse.json(
