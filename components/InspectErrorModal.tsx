@@ -27,9 +27,35 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [copiedRaw, setCopiedRaw] = useState(false);
+  const [copiedCursor, setCopiedCursor] = useState(false);
 
   const rawStack = log.stack_trace || log.stack || '';
   const parsedFrames: ParsedFrame[] = parseStackTrace(rawStack);
+
+  // Generates a pre-formatted prompt ready for Cursor / Claude / ChatGPT
+  const handleCopyForCursor = () => {
+    const cursorPrompt = `Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:
+
+### 🚨 Error Details
+- **Message:** ${log.message}
+- **Environment:** ${log.environment}
+- **Runtime URL:** ${log.url || 'N/A'}
+- **User Agent:** ${log.user_agent || 'N/A'}
+
+### 📜 Stack Trace
+\`\`\`
+${rawStack || 'No stack trace provided'}
+\`\`\`
+
+### 🎯 Request
+1. Explain why this error occurred in plain English.
+2. Identify the exact failing file and line number.
+3. Provide the corrected code patch to prevent this crash.`;
+
+    navigator.clipboard.writeText(cursorPrompt);
+    setCopiedCursor(true);
+    setTimeout(() => setCopiedCursor(false), 2500);
+  };
 
   const handleCopyRaw = () => {
     navigator.clipboard.writeText(rawStack || log.message);
@@ -88,11 +114,11 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden font-sans">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         
         {/* Modal Header */}
-        <div className="p-6 border-b border-slate-800 flex items-start justify-between bg-slate-950/70 gap-4">
+        <div className="p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-start justify-between bg-slate-950/70 gap-4">
           <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span
@@ -113,7 +139,14 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
             </h2>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Action Buttons: Copy for Cursor + Direct AI Analysis */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={handleCopyForCursor}
+              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>{copiedCursor ? '✓ Prompt Copied!' : '📋 Copy for Cursor / AI'}</span>
+            </button>
             <button
               onClick={handleAnalyzeWithAI}
               className="px-3.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-lg shadow-purple-600/20 cursor-pointer"
@@ -145,7 +178,7 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
             </span>
           </div>
           <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80 col-span-2 sm:col-span-1">
-            <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">First Logged</span>
+            <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Logged At</span>
             <span className="text-slate-200 font-mono block mt-0.5">
               {new Date(log.created_at).toLocaleTimeString()}
             </span>
@@ -190,7 +223,7 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
         {/* Tab Content Body */}
         <div className="p-6 overflow-y-auto flex-1 bg-slate-950/60">
           
-          {/* 1. Formatted Stack Trace */}
+          {/* Formatted Stack Trace */}
           {activeTab === 'stack' && (
             <div className="space-y-2.5">
               {parsedFrames.length === 0 ? (
@@ -233,7 +266,7 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
             </div>
           )}
 
-          {/* 2. Raw Trace View */}
+          {/* Raw Trace View */}
           {activeTab === 'raw' && (
             <div className="space-y-3">
               <div className="flex justify-between items-center">
@@ -251,7 +284,7 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
             </div>
           )}
 
-          {/* 3. AI Diagnosis View */}
+          {/* AI Diagnosis View */}
           {activeTab === 'ai' && (
             <div className="space-y-4">
               {aiLoading ? (
