@@ -11,7 +11,7 @@ interface Project {
 
 export default function ProjectSwitcher() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,12 +33,14 @@ export default function ProjectSwitcher() {
       if (!error && data && data.length > 0) {
         setProjects(data);
 
-        // Check if there's a previously selected project stored
+        // Check if there's a previously selected project, otherwise default to 'all'
         const savedId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
-        const activeProject = data.find((p) => p.id === savedId) || data[0];
-
-        setSelectedProjectId(activeProject.id);
-        localStorage.setItem('snaptrace_selected_project_id', activeProject.id);
+        if (savedId && (savedId === 'all' || data.some((p) => p.id === savedId))) {
+          setSelectedProjectId(savedId);
+        } else {
+          setSelectedProjectId('all');
+          localStorage.setItem('snaptrace_selected_project_id', 'all');
+        }
       }
       setLoading(false);
     }
@@ -51,7 +53,7 @@ export default function ProjectSwitcher() {
     setSelectedProjectId(projectId);
     localStorage.setItem('snaptrace_selected_project_id', projectId);
 
-    // Broadcast the change across the entire dashboard
+    // Broadcast the change across all dashboard pages
     window.dispatchEvent(new Event('snaptrace_project_change'));
   };
 
@@ -71,9 +73,10 @@ export default function ProjectSwitcher() {
         onChange={handleChange}
         className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 font-medium cursor-pointer"
       >
+        <option value="all">⚡ All Projects (Combined)</option>
         {projects.map((project) => (
           <option key={project.id} value={project.id}>
-            {project.name || 'Untitled Project'}
+            📁 {project.name || 'Untitled Project'}
           </option>
         ))}
       </select>

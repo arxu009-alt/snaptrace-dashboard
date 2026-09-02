@@ -12,28 +12,40 @@ export default function ExceptionLogsPage() {
   const loadLogs = useCallback(async () => {
     setLoading(true);
 
-    // 1. Get logged in user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
       return;
     }
 
-    // 2. Get active project from switcher (localStorage)
-    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
+    // Fetch all projects for this user
+    const { data: userProjects } = await supabase
+      .from('projects')
+      .select('id, name')
+      .eq('user_id', user.id);
+
+    if (!userProjects || userProjects.length === 0) {
+      setLogs([]);
+      setLoading(false);
+      return;
+    }
+
+    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
+    const isAll = !savedProjectId || savedProjectId === 'all';
+    const userProjectIds = userProjects.map((p) => p.id);
 
     let query = supabase
       .from('errors')
       .select('*')
       .order('created_at', { ascending: false });
 
-    // Filter by selected project if available
-    if (savedProjectId) {
+    if (isAll) {
+      setCurrentProjectName('All Projects (Global Stream)');
+      query = query.in('project_id', userProjectIds);
+    } else {
+      const activeProj = userProjects.find((p) => p.id === savedProjectId);
+      setCurrentProjectName(activeProj ? activeProj.name : 'Selected Project');
       query = query.eq('project_id', savedProjectId);
-
-      // Fetch project name for header
-      const { data: proj } = await supabase.from('projects').select('name').eq('id', savedProjectId).single();
-      if (proj) setCurrentProjectName(proj.name);
     }
 
     const { data, error } = await query;
@@ -49,10 +61,9 @@ export default function ExceptionLogsPage() {
   useEffect(() => {
     loadLogs();
 
-    // 1. Re-fetch when user switches project in sidebar dropdown
     window.addEventListener('snaptrace_project_change', loadLogs);
 
-    // 2. Realtime WebSocket Listener (Instant Live Feed)
+    // Realtime WebSocket Listener
     const channel = supabase
       .channel('realtime-errors-feed')
       .on(
@@ -63,9 +74,8 @@ export default function ExceptionLogsPage() {
           table: 'errors',
         },
         (payload) => {
-          const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
-          // If project filter matches or no filter, insert at the top of the feed instantly
-          if (!savedProjectId || payload.new.project_id === savedProjectId) {
+          const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
+          if (!savedProjectId || savedProjectId === 'all' || payload.new.project_id === savedProjectId) {
             setLogs((prevLogs) => [payload.new, ...prevLogs]);
           }
         }
@@ -93,7 +103,7 @@ export default function ExceptionLogsPage() {
         <div>
           <h1 className="text-2xl font-bold">Exception Logs</h1>
           <p className="text-slate-400 text-sm">
-            Showing real-time telemetry for <span className="text-purple-400 font-semibold">{currentProjectName}</span>
+            Showing telemetry for <span className="text-purple-400 font-semibold">{currentProjectName}</span>
           </p>
         </div>
         <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-full self-start sm:self-auto">
@@ -126,7 +136,7 @@ export default function ExceptionLogsPage() {
             ) : logs.length === 0 ? (
               <tr>
                 <td colSpan={4} className="p-8 text-center text-slate-400 text-xs">
-                  No exceptions logged for this project yet.
+                  No exceptions logged yet.
                 </td>
               </tr>
             ) : (
@@ -183,7 +193,7 @@ export default function ExceptionLogsPage() {
               </div>
               <button
                 onClick={() => setSelectedLog(null)}
-                className="text-slate-400 hover:text-white text-sm px-2 py-1 bg-slate-800 rounded"
+                className="text-slate-400 hover:text-white text-sm px-2 py-1 bg-slate-800 rounded cursor-pointer"
               >
                 ✕
               </button>

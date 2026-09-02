@@ -18,6 +18,7 @@ export default function DashboardOverviewPage() {
   const [devErrors, setDevErrors] = useState(0);
   const [recentErrors, setRecentErrors] = useState<ErrorLog[]>([]);
   const [projectKey, setProjectKey] = useState<string>('');
+  const [selectedProjectLabel, setSelectedProjectLabel] = useState<string>('All Projects');
 
   const loadDashboardData = useCallback(async () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -41,7 +42,7 @@ export default function DashboardOverviewPage() {
     // 2. Fetch all user projects
     const { data: userProjects } = await supabase
       .from('projects')
-      .select('id, api_key')
+      .select('id, name, api_key')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -55,18 +56,29 @@ export default function DashboardOverviewPage() {
       return;
     }
 
-    // 3. Find currently selected project from the Switcher (localStorage)
-    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
-    const activeProject = userProjects.find((p) => p.id === savedProjectId) || userProjects[0];
+    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
+    const isAll = !savedProjectId || savedProjectId === 'all';
+    const userProjectIds = userProjects.map((p) => p.id);
 
-    setProjectKey(activeProject.api_key);
-
-    // 4. Fetch errors strictly for THIS selected project
-    const { data: errors, error } = await supabase
+    let errorQuery = supabase
       .from('errors')
       .select('id, message, environment, created_at')
-      .eq('project_id', activeProject.id)
       .order('created_at', { ascending: false });
+
+    if (isAll) {
+      // Combined feed across all projects
+      setSelectedProjectLabel('All Projects (Combined)');
+      setProjectKey(userProjects[0].api_key); // Shows default primary key
+      errorQuery = errorQuery.in('project_id', userProjectIds);
+    } else {
+      // Filtered to one specific project
+      const activeProject = userProjects.find((p) => p.id === savedProjectId) || userProjects[0];
+      setSelectedProjectLabel(activeProject.name);
+      setProjectKey(activeProject.api_key);
+      errorQuery = errorQuery.eq('project_id', activeProject.id);
+    }
+
+    const { data: errors, error } = await errorQuery;
 
     if (!error && errors) {
       setTotalErrors(errors.length);
@@ -86,7 +98,6 @@ export default function DashboardOverviewPage() {
   useEffect(() => {
     loadDashboardData();
 
-    // Re-load data instantly when user selects a different project in the dropdown
     window.addEventListener('snaptrace_project_change', loadDashboardData);
     return () => {
       window.removeEventListener('snaptrace_project_change', loadDashboardData);
@@ -101,7 +112,9 @@ export default function DashboardOverviewPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white">System Overview</h1>
-            <p className="text-sm text-slate-400">Real-time status and telemetry for SnapTrace</p>
+            <p className="text-sm text-slate-400">
+              Live status for <span className="text-purple-400 font-semibold">{selectedProjectLabel}</span>
+            </p>
           </div>
           <div className="flex items-center space-x-3">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -120,7 +133,7 @@ export default function DashboardOverviewPage() {
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-xl">
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Ingested Errors</span>
                 <div className="text-3xl font-extrabold text-white">{totalErrors}</div>
-                <p className="text-xs text-slate-500">For selected project</p>
+                <p className="text-xs text-slate-500">{selectedProjectLabel}</p>
               </div>
 
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-xl">
@@ -145,7 +158,7 @@ export default function DashboardOverviewPage() {
             {/* Quick Actions & Recent Errors */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
-              {/* Recent Ingested Errors (2 Columns) */}
+              {/* Recent Ingested Errors */}
               <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4 shadow-xl">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-semibold text-white">Recent Exceptions</h2>
@@ -158,7 +171,7 @@ export default function DashboardOverviewPage() {
                 </div>
 
                 {recentErrors.length === 0 ? (
-                  <p className="text-xs text-slate-500">No errors logged for this project yet.</p>
+                  <p className="text-xs text-slate-500">No errors logged yet.</p>
                 ) : (
                   <div className="space-y-3">
                     {recentErrors.map((err) => (
@@ -187,7 +200,7 @@ export default function DashboardOverviewPage() {
                 )}
               </div>
 
-              {/* Quick Links & Info (1 Column) */}
+              {/* Quick Links & Info */}
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6 shadow-xl">
                 <div>
                   <h2 className="text-lg font-semibold text-white">Quick Shortcuts</h2>
@@ -202,22 +215,22 @@ export default function DashboardOverviewPage() {
                     🔑 Get API Key & Integration Code
                   </Link>
                   <Link
+                    href="/dashboard/integrations"
+                    className="block p-3 bg-slate-950 hover:bg-slate-800/60 border border-slate-800 rounded-lg text-xs font-medium text-slate-200 transition"
+                  >
+                    ⚡ Multi-Stack Language Snippets
+                  </Link>
+                  <Link
                     href="/dashboard/settings"
                     className="block p-3 bg-slate-950 hover:bg-slate-800/60 border border-slate-800 rounded-lg text-xs font-medium text-slate-200 transition"
                   >
                     ⚙️ Configure Discord & Email Alerts
                   </Link>
-                  <Link
-                    href="/dashboard/errors"
-                    className="block p-3 bg-slate-950 hover:bg-slate-800/60 border border-slate-800 rounded-lg text-xs font-medium text-slate-200 transition"
-                  >
-                    🔍 Search & Filter Exceptions
-                  </Link>
                 </div>
 
                 <div className="pt-4 border-t border-slate-800">
                   <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                    Active Project API Key
+                    Primary Project Key
                   </span>
                   <code className="text-[11px] font-mono text-purple-400 block truncate bg-slate-950 p-2 rounded border border-slate-800">
                     {projectKey || 'Loading...'}
