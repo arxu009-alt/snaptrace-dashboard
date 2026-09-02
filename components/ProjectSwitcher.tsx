@@ -9,11 +9,7 @@ interface Project {
   api_key: string;
 }
 
-interface ProjectSwitcherProps {
-  onProjectChange?: (project: Project) => void;
-}
-
-export default function ProjectSwitcher({ onProjectChange }: ProjectSwitcherProps) {
+export default function ProjectSwitcher() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -36,11 +32,13 @@ export default function ProjectSwitcher({ onProjectChange }: ProjectSwitcherProp
 
       if (!error && data && data.length > 0) {
         setProjects(data);
-        // Default to the first project
-        setSelectedProjectId(data[0].id);
-        if (onProjectChange) {
-          onProjectChange(data[0]);
-        }
+
+        // Check if there's a previously selected project stored
+        const savedId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
+        const activeProject = data.find((p) => p.id === savedId) || data[0];
+
+        setSelectedProjectId(activeProject.id);
+        localStorage.setItem('snaptrace_selected_project_id', activeProject.id);
       }
       setLoading(false);
     }
@@ -51,10 +49,10 @@ export default function ProjectSwitcher({ onProjectChange }: ProjectSwitcherProp
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const projectId = e.target.value;
     setSelectedProjectId(projectId);
-    const selected = projects.find((p) => p.id === projectId);
-    if (selected && onProjectChange) {
-      onProjectChange(selected);
-    }
+    localStorage.setItem('snaptrace_selected_project_id', projectId);
+
+    // Broadcast the change across the entire dashboard
+    window.dispatchEvent(new Event('snaptrace_project_change'));
   };
 
   if (loading) {
@@ -62,20 +60,16 @@ export default function ProjectSwitcher({ onProjectChange }: ProjectSwitcherProp
   }
 
   if (projects.length === 0) {
-    return (
-      <span className="text-xs text-slate-500 font-mono">
-        No Projects Yet
-      </span>
-    );
+    return <span className="text-xs text-slate-500 font-mono">No Projects Yet</span>;
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs text-slate-400 font-medium hidden sm:inline">Project:</span>
+    <div className="flex flex-col gap-1.5 w-full">
+      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Active Project</span>
       <select
         value={selectedProjectId}
         onChange={handleChange}
-        className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-purple-500 font-medium cursor-pointer"
+        className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 font-medium cursor-pointer"
       >
         {projects.map((project) => (
           <option key={project.id} value={project.id}>

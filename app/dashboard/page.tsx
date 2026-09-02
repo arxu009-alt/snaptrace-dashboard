@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 
@@ -19,70 +19,79 @@ export default function DashboardOverviewPage() {
   const [recentErrors, setRecentErrors] = useState<ErrorLog[]>([]);
   const [projectKey, setProjectKey] = useState<string>('');
 
-  useEffect(() => {
-    async function loadDashboardData() {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  const loadDashboardData = useCallback(async () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-      if (!supabaseUrl || !supabaseAnonKey) {
-        setLoading(false);
-        return;
-      }
-
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-      setLoading(true);
-
-      // 1. Get authenticated user session
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      // 2. Fetch projects owned ONLY by the logged-in user
-      const { data: userProjects, error: projectError } = await supabase
-        .from('projects')
-        .select('id, api_key')
-        .eq('user_id', user.id);
-
-      if (projectError || !userProjects || userProjects.length === 0) {
-        setTotalErrors(0);
-        setProdErrors(0);
-        setDevErrors(0);
-        setRecentErrors([]);
-        setProjectKey('No active API key found');
-        setLoading(false);
-        return;
-      }
-
-      // Set the first active project API key for display
-      setProjectKey(userProjects[0].api_key);
-
-      // Extract array of project IDs belonging to this account
-      const projectIds = userProjects.map((p) => p.id);
-
-      // 3. Fetch errors filtered strictly by the user's project IDs
-      const { data: errors, error: errorsError } = await supabase
-        .from('errors')
-        .select('id, message, environment, created_at')
-        .in('project_id', projectIds)
-        .order('created_at', { ascending: false });
-
-      if (!errorsError && errors) {
-        setTotalErrors(errors.length);
-        setProdErrors(errors.filter((e) => e.environment === 'production').length);
-        setDevErrors(errors.filter((e) => e.environment === 'development').length);
-        setRecentErrors(errors.slice(0, 5));
-      }
-
+    if (!supabaseUrl || !supabaseAnonKey) {
       setLoading(false);
+      return;
     }
 
-    loadDashboardData();
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    setLoading(true);
+
+    // 1. Identify logged-in user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    // 2. Fetch all user projects
+    const { data: userProjects } = await supabase
+      .from('projects')
+      .select('id, api_key')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (!userProjects || userProjects.length === 0) {
+      setProjectKey('No API Key Created Yet');
+      setTotalErrors(0);
+      setProdErrors(0);
+      setDevErrors(0);
+      setRecentErrors([]);
+      setLoading(false);
+      return;
+    }
+
+    // 3. Find currently selected project from the Switcher (localStorage)
+    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
+    const activeProject = userProjects.find((p) => p.id === savedProjectId) || userProjects[0];
+
+    setProjectKey(activeProject.api_key);
+
+    // 4. Fetch errors strictly for THIS selected project
+    const { data: errors, error } = await supabase
+      .from('errors')
+      .select('id, message, environment, created_at')
+      .eq('project_id', activeProject.id)
+      .order('created_at', { ascending: false });
+
+    if (!error && errors) {
+      setTotalErrors(errors.length);
+      setProdErrors(errors.filter((e) => e.environment === 'production').length);
+      setDevErrors(errors.filter((e) => e.environment === 'development').length);
+      setRecentErrors(errors.slice(0, 5));
+    } else {
+      setTotalErrors(0);
+      setProdErrors(0);
+      setDevErrors(0);
+      setRecentErrors([]);
+    }
+
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    loadDashboardData();
+
+    // Re-load data instantly when user selects a different project in the dropdown
+    window.addEventListener('snaptrace_project_change', loadDashboardData);
+    return () => {
+      window.removeEventListener('snaptrace_project_change', loadDashboardData);
+    };
+  }, [loadDashboardData]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-8 font-sans">
@@ -111,7 +120,7 @@ export default function DashboardOverviewPage() {
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-xl">
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Ingested Errors</span>
                 <div className="text-3xl font-extrabold text-white">{totalErrors}</div>
-                <p className="text-xs text-slate-500">All-time captured exceptions</p>
+                <p className="text-xs text-slate-500">For selected project</p>
               </div>
 
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-xl">
@@ -133,7 +142,7 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
 
-            {/* Quick Actions & Recent Errors split */}
+            {/* Quick Actions & Recent Errors */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
               {/* Recent Ingested Errors (2 Columns) */}
@@ -149,7 +158,7 @@ export default function DashboardOverviewPage() {
                 </div>
 
                 {recentErrors.length === 0 ? (
-                  <p className="text-xs text-slate-500">No recent errors logged for this account.</p>
+                  <p className="text-xs text-slate-500">No errors logged for this project yet.</p>
                 ) : (
                   <div className="space-y-3">
                     {recentErrors.map((err) => (
@@ -208,7 +217,7 @@ export default function DashboardOverviewPage() {
 
                 <div className="pt-4 border-t border-slate-800">
                   <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                    Active API Key
+                    Active Project API Key
                   </span>
                   <code className="text-[11px] font-mono text-purple-400 block truncate bg-slate-950 p-2 rounded border border-slate-800">
                     {projectKey || 'Loading...'}
