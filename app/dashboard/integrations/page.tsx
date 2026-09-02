@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { useEffect, useState, useCallback } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
-// ✅ NEW (Updated with html and css)
 type LanguageKey = 'js' | 'html' | 'css' | 'python' | 'curl' | 'ruby' | 'kotlin' | 'php';
 
 interface IntegrationSnippet {
@@ -20,38 +19,39 @@ export default function LanguageIntegrationsPage() {
   const [copied, setCopied] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    async function fetchApiKey() {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  const fetchApiKey = useCallback(async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
 
-      if (!supabaseUrl || !supabaseAnonKey) {
-        setLoading(false);
-        return;
-      }
+    if (user) {
+      const { data: projects } = await supabase
+        .from('projects')
+        .select('id, api_key')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      if (projects && projects.length > 0) {
+        // Read the currently active project selected in the sidebar
+        const savedId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
+        const activeProj = projects.find((p) => p.id === savedId) || projects[0];
 
-      if (user) {
-        const { data: project } = await supabase
-          .from('projects')
-          .select('api_key')
-          .eq('user_id', user.id)
-          .limit(1)
-          .single();
-
-        if (project?.api_key) {
-          setApiKey(project.api_key);
+        if (activeProj?.api_key) {
+          setApiKey(activeProj.api_key);
         }
       }
-      setLoading(false);
     }
-
-    fetchApiKey();
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetchApiKey();
+
+    // Listen to project switch events in the sidebar
+    window.addEventListener('snaptrace_project_change', fetchApiKey);
+    return () => {
+      window.removeEventListener('snaptrace_project_change', fetchApiKey);
+    };
+  }, [fetchApiKey]);
 
   const integrations: Record<LanguageKey, IntegrationSnippet> = {
     js: {
@@ -90,7 +90,7 @@ try {
   sendSnapTraceError(err, 'production');
 }`,
     },
-   html: {
+    html: {
       name: 'HTML5 / Script Tag',
       icon: '🌐',
       installCmd: '<!-- Place script tag inside your HTML <head> or <body> -->',
@@ -161,17 +161,14 @@ try {
   }, true); // Captures loading errors before event bubbling
 </script>`,
     },
-   
-   
-   
     python: {
       name: 'Python',
       icon: '🐍',
       installCmd: 'pip install requests',
       guide: [
-        'Ensure the `requests` library is installed in your Python environment.',
+        'Ensure the \`requests\` library is installed in your Python environment.',
         'Catch exceptions in your FastAPI, Django, Flask, or script functions.',
-        'Pass `sys.exc_info()` or `traceback.format_exc()` to include stack traces.',
+        'Pass \`sys.exc_info()\` or \`traceback.format_exc()\` to include stack traces.',
       ],
       code: (key) => `# SnapTrace Error Telemetry Handler for Python
 import requests
@@ -231,9 +228,9 @@ curl -X POST https://snaptrace-dashboard.vercel.app/api/v1/log \\
       icon: '💎',
       installCmd: 'gem install net-http json',
       guide: [
-        'Uses standard Ruby `net/http` and `json` libraries.',
+        'Uses standard Ruby \`net/http\` and \`json\` libraries.',
         'Integrate into Rails rescue_from blocks or Sinatra error handlers.',
-        'Captures backtraces via `exception.backtrace.join("\\n")`.',
+        'Captures backtraces via \`exception.backtrace.join("\\n")\`.',
       ],
       code: (key) => `# SnapTrace Ruby Exception Handler
 require 'net/http'
@@ -247,7 +244,7 @@ def send_snaptrace_error(exception, environment = 'production')
   body = {
     apiKey: '${key}',
     message: exception.message,
-    stackTrace: exception.backtrace ? exception.backtrace.join("\n") : nil,
+    stackTrace: exception.backtrace ? exception.backtrace.join("\\n") : nil,
     environment: environment,
     url: 'Ruby Backend Service',
     userAgent: "Ruby #{RUBY_VERSION}"
@@ -278,7 +275,7 @@ end`,
       guide: [
         'Add OkHttp or Ktor client to your Android / Kotlin project dependencies.',
         'Call the dispatcher inside global UncaughtExceptionHandler or coroutine exception handlers.',
-        'Ensure internet permissions are added in `AndroidManifest.xml`.',
+        'Ensure internet permissions are added in \`AndroidManifest.xml\`.',
       ],
       code: (key) => `// SnapTrace Kotlin Error Reporter
 import okhttp3.MediaType.Companion.toMediaType
@@ -300,8 +297,7 @@ fun sendSnapTraceError(exception: Throwable, environment: String = "production")
         put("stackTrace", sw.toString())
         put("environment", environment)
         put("url", "Android Native App")
-        // ✅ CORRECTED
-put("userAgent", "Kotlin/\${KotlinVersion.CURRENT}")
+        put("userAgent", "Kotlin/\${KotlinVersion.CURRENT}")
     }
 
     val body = jsonPayload.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
@@ -325,7 +321,7 @@ put("userAgent", "Kotlin/\${KotlinVersion.CURRENT}")
       installCmd: 'extension=curl # Ensure cURL extension is enabled in php.ini',
       guide: [
         'Uses standard PHP cURL functionality.',
-        'Integrate into custom exception handlers via `set_exception_handler()`.',
+        'Integrate into custom exception handlers via \`set_exception_handler()\`.',
         'Works across Laravel, Symfony, WordPress, and custom PHP apps.',
       ],
       code: (key) => `<?php
@@ -392,7 +388,7 @@ try {
               Active Project API Key
             </span>
             <p className="text-xs text-slate-400">
-              Snippets below are pre-configured with your account key.
+              Snippets below are pre-configured with your active project key.
             </p>
           </div>
           <code className="bg-slate-950 px-3 py-1.5 rounded border border-slate-800 font-mono text-xs text-purple-300 truncate max-w-md">
@@ -415,7 +411,7 @@ try {
                 <button
                   key={lang}
                   onClick={() => setActiveTab(lang)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-medium transition text-left ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-medium transition text-left cursor-pointer ${
                     isActive
                       ? 'bg-purple-600/20 text-purple-300 border border-purple-500/40 shadow-md'
                       : 'bg-slate-900 text-slate-400 border border-slate-800/80 hover:bg-slate-800/60 hover:text-slate-200'
@@ -440,7 +436,7 @@ try {
                 </div>
                 <button
                   onClick={handleCopy}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-2 shadow-lg"
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-2 shadow-lg cursor-pointer"
                 >
                   <span>{copied ? '✓ Copied to Clipboard' : '📋 Copy Snippet'}</span>
                 </button>

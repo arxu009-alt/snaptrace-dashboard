@@ -53,6 +53,7 @@ export default function DashboardLayout({ children }) {
     { name: 'Overview', href: '/dashboard', icon: '📊' },
     { name: 'Exception Logs', href: '/dashboard/errors', icon: '🚨' },
     { name: 'API Keys & Snippets', href: '/dashboard/projects', icon: '🔑' },
+    { name: 'Language Integrations', href: '/dashboard/integrations', icon: '⚡' },
     { name: 'Alert Settings', href: '/dashboard/settings', icon: '⚙️' },
   ];
 
@@ -85,7 +86,7 @@ export default function DashboardLayout({ children }) {
           </span>
         </div>
 
-        {/* Global Project Switcher Dropdown */}
+        {/* Global Project Selector */}
         <div className="px-6 py-3 border-b border-slate-800/60 bg-slate-950/40">
           <ProjectSwitcher />
         </div>
@@ -111,7 +112,7 @@ export default function DashboardLayout({ children }) {
           })}
         </nav>
 
-        {/* Footer */}
+        {/* Footer info */}
         <div className="p-4 border-t border-slate-800 text-[11px] text-slate-500">
           <p>Real-time Telemetry & Monitoring</p>
         </div>
