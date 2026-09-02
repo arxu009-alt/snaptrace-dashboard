@@ -6,25 +6,32 @@ import { supabase } from '@/lib/supabaseClient';
 export default function AlertSettingsPage() {
   const [email, setEmail] = useState('');
   const [discordWebhook, setDiscordWebhook] = useState('');
-  const [apiKey, setApiKey] = useState('');
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     async function loadProjectSettings() {
-      // Fetch active project settings
-      const { data, error } = await supabase
+      // Fetch settings from any row that already has values configured
+      const { data } = await supabase
         .from('projects')
-        .select('api_key, recipient_email, discord_webhook_url')
-        .limit(1)
-        .single();
+        .select('recipient_email, discord_webhook_url')
+        .not('recipient_email', 'is', null)
+        .limit(1);
 
-      if (data) {
-        setApiKey(data.api_key || '');
-        setEmail(data.recipient_email || '');
-        setDiscordWebhook(data.discord_webhook_url || '');
-      } else if (error) {
-        console.error('Failed to load settings:', error.message);
+      if (data && data.length > 0) {
+        setEmail(data[0].recipient_email || '');
+        setDiscordWebhook(data[0].discord_webhook_url || '');
+      } else {
+        const { data: fallback } = await supabase
+          .from('projects')
+          .select('recipient_email, discord_webhook_url')
+          .limit(1)
+          .single();
+
+        if (fallback) {
+          setEmail(fallback.recipient_email || '');
+          setDiscordWebhook(fallback.discord_webhook_url || '');
+        }
       }
     }
     loadProjectSettings();
@@ -35,21 +42,21 @@ export default function AlertSettingsPage() {
     setSaving(true);
     setStatusMessage(null);
 
-    // Dynamic database update targeting the active project row
+    // Apply notification settings across all project records
     const { error } = await supabase
       .from('projects')
       .update({
         recipient_email: email,
         discord_webhook_url: discordWebhook,
       })
-      .eq('api_key', apiKey);
+      .neq('id', '00000000-0000-0000-0000-000000000000');
 
     setSaving(false);
 
     if (error) {
       setStatusMessage({ type: 'error', text: `Failed to save: ${error.message}` });
     } else {
-      setStatusMessage({ type: 'success', text: 'Alert settings updated successfully!' });
+      setStatusMessage({ type: 'success', text: 'Alert settings saved for all project API keys!' });
     }
   };
 
@@ -63,7 +70,9 @@ export default function AlertSettingsPage() {
       {statusMessage && (
         <div
           className={`p-4 rounded-lg text-sm font-medium ${
-            statusMessage.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+            statusMessage.type === 'success'
+              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+              : 'bg-red-500/10 text-red-400 border border-red-500/20'
           }`}
         >
           {statusMessage.text}
@@ -81,7 +90,7 @@ export default function AlertSettingsPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="user@example.com"
+            placeholder="arxu1045@gmail.com"
             className="w-full bg-[#14182b] border border-gray-800 rounded-lg px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-indigo-500 transition"
           />
           <p className="text-xs text-gray-500">Incoming exceptions will trigger email notifications to this recipient.</p>
