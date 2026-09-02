@@ -15,41 +15,44 @@ export default function ExceptionLogsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadInitialLogs() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('error_logs')
-        .select('*');
+  async function loadInitialLogs() {
+    setLoading(true);
+    
+    // Fetch logs unconditionally to match Overview page behavior
+    const { data, error } = await supabase
+      .from('error_logs')
+      .select('*');
 
-      if (error) {
-        console.error('Supabase fetch error:', error.message, error.details);
-      } else if (data) {
-        setLogs(data.reverse());
-      }
-      setLoading(false);
+    if (error) {
+      console.error('Exception fetch error:', error.message);
+    } else if (data) {
+      // Reverse array to ensure newest items are on top
+      setLogs([...data].reverse());
     }
+    setLoading(false);
+  }
 
-    loadInitialLogs();
+  loadInitialLogs();
 
-    const realtimeChannel = supabase
-      .channel('realtime-error-stream')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'error_logs',
-        },
-        (payload) => {
-          setLogs((prevLogs) => [payload.new, ...prevLogs]);
-        }
-      )
-      .subscribe();
+  const realtimeChannel = supabase
+    .channel('realtime-error-stream')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'error_logs',
+      },
+      (payload) => {
+        setLogs((prevLogs) => [payload.new, ...prevLogs]);
+      }
+    )
+    .subscribe();
 
-    return () => {
-      supabase.removeChannel(realtimeChannel);
-    };
-  }, []);
+  return () => {
+    supabase.removeChannel(realtimeChannel);
+  };
+}, []);
 
   const handleResolveLog = async (id: string) => {
     await supabase.from('error_logs').delete().eq('id', id);
