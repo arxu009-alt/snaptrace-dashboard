@@ -37,26 +37,29 @@ export default function AlertSettingsPage() {
     loadProjectSettings();
   }, []);
 
-  const handleSaveChanges = async (e: React.FormEvent) => {
+ const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setStatusMessage(null);
 
-    // Apply notification settings across all project records
-    const { error } = await supabase
-      .from('projects')
-      .update({
-        recipient_email: email,
-        discord_webhook_url: discordWebhook,
-      })
-      .neq('id', '00000000-0000-0000-0000-000000000000');
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, discordWebhook }),
+      });
 
-    setSaving(false);
+      const result = await res.json();
 
-    if (error) {
-      setStatusMessage({ type: 'error', text: `Failed to save: ${error.message}` });
-    } else {
-      setStatusMessage({ type: 'success', text: 'Alert settings saved for all project API keys!' });
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || 'Failed to save settings');
+      }
+
+      setStatusMessage({ type: 'success', text: 'Alert settings saved successfully across all project rows!' });
+    } catch (err: any) {
+      setStatusMessage({ type: 'error', text: err.message });
+    } finally {
+      setSaving(false);
     }
   };
 
