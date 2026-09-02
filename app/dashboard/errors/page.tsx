@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import InspectErrorModal from '@/components/InspectErrorModal';
 
 export default function ExceptionLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -18,7 +19,6 @@ export default function ExceptionLogsPage() {
       return;
     }
 
-    // Fetch all projects for this user
     const { data: userProjects } = await supabase
       .from('projects')
       .select('id, name')
@@ -97,7 +97,7 @@ export default function ExceptionLogsPage() {
   };
 
   return (
-    <div className="p-8 text-white space-y-6 max-w-6xl mx-auto">
+    <div className="p-8 text-white space-y-6 max-w-6xl mx-auto font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
         <div>
@@ -180,44 +180,13 @@ export default function ExceptionLogsPage() {
         </table>
       </div>
 
-      {/* Inspect Modal */}
+      {/* Deep Inspection Modal */}
       {selectedLog && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl w-full space-y-4 shadow-2xl">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-bold text-red-400 break-words">{selectedLog.message}</h3>
-                <p className="text-xs text-slate-400 mt-1 font-mono">
-                  Logged at {new Date(selectedLog.created_at).toLocaleString()} • {selectedLog.environment || 'production'}
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="text-slate-400 hover:text-white text-sm px-2 py-1 bg-slate-800 rounded cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                Stack Trace
-              </label>
-              <pre className="bg-slate-950 p-4 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto max-h-64 whitespace-pre-wrap">
-                {selectedLog.stack_trace || selectedLog.stack || 'No stack trace provided.'}
-              </pre>
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg border border-slate-700 text-white transition cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <InspectErrorModal
+          log={selectedLog}
+          onClose={() => setSelectedLog(null)}
+          onDelete={handleDeleteLog}
+        />
       )}
     </div>
   );
