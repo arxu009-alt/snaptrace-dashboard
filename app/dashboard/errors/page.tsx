@@ -18,10 +18,10 @@ export default function ExceptionLogsPage() {
   async function loadInitialLogs() {
     setLoading(true);
     
-    // Fetch logs unconditionally to match Overview page behavior
     const { data, error } = await supabase
-      .from('error_logs')
-      .select('*');
+  .from('errors')
+  .select('*')
+  .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Exception fetch error:', error.message);

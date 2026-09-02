@@ -54,12 +54,13 @@ export async function POST(req) {
       project.discord_url;
 
     // Resolve Recipient Email across schema variants
+   // Resolve Recipient Email across schema variants
     const recipientEmail =
+      project.recipient_email ||
       project.alert_email ||
       project.alert_email_address ||
       project.email ||
       project.owner_email;
-
     // Resolve SMTP Sender Credentials from Vercel Environment Variables
     const smtpUser =
       process.env.OWNER_EMAIL ||
