@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import ProjectSwitcher from '@/components/ProjectSwitcher';
-
+import SnapTraceLogo from '@/components/SnapTraceLogo';
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -96,12 +96,15 @@ export default function DashboardLayout({ children }) {
       {/* 1. Left Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-[#090D16] border-r border-slate-800/80 flex-shrink-0 flex flex-col">
         
-        {/* Brand Header */}
+        {/* Brand Header with Custom Vector Logo */}
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center space-x-2.5">
-            <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-yellow-500 to-amber-400 flex items-center justify-center text-slate-950 font-black text-sm shadow-md shadow-yellow-500/20">
-              ⚡
-            </div>
+          <Link href="/dashboard" className="transition hover:opacity-90">
+            <SnapTraceLogo size="md" showText={true} />
+          </Link>
+          <span className="text-[10px] font-bold bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full">
+            v1.0
+          </span>
+        </div>
             <span className="text-lg font-black tracking-tight text-white">
               Snap<span className="text-yellow-400">Trace</span>
             </span>
