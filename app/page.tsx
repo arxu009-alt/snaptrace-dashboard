@@ -577,8 +577,16 @@ try {
               Start Tracking for Free in 60s →
             </Link>
           </div>
-          <div className="pt-8 text-xs text-slate-500 border-t border-slate-800/80">
-            © {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform.
+          <div className="pt-8 text-xs text-slate-500 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span>© {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform.</span>
+            <div className="flex items-center space-x-6 text-slate-400">
+              <Link href="/privacy" className="hover:text-yellow-400 transition">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="hover:text-yellow-400 transition">
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </div>
       </footer>

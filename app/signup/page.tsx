@@ -217,9 +217,20 @@ export default function SignUpPage() {
               >
                 {loading ? 'Creating Account...' : 'Create Account →'}
               </button>
+
+              <p className="text-[11px] text-slate-500 text-center leading-relaxed">
+                By signing up, you agree to our{' '}
+                <Link href="/terms" className="text-slate-400 underline hover:text-yellow-400">
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" className="text-slate-400 underline hover:text-yellow-400">
+                  Privacy Policy
+                </Link>.
+              </p>
             </form>
 
-            <p className="text-center text-xs text-slate-400">
+            <p className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800/60">
               Already have an account?{' '}
               <Link href="/login" className="text-yellow-400 hover:underline font-semibold">
                 Sign In
@@ -232,8 +243,16 @@ export default function SignUpPage() {
       </div>
 
       {/* Auth Footer */}
-      <footer className="border-t border-slate-800/60 p-6 text-center text-xs text-slate-500 relative z-10">
-        © {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform.
+      <footer className="border-t border-slate-800/60 p-6 text-xs text-slate-500 relative z-10 max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4">
+        <span>© {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform.</span>
+        <div className="flex items-center space-x-6 text-slate-400">
+          <Link href="/privacy" className="hover:text-yellow-400 transition">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:text-yellow-400 transition">
+            Terms of Service
+          </Link>
+        </div>
       </footer>
 
     </div>
