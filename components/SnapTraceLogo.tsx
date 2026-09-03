@@ -7,12 +7,11 @@ interface LogoProps {
 }
 
 export default function SnapTraceLogo({ size = 'md', showText = true, className = '' }: LogoProps) {
-  // Size mapping
   const iconSizes = {
-    sm: 'h-6 w-6',
-    md: 'h-8 w-8',
-    lg: 'h-10 w-10',
-    xl: 'h-12 w-12',
+    sm: 'h-7 w-7',
+    md: 'h-9 w-9',
+    lg: 'h-11 w-11',
+    xl: 'h-14 w-14',
   };
 
   const textSizes = {
@@ -23,44 +22,44 @@ export default function SnapTraceLogo({ size = 'md', showText = true, className 
   };
 
   return (
-    <div className={`flex items-center gap-2.5 select-none ${className}`}>
-      {/* Scalable SVG Icon Badge */}
+    <div className={`flex items-center gap-3 select-none ${className}`}>
+      {/* High-End Vector Icon Badge */}
       <div
-        className={`relative ${iconSizes[size]} rounded-xl bg-gradient-to-br from-[#121829] to-[#060911] p-[1px] shadow-lg shadow-yellow-500/10 border border-slate-800/80 group`}
+        className={`relative ${iconSizes[size]} rounded-2xl bg-gradient-to-br from-yellow-400/20 via-slate-800/60 to-emerald-500/20 p-[1.5px] shadow-xl shadow-yellow-500/10 group transition transform hover:scale-105`}
       >
-        <div className="w-full h-full rounded-[11px] bg-[#090D16] flex items-center justify-center relative overflow-hidden">
-          {/* Subtle Ambient Glow */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-yellow-500/15 via-transparent to-emerald-500/15 opacity-80" />
+        <div className="w-full h-full rounded-[14px] bg-[#090D16] flex items-center justify-center relative overflow-hidden border border-slate-800/90">
+          {/* Radial Ambient Glow */}
+          <div className="absolute inset-0 bg-radial from-yellow-500/20 via-transparent to-transparent opacity-80" />
 
-          {/* Precision Trace & Spark SVG Icon */}
+          {/* Precision Snap & Trace SVG Geometry */}
           <svg
-            viewBox="0 0 24 24"
+            viewBox="0 0 28 28"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="w-[60%] h-[60%] relative z-10 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]"
+            className="w-[70%] h-[70%] relative z-10 drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]"
           >
-            {/* Background Trace Pulse Path */}
+            {/* Background Telemetry Pulse Radar */}
             <path
-              d="M2 13H6L8.5 7L12 17L14.5 11L16.5 13H22"
+              d="M2 15H6.5L9.5 8L14 20L17 12L19.5 15H26"
               stroke="#10B981"
-              strokeWidth="1.8"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeOpacity="0.4"
             />
-            {/* Foreground Snap Lightning Spark */}
+            {/* Foreground Lightning Bolt Spark */}
             <path
-              d="M13 2L4.5 13.5H11.5L10.5 22L19.5 10.5H12.5L13 2Z"
-              fill="url(#snapGradient)"
+              d="M15.5 2.5L5 15.5H13.5L12 25.5L23 12H14.5L15.5 2.5Z"
+              fill="url(#snapTraceGradient)"
               stroke="#FACC15"
               strokeWidth="0.8"
               strokeLinejoin="round"
             />
-            {/* Gradient definition */}
             <defs>
-              <linearGradient id="snapGradient" x1="4.5" y1="2" x2="19.5" y2="22" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#FDE047" />
-                <stop offset="1" stopColor="#EAB308" />
+              <linearGradient id="snapTraceGradient" x1="5" y1="2.5" x2="23" y2="25.5" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#FEF08A" />
+                <stop offset="0.5" stopColor="#FACC15" />
+                <stop offset="1" stopColor="#D97706" />
               </linearGradient>
             </defs>
           </svg>
@@ -73,7 +72,7 @@ export default function SnapTraceLogo({ size = 'md', showText = true, className 
           <span className={`font-black tracking-tight text-white ${textSizes[size]}`}>
             Snap<span className="text-yellow-400">Trace</span>
           </span>
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 ml-1 mb-2 animate-pulse shadow-sm shadow-emerald-400" />
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 ml-1.5 mb-2.5 animate-pulse shadow-md shadow-emerald-400/80" />
         </div>
       )}
     </div>
