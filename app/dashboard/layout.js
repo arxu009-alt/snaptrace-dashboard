@@ -10,11 +10,13 @@ export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [authChecking, setAuthChecking] = useState(true);
+  const [userEmail, setUserEmail] = useState('');
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
   useEffect(() => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
     if (!supabaseUrl || !supabaseAnonKey) {
       router.replace('/login');
       return;
@@ -23,103 +25,217 @@ export default function DashboardLayout({ children }) {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     async function verifySession() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
         router.replace('/login');
       } else {
+        setUserEmail(session.user?.email || 'Developer');
         setAuthChecking(false);
       }
     }
 
     verifySession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         router.replace('/login');
+      } else if (session?.user?.email) {
+        setUserEmail(session.user.email);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, supabaseUrl, supabaseAnonKey]);
+
+  const handleSignOut = async () => {
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    await supabase.auth.signOut();
+    router.replace('/login');
+  };
 
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: '📊' },
     { name: 'Exception Logs', href: '/dashboard/errors', icon: '🚨' },
-    { name: 'API Keys & Snippets', href: '/dashboard/projects', icon: '🔑' },
+    { name: 'API Keys & Projects', href: '/dashboard/projects', icon: '🔑' },
     { name: 'Language Integrations', href: '/dashboard/integrations', icon: '⚡' },
-    { name: 'Alert Settings', href: '/dashboard/settings', icon: '⚙️' },
+    { name: 'Alert & AI Settings', href: '/dashboard/settings', icon: '⚙️' },
   ];
+
+  // Map route to clean breadcrumb title
+  const getPageTitle = () => {
+    if (pathname === '/dashboard') return 'System Overview';
+    if (pathname === '/dashboard/errors') return 'Exception Logs Stream';
+    if (pathname === '/dashboard/projects') return 'API Keys & Projects';
+    if (pathname === '/dashboard/integrations') return 'Language & SDK Integrations';
+    if (pathname === '/dashboard/settings') return 'Settings & AI Copilot';
+    return 'Dashboard';
+  };
 
   if (authChecking) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center font-sans">
+      <div className="min-h-screen bg-[#05070E] text-slate-100 flex items-center justify-center font-sans">
         <div className="flex flex-col items-center space-y-3">
-          <div className="h-8 w-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs text-slate-400 font-medium tracking-wide">
-            Verifying Session Authorization...
+          <div className="h-8 w-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-xs text-slate-400 font-mono tracking-wide">
+            Authenticating Session...
           </p>
         </div>
       </div>
     );
   }
 
+  // Get first letter of email for avatar
+  const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : 'U';
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex-shrink-0 flex flex-col">
-        {/* Brand */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center space-x-2">
-            <span className="text-xl font-black tracking-tight text-white">
-              Snap<span className="text-purple-500">Trace</span>
+    <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans">
+      
+      {/* 1. Left Sidebar Navigation */}
+      <aside className="w-full md:w-64 bg-[#090D16] border-r border-slate-800/80 flex-shrink-0 flex flex-col">
+        
+        {/* Brand Header */}
+        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+          <Link href="/dashboard" className="flex items-center space-x-2.5">
+            <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-yellow-500 to-amber-400 flex items-center justify-center text-slate-950 font-black text-sm shadow-md shadow-yellow-500/20">
+              ⚡
+            </div>
+            <span className="text-lg font-black tracking-tight text-white">
+              Snap<span className="text-yellow-400">Trace</span>
             </span>
           </Link>
-          <span className="text-[10px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded">
+          <span className="text-[10px] font-bold bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full">
             v1.0
           </span>
         </div>
 
-        {/* Global Project Selector */}
-        <div className="px-6 py-3 border-b border-slate-800/60 bg-slate-950/40">
+        {/* Global Project Switcher */}
+        <div className="px-4 py-3 border-b border-slate-800/60 bg-[#060911]">
           <ProjectSwitcher />
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 p-4 space-y-1">
+        {/* Navigation Items */}
+        <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium transition ${
+                className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
                   isActive
-                    ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 shadow-sm shadow-yellow-400/5'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                 }`}
               >
-                <span>{item.icon}</span>
+                <span className="text-base">{item.icon}</span>
                 <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer info */}
-        <div className="p-4 border-t border-slate-800 text-[11px] text-slate-500">
-          <p>Real-time Telemetry & Monitoring</p>
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center justify-between">
+          <span>Featherweight APM</span>
+          <span className="text-emerald-400 font-mono text-[10px]">● Live</span>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      {/* 2. Main Content View with Top Bar */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#05070E]">
+        
+        {/* Top Header Bar */}
+        <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/80 backdrop-blur-md px-8 flex items-center justify-between z-40">
+          
+          {/* Breadcrumb Title */}
+          <div className="flex items-center space-x-2 text-xs">
+            <span className="text-slate-500">SnapTrace</span>
+            <span className="text-slate-700">/</span>
+            <span className="text-slate-200 font-bold">{getPageTitle()}</span>
+          </div>
+
+          {/* Right Area: Live Badge + User Profile Dropdown */}
+          <div className="flex items-center space-x-4">
+            
+            {/* Live Ingestion Indicator */}
+            <div className="hidden sm:flex items-center gap-2 bg-[#05070E] border border-slate-800 px-3 py-1.5 rounded-full">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">
+                Ingestion Active
+              </span>
+            </div>
+
+            {/* Profile Avatar & Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                className="flex items-center space-x-2.5 p-1 rounded-xl hover:bg-slate-800/50 transition cursor-pointer"
+              >
+                <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-yellow-500/20 border border-yellow-400/40">
+                  {userInitial}
+                </div>
+                <span className="hidden md:inline text-xs text-slate-300 font-medium max-w-[120px] truncate">
+                  {userEmail.split('@')[0]}
+                </span>
+                <span className="text-slate-500 text-[10px]">▾</span>
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {profileDropdownOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-56 bg-[#090D16] border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+                  onMouseLeave={() => setProfileDropdownOpen(false)}
+                >
+                  <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Signed in as</p>
+                    <p className="text-xs text-slate-200 font-mono truncate">{userEmail}</p>
+                  </div>
+
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
+                  >
+                    <span>⚙️</span>
+                    <span>Account & AI Settings</span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/projects"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
+                  >
+                    <span>🔑</span>
+                    <span>Manage Projects & Keys</span>
+                  </Link>
+
+                  <div className="border-t border-slate-800/80 my-1"></div>
+
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-red-400 hover:bg-red-950/30 transition cursor-pointer text-left"
+                  >
+                    <span>🚪</span>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
+
+        </header>
+
+        {/* Main Route Content */}
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
+
     </div>
   );
 }
