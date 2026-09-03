@@ -1,14 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabaseClient';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
 
+export const dynamic = 'force-dynamic';
+
 export default function WelcomeLandingPage() {
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [activeQuickTab, setActiveQuickTab] = useState<'nextjs' | 'js' | 'python' | 'node'>('nextjs');
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [copiedCursorPrompt, setCopiedCursorPrompt] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+  // 1. Check if user is already logged in -> Auto redirect to /dashboard
+  useEffect(() => {
+    async function checkUserSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          router.replace('/dashboard');
+          return;
+        }
+      } catch (err) {
+        console.error('Auth verification error:', err);
+      } finally {
+        setCheckingAuth(false);
+      }
+    }
+
+    checkUserSession();
+  }, [router]);
 
   const scrollToTop = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -103,6 +128,18 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
     }
   ];
 
+  // Brief session check loader (prevents layout flashing)
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-[#05070E] flex items-center justify-center font-sans text-slate-400">
+        <div className="flex flex-col items-center space-y-3">
+          <div className="h-8 w-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-xs font-mono text-slate-500">Checking Active Session...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden">
       
@@ -115,7 +152,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Sentry-Style Navigation Links */}
+          {/* Navigation Links */}
           <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300">
             <a href="#features" className="hover:text-yellow-400 transition flex items-center gap-1">
               Features <span className="text-[10px] text-slate-500">▾</span>
@@ -157,18 +194,15 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
       {/* 2. Hero Section */}
       <section className="relative pt-24 pb-32 overflow-hidden">
-        {/* Ambient Gradient Glows */}
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none" />
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10">
           
-          {/* Announcement Pill */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090D16] border border-slate-800 text-xs font-semibold text-yellow-300 shadow-xl shadow-yellow-500/5">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>Sub-5KB SDK • 1-Click Cursor / Claude AI Export • Zero Alert Flood</span>
           </div>
 
-          {/* Sentry-Grade Punchy Headline */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.1]">
             Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>, fix it in a{' '}
             <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
@@ -176,12 +210,10 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </span>
           </h1>
 
-          {/* Subtitle */}
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed">
             The lightweight, noise-free application monitoring platform. Capture live exceptions in real time, silence duplicate alerts, and diagnose root causes with your own favorite AI models.
           </p>
 
-          {/* Action CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Link
               href="/signup"
@@ -197,7 +229,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </Link>
           </div>
 
-          {/* Trust Checklist */}
           <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400">
             <span className="flex items-center gap-1.5"><span className="text-emerald-400">✓</span> No credit card required</span>
             <span className="flex items-center gap-1.5"><span className="text-emerald-400">✓</span> Drop-in 3 lines of code</span>
@@ -210,7 +241,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       <section id="quickstart" className="max-w-4xl mx-auto px-6 pb-28">
         <div className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#060911] px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            {/* Tabs */}
             <div className="flex items-center space-x-2">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-2 font-mono">Quickstart:</span>
               {(['nextjs', 'js', 'python', 'node'] as const).map((tab) => (
@@ -244,7 +274,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 4. Core Features Deep Dive */}
+      {/* 4. Features Section */}
       <section id="features" className="py-24 border-t border-slate-800/80 bg-[#060911]/60">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
           
@@ -302,7 +332,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 5. BYOK AI Section with Cursor & Claude Badges */}
+      {/* 5. BYOK AI Section */}
       <section id="ai-copilot" className="py-24 border-t border-slate-800/80 relative">
         <div className="max-w-6xl mx-auto px-6 space-y-12">
           
@@ -317,7 +347,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               Don’t pay $40/month for locked-in AI features. Add your own OpenAI key or use our <strong>1-Click Prompt Export</strong> directly into <strong>Cursor</strong>, <strong>Claude Code</strong>, or <strong>ChatGPT</strong>.
             </p>
 
-            {/* AI Agent Badges */}
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#090D16] border border-purple-500/40 shadow-lg shadow-purple-500/10">
                 <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
@@ -507,12 +536,18 @@ try {
                 <td className="p-4 text-slate-500">✕ Manual copy</td>
                 <td className="p-4 text-slate-500">✕ Manual copy</td>
               </tr>
+              <tr>
+                <td className="p-4 font-semibold text-white">Noise Deduplication Throttling</td>
+                <td className="p-4 text-emerald-400 font-bold">✓ Automatic 60s window</td>
+                <td className="p-4 text-slate-500">Manual spike rules</td>
+                <td className="p-4 text-slate-500">Rate limited</td>
+              </tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      {/* 9. Sentry-Style Dedicated Pricing Section */}
+      {/* 9. Dedicated Pricing Section */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase">
