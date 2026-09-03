@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import ProjectSwitcher from '@/components/ProjectSwitcher';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
+
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -64,7 +65,6 @@ export default function DashboardLayout({ children }) {
     { name: 'Alert & AI Settings', href: '/dashboard/settings', icon: '⚙️' },
   ];
 
-  // Map route to clean breadcrumb title
   const getPageTitle = () => {
     if (pathname === '/dashboard') return 'System Overview';
     if (pathname === '/dashboard/errors') return 'Exception Logs Stream';
@@ -87,7 +87,6 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  // Get first letter of email for avatar
   const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : 'U';
 
   return (
@@ -96,18 +95,10 @@ export default function DashboardLayout({ children }) {
       {/* 1. Left Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-[#090D16] border-r border-slate-800/80 flex-shrink-0 flex flex-col">
         
-        {/* Brand Header with Custom Vector Logo */}
+        {/* Brand Header with Vector Logo */}
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
           <Link href="/dashboard" className="transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={true} />
-          </Link>
-          <span className="text-[10px] font-bold bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full">
-            v1.0
-          </span>
-        </div>
-            <span className="text-lg font-black tracking-tight text-white">
-              Snap<span className="text-yellow-400">Trace</span>
-            </span>
           </Link>
           <span className="text-[10px] font-bold bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full">
             v1.0
