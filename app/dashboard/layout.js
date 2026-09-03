@@ -13,6 +13,7 @@ export default function DashboardLayout({ children }) {
   const [authChecking, setAuthChecking] = useState(true);
   const [userEmail, setUserEmail] = useState('');
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -92,26 +93,33 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans">
       
-      {/* 1. Left Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-[#090D16] border-r border-slate-800/80 flex-shrink-0 flex flex-col">
-        
-        {/* Brand Header with Vector Logo */}
-        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+      {/* 1. Left Sidebar Navigation (Collapsible) */}
+      <aside
+        className={`bg-[#090D16] border-r border-slate-800/80 flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
+        }`}
+      >
+        {/* Brand Header */}
+        <div className="p-5 border-b border-slate-800/80 flex items-center justify-between min-w-[240px]">
           <Link href="/dashboard" className="transition hover:opacity-90">
-            <SnapTraceLogo size="md" showText={true} />
+            <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
           </Link>
-          <span className="text-[10px] font-bold bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full">
-            v1.0
-          </span>
+          {!sidebarCollapsed && (
+            <span className="text-[10px] font-bold bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full">
+              v1.0
+            </span>
+          )}
         </div>
 
-        {/* Global Project Switcher */}
-        <div className="px-4 py-3 border-b border-slate-800/60 bg-[#060911]">
-          <ProjectSwitcher />
-        </div>
+        {/* Global Project Switcher (Hidden when collapsed) */}
+        {!sidebarCollapsed && (
+          <div className="px-4 py-3 border-b border-slate-800/60 bg-[#060911] min-w-[240px]">
+            <ProjectSwitcher />
+          </div>
+        )}
 
         {/* Navigation Items */}
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 min-w-[240px]">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -123,32 +131,51 @@ export default function DashboardLayout({ children }) {
                     ? 'bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 shadow-sm shadow-yellow-400/5'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                 }`}
+                title={sidebarCollapsed ? item.name : undefined}
               >
                 <span className="text-base">{item.icon}</span>
-                <span>{item.name}</span>
+                {!sidebarCollapsed && <span>{item.name}</span>}
               </Link>
             );
           })}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center justify-between">
-          <span>Featherweight APM</span>
-          <span className="text-emerald-400 font-mono text-[10px]">● Live</span>
-        </div>
+        {!sidebarCollapsed && (
+          <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center justify-between min-w-[240px]">
+            <span>Featherweight APM</span>
+            <span className="text-emerald-400 font-mono text-[10px]">● Live</span>
+          </div>
+        )}
       </aside>
 
       {/* 2. Main Content View with Top Bar */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#05070E]">
         
         {/* Top Header Bar */}
-        <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/80 backdrop-blur-md px-8 flex items-center justify-between z-40">
+        <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/80 backdrop-blur-md px-6 flex items-center justify-between z-40">
           
-          {/* Breadcrumb Title */}
-          <div className="flex items-center space-x-2 text-xs">
-            <span className="text-slate-500">SnapTrace</span>
-            <span className="text-slate-700">/</span>
-            <span className="text-slate-200 font-bold">{getPageTitle()}</span>
+          {/* Left Area: Sidebar Collapse Toggle + Breadcrumbs */}
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-yellow-400 hover:border-yellow-400/40 transition cursor-pointer"
+              title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar (Full Width View)'}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {sidebarCollapsed ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                )}
+              </svg>
+            </button>
+
+            <div className="flex items-center space-x-2 text-xs">
+              <span className="text-slate-500">SnapTrace</span>
+              <span className="text-slate-700">/</span>
+              <span className="text-slate-200 font-bold">{getPageTitle()}</span>
+            </div>
           </div>
 
           {/* Right Area: Live Badge + User Profile Dropdown */}
@@ -180,7 +207,6 @@ export default function DashboardLayout({ children }) {
                 <span className="text-slate-500 text-[10px]">▾</span>
               </button>
 
-              {/* Profile Dropdown Menu */}
               {profileDropdownOpen && (
                 <div
                   className="absolute right-0 mt-2 w-56 bg-[#090D16] border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100"
