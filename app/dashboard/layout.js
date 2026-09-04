@@ -13,6 +13,7 @@ export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [authChecking, setAuthChecking] = useState(true);
+  const [userDisplayName, setUserDisplayName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -35,7 +36,10 @@ export default function DashboardLayout({ children }) {
       if (!session) {
         router.replace('/login');
       } else {
-        setUserEmail(session.user?.email || 'Developer');
+        const name = session.user?.user_metadata?.full_name;
+        const email = session.user?.email || '';
+        setUserDisplayName(name || email.split('@')[0] || 'Developer');
+        setUserEmail(email);
         setAuthChecking(false);
       }
     }
@@ -45,8 +49,11 @@ export default function DashboardLayout({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         router.replace('/login');
-      } else if (session?.user?.email) {
-        setUserEmail(session.user.email);
+      } else if (session?.user) {
+        const name = session.user.user_metadata?.full_name;
+        const email = session.user.email || '';
+        setUserDisplayName(name || email.split('@')[0] || 'Developer');
+        setUserEmail(email);
       }
     });
 
@@ -98,7 +105,8 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : 'U';
+  // Get first letter of Name or Email for avatar badge
+  const userInitial = userDisplayName ? userDisplayName.charAt(0).toUpperCase() : 'D';
 
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans">
@@ -121,14 +129,14 @@ export default function DashboardLayout({ children }) {
           )}
         </div>
 
-        {/* Global Project Switcher (Tour Anchor 1) */}
+        {/* Global Project Switcher */}
         {!sidebarCollapsed && (
           <div id="tour-project-switcher" className="px-4 py-3 border-b border-slate-800/60 bg-[#060911] min-w-[240px]">
             <ProjectSwitcher />
           </div>
         )}
 
-        {/* Navigation Items (Tour Anchors) */}
+        {/* Navigation Items */}
         <nav className="flex-1 p-3 space-y-1 min-w-[240px]">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -222,8 +230,8 @@ export default function DashboardLayout({ children }) {
                 <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-yellow-500/20 border border-yellow-400/40">
                   {userInitial}
                 </div>
-                <span className="hidden lg:inline text-xs text-slate-300 font-medium max-w-[120px] truncate">
-                  {userEmail.split('@')[0]}
+                <span className="hidden lg:inline text-xs text-slate-200 font-bold max-w-[130px] truncate">
+                  {userDisplayName}
                 </span>
                 <span className="text-slate-500 text-[10px]">▾</span>
               </button>
@@ -234,8 +242,8 @@ export default function DashboardLayout({ children }) {
                   onMouseLeave={() => setProfileDropdownOpen(false)}
                 >
                   <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Signed in as</p>
-                    <p className="text-xs text-slate-200 font-mono truncate">{userEmail}</p>
+                    <p className="text-xs text-white font-bold truncate">{userDisplayName}</p>
+                    <p className="text-[10px] text-slate-400 font-mono truncate">{userEmail}</p>
                   </div>
 
                   <button
