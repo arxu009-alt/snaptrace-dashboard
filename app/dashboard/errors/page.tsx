@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import InspectErrorModal from '@/components/InspectErrorModal';
+import SnapTraceLogo from '@/components/SnapTraceLogo';
 
 interface ErrorLog {
   id: number;
@@ -14,14 +16,20 @@ interface ErrorLog {
   user_agent?: string;
   created_at: string;
   status?: string;
+  project_id?: string;
   occurrence_count?: number;
 }
 
 export default function ExceptionLogsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const urlProjectId = searchParams.get('projectId');
+
   const [logs, setLogs] = useState<ErrorLog[]>([]);
   const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentProjectName, setCurrentProjectName] = useState<string>('All Projects');
+  const [isUrlFiltered, setIsUrlFiltered] = useState<boolean>(false);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,7 +45,6 @@ export default function ExceptionLogsPage() {
       return;
     }
 
-    // Fetch user's projects
     const { data: userProjects } = await supabase
       .from('projects')
       .select('id, name')
@@ -49,9 +56,12 @@ export default function ExceptionLogsPage() {
       return;
     }
 
-    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
-    const isAll = !savedProjectId || savedProjectId === 'all';
+    // Check if filtered by URL parameter or global dropdown
+    const targetProjectId = urlProjectId || (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all');
+    const isAll = !targetProjectId || targetProjectId === 'all';
     const userProjectIds = userProjects.map((p) => p.id);
+
+    setIsUrlFiltered(Boolean(urlProjectId));
 
     let query = supabase
       .from('errors')
@@ -62,9 +72,9 @@ export default function ExceptionLogsPage() {
       setCurrentProjectName('All Projects (Global)');
       query = query.in('project_id', userProjectIds);
     } else {
-      const activeProj = userProjects.find((p) => p.id === savedProjectId);
+      const activeProj = userProjects.find((p) => p.id === targetProjectId);
       setCurrentProjectName(activeProj ? activeProj.name : 'Selected Project');
-      query = query.eq('project_id', savedProjectId);
+      query = query.eq('project_id', targetProjectId);
     }
 
     const { data, error } = await query;
@@ -75,7 +85,7 @@ export default function ExceptionLogsPage() {
       setLogs(data);
     }
     setLoading(false);
-  }, []);
+  }, [urlProjectId]);
 
   useEffect(() => {
     loadLogs();
@@ -92,8 +102,8 @@ export default function ExceptionLogsPage() {
           table: 'errors',
         },
         (payload) => {
-          const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
-          if (!savedProjectId || savedProjectId === 'all' || payload.new.project_id === savedProjectId) {
+          const targetProjectId = urlProjectId || (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all');
+          if (!targetProjectId || targetProjectId === 'all' || payload.new.project_id === targetProjectId) {
             setLogs((prevLogs) => [payload.new as ErrorLog, ...prevLogs]);
           }
         }
@@ -104,13 +114,16 @@ export default function ExceptionLogsPage() {
       window.removeEventListener('snaptrace_project_change', loadLogs);
       supabase.removeChannel(channel);
     };
-  }, [loadLogs]);
+  }, [loadLogs, urlProjectId]);
 
-  // Toggle status between 'resolved' and 'unresolved'
+  // Clear specific URL filter back to global view
+  const handleClearUrlFilter = () => {
+    router.push('/dashboard/errors');
+  };
+
   const handleToggleStatus = async (id: number, currentStatus?: string) => {
     const newStatus = currentStatus === 'resolved' ? 'unresolved' : 'resolved';
     
-    // Optimistic UI update
     setLogs((prev) =>
       prev.map((log) => (log.id === id ? { ...log, status: newStatus } : log))
     );
@@ -130,54 +143,67 @@ export default function ExceptionLogsPage() {
     }
   };
 
-  // Client-side filtering
-  const filteredLogs = logs.filter((log) => {
-    const logStatus = log.status || 'unresolved';
-    
-    // Status Filter
-    if (statusFilter !== 'all' && logStatus !== statusFilter) {
-      return false;
-    }
+  const filteredLogs = useMemo(() => {
+    return logs.filter((log) => {
+      const logStatus = log.status || 'unresolved';
+      
+      if (statusFilter !== 'all' && logStatus !== statusFilter) {
+        return false;
+      }
 
-    // Environment Filter
-    if (envFilter !== 'all' && log.environment.toLowerCase() !== envFilter) {
-      return false;
-    }
+      if (envFilter !== 'all' && log.environment.toLowerCase() !== envFilter) {
+        return false;
+      }
 
-    // Search Query Filter (message, url, stack)
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchMsg = log.message?.toLowerCase().includes(q);
-      const matchUrl = log.url?.toLowerCase().includes(q);
-      const matchStack = (log.stack_trace || log.stack || '').toLowerCase().includes(q);
-      return matchMsg || matchUrl || matchStack;
-    }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchMsg = log.message?.toLowerCase().includes(q);
+        const matchUrl = log.url?.toLowerCase().includes(q);
+        const matchStack = (log.stack_trace || log.stack || '').toLowerCase().includes(q);
+        return matchMsg || matchUrl || matchStack;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [logs, statusFilter, envFilter, searchQuery]);
 
   const unresolvedCount = logs.filter((l) => (l.status || 'unresolved') === 'unresolved').length;
   const resolvedCount = logs.filter((l) => l.status === 'resolved').length;
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-5 gap-4">
-          <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
+          <div className="space-y-1.5">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5 flex-wrap">
               <span>Exception Logs Stream</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 font-mono font-bold">
-                {currentProjectName}
-              </span>
+
+              {/* Filter Tag or Clear Badge */}
+              {isUrlFiltered ? (
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 text-xs font-mono font-bold animate-in zoom-in-95">
+                  <span>📁 {currentProjectName}</span>
+                  <button
+                    onClick={handleClearUrlFilter}
+                    className="ml-1 hover:text-white bg-yellow-400/20 rounded-full w-4 h-4 flex items-center justify-center text-[10px] cursor-pointer"
+                    title="Clear filter and view all projects"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 font-mono font-bold">
+                  {currentProjectName}
+                </span>
+              )}
             </h1>
-            <p className="text-xs text-slate-400">
-              Live telemetry feed with real-time issue triage and search filters.
+            <p className="text-xs text-slate-400 font-mono">
+              Live telemetry feed with issue triage and real-time noise deduplication.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-[#090D16] border border-slate-800 px-3.5 py-1.5 rounded-full self-start sm:self-auto">
+          <div className="flex items-center gap-2 bg-[#090D16] border border-slate-800 px-3.5 py-1.5 rounded-full self-start sm:self-auto shadow-sm">
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
@@ -189,7 +215,7 @@ export default function ExceptionLogsPage() {
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="bg-[#090D16] border border-slate-800/90 rounded-2xl p-4 space-y-4 shadow-xl">
+        <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-4 space-y-4 shadow-xl">
           
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             
@@ -213,7 +239,7 @@ export default function ExceptionLogsPage() {
                   onClick={() => setEnvFilter(env)}
                   className={`px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition cursor-pointer ${
                     envFilter === env
-                      ? 'bg-yellow-400 text-slate-950 shadow-sm'
+                      ? 'bg-yellow-400 text-slate-950 shadow-sm font-bold'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -230,7 +256,7 @@ export default function ExceptionLogsPage() {
               onClick={() => setStatusFilter('unresolved')}
               className={`px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'unresolved'
-                  ? 'bg-red-500/15 text-red-400 border border-red-500/30'
+                  ? 'bg-red-500/15 text-red-400 border border-red-500/30 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
               }`}
             >
@@ -244,7 +270,7 @@ export default function ExceptionLogsPage() {
               onClick={() => setStatusFilter('resolved')}
               className={`px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
                 statusFilter === 'resolved'
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
               }`}
             >
@@ -258,7 +284,7 @@ export default function ExceptionLogsPage() {
               onClick={() => setStatusFilter('all')}
               className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer ${
                 statusFilter === 'all'
-                  ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/30'
+                  ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
               }`}
             >
@@ -269,32 +295,40 @@ export default function ExceptionLogsPage() {
         </div>
 
         {/* Exception Table / Feed */}
-        <div className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           {loading ? (
-            /* Shimmer Skeleton Loader */
-            <div className="p-6 space-y-4 animate-pulse">
-              {[...Array(5)].map((_, idx) => (
-                <div key={idx} className="h-14 bg-[#05070E] border border-slate-800/80 rounded-2xl" />
-              ))}
+            <div className="p-20 flex flex-col items-center justify-center space-y-4 animate-in fade-in">
+              <div className="relative animate-pulse">
+                <SnapTraceLogo size="lg" showText={false} />
+              </div>
+              <p className="text-xs font-mono text-slate-500 tracking-widest uppercase">Streaming Exceptions...</p>
             </div>
           ) : filteredLogs.length === 0 ? (
-            <div className="p-12 text-center text-slate-500 text-xs font-mono space-y-2">
-              <div className="text-2xl">🎉</div>
-              <p className="font-semibold text-slate-400">
+            <div className="p-16 text-center text-slate-500 text-xs font-mono space-y-3">
+              <div className="text-3xl">🎉</div>
+              <p className="font-semibold text-slate-300 text-sm">
                 {logs.length === 0 ? 'No exceptions captured yet.' : 'No matching issues found for this filter.'}
               </p>
-              <p className="text-[11px] text-slate-600">Your application is currently error-free!</p>
+              <p className="text-slate-500">Your application runtime is running smoothly.</p>
+              {isUrlFiltered && (
+                <button
+                  onClick={handleClearUrlFilter}
+                  className="mt-2 px-4 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  View All Projects Instead →
+                </button>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-slate-800/90 bg-[#060911] text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
-                    <th className="py-3.5 px-4 w-12 text-center">Status</th>
-                    <th className="py-3.5 px-4">Timestamp</th>
-                    <th className="py-3.5 px-4">Exception Message</th>
-                    <th className="py-3.5 px-4">Environment</th>
-                    <th className="py-3.5 px-4 text-right">Actions</th>
+                    <th className="py-4 px-4 w-12 text-center">Status</th>
+                    <th className="py-4 px-4">Timestamp</th>
+                    <th className="py-4 px-4">Exception Message</th>
+                    <th className="py-4 px-4">Environment</th>
+                    <th className="py-4 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/70 text-slate-200">
@@ -304,14 +338,14 @@ export default function ExceptionLogsPage() {
                       <tr
                         key={log.id}
                         className={`hover:bg-slate-800/40 transition group ${
-                          isResolved ? 'opacity-60 bg-[#05070E]/50' : ''
+                          isResolved ? 'opacity-50 bg-[#05070E]/50' : ''
                         }`}
                       >
-                        {/* Status Checkbox Button */}
-                        <td className="py-3.5 px-4 text-center">
+                        {/* Status Checkbox */}
+                        <td className="py-4 px-4 text-center">
                           <button
                             onClick={() => handleToggleStatus(log.id, log.status)}
-                            className={`w-5 h-5 rounded-md border flex items-center justify-center text-[10px] font-bold transition cursor-pointer ${
+                            className={`w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] font-bold transition cursor-pointer ${
                               isResolved
                                 ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
                                 : 'border-slate-700 hover:border-emerald-400 hover:text-emerald-400 text-transparent'
@@ -323,19 +357,19 @@ export default function ExceptionLogsPage() {
                         </td>
 
                         {/* Timestamp */}
-                        <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">
+                        <td className="py-4 px-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">
                           {new Date(log.created_at).toLocaleString()}
                         </td>
 
                         {/* Message */}
-                        <td className="py-3.5 px-4 font-mono font-medium truncate max-w-md">
+                        <td className="py-4 px-4 font-mono font-medium truncate max-w-md">
                           <span className={isResolved ? 'line-through text-slate-400' : 'text-slate-100'}>
                             {log.message || log.stack || 'Unknown exception'}
                           </span>
                         </td>
 
                         {/* Environment Badge */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                               log.environment === 'production'
@@ -348,16 +382,16 @@ export default function ExceptionLogsPage() {
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3.5 px-4 text-right space-x-2 whitespace-nowrap">
+                        <td className="py-4 px-4 text-right space-x-2 whitespace-nowrap">
                           <button
                             onClick={() => setSelectedLog(log)}
-                            className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition cursor-pointer"
+                            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer"
                           >
                             Inspect
                           </button>
                           <button
                             onClick={() => handleDeleteLog(log.id)}
-                            className="px-2.5 py-1 bg-red-950/40 hover:bg-red-900/60 text-xs text-red-400 font-medium rounded-lg border border-red-800/50 transition cursor-pointer"
+                            className="px-2.5 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-xs text-red-400 font-medium rounded-xl border border-red-800/50 transition cursor-pointer"
                           >
                             Delete
                           </button>

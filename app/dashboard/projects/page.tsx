@@ -65,11 +65,9 @@ export default function ProjectsPage() {
     fetchProjects();
   }, [fetchProjects]);
 
-  // Jump to filtered errors when event badge is clicked
+  // Navigate with temporary URL filter (does not permanently lock global context)
   const handleJumpToErrors = (projectId: string) => {
-    localStorage.setItem('snaptrace_selected_project_id', projectId);
-    window.dispatchEvent(new Event('snaptrace_project_change'));
-    router.push('/dashboard/errors');
+    router.push(`/dashboard/errors?projectId=${projectId}`);
   };
 
   const generateApiKey = () => {
@@ -132,7 +130,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Page Header */}
@@ -159,7 +157,6 @@ export default function ProjectsPage() {
         </div>
 
         {loading ? (
-          /* Custom SnapTrace Brand Pulse Loader */
           <div className="p-20 flex flex-col items-center justify-center space-y-4 animate-in fade-in">
             <div className="relative animate-pulse">
               <SnapTraceLogo size="lg" showText={false} />
@@ -187,7 +184,7 @@ export default function ProjectsPage() {
             {projects.map((project) => (
               <div
                 key={project.id}
-                className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 hover:border-slate-700/90 rounded-3xl p-6 space-y-5 shadow-2xl transition group"
+                className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 hover:border-slate-700/90 rounded-3xl p-6 space-y-5 shadow-2xl transition-all duration-200 hover:-translate-y-0.5 group"
               >
                 {/* Project Header Row */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
@@ -198,10 +195,10 @@ export default function ProjectsPage() {
                         {project.name}
                       </h2>
                       
-                      {/* Clickable Event Counter Badge */}
+                      {/* Clickable Event Counter Badge (Takes to ?projectId=...) */}
                       <button
                         onClick={() => handleJumpToErrors(project.id)}
-                        className="text-[11px] font-mono px-3 py-0.5 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 transition flex items-center gap-1 cursor-pointer"
+                        className="text-[11px] font-mono px-3 py-0.5 rounded-full bg-yellow-400/10 hover:bg-yellow-400/25 text-yellow-300 border border-yellow-400/30 transition flex items-center gap-1.5 cursor-pointer shadow-sm"
                         title="Click to view all live exceptions for this project"
                       >
                         <span>{project.error_count} {project.error_count === 1 ? 'event' : 'events'}</span>
