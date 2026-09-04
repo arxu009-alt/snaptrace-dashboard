@@ -56,7 +56,6 @@ export default function ExceptionLogsPage() {
       return;
     }
 
-    // Check if filtered by URL parameter or global dropdown
     const targetProjectId = urlProjectId || (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all');
     const isAll = !targetProjectId || targetProjectId === 'all';
     const userProjectIds = userProjects.map((p) => p.id);
@@ -91,7 +90,6 @@ export default function ExceptionLogsPage() {
     loadLogs();
     window.addEventListener('snaptrace_project_change', loadLogs);
 
-    // Realtime WebSocket Listener
     const channel = supabase
       .channel('realtime-errors-feed')
       .on(
@@ -116,7 +114,6 @@ export default function ExceptionLogsPage() {
     };
   }, [loadLogs, urlProjectId]);
 
-  // Clear specific URL filter back to global view
   const handleClearUrlFilter = () => {
     router.push('/dashboard/errors');
   };
@@ -180,7 +177,6 @@ export default function ExceptionLogsPage() {
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5 flex-wrap">
               <span>Exception Logs Stream</span>
 
-              {/* Filter Tag or Clear Badge */}
               {isUrlFiltered ? (
                 <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 text-xs font-mono font-bold animate-in zoom-in-95">
                   <span>📁 {currentProjectName}</span>
@@ -294,7 +290,7 @@ export default function ExceptionLogsPage() {
 
         </div>
 
-        {/* Exception Table / Feed */}
+        {/* Exception Table with Wide Columns (No Button Clipping) */}
         <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           {loading ? (
             <div className="p-20 flex flex-col items-center justify-center space-y-4 animate-in fade-in">
@@ -321,14 +317,14 @@ export default function ExceptionLogsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full min-w-[780px] text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-slate-800/90 bg-[#060911] text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
                     <th className="py-4 px-4 w-12 text-center">Status</th>
-                    <th className="py-4 px-4">Timestamp</th>
+                    <th className="py-4 px-4 w-44">Timestamp</th>
                     <th className="py-4 px-4">Exception Message</th>
-                    <th className="py-4 px-4">Environment</th>
-                    <th className="py-4 px-4 text-right">Actions</th>
+                    <th className="py-4 px-4 w-32">Environment</th>
+                    <th className="py-4 px-6 w-44 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/70 text-slate-200">
@@ -362,8 +358,8 @@ export default function ExceptionLogsPage() {
                         </td>
 
                         {/* Message */}
-                        <td className="py-4 px-4 font-mono font-medium truncate max-w-md">
-                          <span className={isResolved ? 'line-through text-slate-400' : 'text-slate-100'}>
+                        <td className="py-4 px-4 font-mono font-medium truncate max-w-xs md:max-w-sm">
+                          <span className={isResolved ? 'line-through text-slate-400' : 'text-slate-100 font-semibold'}>
                             {log.message || log.stack || 'Unknown exception'}
                           </span>
                         </td>
@@ -371,7 +367,7 @@ export default function ExceptionLogsPage() {
                         {/* Environment Badge */}
                         <td className="py-4 px-4 whitespace-nowrap">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
                               log.environment === 'production'
                                 ? 'bg-red-500/10 text-red-400 border border-red-500/20'
                                 : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
@@ -381,8 +377,8 @@ export default function ExceptionLogsPage() {
                           </span>
                         </td>
 
-                        {/* Actions */}
-                        <td className="py-4 px-4 text-right space-x-2 whitespace-nowrap">
+                        {/* Actions (Inspect & Delete fully spaced) */}
+                        <td className="py-4 px-6 text-right whitespace-nowrap space-x-2">
                           <button
                             onClick={() => setSelectedLog(log)}
                             className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer"

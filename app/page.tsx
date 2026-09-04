@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
+import RevealOnScroll from '@/components/RevealOnScroll';
 
 export const dynamic = 'force-dynamic';
 
@@ -144,15 +145,12 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       {/* 1. Sentry-Style Sticky Navigation Bar */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/85 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
           <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300">
-            <a href="#features" className="hover:text-yellow-400 transition flex items-center gap-1">
-              Features <span className="text-[10px] text-slate-500">▾</span>
-            </a>
+            <a href="#features" className="hover:text-yellow-400 transition">Features</a>
             <a href="#quickstart" className="hover:text-yellow-400 transition">Integrations</a>
             <a href="#ai-copilot" className="hover:text-yellow-400 transition flex items-center gap-1.5 text-purple-300 hover:text-purple-200">
               <span>✨</span> AI Copilot
@@ -179,11 +177,11 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 2. Hero Section */}
+      {/* 2. Hero Section with Glow Animation */}
       <section className="relative pt-24 pb-32 overflow-hidden">
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none" />
+        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none animate-pulse" />
 
-        <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10">
+        <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10 animate-in fade-in duration-500">
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090D16] border border-slate-800 text-xs font-semibold text-yellow-300 shadow-xl shadow-yellow-500/5">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -224,9 +222,9 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 3. Interactive Multi-Stack Quickstart Terminal */}
-      <section id="quickstart" className="max-w-4xl mx-auto px-6 pb-28">
-        <div className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+      {/* 3. Interactive Quickstart Terminal (Animated Scroll Reveal) */}
+      <RevealOnScroll className="max-w-4xl mx-auto px-6 pb-28" delay={100}>
+        <div id="quickstart" className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#060911] px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center space-x-2">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-2 font-mono">Quickstart:</span>
@@ -259,71 +257,73 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </pre>
           </div>
         </div>
-      </section>
+      </RevealOnScroll>
 
-      {/* 4. Core Features Deep Dive */}
+      {/* 4. Sub-5KB SDK Section (Animated Scroll Reveal) */}
       <section id="features" className="py-24 border-t border-slate-800/80 bg-[#060911]/60">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
-          
-          <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase">
-              <span>🪶</span> Performance & Core Web Vitals
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
-              An error tracker that never slows down your users
-            </h2>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Legacy APMs force your users to download massive 100KB+ bundles that delay First Contentful Paint (FCP) and hurt Google Lighthouse scores. SnapTrace is a zero-dependency script under <strong>5KB</strong> gzipped.
-            </p>
-
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs">
-                <span className="text-slate-300 font-semibold">SnapTrace JS Telemetry SDK</span>
-                <span className="text-emerald-400 font-mono font-bold">&lt; 5 KB</span>
-              </div>
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs opacity-70">
-                <span className="text-slate-400">Honeybadger Client</span>
-                <span className="text-slate-400 font-mono font-bold">~35 KB</span>
-              </div>
-              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs opacity-50">
-                <span className="text-slate-500">Sentry Browser SDK</span>
-                <span className="text-red-400 font-mono font-bold">100+ KB</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-6 bg-[#090D16] border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Google Lighthouse Impact</span>
-              <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
-                Score: 100/100
-              </span>
-            </div>
+        <div className="max-w-6xl mx-auto px-6">
+          <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
             
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-4 rounded-2xl bg-[#05070E] border border-slate-800 space-y-1">
-                <div className="text-2xl font-black text-emerald-400 font-mono">0.0ms</div>
-                <p className="text-[11px] text-slate-400">Main Thread Blocking Time</p>
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase">
+                <span>🪶</span> Performance & Core Web Vitals
               </div>
-              <div className="p-4 rounded-2xl bg-[#05070E] border border-slate-800 space-y-1">
-                <div className="text-2xl font-black text-emerald-400 font-mono">3.4 KB</div>
-                <p className="text-[11px] text-slate-400">Total Gzipped Size</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+                An error tracker that never slows down your users
+              </h2>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Legacy APMs force your users to download massive 100KB+ bundles that delay First Contentful Paint (FCP) and hurt Google Lighthouse scores. SnapTrace is a zero-dependency script under <strong>5KB</strong> gzipped.
+              </p>
+
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs">
+                  <span className="text-slate-300 font-semibold">SnapTrace JS Telemetry SDK</span>
+                  <span className="text-emerald-400 font-mono font-bold">&lt; 5 KB</span>
+                </div>
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs opacity-70">
+                  <span className="text-slate-400">Honeybadger Client</span>
+                  <span className="text-slate-400 font-mono font-bold">~35 KB</span>
+                </div>
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs opacity-50">
+                  <span className="text-slate-500">Sentry Browser SDK</span>
+                  <span className="text-red-400 font-mono font-bold">100+ KB</span>
+                </div>
               </div>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed italic border-t border-slate-800/80 pt-4">
-              "We dropped Sentry for SnapTrace and our Next.js frontend load time dropped by 240ms on mobile devices."
-            </p>
-          </div>
+            <div className="lg:col-span-6 bg-[#090D16] border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Google Lighthouse Impact</span>
+                <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20">
+                  Score: 100/100
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="p-4 rounded-2xl bg-[#05070E] border border-slate-800 space-y-1">
+                  <div className="text-2xl font-black text-emerald-400 font-mono">0.0ms</div>
+                  <p className="text-[11px] text-slate-400">Main Thread Blocking Time</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#05070E] border border-slate-800 space-y-1">
+                  <div className="text-2xl font-black text-emerald-400 font-mono">3.4 KB</div>
+                  <p className="text-[11px] text-slate-400">Total Gzipped Size</p>
+                </div>
+              </div>
 
+              <p className="text-xs text-slate-400 leading-relaxed italic border-t border-slate-800/80 pt-4">
+                "We dropped Sentry for SnapTrace and our Next.js frontend load time dropped by 240ms on mobile devices."
+              </p>
+            </div>
+
+          </RevealOnScroll>
         </div>
       </section>
 
-      {/* 5. BYOK AI Section with Cursor & Claude Badges */}
+      {/* 5. BYOK AI Section (Animated Scroll Reveal) */}
       <section id="ai-copilot" className="py-24 border-t border-slate-800/80 relative">
         <div className="max-w-6xl mx-auto px-6 space-y-12">
           
-          <div className="text-center space-y-4 max-w-2xl mx-auto">
+          <RevealOnScroll className="text-center space-y-4 max-w-2xl mx-auto">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase">
               <span>🤖</span> BYOK (Bring Your Own Key) AI Architecture
             </div>
@@ -352,9 +352,9 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 <span className="text-xs font-bold text-slate-200">OpenAI GPT-4o</span>
               </div>
             </div>
-          </div>
+          </RevealOnScroll>
 
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-4xl mx-auto space-y-6">
+          <RevealOnScroll className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-4xl mx-auto space-y-6" delay={150}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-4">
               <div>
                 <span className="text-xs font-bold text-red-400 font-mono block">CRASH: ReferenceError: Connection pool exhausted</span>
@@ -385,110 +385,114 @@ try {
 }`}
               </pre>
             </div>
-          </div>
+          </RevealOnScroll>
 
         </div>
       </section>
 
-      {/* 6. Noise Deduplication Section */}
+      {/* 6. Noise Deduplication Section (Animated Scroll Reveal) */}
       <section id="dedup" className="py-24 border-t border-slate-800/80 bg-[#060911]/60">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
-          
-          <div className="lg:col-span-6 bg-[#090D16] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 order-2 lg:order-1">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-              <span className="text-xs font-bold font-mono text-slate-400 uppercase">Live Discord Alert Dispatch</span>
-              <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
-                Deduplication Active
-              </span>
-            </div>
-
-            <div className="bg-[#1e1f22] rounded-2xl p-4 border-l-4 border-red-500 space-y-2 text-xs">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-white">SnapTrace Engine</span>
-                <span className="px-1.5 py-0.5 bg-[#5865f2] text-white text-[9px] font-bold rounded">BOT</span>
+        <div className="max-w-6xl mx-auto px-6">
+          <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
+            
+            <div className="lg:col-span-6 bg-[#090D16] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 order-2 lg:order-1">
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                <span className="text-xs font-bold font-mono text-slate-400 uppercase">Live Discord Alert Dispatch</span>
+                <span className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
+                  Deduplication Active
+                </span>
               </div>
-              <p className="text-red-300 font-bold">
-                🚨 CheckoutModuleError: Gateway Timeout <span className="text-yellow-300 bg-yellow-400/10 px-1.5 py-0.5 rounded border border-yellow-400/30">(Occurred 542 times)</span>
+
+              <div className="bg-[#1e1f22] rounded-2xl p-4 border-l-4 border-red-500 space-y-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-white">SnapTrace Engine</span>
+                  <span className="px-1.5 py-0.5 bg-[#5865f2] text-white text-[9px] font-bold rounded">BOT</span>
+                </div>
+                <p className="text-red-300 font-bold">
+                  🚨 CheckoutModuleError: Gateway Timeout <span className="text-yellow-300 bg-yellow-400/10 px-1.5 py-0.5 rounded border border-yellow-400/30">(Occurred 542 times)</span>
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-400 pt-2 border-t border-slate-700/60">
+                  <div>Environment: <strong className="text-white">production</strong></div>
+                  <div>Occurrences: <strong className="text-yellow-400">542</strong></div>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-400">
+                542 cascading errors condensed into <strong>1 notification</strong> over a 60-second window.
               </p>
-              <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-400 pt-2 border-t border-slate-700/60">
-                <div>Environment: <strong className="text-white">production</strong></div>
-                <div>Occurrences: <strong className="text-yellow-400">542</strong></div>
+            </div>
+
+            <div className="lg:col-span-6 space-y-6 order-1 lg:order-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase">
+                <span>🔇</span> Zero Alert Fatigue
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+                Stop waking up to 10,000 duplicate email alerts
+              </h2>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                When a database drops or a React render loop breaks, legacy tools flood your inbox until you are forced to mute the channel. SnapTrace uses deterministic <strong>SHA-256 fingerprinting</strong> to group identical crashes and send one clean summary ping.
+              </p>
+
+              <ul className="space-y-2.5 text-xs text-slate-300">
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 60-second duplicate suppression window</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Automatic summary occurrence counter tags (<code className="text-yellow-300 font-mono">[x542]</code>)</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Protects Gmail and Discord rate-limit thresholds</li>
+              </ul>
+            </div>
+
+          </RevealOnScroll>
+        </div>
+      </section>
+
+      {/* 7. Client-Side PII Firewall (Animated Scroll Reveal) */}
+      <section id="privacy" className="py-24 border-t border-slate-800/80">
+        <div className="max-w-6xl mx-auto px-6">
+          <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
+            
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase">
+                <span>🔒</span> GDPR & HIPAA Compliance
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+                Sensitive data never leaves your user's browser
+              </h2>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Accidentally logging passwords, authentication tokens, or credit cards into a third-party server creates serious legal risks. SnapTrace sanitizes sensitive strings <strong>on the client device</strong> before anything is transmitted over HTTP.
+              </p>
+            </div>
+
+            <div className="lg:col-span-6 bg-[#090D16] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider font-mono">1. Raw Browser Exception (Before)</span>
+                <pre className="p-3 bg-[#05070E] rounded-xl border border-red-500/30 text-red-300 font-mono text-xs overflow-x-auto">
+{`Failed auth for user@company.com with token=secret_token_12345`}
+                </pre>
+              </div>
+
+              <div className="text-center text-xs text-slate-500 font-mono">⬇️ SnapTrace Client-Side Regex Firewall ⬇️</div>
+
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono">2. Ingested Safe Telemetry (After)</span>
+                <pre className="p-3 bg-[#05070E] rounded-xl border border-emerald-500/30 text-emerald-300 font-mono text-xs overflow-x-auto">
+{`Failed auth for [REDACTED_EMAIL] with token=[REDACTED]`}
+                </pre>
               </div>
             </div>
 
-            <p className="text-[11px] text-slate-400">
-              542 cascading errors condensed into <strong>1 notification</strong> over a 60-second window.
-            </p>
-          </div>
-
-          <div className="lg:col-span-6 space-y-6 order-1 lg:order-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase">
-              <span>🔇</span> Zero Alert Fatigue
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
-              Stop waking up to 10,000 duplicate email alerts
-            </h2>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              When a database drops or a React render loop breaks, legacy tools flood your inbox until you are forced to mute the channel. SnapTrace uses deterministic <strong>SHA-256 fingerprinting</strong> to group identical crashes and send one clean summary ping.
-            </p>
-
-            <ul className="space-y-2.5 text-xs text-slate-300">
-              <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 60-second duplicate suppression window</li>
-              <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Automatic summary occurrence counter tags (<code className="text-yellow-300 font-mono">[x542]</code>)</li>
-              <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Protects Gmail and Discord rate-limit thresholds</li>
-            </ul>
-          </div>
-
+          </RevealOnScroll>
         </div>
       </section>
 
-      {/* 7. Client-Side PII Firewall */}
-      <section id="privacy" className="py-24 border-t border-slate-800/80">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
-          
-          <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase">
-              <span>🔒</span> GDPR & HIPAA Compliance
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
-              Sensitive data never leaves your user's browser
-            </h2>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Accidentally logging passwords, authentication tokens, or credit cards into a third-party server creates serious legal risks. SnapTrace sanitizes sensitive strings <strong>on the client device</strong> before anything is transmitted over HTTP.
-            </p>
-          </div>
-
-          <div className="lg:col-span-6 bg-[#090D16] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4">
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider font-mono">1. Raw Browser Exception (Before)</span>
-              <pre className="p-3 bg-[#05070E] rounded-xl border border-red-500/30 text-red-300 font-mono text-xs overflow-x-auto">
-{`Failed auth for user@company.com with token=secret_token_12345`}
-              </pre>
-            </div>
-
-            <div className="text-center text-xs text-slate-500 font-mono">⬇️ SnapTrace Client-Side Regex Firewall ⬇️</div>
-
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider font-mono">2. Ingested Safe Telemetry (After)</span>
-              <pre className="p-3 bg-[#05070E] rounded-xl border border-emerald-500/30 text-emerald-300 font-mono text-xs overflow-x-auto">
-{`Failed auth for [REDACTED_EMAIL] with token=[REDACTED]`}
-              </pre>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 8. Comparison Table */}
+      {/* 8. Comparison Table (Animated Scroll Reveal) */}
       <section id="comparison" className="max-w-5xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
-        <div className="text-center space-y-3">
+        <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Why Developers Choose SnapTrace</h2>
           <p className="text-sm text-slate-400 max-w-xl mx-auto">
             Built to replace bloated, expensive legacy APMs.
           </p>
-        </div>
+        </RevealOnScroll>
 
-        <div className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-x-auto shadow-2xl">
+        <RevealOnScroll className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-x-auto shadow-2xl" delay={150}>
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-800 bg-[#060911] text-slate-400 font-semibold uppercase">
@@ -531,12 +535,12 @@ try {
               </tr>
             </tbody>
           </table>
-        </div>
+        </RevealOnScroll>
       </section>
 
-      {/* 9. REFINED 3-TIER PRICING SECTION */}
+      {/* 9. 3-Tier Pricing Section (Animated Scroll Reveal) */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
-        <div className="text-center space-y-3">
+        <RevealOnScroll className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase">
             <span>💎</span> Predictable Monthly Recurring Plans
           </div>
@@ -544,12 +548,12 @@ try {
           <p className="text-sm text-slate-400 max-w-xl mx-auto">
             Zero surprise overage bills. Generous capacity for developers, indie hackers, and growing teams.
           </p>
-        </div>
+        </RevealOnScroll>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
+        <RevealOnScroll className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch" delay={150}>
           
           {/* Tier 1: Developer Free */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between">
+          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
             <div className="space-y-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Developer Free</span>
@@ -575,8 +579,8 @@ try {
             </Link>
           </div>
 
-          {/* Tier 2: Starter Pro ($9/mo - The Sweet Spot) */}
-          <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2">
+          {/* Tier 2: Starter Pro ($9/mo) */}
+          <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
             <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg">
               ★ Most Popular
             </span>
@@ -607,7 +611,7 @@ try {
           </div>
 
           {/* Tier 3: Team Scale ($29/mo) */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between">
+          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
             <div className="space-y-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
@@ -633,17 +637,17 @@ try {
             </Link>
           </div>
 
-        </div>
+        </RevealOnScroll>
       </section>
 
-      {/* 10. FAQ Section */}
+      {/* 10. FAQ Section (Animated Scroll Reveal) */}
       <section id="faq" className="max-w-4xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-10">
-        <div className="text-center space-y-3">
+        <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
           <p className="text-sm text-slate-400">Everything you need to know about SnapTrace.</p>
-        </div>
+        </RevealOnScroll>
 
-        <div className="space-y-3">
+        <RevealOnScroll className="space-y-3" delay={150}>
           {faqs.map((faq, idx) => {
             const isOpen = activeFaq === idx;
             return (
@@ -666,12 +670,12 @@ try {
               </div>
             );
           })}
-        </div>
+        </RevealOnScroll>
       </section>
 
-      {/* 11. Footer */}
+      {/* 11. Footer (Animated Scroll Reveal) */}
       <footer className="border-t border-slate-800/80 bg-[#060911] py-20 text-center space-y-6 relative overflow-hidden">
-        <div className="max-w-2xl mx-auto px-6 space-y-6 relative z-10">
+        <RevealOnScroll className="max-w-2xl mx-auto px-6 space-y-6 relative z-10">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
             Ready to catch bugs in a snap?
           </h2>
@@ -694,7 +698,7 @@ try {
               <Link href="/terms" className="hover:text-yellow-400 transition">Terms of Service</Link>
             </div>
           </div>
-        </div>
+        </RevealOnScroll>
       </footer>
 
     </div>
