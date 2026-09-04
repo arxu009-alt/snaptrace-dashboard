@@ -1,60 +1,72 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { useEffect, useState, useCallback } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface Project {
   id: string;
   name: string;
   api_key: string;
   created_at: string;
+  error_count?: number;
 }
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newProjectName, setNewProjectName] = useState("");
+  const [newProjectName, setNewProjectName] = useState('');
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
- const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
-    
-    // 1. Find out exactly who is logged in right now
+
     const { data: { user } } = await supabase.auth.getUser();
-    
     if (!user) {
       setLoading(false);
       return;
     }
 
-    // 2. ONLY fetch projects that belong to this specific user
-    const { data, error } = await supabase
-      .from("projects")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+    // Fetch user projects
+    const { data: projectList, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setProjects(data);
+    if (!error && projectList) {
+      // Fetch error counts per project
+      const { data: errors } = await supabase
+        .from('errors')
+        .select('project_id');
+
+      const counts: Record<string, number> = {};
+      if (errors) {
+        errors.forEach((err) => {
+          counts[err.project_id] = (counts[err.project_id] || 0) + 1;
+        });
+      }
+
+      const formatted = projectList.map((p) => ({
+        ...p,
+        error_count: counts[p.id] || 0,
+      }));
+
+      setProjects(formatted);
     }
+
     setLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const generateApiKey = () => {
     const randomHex = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
     return `sk_live_${randomHex}`;
   };
 
@@ -63,9 +75,7 @@ export default function ProjectsPage() {
     if (!newProjectName.trim()) return;
 
     setCreating(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       setCreating(false);
@@ -75,7 +85,7 @@ export default function ProjectsPage() {
     const apiKey = generateApiKey();
 
     const { data, error } = await supabase
-      .from("projects")
+      .from('projects')
       .insert([
         {
           name: newProjectName.trim(),
@@ -85,20 +95,26 @@ export default function ProjectsPage() {
       ])
       .select();
 
-    if (!error && data) {
-      setProjects([data[0], ...projects]);
-      setNewProjectName("");
+    if (!error && data && data.length > 0) {
+      setProjects([{ ...data[0], error_count: 0 }, ...projects]);
+      setNewProjectName('');
       setIsModalOpen(false);
+
+      // Notify ProjectSwitcher dropdown across dashboard
+      window.dispatchEvent(new Event('snaptrace_project_change'));
     }
     setCreating(false);
   };
 
   const handleDeleteProject = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this project? All associated logs will be removed.")) return;
+    if (!confirm('Are you sure you want to delete this project? All associated crash logs will be permanently removed.')) {
+      return;
+    }
 
-    const { error } = await supabase.from("projects").delete().eq("id", id);
+    const { error } = await supabase.from('projects').delete().eq('id', id);
     if (!error) {
       setProjects(projects.filter((p) => p.id !== id));
+      window.dispatchEvent(new Event('snaptrace_project_change'));
     }
   };
 
@@ -109,122 +125,172 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto text-white">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Project API Keys</h1>
-          <p className="text-gray-400 text-sm">
-            Manage integration credentials and project identifiers for SnapTrace.
-          </p>
-        </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded-lg transition-colors text-sm"
-        >
-          + Create New Project
-        </button>
-      </div>
+    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-5 gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
+              <span>Projects & Ingestion Tokens</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 font-mono font-bold">
+                {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
+              </span>
+            </h1>
+            <p className="text-xs text-slate-400">
+              Manage your project credentials, API keys, and individual ingestion endpoints.
+            </p>
+          </div>
 
-      {loading ? (
-        <div className="text-gray-400 text-sm">Loading projects...</div>
-      ) : projects.length === 0 ? (
-        <div className="bg-[#111827] border border-gray-800 rounded-xl p-8 text-center text-gray-400">
-          No projects found. Click "+ Create New Project" to generate your first API key.
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-1.5 self-start sm:self-auto"
+          >
+            <span>+</span>
+            <span>Create New Project</span>
+          </button>
         </div>
-      ) : (
-        <div className="space-y-6">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="bg-[#111827] border border-gray-800 rounded-xl p-6 relative shadow-sm"
+
+        {loading ? (
+          /* Shimmer Skeleton Loader */
+          <div className="space-y-4 animate-pulse">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-44 bg-[#090D16] border border-slate-800/80 rounded-3xl p-6" />
+            ))}
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-12 text-center space-y-4 shadow-xl">
+            <div className="text-3xl">📁</div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-white">No Projects Found</h3>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                Create your first project to generate an API key and start ingesting telemetry.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-5 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-white">{project.name}</h2>
-                  <p className="text-xs text-gray-500">ID: {project.id}</p>
+              + Create First Project
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {projects.map((project) => (
+              <div
+                key={project.id}
+                className="bg-[#090D16] border border-slate-800/90 hover:border-slate-700/90 rounded-3xl p-6 space-y-5 shadow-2xl transition group"
+              >
+                {/* Project Header Row */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-lg">📁</span>
+                      <h2 className="text-base font-bold text-white group-hover:text-yellow-400 transition">
+                        {project.name}
+                      </h2>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
+                        {project.error_count} {project.error_count === 1 ? 'event' : 'events'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-mono">
+                      Project ID: <span className="text-slate-400">{project.id}</span> • Created {new Date(project.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleDeleteProject(project.id)}
+                      className="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-semibold rounded-xl transition cursor-pointer"
+                    >
+                      Delete Project
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => handleDeleteProject(project.id)}
-                  className="text-red-400 hover:text-red-300 text-xs px-2 py-1 bg-red-950/40 border border-red-900/50 rounded"
-                >
-                  Delete Project
-                </button>
+
+                {/* API Key Box */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+                    Active Ingestion Token
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={project.api_key}
+                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-yellow-300 font-mono focus:outline-none"
+                    />
+                    <button
+                      onClick={() => copyToClipboard(project.api_key, project.id)}
+                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition min-w-[75px] cursor-pointer"
+                    >
+                      {copiedId === project.id ? '✓ Copied' : 'Copy Key'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick 1-Line Drop-in Integration Snippet */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+                    Quick JavaScript Integration Tag
+                  </label>
+                  <pre className="bg-[#05070E] border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300 font-mono overflow-x-auto leading-relaxed">
+{`<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="${project.api_key}" async></script>`}
+                  </pre>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Modal: Create New Project */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+            <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <span>⚡</span> Create New Project
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Enter a project name to generate a dedicated API key and telemetry endpoint.
+                </p>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-400 mb-1">
-                  API KEY
-                </label>
-                <div className="flex items-center gap-2">
+              <form onSubmit={handleCreateProject} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300 block">Project Name</label>
                   <input
                     type="text"
-                    readOnly
-                    value={project.api_key}
-                    className="w-full bg-[#0a0f1d] border border-gray-800 rounded-md px-3 py-2 text-sm text-gray-300 font-mono focus:outline-none"
+                    required
+                    placeholder="e.g. Next.js Web App, Payment API"
+                    value={newProjectName}
+                    onChange={(e) => setNewProjectName(e.target.value)}
+                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
                   />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
                   <button
-                    onClick={() => copyToClipboard(project.api_key, project.id)}
-                    className="bg-[#1f293d] hover:bg-[#2c3b57] text-gray-200 text-xs px-3 py-2 rounded-md font-medium min-w-[65px]"
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 text-slate-400 hover:text-white text-xs font-semibold rounded-xl transition cursor-pointer"
                   >
-                    {copiedId === project.id ? "Copied!" : "Copy"}
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creating}
+                    className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer"
+                  >
+                    {creating ? 'Generating...' : 'Create Project →'}
                   </button>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">
-                  QUICK INTEGRATION SNIPPET
-                </label>
-                <pre className="bg-[#0a0f1d] border border-gray-800 rounded-md p-3 text-xs text-purple-300 font-mono overflow-x-auto">
-{`import { initSnapTrace } from '@snaptrace/js';
-
-initSnapTrace({
-  apiKey: '${project.api_key}'
-});`}
-                </pre>
-              </div>
+              </form>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Modal for Creating New Project */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-[#111827] border border-gray-800 rounded-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-white mb-2">Create New Project</h3>
-            <p className="text-gray-400 text-xs mb-4">
-              Enter a project name to generate a dedicated API key.
-            </p>
-            <form onSubmit={handleCreateProject}>
-              <input
-                type="text"
-                required
-                placeholder="e.g. My Next.js Web App"
-                value={newProjectName}
-                onChange={(e) => setNewProjectName(e.target.value)}
-                className="w-full bg-[#0a0f1d] border border-gray-800 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500 mb-4"
-              />
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-gray-400 hover:text-white text-xs px-3 py-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={creating}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs px-4 py-2 rounded-md transition-colors"
-                >
-                  {creating ? "Creating..." : "Create Project"}
-                </button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
     </div>
   );
 }
