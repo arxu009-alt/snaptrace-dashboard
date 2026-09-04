@@ -87,7 +87,7 @@ export default function DashboardOverviewPage() {
       setDevErrors(errors.filter((e) => e.environment === 'development').length);
       setRecentErrors(errors.slice(0, 6));
 
-      // Calculate 12-slot distribution for sparkline chart
+      // 12-slot distribution for sparkline chart
       const buckets = new Array(12).fill(0);
       const now = Date.now();
       const twelveHoursMs = 12 * 60 * 60 * 1000;
@@ -153,7 +153,6 @@ export default function DashboardOverviewPage() {
         </div>
 
         {loading ? (
-          /* Shimmering Skeleton Loader */
           <div className="space-y-6 animate-pulse">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
@@ -167,7 +166,7 @@ export default function DashboardOverviewPage() {
             {/* 1. Stat Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               
-              {/* Card 1: Total */}
+              {/* Total Ingested */}
               <div className="bg-[#090D16] border border-slate-800/90 hover:border-yellow-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">Total Ingested</span>
@@ -177,7 +176,7 @@ export default function DashboardOverviewPage() {
                 <p className="text-[11px] text-slate-500">All-time captured exceptions</p>
               </div>
 
-              {/* Card 2: Production Crashes */}
+              {/* Production Crashes */}
               <div className="bg-[#090D16] border border-slate-800/90 hover:border-red-500/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-red-400 uppercase tracking-wider font-mono">Production Issues</span>
@@ -187,7 +186,7 @@ export default function DashboardOverviewPage() {
                 <p className="text-[11px] text-slate-500">Live runtime exceptions</p>
               </div>
 
-              {/* Card 3: Development Logs */}
+              {/* Development Logs */}
               <div className="bg-[#090D16] border border-slate-800/90 hover:border-amber-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">Development Logs</span>
@@ -197,7 +196,7 @@ export default function DashboardOverviewPage() {
                 <p className="text-[11px] text-slate-500">Local & staging events</p>
               </div>
 
-              {/* Card 4: Noise Window */}
+              {/* Noise Window */}
               <div className="bg-[#090D16] border border-slate-800/90 hover:border-emerald-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">Noise Firewall</span>
@@ -208,7 +207,7 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
 
-            {/* 2. Visual 12-Hour Error Velocity Graph Card */}
+            {/* 2. Visual 12-Hour Velocity Bar Chart */}
             <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
                 <div>
@@ -223,19 +222,16 @@ export default function DashboardOverviewPage() {
                 </span>
               </div>
 
-              {/* Bar Chart Visualization */}
               <div className="pt-4 pb-2">
                 <div className="h-28 flex items-end gap-2 sm:gap-3 px-2">
                   {hourlyDistribution.map((count, idx) => {
                     const heightPercent = maxBucketVal > 0 ? (count / maxBucketVal) * 100 : 0;
                     return (
                       <div key={idx} className="flex-1 flex flex-col items-center gap-2 group relative">
-                        {/* Hover Tooltip */}
                         <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-slate-700 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-xl z-20">
                           {count} {count === 1 ? 'error' : 'errors'}
                         </div>
 
-                        {/* Bar */}
                         <div className="w-full bg-slate-800/60 rounded-t-lg h-full flex items-end overflow-hidden p-0.5">
                           <div
                             style={{ height: `${Math.max(heightPercent, count > 0 ? 15 : 4)}%` }}
@@ -251,7 +247,6 @@ export default function DashboardOverviewPage() {
                   })}
                 </div>
 
-                {/* Timeline Axis Labels */}
                 <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-3 border-t border-slate-800/80 mt-2 px-2">
                   <span>12 hrs ago</span>
                   <span>6 hrs ago</span>
@@ -260,7 +255,7 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
 
-            {/* 3. Bottom Grid: Recent Exceptions & Quick Configuration */}
+            {/* 3. Bottom Grid: Recent Exceptions & Quick Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
               {/* Recent Exceptions Feed (2 Columns) */}
@@ -309,29 +304,42 @@ export default function DashboardOverviewPage() {
                 )}
               </div>
 
-              {/* Quick Shortcuts & API Key Card (1 Column) */}
+              {/* Quick Shortcuts Card (with Direct Link to /test Playground) */}
               <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="border-b border-slate-800/80 pb-3">
                     <h2 className="text-sm font-bold text-white flex items-center gap-2">
                       <span>⚡</span> Quick Actions
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Direct shortcuts to key tools</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Direct shortcuts to developer tools</p>
                   </div>
 
                   <div className="space-y-2">
+                    {/* Direct 1-Click Link to /test Playground */}
+                    <Link
+                      href="/test"
+                      className="block p-3 bg-gradient-to-r from-yellow-400/10 to-amber-500/10 hover:from-yellow-400/20 hover:to-amber-500/20 border border-yellow-400/30 rounded-xl text-xs font-bold text-yellow-300 transition flex items-center justify-between"
+                    >
+                      <span>🧪 Open Test Playground</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-400/20 text-yellow-300">
+                        Live Demo →
+                      </span>
+                    </Link>
+
                     <Link
                       href="/dashboard/integrations"
                       className="block p-3 bg-[#05070E] hover:bg-slate-800/50 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-200 transition"
                     >
                       ⚡ Multi-Language SDK Snippets
                     </Link>
+
                     <Link
                       href="/dashboard/settings"
                       className="block p-3 bg-[#05070E] hover:bg-slate-800/50 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-200 transition"
                     >
                       🤖 Configure BYOK AI Copilot
                     </Link>
+
                     <Link
                       href="/dashboard/projects"
                       className="block p-3 bg-[#05070E] hover:bg-slate-800/50 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-200 transition"
@@ -342,8 +350,8 @@ export default function DashboardOverviewPage() {
                 </div>
 
                 <div className="pt-3 border-t border-slate-800/80 space-y-1.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
-                    Active Ingestion Token
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono block">
+                    ACTIVE INGESTION TOKEN
                   </span>
                   <code className="text-[11px] font-mono text-yellow-300 block truncate bg-[#05070E] p-2.5 rounded-xl border border-slate-800">
                     {projectKey || 'Loading...'}
