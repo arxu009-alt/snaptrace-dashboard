@@ -31,6 +31,10 @@ export default function ExceptionLogsPage() {
   const [currentProjectName, setCurrentProjectName] = useState<string>('All Projects');
   const [isUrlFiltered, setIsUrlFiltered] = useState<boolean>(false);
 
+  // Bulk Resolve Modal State
+  const [showBulkResolveModal, setShowBulkResolveModal] = useState<boolean>(false);
+  const [bulkResolving, setBulkResolving] = useState<boolean>(false);
+
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'development'>('all');
@@ -129,6 +133,35 @@ export default function ExceptionLogsPage() {
       await supabase.from('errors').update({ status: newStatus }).eq('id', id);
     } catch (e) {
       console.error('Failed to update status:', e);
+    }
+  };
+
+  // Bulk Resolve Handler
+  const handleBulkResolveConfirm = async () => {
+    const unresolvedList = logs.filter((l) => (l.status || 'unresolved') === 'unresolved');
+    if (unresolvedList.length === 0) {
+      setShowBulkResolveModal(false);
+      return;
+    }
+
+    setBulkResolving(true);
+    const unresolvedIds = unresolvedList.map((l) => l.id);
+
+    // Optimistic UI update
+    setLogs((prev) =>
+      prev.map((l) => (unresolvedIds.includes(l.id) ? { ...l, status: 'resolved' } : l))
+    );
+
+    try {
+      await supabase
+        .from('errors')
+        .update({ status: 'resolved' })
+        .in('id', unresolvedIds);
+    } catch (e) {
+      console.error('Bulk resolve failed:', e);
+    } finally {
+      setBulkResolving(false);
+      setShowBulkResolveModal(false);
     }
   };
 
@@ -246,51 +279,68 @@ export default function ExceptionLogsPage() {
 
           </div>
 
-          {/* Triage Status Tabs */}
-          <div className="flex items-center gap-2 border-t border-slate-800/80 pt-3 text-xs">
-            <button
-              onClick={() => setStatusFilter('unresolved')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                statusFilter === 'unresolved'
-                  ? 'bg-red-500/15 text-red-400 border border-red-500/30 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-              }`}
-            >
-              <span>🚨 Unresolved</span>
-              <span className="px-1.5 py-0.2 bg-red-950/60 rounded text-[10px] font-mono font-bold">
-                {unresolvedCount}
-              </span>
-            </button>
+          {/* Triage Status Tabs & Bulk Action Button */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-800/80 pt-3 text-xs">
+            
+            {/* Left Tabs */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setStatusFilter('unresolved')}
+                className={`px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === 'unresolved'
+                    ? 'bg-red-500/15 text-red-400 border border-red-500/30 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <span>🚨 Unresolved</span>
+                <span className="px-1.5 py-0.2 bg-red-950/60 rounded text-[10px] font-mono font-bold">
+                  {unresolvedCount}
+                </span>
+              </button>
 
-            <button
-              onClick={() => setStatusFilter('resolved')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                statusFilter === 'resolved'
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-              }`}
-            >
-              <span>✓ Resolved</span>
-              <span className="px-1.5 py-0.2 bg-emerald-950/60 rounded text-[10px] font-mono font-bold">
-                {resolvedCount}
-              </span>
-            </button>
+              <button
+                onClick={() => setStatusFilter('resolved')}
+                className={`px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  statusFilter === 'resolved'
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <span>✓ Resolved</span>
+                <span className="px-1.5 py-0.2 bg-emerald-950/60 rounded text-[10px] font-mono font-bold">
+                  {resolvedCount}
+                </span>
+              </button>
 
-            <button
-              onClick={() => setStatusFilter('all')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-                statusFilter === 'all'
-                  ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-              }`}
-            >
-              All Events ({logs.length})
-            </button>
+              <button
+                onClick={() => setStatusFilter('all')}
+                className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer ${
+                  statusFilter === 'all'
+                    ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                All Events ({logs.length})
+              </button>
+            </div>
+
+            {/* Right: Mark All as Resolved Button */}
+            {unresolvedCount > 0 && (
+              <button
+                onClick={() => setShowBulkResolveModal(true)}
+                className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shadow-sm"
+                title="Mark all unresolved errors as resolved"
+              >
+                <span>✓</span>
+                <span>Mark All as Resolved</span>
+              </button>
+            )}
+
           </div>
 
         </div>
 
-        {/* Exception Table with Wide Columns (No Button Clipping) */}
+        {/* Exception Table with Wide Columns */}
         <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           {loading ? (
             <div className="p-20 flex flex-col items-center justify-center space-y-4 animate-in fade-in">
@@ -377,7 +427,7 @@ export default function ExceptionLogsPage() {
                           </span>
                         </td>
 
-                        {/* Actions (Inspect & Delete fully spaced) */}
+                        {/* Actions */}
                         <td className="py-4 px-6 text-right whitespace-nowrap space-x-2">
                           <button
                             onClick={() => setSelectedLog(log)}
@@ -408,6 +458,52 @@ export default function ExceptionLogsPage() {
             onClose={() => setSelectedLog(null)}
             onDelete={handleDeleteLog}
           />
+        )}
+
+        {/* Bulk Mark As Resolved Confirmation Modal */}
+        {showBulkResolveModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
+            <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl shadow-yellow-500/10">
+              
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-xl">
+                  ✓
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-white tracking-tight">
+                    Mark All Exceptions as Resolved?
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    This will mark all <strong className="text-yellow-400 font-mono">{unresolvedCount}</strong> active exception(s) in <span className="text-white font-semibold">{currentProjectName}</span> as resolved.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 text-[11px] text-slate-400 font-mono">
+                💡 You can still access them anytime under the <strong>Resolved</strong> tab.
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkResolveModal(false)}
+                  disabled={bulkResolving}
+                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBulkResolveConfirm}
+                  disabled={bulkResolving}
+                  className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer"
+                >
+                  {bulkResolving ? 'Resolving All...' : 'Confirm & Mark Resolved →'}
+                </button>
+              </div>
+
+            </div>
+          </div>
         )}
 
       </div>
