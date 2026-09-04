@@ -32,7 +32,6 @@ export default function DashboardOverviewPage() {
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    setLoading(true);
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -85,7 +84,7 @@ export default function DashboardOverviewPage() {
       setDevErrors(errors.filter((e) => e.environment === 'development').length);
       setRecentErrors(errors.slice(0, 6));
 
-      // Calculate 12-hour hourly buckets with clock-skew protection
+      // Calculate 12-hour distribution with clock-skew protection
       const buckets = new Array(12).fill(0);
       const now = Date.now();
       const oneHourMs = 60 * 60 * 1000;
@@ -97,7 +96,6 @@ export default function DashboardOverviewPage() {
         if (isNaN(errTime)) return;
 
         const diff = now - errTime;
-        // Allows for a 5-minute server time difference
         if (diff > -5 * 60 * 1000 && diff < twelveHoursMs) {
           let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
           if (bucketIndex < 0) bucketIndex = 0;
@@ -120,15 +118,38 @@ export default function DashboardOverviewPage() {
   useEffect(() => {
     loadDashboardData();
     window.addEventListener('snaptrace_project_change', loadDashboardData);
+
+    // ⚡ Realtime WebSocket Listener: Instantly reload numbers & bars when a crash occurs!
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const channel = supabase
+      .channel('realtime-overview-feed')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'errors',
+        },
+        () => {
+          // Live crash received -> refresh overview metrics instantly without page reload!
+          loadDashboardData();
+        }
+      )
+      .subscribe();
+
     return () => {
       window.removeEventListener('snaptrace_project_change', loadDashboardData);
+      supabase.removeChannel(channel);
     };
   }, [loadDashboardData]);
 
   const maxBucketVal = Math.max(...hourlyDistribution, 1);
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Page Header */}
@@ -169,7 +190,6 @@ export default function DashboardOverviewPage() {
             {/* 1. Stat Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               
-              {/* Total Ingested */}
               <div className="bg-[#090D16] border border-slate-800/90 hover:border-yellow-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">Total Ingested</span>
@@ -179,7 +199,6 @@ export default function DashboardOverviewPage() {
                 <p className="text-[11px] text-slate-500">All-time captured exceptions</p>
               </div>
 
-              {/* Production Crashes */}
               <div className="bg-[#090D16] border border-slate-800/90 hover:border-red-500/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-red-400 uppercase tracking-wider font-mono">Production Issues</span>
@@ -189,7 +208,6 @@ export default function DashboardOverviewPage() {
                 <p className="text-[11px] text-slate-500">Live runtime exceptions</p>
               </div>
 
-              {/* Development Logs */}
               <div className="bg-[#090D16] border border-slate-800/90 hover:border-amber-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">Development Logs</span>
@@ -199,7 +217,6 @@ export default function DashboardOverviewPage() {
                 <p className="text-[11px] text-slate-500">Local & staging events</p>
               </div>
 
-              {/* Noise Window */}
               <div className="bg-[#090D16] border border-slate-800/90 hover:border-emerald-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">Noise Firewall</span>
@@ -231,12 +248,10 @@ export default function DashboardOverviewPage() {
                     const heightPercent = maxBucketVal > 0 ? (count / maxBucketVal) * 100 : 0;
                     return (
                       <div key={idx} className="flex-1 flex flex-col items-center gap-2 group relative">
-                        {/* Hover Tooltip */}
                         <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-yellow-400/40 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-2xl z-20">
                           {count} {count === 1 ? 'incident' : 'incidents'}
                         </div>
 
-                        {/* Bar */}
                         <div className="w-full bg-[#05070E] rounded-xl h-full flex items-end overflow-hidden p-1 border border-slate-800/80">
                           <div
                             style={{ height: `${count > 0 ? Math.max(heightPercent, 20) : 6}%` }}
@@ -294,7 +309,7 @@ export default function DashboardOverviewPage() {
                           </p>
                         </div>
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
                             err.environment === 'production'
                               ? 'bg-red-500/10 text-red-400 border border-red-500/20'
                               : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'

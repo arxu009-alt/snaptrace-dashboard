@@ -13,7 +13,7 @@ export default function SnappyAssistant() {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'snappy',
-      text: "⚡ Hi! I'm Snappy, your in-app telemetry copilot. Ask me anything about setting up SDKs, configuring Discord alerts, or using BYOK AI!",
+      text: "⚡ Hi! I'm Snappy, your in-app telemetry copilot. Ask me anything about SDK setup, Discord alerts, or BYOK AI diagnostics!",
     },
   ]);
 
@@ -47,7 +47,6 @@ export default function SnappyAssistant() {
     setMessages((prev) => [...prev, userMsg]);
     setInputQuery('');
 
-    // Answer matching
     const q = queryText.toLowerCase();
     const matched = knowledgeBase.find((item) =>
       item.keywords.some((kw) => q.includes(kw))
@@ -70,25 +69,57 @@ export default function SnappyAssistant() {
 
   return (
     <>
-      {/* 1. Floating Trigger Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* 1. High-Contrast Snappy Copilot Floating Trigger Button */}
+      <div className="fixed bottom-6 right-6 z-50 group">
+        
+        {/* Floating Tooltip Hint on Hover */}
+        <div className="absolute right-16 top-2 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none bg-[#090D16] border border-yellow-400/40 text-yellow-300 text-xs font-bold font-mono px-3 py-1.5 rounded-xl shadow-2xl whitespace-nowrap">
+          Ask Snappy AI ✨
+        </div>
+
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="h-13 w-13 rounded-full bg-gradient-to-tr from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 flex items-center justify-center font-black text-xl shadow-2xl shadow-yellow-500/30 transition transform hover:scale-105 cursor-pointer border-2 border-yellow-300/80"
-          title="Ask Snappy AI"
+          className="relative h-14 w-14 rounded-2xl bg-gradient-to-br from-[#1c2333] via-[#0e1424] to-[#060911] border-2 border-yellow-400 text-yellow-400 flex items-center justify-center font-black shadow-2xl shadow-yellow-500/25 transition-all duration-300 transform hover:scale-110 cursor-pointer"
+          title="Ask Snappy AI Copilot"
         >
-          {isOpen ? '✕' : '⚡'}
+          {/* Active Emerald Pulse Indicator */}
+          <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-[#05070E]" />
+          </span>
+
+          {isOpen ? (
+            <span className="text-white text-base">✕</span>
+          ) : (
+            /* High-Contrast AI Copilot Mascot Icon */
+            <svg
+              className="w-7 h-7 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.7)]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="10" rx="2" fill="#090D16" />
+              <circle cx="12" cy="5" r="2" fill="#FACC15" />
+              <path d="M12 7v4" />
+              <line x1="8" y1="16" x2="8" y2="16.01" strokeWidth="3" stroke="#FACC15" />
+              <line x1="16" y1="16" x2="16" y2="16.01" strokeWidth="3" stroke="#FACC15" />
+              <path d="M9 19h6" stroke="#10B981" />
+            </svg>
+          )}
         </button>
       </div>
 
       {/* 2. Snappy Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-22 right-6 z-50 w-full max-w-[360px] bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl shadow-2xl shadow-yellow-500/15 overflow-hidden flex flex-col font-sans animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed bottom-24 right-6 z-50 w-full max-w-[370px] bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl shadow-2xl shadow-yellow-500/15 overflow-hidden flex flex-col font-sans animate-in fade-in zoom-in-95 duration-150">
           
           {/* Header */}
           <div className="p-4 bg-[#060911] border-b border-slate-800 flex items-center justify-between">
             <div className="flex items-center space-x-2.5">
-              <div className="h-7 w-7 rounded-xl bg-yellow-400 text-slate-950 font-black text-xs flex items-center justify-center shadow-md">
+              <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md">
                 ⚡
               </div>
               <div>
@@ -96,19 +127,19 @@ export default function SnappyAssistant() {
                   <span>Snappy AI Copilot</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 </h3>
-                <p className="text-[10px] text-slate-400 font-mono">SnapTrace In-App Assistant</p>
+                <p className="text-[10px] text-slate-400 font-mono">SnapTrace Assistant</p>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-white text-xs bg-slate-800 px-2 py-1 rounded-lg"
+              className="text-slate-400 hover:text-white text-xs bg-slate-800 px-2 py-1 rounded-lg transition cursor-pointer"
             >
               ✕
             </button>
           </div>
 
           {/* Messages Feed */}
-          <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto text-xs leading-relaxed bg-[#05070E]/80">
+          <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto text-xs leading-relaxed bg-[#05070E]/90">
             {messages.map((m, idx) => (
               <div
                 key={idx}
@@ -117,7 +148,7 @@ export default function SnappyAssistant() {
                 <div
                   className={`p-3 rounded-2xl max-w-[85%] ${
                     m.sender === 'user'
-                      ? 'bg-yellow-400 text-slate-950 font-semibold'
+                      ? 'bg-yellow-400 text-slate-950 font-bold shadow-md'
                       : 'bg-[#090D16] border border-slate-800 text-slate-200 shadow-sm'
                   }`}
                 >
@@ -162,7 +193,7 @@ export default function SnappyAssistant() {
             />
             <button
               type="submit"
-              className="px-3 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
+              className="px-3 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
             >
               Send
             </button>
