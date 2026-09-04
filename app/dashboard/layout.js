@@ -78,10 +78,12 @@ export default function DashboardLayout({ children }) {
   if (authChecking) {
     return (
       <div className="min-h-screen bg-[#05070E] text-slate-100 flex items-center justify-center font-sans">
-        <div className="flex flex-col items-center space-y-3">
-          <div className="h-8 w-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-xs text-slate-400 font-mono tracking-wide">
-            Authenticating Session...
+        <div className="flex flex-col items-center space-y-4 animate-in fade-in">
+          <div className="relative animate-pulse">
+            <SnapTraceLogo size="lg" showText={false} />
+          </div>
+          <p className="text-xs text-slate-400 font-mono tracking-widest uppercase">
+            Verifying Session Authorization...
           </p>
         </div>
       </div>

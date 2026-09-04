@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import SnapTraceLogo from '@/components/SnapTraceLogo';
 
 export default function SettingsPage() {
   const [userEmail, setUserEmail] = useState<string>('');
@@ -153,9 +154,11 @@ export default function SettingsPage() {
         
         {/* Header */}
         <div className="border-b border-slate-800/80 pb-5">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Settings & Alert Channels</h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Configure notification webhooks, AI copilot keys, and database maintenance tools.
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
+            <span>Project Settings & Alert Channels</span>
+          </h1>
+          <p className="text-xs text-slate-400 font-mono mt-1">
+            Configure alert webhooks, BYOK AI copilot keys, and database maintenance tools.
           </p>
         </div>
 
@@ -172,42 +175,48 @@ export default function SettingsPage() {
         )}
 
         {loading ? (
-          <div className="p-12 text-center text-slate-500 text-xs font-mono">Loading settings panel...</div>
+          /* Custom SnapTrace Brand Pulse Loader */
+          <div className="p-20 flex flex-col items-center justify-center space-y-4 animate-in fade-in">
+            <div className="relative animate-pulse">
+              <SnapTraceLogo size="lg" showText={false} />
+            </div>
+            <p className="text-xs font-mono text-slate-500 tracking-widest uppercase">Loading Settings...</p>
+          </div>
         ) : (
           <div className="space-y-6">
 
             {/* 1. Account Profile Card */}
-            <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>👤</span> Account Profile
+                    <span>👤</span> Developer Account Profile
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Your authenticated developer credentials</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Your authenticated developer session</p>
                 </div>
-                <span className="px-2.5 py-1 bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 rounded-full text-[10px] font-bold uppercase">
+                <span className="px-2.5 py-1 bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 rounded-full text-[10px] font-bold uppercase font-mono">
                   Active Session
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="bg-[#05070E] p-3.5 rounded-2xl border border-slate-800/80">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold font-mono">Account Email</span>
-                  <span className="text-slate-200 font-mono mt-1 block font-semibold">{userEmail}</span>
+                <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">Account Email</span>
+                  <span className="text-slate-200 font-mono block font-semibold">{userEmail}</span>
                 </div>
-                <div className="bg-[#05070E] p-3.5 rounded-2xl border border-slate-800/80">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold font-mono">Active API Key</span>
-                  <span className="text-yellow-300 font-mono mt-1 block truncate">{apiKey || 'No key loaded'}</span>
+                <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">Active Primary API Key</span>
+                  <span className="text-yellow-300 font-mono block truncate">{apiKey || 'No key loaded'}</span>
                 </div>
               </div>
             </div>
 
             {/* 2. Notification Channels Form */}
-            <form onSubmit={handleSaveNotifications} className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
+            <form onSubmit={handleSaveNotifications} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-3">
                 <div>
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>🔔</span> Alert Channels (Discord & Email)
+                    <span>🔔</span> Notification Channels (Discord & Email)
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
                     Real-time exception alerts and deduplicated incident tags are dispatched here.
@@ -226,7 +235,7 @@ export default function SettingsPage() {
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 block">Alert Email Address</label>
+                  <label className="text-xs font-semibold text-slate-300 block font-mono">ALERT EMAIL ADDRESS</label>
                   <input
                     type="email"
                     value={email}
@@ -234,13 +243,13 @@ export default function SettingsPage() {
                     placeholder="arxu1045@gmail.com"
                     className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 transition"
                   />
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 font-mono">
                     Incoming exceptions will trigger email notifications to this recipient.
                   </p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 block">Discord Webhook URL</label>
+                  <label className="text-xs font-semibold text-slate-300 block font-mono">DISCORD WEBHOOK URL</label>
                   <input
                     type="url"
                     value={discordWebhook}
@@ -248,7 +257,7 @@ export default function SettingsPage() {
                     placeholder="https://discord.com/api/webhooks/..."
                     className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 font-mono transition"
                   />
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 font-mono">
                     Formatted embeds with occurrence counts will post directly to this Discord channel.
                   </p>
                 </div>
@@ -266,7 +275,7 @@ export default function SettingsPage() {
             </form>
 
             {/* 3. BYOK AI Copilot Card */}
-            <form onSubmit={handleSaveAiKey} className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+            <form onSubmit={handleSaveAiKey} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -277,7 +286,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <span
-                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
+                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase font-mono ${
                     aiKeySaved
                       ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                       : 'bg-slate-800 text-slate-400'
@@ -288,7 +297,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-300 block">OpenAI API Key (sk-...)</label>
+                <label className="text-xs font-semibold text-slate-300 block font-mono">OPENAI API KEY (sk-...)</label>
                 <input
                   type="password"
                   value={openaiKey}
@@ -296,7 +305,7 @@ export default function SettingsPage() {
                   placeholder="sk-proj-..."
                   className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 font-mono transition"
                 />
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-slate-500 font-mono">
                   Stored securely in your browser and used exclusively when you click "Analyze with AI".
                 </p>
               </div>
@@ -312,19 +321,19 @@ export default function SettingsPage() {
             </form>
 
             {/* 4. Database Maintenance & Purge Card */}
-            <div className="bg-[#090D16] border border-red-900/30 rounded-3xl p-6 shadow-xl space-y-4">
+            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-red-900/30 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="border-b border-slate-800/80 pb-3">
                 <h2 className="text-sm font-bold text-red-400 flex items-center gap-2">
                   <span>🧹</span> Database Maintenance & Purge
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-400 mt-0.5 font-mono">
                   Clean up old telemetry records to keep your database fast and lightweight.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
                 <div className="space-y-0.5">
-                  <p className="text-xs text-slate-200 font-semibold">Purge Resolved Errors</p>
+                  <p className="text-xs text-slate-200 font-semibold font-mono">Purge Resolved Errors</p>
                   <p className="text-[11px] text-slate-500">
                     Permanently deletes all exceptions that have been marked as resolved.
                   </p>

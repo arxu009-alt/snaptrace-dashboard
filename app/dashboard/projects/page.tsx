@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+import SnapTraceLogo from '@/components/SnapTraceLogo';
 
 interface Project {
   id: string;
@@ -13,6 +15,7 @@ interface Project {
 }
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -61,6 +64,13 @@ export default function ProjectsPage() {
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  // Jump to filtered errors when event badge is clicked
+  const handleJumpToErrors = (projectId: string) => {
+    localStorage.setItem('snaptrace_selected_project_id', projectId);
+    window.dispatchEvent(new Event('snaptrace_project_change'));
+    router.push('/dashboard/errors');
+  };
 
   const generateApiKey = () => {
     const randomHex = Array.from(crypto.getRandomValues(new Uint8Array(16)))
@@ -129,13 +139,13 @@ export default function ProjectsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-5 gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
-              <span>Projects & Ingestion Tokens</span>
+              <span>Projects & Credentials</span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 font-mono font-bold">
                 {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
               </span>
             </h1>
-            <p className="text-xs text-slate-400">
-              Manage your project credentials and copy SDK setup snippets for any programming language.
+            <p className="text-xs text-slate-400 font-mono">
+              Manage your project keys and click on any event counter to inspect live exceptions.
             </p>
           </div>
 
@@ -149,13 +159,15 @@ export default function ProjectsPage() {
         </div>
 
         {loading ? (
-          <div className="space-y-4 animate-pulse">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-44 bg-[#090D16] border border-slate-800/80 rounded-3xl p-6" />
-            ))}
+          /* Custom SnapTrace Brand Pulse Loader */
+          <div className="p-20 flex flex-col items-center justify-center space-y-4 animate-in fade-in">
+            <div className="relative animate-pulse">
+              <SnapTraceLogo size="lg" showText={false} />
+            </div>
+            <p className="text-xs font-mono text-slate-500 tracking-widest uppercase">Loading Projects...</p>
           </div>
         ) : projects.length === 0 ? (
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-12 text-center space-y-4 shadow-xl">
+          <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800 rounded-3xl p-12 text-center space-y-4 shadow-xl">
             <div className="text-3xl">📁</div>
             <div className="space-y-1">
               <h3 className="text-base font-bold text-white">No Projects Found</h3>
@@ -175,29 +187,37 @@ export default function ProjectsPage() {
             {projects.map((project) => (
               <div
                 key={project.id}
-                className="bg-[#090D16] border border-slate-800/90 hover:border-slate-700/90 rounded-3xl p-6 space-y-5 shadow-2xl transition group"
+                className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 hover:border-slate-700/90 rounded-3xl p-6 space-y-5 shadow-2xl transition group"
               >
-                {/* Project Header */}
+                {/* Project Header Row */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-3">
                       <span className="text-lg">📁</span>
                       <h2 className="text-base font-bold text-white group-hover:text-yellow-400 transition">
                         {project.name}
                       </h2>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
-                        {project.error_count} {project.error_count === 1 ? 'event' : 'events'}
-                      </span>
+                      
+                      {/* Clickable Event Counter Badge */}
+                      <button
+                        onClick={() => handleJumpToErrors(project.id)}
+                        className="text-[11px] font-mono px-3 py-0.5 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 transition flex items-center gap-1 cursor-pointer"
+                        title="Click to view all live exceptions for this project"
+                      >
+                        <span>{project.error_count} {project.error_count === 1 ? 'event' : 'events'}</span>
+                        <span className="text-[10px]">→</span>
+                      </button>
                     </div>
+
                     <p className="text-[11px] text-slate-500 font-mono">
-                      Project ID: <span className="text-slate-400">{project.id}</span> • Created {new Date(project.created_at).toLocaleDateString()}
+                      Project ID: <span className="text-slate-400 font-semibold">{project.id}</span> • Created {new Date(project.created_at).toLocaleDateString()}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleDeleteProject(project.id)}
-                      className="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-semibold rounded-xl transition cursor-pointer"
+                      className="px-3.5 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-semibold rounded-xl transition cursor-pointer"
                     >
                       Delete Project
                     </button>
@@ -206,8 +226,8 @@ export default function ProjectsPage() {
 
                 {/* API Key Box */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
-                    Active Ingestion Token
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono block">
+                    ACTIVE INGESTION TOKEN
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -218,21 +238,21 @@ export default function ProjectsPage() {
                     />
                     <button
                       onClick={() => copyToClipboard(project.api_key, project.id)}
-                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition min-w-[75px] cursor-pointer"
+                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition min-w-[80px] cursor-pointer shadow-sm"
                     >
                       {copiedId === project.id ? '✓ Copied' : 'Copy Key'}
                     </button>
                   </div>
                 </div>
 
-                {/* Multi-Language Snippet Bar */}
-                <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                {/* Multi-Language Snippet Callout */}
+                <div className="bg-[#05070E] border border-slate-800/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
                       <span>⚡</span> Multi-Language SDK Snippets Available
                     </span>
                     <p className="text-[11px] text-slate-400">
-                      Pre-configured for JavaScript, Next.js, Python, Node, PHP, Ruby, Kotlin, and cURL.
+                      Pre-configured with this key for JavaScript, Next.js, Python, Node, PHP, Ruby, Kotlin, and cURL.
                     </p>
                   </div>
                   <Link
@@ -266,7 +286,7 @@ export default function ProjectsPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Python Backend API, React Mobile App"
+                    placeholder="e.g. Python Backend API, React Web App"
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
                     className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
