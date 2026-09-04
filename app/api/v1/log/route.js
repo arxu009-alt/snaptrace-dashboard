@@ -40,12 +40,14 @@ export async function POST(req) {
       return NextResponse.json({ error: "Invalid API key or project not found" }, { status: 401 });
     }
 
+    // Resolve Discord Webhook URL
     const discordWebhookUrl =
       project.discord_webhook_url ||
       project.discord_webhook ||
       project.webhook_url ||
       project.discord_url;
 
+    // Resolve Recipient Email
     const recipientEmail =
       project.recipient_email ||
       project.alert_email ||
@@ -53,6 +55,7 @@ export async function POST(req) {
       project.email ||
       project.owner_email;
 
+    // Resolve SMTP Sender Credentials
     const smtpUser =
       process.env.OWNER_EMAIL ||
       process.env.GMAIL_USER ||
@@ -89,7 +92,10 @@ export async function POST(req) {
           }),
         });
 
-        if (discordRes.ok) discordSent = true;
+        if (discordRes.ok) {
+          discordSent = true;
+          debugLogs.push("Discord notification sent.");
+        }
       } catch (discordErr) {
         debugLogs.push(`Discord error: ${discordErr.message}`);
       }
@@ -125,37 +131,41 @@ export async function POST(req) {
           `,
         });
         emailSent = true;
+        debugLogs.push("Email notification sent.");
       } catch (emailErr) {
         debugLogs.push(`SMTP Email error: ${emailErr.message}`);
       }
     }
 
-    // 4. Save Event into Database with Explicit ISO Timestamp
-    try {
-      await supabase.from("errors").insert([
-        {
-          project_id: project.id,
-          message: message || "Unknown Error",
-          stack_trace: stackTrace || null,
-          environment: environment || "production",
-          url: url || null,
-          user_agent: userAgent || null,
-          status: "unresolved",
-          created_at: new Date().toISOString(), // <--- EXPLICIT REALTIME TIMESTAMP
-        },
-      ]);
-    } catch (dbErr) {
-      debugLogs.push(`Database insertion error: ${dbErr.message}`);
+    // 4. Save Event into Database with Explicit Error Checking
+    const { error: insertError } = await supabase.from("errors").insert([
+      {
+        project_id: project.id,
+        message: message || "Unknown Error",
+        stack_trace: stackTrace || null,
+        environment: environment || "production",
+        url: url || null,
+        user_agent: userAgent || null,
+        status: "unresolved",
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    if (insertError) {
+      console.error("Database insert error:", insertError.message);
+      debugLogs.push(`Database error: ${insertError.message}`);
+    } else {
+      debugLogs.push("Error event recorded in database.");
     }
 
     return NextResponse.json(
       {
-        success: true,
-        message: "Telemetry processed",
+        success: !insertError,
+        message: insertError ? "Telemetry alert dispatched, but database insert failed" : "Telemetry processed successfully",
         notifications: { discord: discordSent, email: emailSent },
         debugLogs,
       },
-      { status: 200 }
+      { status: insertError ? 500 : 200 }
     );
   } catch (err) {
     return NextResponse.json(
