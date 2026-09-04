@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import ProjectSwitcher from '@/components/ProjectSwitcher';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
+import FeedbackModal from '@/components/FeedbackModal';
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
@@ -14,6 +15,7 @@ export default function DashboardLayout({ children }) {
   const [userEmail, setUserEmail] = useState('');
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -101,19 +103,19 @@ export default function DashboardLayout({ children }) {
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
-        {/* Brand Header */}
+        {/* Brand Header with BETA Badge */}
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between min-w-[240px]">
           <Link href="/dashboard" className="transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
           </Link>
           {!sidebarCollapsed && (
-            <span className="text-[10px] font-bold bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full">
-              v1.0
+            <span className="text-[10px] font-black bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+              BETA
             </span>
           )}
         </div>
 
-        {/* Global Project Switcher (Hidden when collapsed) */}
+        {/* Global Project Switcher */}
         {!sidebarCollapsed && (
           <div className="px-4 py-3 border-b border-slate-800/60 bg-[#060911] min-w-[240px]">
             <ProjectSwitcher />
@@ -142,7 +144,7 @@ export default function DashboardLayout({ children }) {
           })}
         </nav>
 
-        {/* Sidebar Footer */}
+        {/* Sidebar Footer with Feedback Trigger */}
         {!sidebarCollapsed && (
           <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center justify-between min-w-[240px]">
             <span>Featherweight APM</span>
@@ -162,7 +164,7 @@ export default function DashboardLayout({ children }) {
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-yellow-400 hover:border-yellow-400/40 transition cursor-pointer"
-              title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar (Full Width View)'}
+              title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {sidebarCollapsed ? (
@@ -180,16 +182,26 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
 
-          {/* Right Area: Live Badge + User Profile Dropdown */}
-          <div className="flex items-center space-x-4">
+          {/* Right Area: Feedback Button + Live Badge + User Profile */}
+          <div className="flex items-center space-x-3 sm:space-x-4">
             
+            {/* Feedback Button */}
+            <button
+              onClick={() => setFeedbackOpen(true)}
+              className="px-3 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+              title="Give beta feedback or feature requests"
+            >
+              <span>💡</span>
+              <span className="hidden sm:inline">Feedback</span>
+            </button>
+
             {/* Live Ingestion Indicator */}
-            <div className="hidden sm:flex items-center gap-2 bg-[#05070E] border border-slate-800 px-3 py-1.5 rounded-full">
+            <div className="hidden md:flex items-center gap-2 bg-[#05070E] border border-slate-800 px-3 py-1.5 rounded-full">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <span className="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">
+              <span className="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider font-mono">
                 Ingestion Active
               </span>
             </div>
@@ -203,7 +215,7 @@ export default function DashboardLayout({ children }) {
                 <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-yellow-500/20 border border-yellow-400/40">
                   {userInitial}
                 </div>
-                <span className="hidden md:inline text-xs text-slate-300 font-medium max-w-[120px] truncate">
+                <span className="hidden lg:inline text-xs text-slate-300 font-medium max-w-[120px] truncate">
                   {userEmail.split('@')[0]}
                 </span>
                 <span className="text-slate-500 text-[10px]">▾</span>
@@ -237,7 +249,7 @@ export default function DashboardLayout({ children }) {
                     <span>Manage Projects & Keys</span>
                   </Link>
 
-                  <div className="border-t border-slate-800/80 my-1"></div>
+                  <div className="border-t border-slate-800/80 my-1" />
 
                   <button
                     onClick={handleSignOut}
@@ -257,6 +269,13 @@ export default function DashboardLayout({ children }) {
         {/* Main Route Content */}
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
+
+      {/* Global Feedback Modal */}
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        userEmail={userEmail}
+      />
 
     </div>
   );
