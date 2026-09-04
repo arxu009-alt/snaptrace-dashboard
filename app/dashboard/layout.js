@@ -8,6 +8,7 @@ import ProjectSwitcher from '@/components/ProjectSwitcher';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
 import FeedbackModal from '@/components/FeedbackModal';
 import DashboardOnboardingTour from '@/components/DashboardOnboardingTour';
+import SnappyAssistant from '@/components/SnappyAssistant';
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
@@ -105,7 +106,6 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  // Get first letter of Name or Email for avatar badge
   const userInitial = userDisplayName ? userDisplayName.charAt(0).toUpperCase() : 'D';
 
   return (
@@ -117,7 +117,7 @@ export default function DashboardLayout({ children }) {
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
-        {/* Brand Header */}
+        {/* Brand Header with BETA Badge */}
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between min-w-[240px]">
           <Link href="/dashboard" className="transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
@@ -293,7 +293,7 @@ export default function DashboardLayout({ children }) {
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
 
-      {/* Global Modals: Feedback & Spotlight Onboarding Tour */}
+      {/* Global Modals: Feedback, Spotlight Tour, & Snappy AI */}
       <FeedbackModal
         isOpen={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
@@ -301,6 +301,8 @@ export default function DashboardLayout({ children }) {
       />
 
       <DashboardOnboardingTour />
+
+      <SnappyAssistant />
 
     </div>
   );

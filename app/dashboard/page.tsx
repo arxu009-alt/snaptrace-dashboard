@@ -34,14 +34,12 @@ export default function DashboardOverviewPage() {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     setLoading(true);
 
-    // 1. Identify logged-in user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
       return;
     }
 
-    // 2. Fetch all user projects
     const { data: userProjects } = await supabase
       .from('projects')
       .select('id, name, api_key')
@@ -87,19 +85,24 @@ export default function DashboardOverviewPage() {
       setDevErrors(errors.filter((e) => e.environment === 'development').length);
       setRecentErrors(errors.slice(0, 6));
 
-      // 12-slot distribution for sparkline chart
+      // Calculate 12-hour hourly buckets with clock-skew protection
       const buckets = new Array(12).fill(0);
       const now = Date.now();
-      const twelveHoursMs = 12 * 60 * 60 * 1000;
+      const oneHourMs = 60 * 60 * 1000;
+      const twelveHoursMs = 12 * oneHourMs;
 
       errors.forEach((err) => {
+        if (!err.created_at) return;
         const errTime = new Date(err.created_at).getTime();
+        if (isNaN(errTime)) return;
+
         const diff = now - errTime;
-        if (diff >= 0 && diff < twelveHoursMs) {
-          const bucketIndex = 11 - Math.floor(diff / (60 * 60 * 1000));
-          if (bucketIndex >= 0 && bucketIndex < 12) {
-            buckets[bucketIndex] += 1;
-          }
+        // Allows for a 5-minute server time difference
+        if (diff > -5 * 60 * 1000 && diff < twelveHoursMs) {
+          let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
+          if (bucketIndex < 0) bucketIndex = 0;
+          if (bucketIndex > 11) bucketIndex = 11;
+          buckets[bucketIndex] += 1;
         }
       });
       setHourlyDistribution(buckets);
@@ -223,22 +226,24 @@ export default function DashboardOverviewPage() {
               </div>
 
               <div className="pt-4 pb-2">
-                <div className="h-28 flex items-end gap-2 sm:gap-3 px-2">
+                <div className="h-32 flex items-end gap-2 sm:gap-3 px-2">
                   {hourlyDistribution.map((count, idx) => {
                     const heightPercent = maxBucketVal > 0 ? (count / maxBucketVal) * 100 : 0;
                     return (
                       <div key={idx} className="flex-1 flex flex-col items-center gap-2 group relative">
-                        <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-slate-700 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-xl z-20">
-                          {count} {count === 1 ? 'error' : 'errors'}
+                        {/* Hover Tooltip */}
+                        <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-yellow-400/40 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-2xl z-20">
+                          {count} {count === 1 ? 'incident' : 'incidents'}
                         </div>
 
-                        <div className="w-full bg-slate-800/60 rounded-t-lg h-full flex items-end overflow-hidden p-0.5">
+                        {/* Bar */}
+                        <div className="w-full bg-[#05070E] rounded-xl h-full flex items-end overflow-hidden p-1 border border-slate-800/80">
                           <div
-                            style={{ height: `${Math.max(heightPercent, count > 0 ? 15 : 4)}%` }}
-                            className={`w-full rounded-t-md transition-all duration-500 ${
+                            style={{ height: `${count > 0 ? Math.max(heightPercent, 20) : 6}%` }}
+                            className={`w-full rounded-lg transition-all duration-700 ${
                               count > 0
-                                ? 'bg-gradient-to-t from-amber-500 to-yellow-400 shadow-lg shadow-yellow-500/20'
-                                : 'bg-slate-800/40'
+                                ? 'bg-gradient-to-t from-amber-500 via-yellow-400 to-yellow-300 shadow-lg shadow-yellow-500/30'
+                                : 'bg-slate-800/30'
                             }`}
                           />
                         </div>
@@ -250,7 +255,7 @@ export default function DashboardOverviewPage() {
                 <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-3 border-t border-slate-800/80 mt-2 px-2">
                   <span>12 hrs ago</span>
                   <span>6 hrs ago</span>
-                  <span>Current Hour (Now)</span>
+                  <span className="text-yellow-400 font-bold">Current Hour (Now)</span>
                 </div>
               </div>
             </div>
@@ -258,7 +263,6 @@ export default function DashboardOverviewPage() {
             {/* 3. Bottom Grid: Recent Exceptions & Quick Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
-              {/* Recent Exceptions Feed (2 Columns) */}
               <div className="lg:col-span-2 bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
                 <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -304,7 +308,7 @@ export default function DashboardOverviewPage() {
                 )}
               </div>
 
-              {/* Quick Shortcuts Card (with Direct Link to /test Playground) */}
+              {/* Quick Shortcuts */}
               <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="border-b border-slate-800/80 pb-3">
@@ -315,7 +319,6 @@ export default function DashboardOverviewPage() {
                   </div>
 
                   <div className="space-y-2">
-                    {/* Direct 1-Click Link to /test Playground */}
                     <Link
                       href="/test"
                       className="block p-3 bg-gradient-to-r from-yellow-400/10 to-amber-500/10 hover:from-yellow-400/20 hover:to-amber-500/20 border border-yellow-400/30 rounded-xl text-xs font-bold text-yellow-300 transition flex items-center justify-between"
