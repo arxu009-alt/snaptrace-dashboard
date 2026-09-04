@@ -16,7 +16,6 @@ export default function WelcomeLandingPage() {
   const [copiedCursorPrompt, setCopiedCursorPrompt] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  // 1. Check if user is already logged in -> Auto redirect to /dashboard
   useEffect(() => {
     async function checkUserSession() {
       try {
@@ -111,8 +110,8 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       a: 'Sentry’s JavaScript SDK adds over 100KB of minified code with complex distributed tracing logic. SnapTrace is a featherweight <5KB zero-dependency script that intercepts uncaught exceptions and sends telemetry using navigator.sendBeacon, resulting in zero impact on Google Core Web Vitals.'
     },
     {
-      q: 'How does BYOK (Bring Your Own Key) AI work?',
-      a: 'Instead of forcing you onto expensive enterprise tiers, you can paste your own OpenAI key in Settings. When you click "Analyze with AI" on any error, SnapTrace calls the AI model to explain the bug and generate code patches at $0 platform cost to you.'
+      q: 'How does BYOK (Bring Your Own Key) AI work on the Pro plan?',
+      a: 'On the Pro plan, you can paste your own OpenAI API key in Settings. Whenever an exception occurs, clicking "Analyze with AI" produces instant root-cause explanations and copy-paste code patches with zero platform markup.'
     },
     {
       q: 'What does Client-Side PII Scrubbing mean?',
@@ -123,17 +122,16 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       a: 'No. SnapTrace uses deterministic fingerprint hashing and a 60-second loop throttling engine. If an error throws 500 times in 10 seconds, it sends the 1st crash instantly, silences duplicate alerts, and sends an aggregated summary count tag [x500].'
     },
     {
-      q: 'Is SnapTrace free to use?',
-      a: 'Yes! SnapTrace offers a generous 100% Free Tier with full access to realtime streaming, multi-project switching, Discord webhooks, and unlimited BYOK AI bug analysis.'
+      q: 'Is there a free plan for hobbyists?',
+      a: 'Yes! Our Developer Free plan includes 10,000 events/month forever, 14-day retention, Discord alerts, and 1-click prompt export for Cursor and Claude.'
     }
   ];
 
-  // Brief session check loader (prevents layout flashing)
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-[#05070E] flex items-center justify-center font-sans text-slate-400">
         <div className="flex flex-col items-center space-y-3">
-          <div className="h-8 w-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+          <div className="h-8 w-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
           <p className="text-xs font-mono text-slate-500">Checking Active Session...</p>
         </div>
       </div>
@@ -147,34 +145,23 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       <header className="border-b border-slate-800/80 bg-[#090D16]/85 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           
-          {/* Logo (Smooth Scroll to Top) */}
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Navigation Links */}
           <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300">
             <a href="#features" className="hover:text-yellow-400 transition flex items-center gap-1">
               Features <span className="text-[10px] text-slate-500">▾</span>
             </a>
-            <a href="#quickstart" className="hover:text-yellow-400 transition">
-              Integrations
-            </a>
+            <a href="#quickstart" className="hover:text-yellow-400 transition">Integrations</a>
             <a href="#ai-copilot" className="hover:text-yellow-400 transition flex items-center gap-1.5 text-purple-300 hover:text-purple-200">
               <span>✨</span> AI Copilot
             </a>
-            <a href="#comparison" className="hover:text-yellow-400 transition">
-              Why SnapTrace
-            </a>
-            <a href="#pricing" className="hover:text-yellow-400 transition">
-              Pricing
-            </a>
-            <a href="#faq" className="hover:text-yellow-400 transition">
-              FAQ
-            </a>
+            <a href="#comparison" className="hover:text-yellow-400 transition">Why SnapTrace</a>
+            <a href="#pricing" className="hover:text-yellow-400 transition font-bold text-yellow-400">Pricing</a>
+            <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* Auth Action Buttons */}
           <div className="flex items-center space-x-3">
             <Link
               href="/login"
@@ -274,7 +261,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 4. Features Section */}
+      {/* 4. Core Features Deep Dive */}
       <section id="features" className="py-24 border-t border-slate-800/80 bg-[#060911]/60">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
           
@@ -332,7 +319,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 5. BYOK AI Section */}
+      {/* 5. BYOK AI Section with Cursor & Claude Badges */}
       <section id="ai-copilot" className="py-24 border-t border-slate-800/80 relative">
         <div className="max-w-6xl mx-auto px-6 space-y-12">
           
@@ -525,14 +512,14 @@ try {
                 <td className="p-4 text-slate-500">Manual regex</td>
               </tr>
               <tr>
-                <td className="p-4 font-semibold text-white">AI Bug Fixes (BYOK)</td>
-                <td className="p-4 text-emerald-400 font-bold">✓ Free (Bring Your Own Key)</td>
+                <td className="p-4 font-semibold text-white">In-Dashboard AI Diagnosis (BYOK)</td>
+                <td className="p-4 text-emerald-400 font-bold">✓ Included in Pro ($9/mo)</td>
                 <td className="p-4 text-slate-500">$$$ Expensive addon</td>
                 <td className="p-4 text-slate-500">✕ None</td>
               </tr>
               <tr>
                 <td className="p-4 font-semibold text-white">1-Click Prompt Export for Cursor</td>
-                <td className="p-4 text-emerald-400 font-bold">✓ 1-Click Ready</td>
+                <td className="p-4 text-emerald-400 font-bold">✓ Free Forever</td>
                 <td className="p-4 text-slate-500">✕ Manual copy</td>
                 <td className="p-4 text-slate-500">✕ Manual copy</td>
               </tr>
@@ -547,69 +534,102 @@ try {
         </div>
       </section>
 
-      {/* 9. Dedicated Pricing Section */}
+      {/* 9. REFINED 3-TIER PRICING SECTION */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase">
-            <span>💎</span> Transparent & Predictable
+            <span>💎</span> Predictable Monthly Recurring Plans
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Simple, developer-first pricing</h2>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Simple, transparent pricing</h2>
           <p className="text-sm text-slate-400 max-w-xl mx-auto">
-            No surprise overage bills. No multi-metered category traps.
+            Zero surprise overage bills. Generous capacity for developers, indie hackers, and growing teams.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
           
-          {/* Free Forever Plan */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-8 space-y-6 shadow-xl relative">
-            <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Developer Free</span>
-              <div className="text-4xl font-black text-white">$0 <span className="text-xs text-slate-500 font-normal">/ month forever</span></div>
-              <p className="text-xs text-slate-400">Perfect for side projects, indie hackers, and hobby apps.</p>
-            </div>
+          {/* Tier 1: Developer Free */}
+          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Developer Free</span>
+                <div className="text-3xl font-black text-white">$0 <span className="text-xs text-slate-500 font-normal">/ month</span></div>
+                <p className="text-xs text-slate-400 pt-1">Essential crash monitoring for side projects and hobby apps.</p>
+              </div>
 
-            <ul className="space-y-3 text-xs text-slate-300 border-t border-slate-800 pt-6">
-              <li className="flex items-center gap-2.5"><span className="text-emerald-400 font-bold">✓</span> Sub-5KB Featherweight SDK</li>
-              <li className="flex items-center gap-2.5"><span className="text-emerald-400 font-bold">✓</span> Real-Time WebSocket Telemetry</li>
-              <li className="flex items-center gap-2.5"><span className="text-emerald-400 font-bold">✓</span> Discord & Gmail Alert Channels</li>
-              <li className="flex items-center gap-2.5"><span className="text-emerald-400 font-bold">✓</span> Unlimited BYOK AI Bug Diagnostics</li>
-              <li className="flex items-center gap-2.5"><span className="text-emerald-400 font-bold">✓</span> Multi-Project Switching</li>
-            </ul>
+              <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5">
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>10,000</strong> Events / Month</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 14-Day Data Retention</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Up to 2 Projects</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Sub-5KB Featherweight SDK</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1-Click Cursor / Claude Prompt Export</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Discord & Gmail Alert Channels</li>
+              </ul>
+            </div>
 
             <Link
               href="/signup"
               className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition"
             >
-              Get Started Free →
+              Start Free Forever →
             </Link>
           </div>
 
-          {/* Pro Flat-Rate Plan */}
-          <div className="bg-[#090D16] border border-yellow-400/40 rounded-3xl p-8 space-y-6 shadow-2xl relative">
-            <span className="absolute -top-3 right-6 px-3 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-md">
-              Most Popular
+          {/* Tier 2: Starter Pro ($9/mo - The Sweet Spot) */}
+          <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2">
+            <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg">
+              ★ Most Popular
             </span>
 
-            <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-yellow-400">Pro Team Flat</span>
-              <div className="text-4xl font-black text-white">$19 <span className="text-xs text-slate-500 font-normal">/ month flat rate</span></div>
-              <p className="text-xs text-slate-400">Generous capacity for high-traffic production apps.</p>
-            </div>
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Starter Pro</span>
+                <div className="text-3xl font-black text-white">$9 <span className="text-xs text-slate-400 font-normal">/ month flat rate</span></div>
+                <p className="text-xs text-slate-400 pt-1">For freelancers, indie hackers, and revenue-generating apps.</p>
+              </div>
 
-            <ul className="space-y-3 text-xs text-slate-300 border-t border-slate-800 pt-6">
-              <li className="flex items-center gap-2.5"><span className="text-yellow-400 font-bold">✓</span> Everything in Developer Free</li>
-              <li className="flex items-center gap-2.5"><span className="text-yellow-400 font-bold">✓</span> 500,000 Events / Month Included</li>
-              <li className="flex items-center gap-2.5"><span className="text-yellow-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
-              <li className="flex items-center gap-2.5"><span className="text-yellow-400 font-bold">✓</span> Zero Surprise Overage Charges</li>
-              <li className="flex items-center gap-2.5"><span className="text-yellow-400 font-bold">✓</span> Priority Support Channels</li>
-            </ul>
+              <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5">
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>150,000</strong> Events / Month</li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 30-Day Data Retention</li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>Unlimited Projects</strong></li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>In-Dashboard BYOK AI Copilot Engine</strong></li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Noise Deduplication Throttling</li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Database Purge Tools</li>
+              </ul>
+            </div>
 
             <Link
               href="/signup"
-              className="block w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-center text-xs rounded-xl transition shadow-lg shadow-yellow-500/20"
+              className="block w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl transition shadow-xl shadow-yellow-500/20 cursor-pointer"
             >
-              Start 14-Day Pro Trial →
+              Get Started with Pro →
+            </Link>
+          </div>
+
+          {/* Tier 3: Team Scale ($29/mo) */}
+          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
+                <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal">/ month flat rate</span></div>
+                <p className="text-xs text-slate-400 pt-1">For growing startups, agencies, and high-traffic production workloads.</p>
+              </div>
+
+              <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5">
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord & Email Delivery</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Team Invites & Multi-Seat Access</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
+              </ul>
+            </div>
+
+            <Link
+              href="/signup"
+              className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition"
+            >
+              Start Team Trial →
             </Link>
           </div>
 
