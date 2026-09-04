@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import ProjectSwitcher from '@/components/ProjectSwitcher';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
 import FeedbackModal from '@/components/FeedbackModal';
+import DashboardOnboardingTour from '@/components/DashboardOnboardingTour';
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
@@ -58,6 +59,11 @@ export default function DashboardLayout({ children }) {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     await supabase.auth.signOut();
     router.replace('/login');
+  };
+
+  const handleTriggerTour = () => {
+    setProfileDropdownOpen(false);
+    window.dispatchEvent(new Event('snaptrace_replay_tour'));
   };
 
   const navItems = [
@@ -144,7 +150,7 @@ export default function DashboardLayout({ children }) {
           })}
         </nav>
 
-        {/* Sidebar Footer with Feedback Trigger */}
+        {/* Sidebar Footer */}
         {!sidebarCollapsed && (
           <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center justify-between min-w-[240px]">
             <span>Featherweight APM</span>
@@ -231,6 +237,15 @@ export default function DashboardLayout({ children }) {
                     <p className="text-xs text-slate-200 font-mono truncate">{userEmail}</p>
                   </div>
 
+                  {/* Replay Onboarding Tour Trigger */}
+                  <button
+                    onClick={handleTriggerTour}
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-yellow-300 hover:bg-yellow-400/10 transition cursor-pointer text-left"
+                  >
+                    <span>🎓</span>
+                    <span>Replay Setup Tour</span>
+                  </button>
+
                   <Link
                     href="/dashboard/settings"
                     onClick={() => setProfileDropdownOpen(false)}
@@ -270,12 +285,14 @@ export default function DashboardLayout({ children }) {
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
 
-      {/* Global Feedback Modal */}
+      {/* Global Modals: Feedback & Onboarding Tour */}
       <FeedbackModal
         isOpen={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
         userEmail={userEmail}
       />
+
+      <DashboardOnboardingTour />
 
     </div>
   );
