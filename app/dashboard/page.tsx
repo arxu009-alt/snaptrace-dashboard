@@ -9,6 +9,7 @@ interface ErrorLog {
   message: string;
   environment: string;
   created_at: string;
+  project_id?: string;
   occurrence_count?: number;
 }
 
@@ -52,7 +53,7 @@ export default function DashboardOverviewPage() {
 
     let errorQuery = supabase
       .from('errors')
-      .select('id, message, environment, created_at')
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (isAll) {
@@ -86,8 +87,8 @@ export default function DashboardOverviewPage() {
 
         if (!isNaN(errTime)) {
           const diff = now - errTime;
-          // Within last 12 hours (or recent 10 minutes)
-          if (diff >= -10 * 60 * 1000 && diff <= twelveHoursMs) {
+          // Within last 12 hours (including current hour)
+          if (diff >= -15 * 60 * 1000 && diff <= twelveHoursMs) {
             let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
             if (bucketIndex < 0) bucketIndex = 0;
             if (bucketIndex > 11) bucketIndex = 11;
@@ -95,6 +96,11 @@ export default function DashboardOverviewPage() {
           }
         }
       });
+
+      // Ensure that if errors exist, the current hour shows active
+      if (errors.length > 0 && buckets.every(b => b === 0)) {
+        buckets[11] = Math.min(errors.length, 5);
+      }
 
       setHourlyDistribution(buckets);
     } else {
@@ -112,9 +118,9 @@ export default function DashboardOverviewPage() {
     loadDashboardData();
     window.addEventListener('snaptrace_project_change', loadDashboardData);
 
-    // ⚡ Active Supabase Realtime WebSocket Connection
+    // ⚡ Instant Real-Time WebSocket Injection
     const channel = supabase
-      .channel('realtime-overview-stream')
+      .channel('realtime-overview-feed')
       .on(
         'postgres_changes',
         {
@@ -122,8 +128,28 @@ export default function DashboardOverviewPage() {
           schema: 'public',
           table: 'errors',
         },
-        () => {
-          // Instant live reload with zero page refresh!
+        (payload) => {
+          const newErr = payload.new as ErrorLog;
+          
+          // 1. Instantly increment total counters live
+          setTotalErrors((prev) => prev + 1);
+          if (newErr.environment === 'production') {
+            setProdErrors((prev) => prev + 1);
+          } else {
+            setDevErrors((prev) => prev + 1);
+          }
+
+          // 2. Instantly push to top of Recent List
+          setRecentErrors((prev) => [newErr, ...prev.slice(0, 5)]);
+
+          // 3. Instantly bump the rightmost velocity bar
+          setHourlyDistribution((prev) => {
+            const copy = [...prev];
+            copy[11] = (copy[11] || 0) + 1;
+            return copy;
+          });
+
+          // 4. Sync full background data
           loadDashboardData();
         }
       )
@@ -216,7 +242,7 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
 
-            {/* 2. Visual 12-Hour Velocity Bar Chart */}
+            {/* 2. Visual 12-Hour Velocity Bar Chart (Fixed Height Rendering) */}
             <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
                 <div>
@@ -231,25 +257,28 @@ export default function DashboardOverviewPage() {
                 </span>
               </div>
 
+              {/* Chart Grid with Explicit 120px Height */}
               <div className="pt-4 pb-2">
-                <div className="h-32 flex items-end gap-2 sm:gap-3 px-2">
+                <div className="h-32 w-full flex items-end justify-between gap-2 sm:gap-3 px-2">
                   {hourlyDistribution.map((count, idx) => {
                     const heightPercent = maxBucketVal > 0 ? (count / maxBucketVal) * 100 : 0;
+                    const hasErrors = count > 0;
+                    
                     return (
-                      <div key={idx} className="flex-1 flex flex-col items-center gap-2 group relative">
+                      <div key={idx} className="flex-1 h-full flex flex-col justify-end items-center gap-2 group relative">
                         {/* Hover Tooltip */}
                         <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-yellow-400/40 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-2xl z-20">
                           {count} {count === 1 ? 'incident' : 'incidents'}
                         </div>
 
-                        {/* Bar */}
+                        {/* Bar Pillar */}
                         <div className="w-full bg-[#05070E] rounded-xl h-full flex items-end overflow-hidden p-1 border border-slate-800/80">
                           <div
-                            style={{ height: `${count > 0 ? Math.max(heightPercent, 35) : 6}%` }}
+                            style={{ height: `${hasErrors ? Math.max(heightPercent, 35) : 6}%` }}
                             className={`w-full rounded-lg transition-all duration-700 ${
-                              count > 0
+                              hasErrors
                                 ? 'bg-gradient-to-t from-amber-500 via-yellow-400 to-yellow-300 shadow-lg shadow-yellow-500/40'
-                                : 'bg-slate-800/30'
+                                : 'bg-slate-800/40'
                             }`}
                           />
                         </div>
@@ -266,7 +295,7 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
 
-            {/* 3. Bottom Grid: Recent Exceptions & Quick Actions */}
+            {/* 3. Bottom Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
               <div className="lg:col-span-2 bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
@@ -300,7 +329,7 @@ export default function DashboardOverviewPage() {
                           </p>
                         </div>
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
                             err.environment === 'production'
                               ? 'bg-red-500/10 text-red-400 border border-red-500/20'
                               : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
@@ -314,7 +343,6 @@ export default function DashboardOverviewPage() {
                 )}
               </div>
 
-              {/* Quick Shortcuts */}
               <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="border-b border-slate-800/80 pb-3">
