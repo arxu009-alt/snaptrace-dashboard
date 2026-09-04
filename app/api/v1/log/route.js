@@ -130,7 +130,7 @@ export async function POST(req) {
       }
     }
 
-    // 4. Save Event into Database
+    // 4. Save Event into Database with Explicit ISO Timestamp
     try {
       await supabase.from("errors").insert([
         {
@@ -140,6 +140,8 @@ export async function POST(req) {
           environment: environment || "production",
           url: url || null,
           user_agent: userAgent || null,
+          status: "unresolved",
+          created_at: new Date().toISOString(), // <--- EXPLICIT REALTIME TIMESTAMP
         },
       ]);
     } catch (dbErr) {

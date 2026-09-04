@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 
 interface ErrorLog {
@@ -23,16 +23,6 @@ export default function DashboardOverviewPage() {
   const [hourlyDistribution, setHourlyDistribution] = useState<number[]>(new Array(12).fill(0));
 
   const loadDashboardData = useCallback(async () => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      setLoading(false);
-      return;
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
@@ -84,25 +74,28 @@ export default function DashboardOverviewPage() {
       setDevErrors(errors.filter((e) => e.environment === 'development').length);
       setRecentErrors(errors.slice(0, 6));
 
-      // Calculate 12-hour distribution with clock-skew protection
+      // Calculate 12-hour hourly buckets
       const buckets = new Array(12).fill(0);
       const now = Date.now();
       const oneHourMs = 60 * 60 * 1000;
       const twelveHoursMs = 12 * oneHourMs;
 
       errors.forEach((err) => {
-        if (!err.created_at) return;
-        const errTime = new Date(err.created_at).getTime();
-        if (isNaN(errTime)) return;
+        const rawDate = err.created_at;
+        const errTime = rawDate ? new Date(rawDate).getTime() : now;
 
-        const diff = now - errTime;
-        if (diff > -5 * 60 * 1000 && diff < twelveHoursMs) {
-          let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
-          if (bucketIndex < 0) bucketIndex = 0;
-          if (bucketIndex > 11) bucketIndex = 11;
-          buckets[bucketIndex] += 1;
+        if (!isNaN(errTime)) {
+          const diff = now - errTime;
+          // Within last 12 hours (or recent 10 minutes)
+          if (diff >= -10 * 60 * 1000 && diff <= twelveHoursMs) {
+            let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
+            if (bucketIndex < 0) bucketIndex = 0;
+            if (bucketIndex > 11) bucketIndex = 11;
+            buckets[bucketIndex] += 1;
+          }
         }
       });
+
       setHourlyDistribution(buckets);
     } else {
       setTotalErrors(0);
@@ -119,13 +112,9 @@ export default function DashboardOverviewPage() {
     loadDashboardData();
     window.addEventListener('snaptrace_project_change', loadDashboardData);
 
-    // ⚡ Realtime WebSocket Listener: Instantly reload numbers & bars when a crash occurs!
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
+    // ⚡ Active Supabase Realtime WebSocket Connection
     const channel = supabase
-      .channel('realtime-overview-feed')
+      .channel('realtime-overview-stream')
       .on(
         'postgres_changes',
         {
@@ -134,7 +123,7 @@ export default function DashboardOverviewPage() {
           table: 'errors',
         },
         () => {
-          // Live crash received -> refresh overview metrics instantly without page reload!
+          // Instant live reload with zero page refresh!
           loadDashboardData();
         }
       )
@@ -161,7 +150,7 @@ export default function DashboardOverviewPage() {
                 {selectedProjectLabel}
               </span>
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 font-mono">
               Live monitoring, error velocity metrics, and incident distribution.
             </p>
           </div>
@@ -248,16 +237,18 @@ export default function DashboardOverviewPage() {
                     const heightPercent = maxBucketVal > 0 ? (count / maxBucketVal) * 100 : 0;
                     return (
                       <div key={idx} className="flex-1 flex flex-col items-center gap-2 group relative">
+                        {/* Hover Tooltip */}
                         <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-yellow-400/40 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-2xl z-20">
                           {count} {count === 1 ? 'incident' : 'incidents'}
                         </div>
 
+                        {/* Bar */}
                         <div className="w-full bg-[#05070E] rounded-xl h-full flex items-end overflow-hidden p-1 border border-slate-800/80">
                           <div
-                            style={{ height: `${count > 0 ? Math.max(heightPercent, 20) : 6}%` }}
+                            style={{ height: `${count > 0 ? Math.max(heightPercent, 35) : 6}%` }}
                             className={`w-full rounded-lg transition-all duration-700 ${
                               count > 0
-                                ? 'bg-gradient-to-t from-amber-500 via-yellow-400 to-yellow-300 shadow-lg shadow-yellow-500/30'
+                                ? 'bg-gradient-to-t from-amber-500 via-yellow-400 to-yellow-300 shadow-lg shadow-yellow-500/40'
                                 : 'bg-slate-800/30'
                             }`}
                           />
@@ -309,7 +300,7 @@ export default function DashboardOverviewPage() {
                           </p>
                         </div>
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                             err.environment === 'production'
                               ? 'bg-red-500/10 text-red-400 border border-red-500/20'
                               : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
