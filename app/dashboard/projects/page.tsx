@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import Link from 'next/link';
 
 interface Project {
   id: string;
@@ -28,7 +29,6 @@ export default function ProjectsPage() {
       return;
     }
 
-    // Fetch user projects
     const { data: projectList, error } = await supabase
       .from('projects')
       .select('*')
@@ -36,7 +36,6 @@ export default function ProjectsPage() {
       .order('created_at', { ascending: false });
 
     if (!error && projectList) {
-      // Fetch error counts per project
       const { data: errors } = await supabase
         .from('errors')
         .select('project_id');
@@ -99,8 +98,6 @@ export default function ProjectsPage() {
       setProjects([{ ...data[0], error_count: 0 }, ...projects]);
       setNewProjectName('');
       setIsModalOpen(false);
-
-      // Notify ProjectSwitcher dropdown across dashboard
       window.dispatchEvent(new Event('snaptrace_project_change'));
     }
     setCreating(false);
@@ -138,7 +135,7 @@ export default function ProjectsPage() {
               </span>
             </h1>
             <p className="text-xs text-slate-400">
-              Manage your project credentials, API keys, and individual ingestion endpoints.
+              Manage your project credentials and copy SDK setup snippets for any programming language.
             </p>
           </div>
 
@@ -152,7 +149,6 @@ export default function ProjectsPage() {
         </div>
 
         {loading ? (
-          /* Shimmer Skeleton Loader */
           <div className="space-y-4 animate-pulse">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="h-44 bg-[#090D16] border border-slate-800/80 rounded-3xl p-6" />
@@ -181,7 +177,7 @@ export default function ProjectsPage() {
                 key={project.id}
                 className="bg-[#090D16] border border-slate-800/90 hover:border-slate-700/90 rounded-3xl p-6 space-y-5 shadow-2xl transition group"
               >
-                {/* Project Header Row */}
+                {/* Project Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2.5">
@@ -229,21 +225,29 @@ export default function ProjectsPage() {
                   </div>
                 </div>
 
-                {/* Quick 1-Line Drop-in Integration Snippet */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
-                    Quick JavaScript Integration Tag
-                  </label>
-                  <pre className="bg-[#05070E] border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300 font-mono overflow-x-auto leading-relaxed">
-{`<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="${project.api_key}" async></script>`}
-                  </pre>
+                {/* Multi-Language Snippet Bar */}
+                <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <span>⚡</span> Multi-Language SDK Snippets Available
+                    </span>
+                    <p className="text-[11px] text-slate-400">
+                      Pre-configured for JavaScript, Next.js, Python, Node, PHP, Ruby, Kotlin, and cURL.
+                    </p>
+                  </div>
+                  <Link
+                    href="/dashboard/integrations"
+                    className="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition self-start sm:self-auto cursor-pointer"
+                  >
+                    View Code Snippets →
+                  </Link>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Modal: Create New Project */}
+        {/* Modal: Create Project */}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
             <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
@@ -262,7 +266,7 @@ export default function ProjectsPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Next.js Web App, Payment API"
+                    placeholder="e.g. Python Backend API, React Mobile App"
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
                     className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
