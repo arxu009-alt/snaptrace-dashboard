@@ -67,11 +67,11 @@ export default function DashboardLayout({ children }) {
   };
 
   const navItems = [
-    { name: 'Overview', href: '/dashboard', icon: '📊' },
-    { name: 'Exception Logs', href: '/dashboard/errors', icon: '🚨' },
-    { name: 'API Keys & Projects', href: '/dashboard/projects', icon: '🔑' },
-    { name: 'Language Integrations', href: '/dashboard/integrations', icon: '⚡' },
-    { name: 'Alert & AI Settings', href: '/dashboard/settings', icon: '⚙️' },
+    { id: 'tour-nav-overview', name: 'Overview', href: '/dashboard', icon: '📊' },
+    { id: 'tour-nav-errors', name: 'Exception Logs', href: '/dashboard/errors', icon: '🚨' },
+    { id: 'tour-nav-projects', name: 'API Keys & Projects', href: '/dashboard/projects', icon: '🔑' },
+    { id: 'tour-nav-integrations', name: 'Language Integrations', href: '/dashboard/integrations', icon: '⚡' },
+    { id: 'tour-nav-settings', name: 'Alert & AI Settings', href: '/dashboard/settings', icon: '⚙️' },
   ];
 
   const getPageTitle = () => {
@@ -103,13 +103,13 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans">
       
-      {/* 1. Left Sidebar Navigation (Collapsible) */}
+      {/* 1. Left Sidebar Navigation */}
       <aside
         className={`bg-[#090D16] border-r border-slate-800/80 flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out ${
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
-        {/* Brand Header with BETA Badge */}
+        {/* Brand Header */}
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between min-w-[240px]">
           <Link href="/dashboard" className="transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
@@ -121,20 +121,21 @@ export default function DashboardLayout({ children }) {
           )}
         </div>
 
-        {/* Global Project Switcher */}
+        {/* Global Project Switcher (Tour Anchor 1) */}
         {!sidebarCollapsed && (
-          <div className="px-4 py-3 border-b border-slate-800/60 bg-[#060911] min-w-[240px]">
+          <div id="tour-project-switcher" className="px-4 py-3 border-b border-slate-800/60 bg-[#060911] min-w-[240px]">
             <ProjectSwitcher />
           </div>
         )}
 
-        {/* Navigation Items */}
+        {/* Navigation Items (Tour Anchors) */}
         <nav className="flex-1 p-3 space-y-1 min-w-[240px]">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
+                id={item.id}
                 href={item.href}
                 className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
                   isActive
@@ -189,7 +190,7 @@ export default function DashboardLayout({ children }) {
           </div>
 
           {/* Right Area: Feedback Button + Live Badge + User Profile */}
-          <div className="flex items-center space-x-3 sm:space-x-4">
+          <div id="tour-header-actions" className="flex items-center space-x-3 sm:space-x-4">
             
             {/* Feedback Button */}
             <button
@@ -237,7 +238,6 @@ export default function DashboardLayout({ children }) {
                     <p className="text-xs text-slate-200 font-mono truncate">{userEmail}</p>
                   </div>
 
-                  {/* Replay Onboarding Tour Trigger */}
                   <button
                     onClick={handleTriggerTour}
                     className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-yellow-300 hover:bg-yellow-400/10 transition cursor-pointer text-left"
@@ -285,7 +285,7 @@ export default function DashboardLayout({ children }) {
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
 
-      {/* Global Modals: Feedback & Onboarding Tour */}
+      {/* Global Modals: Feedback & Spotlight Onboarding Tour */}
       <FeedbackModal
         isOpen={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
