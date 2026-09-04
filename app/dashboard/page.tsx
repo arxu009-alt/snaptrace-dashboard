@@ -9,6 +9,7 @@ interface ErrorLog {
   message: string;
   environment: string;
   created_at: string;
+  occurrence_count?: number;
 }
 
 export default function DashboardOverviewPage() {
@@ -19,6 +20,7 @@ export default function DashboardOverviewPage() {
   const [recentErrors, setRecentErrors] = useState<ErrorLog[]>([]);
   const [projectKey, setProjectKey] = useState<string>('');
   const [selectedProjectLabel, setSelectedProjectLabel] = useState<string>('All Projects');
+  const [hourlyDistribution, setHourlyDistribution] = useState<number[]>(new Array(12).fill(0));
 
   const loadDashboardData = useCallback(async () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -52,6 +54,7 @@ export default function DashboardOverviewPage() {
       setProdErrors(0);
       setDevErrors(0);
       setRecentErrors([]);
+      setHourlyDistribution(new Array(12).fill(0));
       setLoading(false);
       return;
     }
@@ -66,12 +69,10 @@ export default function DashboardOverviewPage() {
       .order('created_at', { ascending: false });
 
     if (isAll) {
-      // Combined feed across all projects
-      setSelectedProjectLabel('All Projects (Combined)');
-      setProjectKey(userProjects[0].api_key); // Shows default primary key
+      setSelectedProjectLabel('All Projects (Global Stream)');
+      setProjectKey(userProjects[0].api_key);
       errorQuery = errorQuery.in('project_id', userProjectIds);
     } else {
-      // Filtered to one specific project
       const activeProject = userProjects.find((p) => p.id === savedProjectId) || userProjects[0];
       setSelectedProjectLabel(activeProject.name);
       setProjectKey(activeProject.api_key);
@@ -84,12 +85,30 @@ export default function DashboardOverviewPage() {
       setTotalErrors(errors.length);
       setProdErrors(errors.filter((e) => e.environment === 'production').length);
       setDevErrors(errors.filter((e) => e.environment === 'development').length);
-      setRecentErrors(errors.slice(0, 5));
+      setRecentErrors(errors.slice(0, 6));
+
+      // Calculate 12-slot distribution for sparkline chart
+      const buckets = new Array(12).fill(0);
+      const now = Date.now();
+      const twelveHoursMs = 12 * 60 * 60 * 1000;
+
+      errors.forEach((err) => {
+        const errTime = new Date(err.created_at).getTime();
+        const diff = now - errTime;
+        if (diff >= 0 && diff < twelveHoursMs) {
+          const bucketIndex = 11 - Math.floor(diff / (60 * 60 * 1000));
+          if (bucketIndex >= 0 && bucketIndex < 12) {
+            buckets[bucketIndex] += 1;
+          }
+        }
+      });
+      setHourlyDistribution(buckets);
     } else {
       setTotalErrors(0);
       setProdErrors(0);
       setDevErrors(0);
       setRecentErrors([]);
+      setHourlyDistribution(new Array(12).fill(0));
     }
 
     setLoading(false);
@@ -97,96 +116,186 @@ export default function DashboardOverviewPage() {
 
   useEffect(() => {
     loadDashboardData();
-
     window.addEventListener('snaptrace_project_change', loadDashboardData);
     return () => {
       window.removeEventListener('snaptrace_project_change', loadDashboardData);
     };
   }, [loadDashboardData]);
 
+  const maxBucketVal = Math.max(...hourlyDistribution, 1);
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-8 font-sans">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950">
       <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">System Overview</h1>
-            <p className="text-sm text-slate-400">
-              Live status for <span className="text-purple-400 font-semibold">{selectedProjectLabel}</span>
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-5 gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
+              <span>Telemetry Overview</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 font-mono font-bold">
+                {selectedProjectLabel}
+              </span>
+            </h1>
+            <p className="text-xs text-slate-400">
+              Live monitoring, error velocity metrics, and incident distribution.
             </p>
           </div>
+
           <div className="flex items-center space-x-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Ingestion Active
-            </span>
+            <Link
+              href="/dashboard/errors"
+              className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5 cursor-pointer"
+            >
+              View Live Feed →
+            </Link>
           </div>
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-slate-400">Loading metrics dashboard...</div>
+          /* Shimmering Skeleton Loader */
+          <div className="space-y-6 animate-pulse">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-28 bg-[#090D16] border border-slate-800/60 rounded-2xl p-5" />
+              ))}
+            </div>
+            <div className="h-64 bg-[#090D16] border border-slate-800/60 rounded-3xl" />
+          </div>
         ) : (
           <>
-            {/* Stat Cards Grid */}
+            {/* 1. Stat Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-xl">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Ingested Errors</span>
-                <div className="text-3xl font-extrabold text-white">{totalErrors}</div>
-                <p className="text-xs text-slate-500">{selectedProjectLabel}</p>
+              
+              {/* Card 1: Total */}
+              <div className="bg-[#090D16] border border-slate-800/90 hover:border-yellow-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">Total Ingested</span>
+                  <span className="text-base p-1.5 bg-yellow-400/10 rounded-lg text-yellow-400 border border-yellow-400/20">⚡</span>
+                </div>
+                <div className="text-3xl font-black text-white group-hover:text-yellow-400 transition">{totalErrors}</div>
+                <p className="text-[11px] text-slate-500">All-time captured exceptions</p>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-xl">
-                <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Production Errors</span>
-                <div className="text-3xl font-extrabold text-red-400">{prodErrors}</div>
-                <p className="text-xs text-slate-500">High-priority live issues</p>
+              {/* Card 2: Production Crashes */}
+              <div className="bg-[#090D16] border border-slate-800/90 hover:border-red-500/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-red-400 uppercase tracking-wider font-mono">Production Issues</span>
+                  <span className="text-base p-1.5 bg-red-500/10 rounded-lg text-red-400 border border-red-500/20">🚨</span>
+                </div>
+                <div className="text-3xl font-black text-red-400">{prodErrors}</div>
+                <p className="text-[11px] text-slate-500">Live runtime exceptions</p>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-xl">
-                <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Development Logs</span>
-                <div className="text-3xl font-extrabold text-amber-400">{devErrors}</div>
-                <p className="text-xs text-slate-500">Local and staging exceptions</p>
+              {/* Card 3: Development Logs */}
+              <div className="bg-[#090D16] border border-slate-800/90 hover:border-amber-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">Development Logs</span>
+                  <span className="text-base p-1.5 bg-amber-400/10 rounded-lg text-amber-400 border border-amber-400/20">💻</span>
+                </div>
+                <div className="text-3xl font-black text-amber-400">{devErrors}</div>
+                <p className="text-[11px] text-slate-500">Local & staging events</p>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2 shadow-xl">
-                <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider">Rate Limit Window</span>
-                <div className="text-3xl font-extrabold text-purple-400">5 min</div>
-                <p className="text-xs text-slate-500">Duplicate alert suppression</p>
+              {/* Card 4: Noise Window */}
+              <div className="bg-[#090D16] border border-slate-800/90 hover:border-emerald-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">Noise Firewall</span>
+                  <span className="text-base p-1.5 bg-emerald-400/10 rounded-lg text-emerald-400 border border-emerald-400/20">🔇</span>
+                </div>
+                <div className="text-3xl font-black text-emerald-400">Active</div>
+                <p className="text-[11px] text-slate-500">60s loop throttling active</p>
               </div>
             </div>
 
-            {/* Quick Actions & Recent Errors */}
+            {/* 2. Visual 12-Hour Error Velocity Graph Card */}
+            <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+                <div>
+                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span>📈</span> Incident Velocity Pulse (Last 12 Hours)
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Real-time hourly frequency spikes</p>
+                </div>
+                <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 self-start sm:self-auto">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Live Stream Connected
+                </span>
+              </div>
+
+              {/* Bar Chart Visualization */}
+              <div className="pt-4 pb-2">
+                <div className="h-28 flex items-end gap-2 sm:gap-3 px-2">
+                  {hourlyDistribution.map((count, idx) => {
+                    const heightPercent = maxBucketVal > 0 ? (count / maxBucketVal) * 100 : 0;
+                    return (
+                      <div key={idx} className="flex-1 flex flex-col items-center gap-2 group relative">
+                        {/* Hover Tooltip */}
+                        <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-slate-700 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-xl z-20">
+                          {count} {count === 1 ? 'error' : 'errors'}
+                        </div>
+
+                        {/* Bar */}
+                        <div className="w-full bg-slate-800/60 rounded-t-lg h-full flex items-end overflow-hidden p-0.5">
+                          <div
+                            style={{ height: `${Math.max(heightPercent, count > 0 ? 15 : 4)}%` }}
+                            className={`w-full rounded-t-md transition-all duration-500 ${
+                              count > 0
+                                ? 'bg-gradient-to-t from-amber-500 to-yellow-400 shadow-lg shadow-yellow-500/20'
+                                : 'bg-slate-800/40'
+                            }`}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Timeline Axis Labels */}
+                <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-3 border-t border-slate-800/80 mt-2 px-2">
+                  <span>12 hrs ago</span>
+                  <span>6 hrs ago</span>
+                  <span>Current Hour (Now)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Bottom Grid: Recent Exceptions & Quick Configuration */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
-              {/* Recent Ingested Errors */}
-              <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4 shadow-xl">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold text-white">Recent Exceptions</h2>
+              {/* Recent Exceptions Feed (2 Columns) */}
+              <div className="lg:col-span-2 bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+                <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
+                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span>🚨</span> Recent Captured Crashes
+                  </h2>
                   <Link
                     href="/dashboard/errors"
-                    className="text-xs text-purple-400 hover:text-purple-300 font-medium transition"
+                    className="text-xs text-yellow-400 hover:underline font-semibold transition"
                   >
-                    View All Logs →
+                    View All Stream →
                   </Link>
                 </div>
 
                 {recentErrors.length === 0 ? (
-                  <p className="text-xs text-slate-500">No errors logged yet.</p>
+                  <div className="p-8 text-center text-slate-500 text-xs font-mono">
+                    No exceptions logged for this project yet.
+                  </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5">
                     {recentErrors.map((err) => (
                       <div
                         key={err.id}
-                        className="flex items-center justify-between p-3 bg-slate-950 border border-slate-800 rounded-lg text-xs"
+                        className="flex items-center justify-between p-3.5 bg-[#05070E] border border-slate-800/80 hover:border-slate-700 rounded-2xl text-xs transition"
                       >
                         <div className="space-y-1 truncate max-w-md">
-                          <p className="font-medium text-slate-200 truncate">{err.message}</p>
-                          <p className="text-slate-500 font-mono text-[11px]">
+                          <p className="font-semibold text-slate-200 truncate font-mono text-[12px]">{err.message}</p>
+                          <p className="text-slate-500 font-mono text-[10px]">
                             {new Date(err.created_at).toLocaleString()}
                           </p>
                         </div>
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                             err.environment === 'production'
                               ? 'bg-red-500/10 text-red-400 border border-red-500/20'
                               : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
@@ -200,39 +309,43 @@ export default function DashboardOverviewPage() {
                 )}
               </div>
 
-              {/* Quick Links & Info */}
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6 shadow-xl">
-                <div>
-                  <h2 className="text-lg font-semibold text-white">Quick Shortcuts</h2>
-                  <p className="text-xs text-slate-400 mt-1">Jump to common configuration views</p>
+              {/* Quick Shortcuts & API Key Card (1 Column) */}
+              <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="border-b border-slate-800/80 pb-3">
+                    <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span>⚡</span> Quick Actions
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Direct shortcuts to key tools</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Link
+                      href="/dashboard/integrations"
+                      className="block p-3 bg-[#05070E] hover:bg-slate-800/50 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-200 transition"
+                    >
+                      ⚡ Multi-Language SDK Snippets
+                    </Link>
+                    <Link
+                      href="/dashboard/settings"
+                      className="block p-3 bg-[#05070E] hover:bg-slate-800/50 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-200 transition"
+                    >
+                      🤖 Configure BYOK AI Copilot
+                    </Link>
+                    <Link
+                      href="/dashboard/projects"
+                      className="block p-3 bg-[#05070E] hover:bg-slate-800/50 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-200 transition"
+                    >
+                      🔑 Rotate & Manage Project Keys
+                    </Link>
+                  </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Link
-                    href="/dashboard/projects"
-                    className="block p-3 bg-slate-950 hover:bg-slate-800/60 border border-slate-800 rounded-lg text-xs font-medium text-slate-200 transition"
-                  >
-                    🔑 Get API Key & Integration Code
-                  </Link>
-                  <Link
-                    href="/dashboard/integrations"
-                    className="block p-3 bg-slate-950 hover:bg-slate-800/60 border border-slate-800 rounded-lg text-xs font-medium text-slate-200 transition"
-                  >
-                    ⚡ Multi-Stack Language Snippets
-                  </Link>
-                  <Link
-                    href="/dashboard/settings"
-                    className="block p-3 bg-slate-950 hover:bg-slate-800/60 border border-slate-800 rounded-lg text-xs font-medium text-slate-200 transition"
-                  >
-                    ⚙️ Configure Discord & Email Alerts
-                  </Link>
-                </div>
-
-                <div className="pt-4 border-t border-slate-800">
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-                    Primary Project Key
+                <div className="pt-3 border-t border-slate-800/80 space-y-1.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+                    Active Ingestion Token
                   </span>
-                  <code className="text-[11px] font-mono text-purple-400 block truncate bg-slate-950 p-2 rounded border border-slate-800">
+                  <code className="text-[11px] font-mono text-yellow-300 block truncate bg-[#05070E] p-2.5 rounded-xl border border-slate-800">
                     {projectKey || 'Loading...'}
                   </code>
                 </div>
