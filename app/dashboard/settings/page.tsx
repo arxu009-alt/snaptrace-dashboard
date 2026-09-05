@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
+import Link from 'next/link';
 
 export default function SettingsPage() {
   const [userEmail, setUserEmail] = useState<string>('');
@@ -11,12 +12,14 @@ export default function SettingsPage() {
   const [email, setEmail] = useState<string>('');
   const [discordWebhook, setDiscordWebhook] = useState<string>('');
   const [apiKey, setApiKey] = useState<string>('');
+  const [currentTier, setCurrentTier] = useState<string>('free');
   
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [testingAlert, setTestingAlert] = useState<boolean>(false);
   const [purging, setPurging] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadSettings() {
@@ -43,6 +46,7 @@ export default function SettingsPage() {
         setApiKey(p.api_key || '');
         setEmail(p.recipient_email || p.alert_email || '');
         setDiscordWebhook(p.discord_webhook_url || p.discord_webhook || '');
+        setCurrentTier(p.plan_tier || 'free');
       }
 
       setLoading(false);
@@ -148,17 +152,33 @@ export default function SettingsPage() {
     setTimeout(() => setStatusMessage(null), 3500);
   };
 
+  // Demo direct checkout trigger
+  const handleUpgradeCheckout = (tierName: string) => {
+    // In production: open Lemon Squeezy checkout overlay URL
+    alert(`Redirecting to secure Lemon Squeezy checkout for ${tierName} plan...`);
+  };
+
+  const getTierBadge = () => {
+    if (currentTier === 'team_scale') {
+      return <span className="px-3 py-1 bg-purple-500/15 text-purple-300 border border-purple-500/30 rounded-full text-xs font-bold font-mono uppercase">Team Scale ($29/mo)</span>;
+    }
+    if (currentTier === 'starter_pro') {
+      return <span className="px-3 py-1 bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 rounded-full text-xs font-bold font-mono uppercase">Starter Pro ($9/mo)</span>;
+    }
+    return <span className="px-3 py-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-full text-xs font-bold font-mono uppercase">Developer Free ($0/mo)</span>;
+  };
+
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Header */}
         <div className="border-b border-slate-800/80 pb-5">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
-            <span>Project Settings & Alert Channels</span>
+            <span>Project Settings & Subscription</span>
           </h1>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Configure alert webhooks, BYOK AI copilot keys, and database maintenance tools.
+            Manage your billing plan, notification webhooks, BYOK AI keys, and database maintenance.
           </p>
         </div>
 
@@ -175,7 +195,6 @@ export default function SettingsPage() {
         )}
 
         {loading ? (
-          /* Custom SnapTrace Brand Pulse Loader */
           <div className="p-20 flex flex-col items-center justify-center space-y-4 animate-in fade-in">
             <div className="relative animate-pulse">
               <SnapTraceLogo size="lg" showText={false} />
@@ -185,14 +204,56 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-6">
 
-            {/* 1. Account Profile Card */}
+            {/* 1. Subscription & Billing Plan Card */}
+            <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-5 relative">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">💎</span>
+                    <h2 className="text-base font-bold text-white">Current Subscription Tier</h2>
+                    {getTierBadge()}
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    {currentTier === 'free'
+                      ? 'You are on the free tier (10,000 events/mo included).'
+                      : 'Active Pro telemetry plan with unlimited BYOK AI diagnostics.'}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setIsUpgradeModalOpen(true)}
+                  className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 self-start sm:self-auto cursor-pointer"
+                >
+                  {currentTier === 'free' ? '⚡ Upgrade to Pro ($9/mo) →' : 'Manage Subscription'}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+                <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Monthly Event Cap</span>
+                  <span className="text-slate-200 font-semibold">{currentTier === 'team_scale' ? '1,000,000' : currentTier === 'starter_pro' ? '150,000' : '10,000'} events</span>
+                </div>
+                <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Data Retention</span>
+                  <span className="text-slate-200 font-semibold">{currentTier === 'team_scale' ? '90 Days' : currentTier === 'starter_pro' ? '30 Days' : '14 Days'}</span>
+                </div>
+                <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">In-Dashboard AI</span>
+                  <span className={currentTier === 'free' ? 'text-slate-400' : 'text-emerald-400 font-bold'}>
+                    {currentTier === 'free' ? 'Prompt Export Only' : '✓ Unlimited Copilot Active'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Developer Account Profile */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
                     <span>👤</span> Developer Account Profile
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Your authenticated developer session</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Your authenticated credentials</p>
                 </div>
                 <span className="px-2.5 py-1 bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 rounded-full text-[10px] font-bold uppercase font-mono">
                   Active Session
@@ -205,13 +266,13 @@ export default function SettingsPage() {
                   <span className="text-slate-200 font-mono block font-semibold">{userEmail}</span>
                 </div>
                 <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">Active Primary API Key</span>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">Primary API Key</span>
                   <span className="text-yellow-300 font-mono block truncate">{apiKey || 'No key loaded'}</span>
                 </div>
               </div>
             </div>
 
-            {/* 2. Notification Channels Form */}
+            {/* 3. Notification Channels Form */}
             <form onSubmit={handleSaveNotifications} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-3">
                 <div>
@@ -243,9 +304,6 @@ export default function SettingsPage() {
                     placeholder="arxu1045@gmail.com"
                     className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 transition"
                   />
-                  <p className="text-[11px] text-slate-500 font-mono">
-                    Incoming exceptions will trigger email notifications to this recipient.
-                  </p>
                 </div>
 
                 <div className="space-y-1.5">
@@ -257,9 +315,6 @@ export default function SettingsPage() {
                     placeholder="https://discord.com/api/webhooks/..."
                     className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 font-mono transition"
                   />
-                  <p className="text-[11px] text-slate-500 font-mono">
-                    Formatted embeds with occurrence counts will post directly to this Discord channel.
-                  </p>
                 </div>
               </div>
 
@@ -274,7 +329,7 @@ export default function SettingsPage() {
               </div>
             </form>
 
-            {/* 3. BYOK AI Copilot Card */}
+            {/* 4. BYOK AI Copilot Card */}
             <form onSubmit={handleSaveAiKey} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
@@ -305,9 +360,6 @@ export default function SettingsPage() {
                   placeholder="sk-proj-..."
                   className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 font-mono transition"
                 />
-                <p className="text-[11px] text-slate-500 font-mono">
-                  Stored securely in your browser and used exclusively when you click "Analyze with AI".
-                </p>
               </div>
 
               <div className="flex justify-end pt-1">
@@ -320,34 +372,98 @@ export default function SettingsPage() {
               </div>
             </form>
 
-            {/* 4. Database Maintenance & Purge Card */}
+            {/* 5. Database Purge */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-red-900/30 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="border-b border-slate-800/80 pb-3">
                 <h2 className="text-sm font-bold text-red-400 flex items-center gap-2">
                   <span>🧹</span> Database Maintenance & Purge
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5 font-mono">
-                  Clean up old telemetry records to keep your database fast and lightweight.
+                  Permanently deletes all exceptions that have been marked as resolved.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-                <div className="space-y-0.5">
-                  <p className="text-xs text-slate-200 font-semibold font-mono">Purge Resolved Errors</p>
-                  <p className="text-[11px] text-slate-500">
-                    Permanently deletes all exceptions that have been marked as resolved.
-                  </p>
-                </div>
+              <div className="flex justify-end">
                 <button
                   onClick={handlePurgeResolved}
                   disabled={purging}
-                  className="px-4 py-2 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-bold rounded-xl transition cursor-pointer self-start sm:self-auto"
+                  className="px-4 py-2 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-bold rounded-xl transition cursor-pointer"
                 >
                   {purging ? 'Purging...' : 'Purge Resolved Logs'}
                 </button>
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* Upgrade Plan Modal */}
+        {isUpgradeModalOpen && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
+            <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl">
+              
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span>⚡</span> Upgrade SnapTrace Plan
+                  </h3>
+                  <p className="text-xs text-slate-400">Unlock higher event capacity and in-dashboard AI diagnosis.</p>
+                </div>
+                <button
+                  onClick={() => setIsUpgradeModalOpen(false)}
+                  className="text-slate-400 hover:text-white text-xs bg-slate-800 px-2.5 py-1.5 rounded-xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                {/* Starter Pro Option */}
+                <div className="bg-[#05070E] border-2 border-yellow-400 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest font-mono">Most Popular</span>
+                    <h4 className="text-base font-bold text-white">Starter Pro</h4>
+                    <div className="text-2xl font-black text-white">$9 <span className="text-xs text-slate-400 font-normal">/ mo flat</span></div>
+                    <ul className="space-y-1.5 text-xs text-slate-300 pt-2">
+                      <li>✓ 150,000 events/mo</li>
+                      <li>✓ 30-day retention</li>
+                      <li>✓ In-Dashboard AI Copilot</li>
+                      <li>✓ Unlimited projects</li>
+                    </ul>
+                  </div>
+                  <button
+                    onClick={() => handleUpgradeCheckout('Starter Pro ($9/mo)')}
+                    className="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold text-xs rounded-xl shadow-md cursor-pointer"
+                  >
+                    Select Starter Pro →
+                  </button>
+                </div>
+
+                {/* Team Scale Option */}
+                <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest font-mono">High Traffic</span>
+                    <h4 className="text-base font-bold text-white">Team Scale</h4>
+                    <div className="text-2xl font-black text-white">$29 <span className="text-xs text-slate-400 font-normal">/ mo flat</span></div>
+                    <ul className="space-y-1.5 text-xs text-slate-300 pt-2">
+                      <li>✓ 1,000,000 events/mo</li>
+                      <li>✓ 90-day retention</li>
+                      <li>✓ Priority alert delivery</li>
+                      <li>✓ Multi-seat team invites</li>
+                    </ul>
+                  </div>
+                  <button
+                    onClick={() => handleUpgradeCheckout('Team Scale ($29/mo)')}
+                    className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl cursor-pointer"
+                  >
+                    Select Team Scale →
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
           </div>
         )}
 
