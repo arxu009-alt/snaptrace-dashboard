@@ -14,6 +14,7 @@ export default function SettingsPage() {
   const [apiKey, setApiKey] = useState<string>('');
   const [projectId, setProjectId] = useState<string>('');
   const [currentTier, setCurrentTier] = useState<string>('free');
+  const [isOwner, setIsOwner] = useState<boolean>(false);
   
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
@@ -32,7 +33,13 @@ export default function SettingsPage() {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        setUserEmail(user.email || 'Authenticated User');
+        const uEmail = user.email || '';
+        setUserEmail(uEmail);
+
+        // Check owner credentials
+        if (uEmail.toLowerCase() === 'arxu1045@gmail.com' || uEmail.toLowerCase() === 'arxu009@gmail.com') {
+          setIsOwner(true);
+        }
       }
 
       const savedAiKey = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_openai_key') : '';
@@ -158,13 +165,19 @@ export default function SettingsPage() {
     setTimeout(() => setStatusMessage(null), 3500);
   };
 
-  // Direct checkout link launcher with prefilled user email & metadata
   const handleUpgradeCheckout = (checkoutUrl: string) => {
     const finalUrl = `${checkoutUrl}?checkout[email]=${encodeURIComponent(userEmail)}&checkout[custom][project_id]=${encodeURIComponent(projectId)}`;
     window.open(finalUrl, '_blank');
   };
 
   const getTierBadge = () => {
+    if (isOwner) {
+      return (
+        <span className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black rounded-full text-xs font-mono uppercase tracking-wider shadow-sm">
+          👑 OWNER PRO (Unlimited)
+        </span>
+      );
+    }
     if (currentTier === 'team_scale') {
       return <span className="px-3 py-1 bg-purple-500/15 text-purple-300 border border-purple-500/30 rounded-full text-xs font-bold font-mono uppercase">Team Scale ($29/mo)</span>;
     }
@@ -214,39 +227,53 @@ export default function SettingsPage() {
             <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-5 relative">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2.5 flex-wrap">
                     <span className="text-xl">💎</span>
-                    <h2 className="text-base font-bold text-white">Current Subscription Tier</h2>
+                    <h2 className="text-base font-bold text-white">Subscription & Plan Status</h2>
                     {getTierBadge()}
                   </div>
                   <p className="text-xs text-slate-400">
-                    {currentTier === 'free'
+                    {isOwner
+                      ? 'Owner account with full unlimited access to all features.'
+                      : currentTier === 'free'
                       ? 'You are on the free tier (10,000 events/mo included).'
-                      : 'Active Pro telemetry plan with unlimited BYOK AI diagnostics.'}
+                      : 'Active Pro telemetry subscription with in-dashboard AI diagnostics.'}
                   </p>
                 </div>
 
-                <button
-                  onClick={() => setIsUpgradeModalOpen(true)}
-                  className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 self-start sm:self-auto cursor-pointer"
-                >
-                  {currentTier === 'free' ? '⚡ Upgrade Plan ($9/mo) →' : 'Change Plan'}
-                </button>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={() => handleUpgradeCheckout(PRO_CHECKOUT_URL)}
+                    className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 cursor-pointer"
+                  >
+                    ⚡ Starter Pro ($9/mo)
+                  </button>
+                  <button
+                    onClick={() => handleUpgradeCheckout(TEAM_CHECKOUT_URL)}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 font-bold text-xs rounded-xl transition cursor-pointer"
+                  >
+                    👑 Team Scale ($29/mo)
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Monthly Event Cap</span>
-                  <span className="text-slate-200 font-semibold">{currentTier === 'team_scale' ? '1,000,000' : currentTier === 'starter_pro' ? '150,000' : '10,000'} events</span>
+                  <span className="text-slate-200 font-semibold">
+                    {isOwner ? 'Unlimited (Owner)' : currentTier === 'team_scale' ? '1,000,000' : currentTier === 'starter_pro' ? '150,000' : '10,000'} events
+                  </span>
                 </div>
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Data Retention</span>
-                  <span className="text-slate-200 font-semibold">{currentTier === 'team_scale' ? '90 Days' : currentTier === 'starter_pro' ? '30 Days' : '14 Days'}</span>
+                  <span className="text-slate-200 font-semibold">
+                    {isOwner ? '90 Days' : currentTier === 'team_scale' ? '90 Days' : currentTier === 'starter_pro' ? '30 Days' : '14 Days'}
+                  </span>
                 </div>
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">In-Dashboard AI</span>
-                  <span className={currentTier === 'free' ? 'text-slate-400' : 'text-emerald-400 font-bold'}>
-                    {currentTier === 'free' ? 'Prompt Export Only' : '✓ Unlimited Copilot Active'}
+                  <span className={isOwner || currentTier !== 'free' ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
+                    {isOwner || currentTier !== 'free' ? '✓ Unlimited Copilot Active' : 'Prompt Export Only'}
                   </span>
                 </div>
               </div>
@@ -400,76 +427,6 @@ export default function SettingsPage() {
               </div>
             </div>
 
-          </div>
-        )}
-
-        {/* Upgrade Plan Modal with Direct Lemon Squeezy Integration */}
-        {isUpgradeModalOpen && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
-            <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl">
-              
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
-                <div>
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span>⚡</span> Upgrade SnapTrace Plan
-                  </h3>
-                  <p className="text-xs text-slate-400">Unlock higher event capacity and in-dashboard AI diagnosis.</p>
-                </div>
-                <button
-                  onClick={() => setIsUpgradeModalOpen(false)}
-                  className="text-slate-400 hover:text-white text-xs bg-slate-800 px-2.5 py-1.5 rounded-xl transition cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
-                {/* Starter Pro Option ($9/mo) */}
-                <div className="bg-[#05070E] border-2 border-yellow-400 rounded-2xl p-5 space-y-4 flex flex-col justify-between hover:border-yellow-300 transition">
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest font-mono">Most Popular</span>
-                    <h4 className="text-base font-bold text-white">Starter Pro</h4>
-                    <div className="text-2xl font-black text-white">$9 <span className="text-xs text-slate-400 font-normal">/ mo flat</span></div>
-                    <ul className="space-y-1.5 text-xs text-slate-300 pt-2">
-                      <li>✓ 150,000 events/mo</li>
-                      <li>✓ 30-day retention</li>
-                      <li>✓ In-Dashboard AI Copilot</li>
-                      <li>✓ Unlimited projects</li>
-                    </ul>
-                  </div>
-                  <button
-                    onClick={() => handleUpgradeCheckout(PRO_CHECKOUT_URL)}
-                    className="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-md cursor-pointer transition"
-                  >
-                    Upgrade to Starter Pro ($9) →
-                  </button>
-                </div>
-
-                {/* Team Scale Option ($29/mo) */}
-                <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-5 space-y-4 flex flex-col justify-between hover:border-purple-400 transition">
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest font-mono">High Traffic</span>
-                    <h4 className="text-base font-bold text-white">Team Scale</h4>
-                    <div className="text-2xl font-black text-white">$29 <span className="text-xs text-slate-400 font-normal">/ mo flat</span></div>
-                    <ul className="space-y-1.5 text-xs text-slate-300 pt-2">
-                      <li>✓ 1,000,000 events/mo</li>
-                      <li>✓ 90-day retention</li>
-                      <li>✓ Priority alert delivery</li>
-                      <li>✓ Multi-seat team invites</li>
-                    </ul>
-                  </div>
-                  <button
-                    onClick={() => handleUpgradeCheckout(TEAM_CHECKOUT_URL)}
-                    className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl cursor-pointer transition"
-                  >
-                    Upgrade to Team Scale ($29) →
-                  </button>
-                </div>
-
-              </div>
-
-            </div>
           </div>
         )}
 
