@@ -602,13 +602,15 @@ try {
               </ul>
             </div>
 
-            <Link
-              href="/signup"
+       
+          </div><a
+              href="https://snaptrace.lemonsqueezy.com/checkout/buy/b7355f43-3ece-4fa9-a91e-ba847f3cd52e"
+              target="_blank"
+              rel="noopener noreferrer"
               className="block w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl transition shadow-xl shadow-yellow-500/20 cursor-pointer"
             >
-              Get Started with Pro →
-            </Link>
-          </div>
+              Get Started with Pro ($9) →
+            </a>
 
           {/* Tier 3: Team Scale ($29/mo) */}
           <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
@@ -629,12 +631,14 @@ try {
               </ul>
             </div>
 
-            <Link
-              href="/signup"
+            <a
+              href="https://snaptrace.lemonsqueezy.com/checkout/buy/913b182d-9db4-41c3-9c93-ed68d83eaae0"
+              target="_blank"
+              rel="noopener noreferrer"
               className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition"
             >
-              Start Team Trial →
-            </Link>
+              Get Team Scale ($29) →
+            </a>
           </div>
 
         </RevealOnScroll>

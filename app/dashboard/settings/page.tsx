@@ -12,6 +12,7 @@ export default function SettingsPage() {
   const [email, setEmail] = useState<string>('');
   const [discordWebhook, setDiscordWebhook] = useState<string>('');
   const [apiKey, setApiKey] = useState<string>('');
+  const [projectId, setProjectId] = useState<string>('');
   const [currentTier, setCurrentTier] = useState<string>('free');
   
   const [loading, setLoading] = useState<boolean>(true);
@@ -20,6 +21,10 @@ export default function SettingsPage() {
   const [purging, setPurging] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+
+  // Live Lemon Squeezy Checkout URLs
+  const PRO_CHECKOUT_URL = 'https://snaptrace.lemonsqueezy.com/checkout/buy/b7355f43-3ece-4fa9-a91e-ba847f3cd52e';
+  const TEAM_CHECKOUT_URL = 'https://snaptrace.lemonsqueezy.com/checkout/buy/913b182d-9db4-41c3-9c93-ed68d83eaae0';
 
   useEffect(() => {
     async function loadSettings() {
@@ -43,6 +48,7 @@ export default function SettingsPage() {
 
       if (projects && projects.length > 0) {
         const p = projects[0];
+        setProjectId(p.id || '');
         setApiKey(p.api_key || '');
         setEmail(p.recipient_email || p.alert_email || '');
         setDiscordWebhook(p.discord_webhook_url || p.discord_webhook || '');
@@ -152,10 +158,10 @@ export default function SettingsPage() {
     setTimeout(() => setStatusMessage(null), 3500);
   };
 
-  // Demo direct checkout trigger
-  const handleUpgradeCheckout = (tierName: string) => {
-    // In production: open Lemon Squeezy checkout overlay URL
-    alert(`Redirecting to secure Lemon Squeezy checkout for ${tierName} plan...`);
+  // Direct checkout link launcher with prefilled user email & metadata
+  const handleUpgradeCheckout = (checkoutUrl: string) => {
+    const finalUrl = `${checkoutUrl}?checkout[email]=${encodeURIComponent(userEmail)}&checkout[custom][project_id]=${encodeURIComponent(projectId)}`;
+    window.open(finalUrl, '_blank');
   };
 
   const getTierBadge = () => {
@@ -224,7 +230,7 @@ export default function SettingsPage() {
                   onClick={() => setIsUpgradeModalOpen(true)}
                   className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 self-start sm:self-auto cursor-pointer"
                 >
-                  {currentTier === 'free' ? '⚡ Upgrade to Pro ($9/mo) →' : 'Manage Subscription'}
+                  {currentTier === 'free' ? '⚡ Upgrade Plan ($9/mo) →' : 'Change Plan'}
                 </button>
               </div>
 
@@ -397,7 +403,7 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* Upgrade Plan Modal */}
+        {/* Upgrade Plan Modal with Direct Lemon Squeezy Integration */}
         {isUpgradeModalOpen && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
             <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl">
@@ -411,7 +417,7 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={() => setIsUpgradeModalOpen(false)}
-                  className="text-slate-400 hover:text-white text-xs bg-slate-800 px-2.5 py-1.5 rounded-xl"
+                  className="text-slate-400 hover:text-white text-xs bg-slate-800 px-2.5 py-1.5 rounded-xl transition cursor-pointer"
                 >
                   ✕
                 </button>
@@ -419,8 +425,8 @@ export default function SettingsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
-                {/* Starter Pro Option */}
-                <div className="bg-[#05070E] border-2 border-yellow-400 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                {/* Starter Pro Option ($9/mo) */}
+                <div className="bg-[#05070E] border-2 border-yellow-400 rounded-2xl p-5 space-y-4 flex flex-col justify-between hover:border-yellow-300 transition">
                   <div className="space-y-2">
                     <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest font-mono">Most Popular</span>
                     <h4 className="text-base font-bold text-white">Starter Pro</h4>
@@ -433,15 +439,15 @@ export default function SettingsPage() {
                     </ul>
                   </div>
                   <button
-                    onClick={() => handleUpgradeCheckout('Starter Pro ($9/mo)')}
-                    className="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold text-xs rounded-xl shadow-md cursor-pointer"
+                    onClick={() => handleUpgradeCheckout(PRO_CHECKOUT_URL)}
+                    className="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-md cursor-pointer transition"
                   >
-                    Select Starter Pro →
+                    Upgrade to Starter Pro ($9) →
                   </button>
                 </div>
 
-                {/* Team Scale Option */}
-                <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                {/* Team Scale Option ($29/mo) */}
+                <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-5 space-y-4 flex flex-col justify-between hover:border-purple-400 transition">
                   <div className="space-y-2">
                     <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest font-mono">High Traffic</span>
                     <h4 className="text-base font-bold text-white">Team Scale</h4>
@@ -454,10 +460,10 @@ export default function SettingsPage() {
                     </ul>
                   </div>
                   <button
-                    onClick={() => handleUpgradeCheckout('Team Scale ($29/mo)')}
-                    className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl cursor-pointer"
+                    onClick={() => handleUpgradeCheckout(TEAM_CHECKOUT_URL)}
+                    className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl cursor-pointer transition"
                   >
-                    Select Team Scale →
+                    Upgrade to Team Scale ($29) →
                   </button>
                 </div>
 
