@@ -28,85 +28,81 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
 2. 🔍 Root Cause Analysis: Exactly which file/line caused it.
 3. 🛠️ Proposed Code Patch: Corrected code snippet to fix the issue.`;
 
-    // 1. Google Gemini Provider (Handles all AQ. and AIza keys)
+    // 1. Google Gemini (Official OpenAI-Compatible Endpoint with /openai/ path)
     if (provider === 'gemini' || key.startsWith('AQ') || key.startsWith('AIza') || !key.startsWith('sk-')) {
-      
-      // Approach A: Google's Official Universal Chat Endpoint
-      try {
-        const geminiChatRes = await fetch(
-          'https://generativelanguage.googleapis.com/v1beta/chat/completions',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${key}`,
-            },
-            body: JSON.stringify({
-              model: 'gemini-1.5-flash',
-              messages: [
-                {
-                  role: 'system',
-                  content:
-                    'You are an expert software engineer and crash diagnostic AI. Analyze the given exception and stack trace.',
-                },
-                { role: 'user', content: prompt },
-              ],
-              temperature: 0.2,
-            }),
-          }
-        );
+      const modelsToTry = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+      let lastErrorMessage = '';
 
-        const geminiChatData = await geminiChatRes.json();
-        if (geminiChatRes.ok && geminiChatData.choices?.[0]?.message?.content) {
-          return NextResponse.json({
-            success: true,
-            analysis: geminiChatData.choices[0].message.content,
-          });
-        }
-      } catch (chatErr) {
-        // Fallback to Direct REST
-      }
-
-      // Approach B: Direct REST Fallback
-      const activeGeminiModels = [
-        'gemini-1.5-flash',
-        'gemini-2.0-flash',
-        'gemini-1.5-flash-8b',
-        'gemini-1.5-pro'
-      ];
-
-      for (const model of activeGeminiModels) {
+      // Primary: Official Google OpenAI-Compatible Chat Completions
+      for (const model of modelsToTry) {
         try {
-          const restRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+          const res = await fetch(
+            'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
             {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${key}`,
               },
+              body: JSON.stringify({
+                model: model,
+                messages: [
+                  {
+                    role: 'system',
+                    content:
+                      'You are an expert crash diagnostic AI for SnapTrace. Analyze the error and provide a fix.',
+                  },
+                  { role: 'user', content: prompt },
+                ],
+                temperature: 0.2,
+              }),
+            }
+          );
+
+          const data = await res.json();
+          if (res.ok && data.choices?.[0]?.message?.content) {
+            return NextResponse.json({
+              success: true,
+              analysis: data.choices[0].message.content,
+            });
+          } else if (data.error?.message) {
+            lastErrorMessage = data.error.message;
+          }
+        } catch (e: any) {
+          lastErrorMessage = e.message;
+        }
+      }
+
+      // Secondary Fallback: Direct REST generateContent
+      for (const model of modelsToTry) {
+        try {
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
               }),
             }
           );
 
-          const restData = await restRes.json();
-          if (restRes.ok && restData.candidates?.[0]?.content?.parts?.[0]?.text) {
+          const data = await res.json();
+          if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
             return NextResponse.json({
               success: true,
-              analysis: restData.candidates[0].content.parts[0].text,
+              analysis: data.candidates[0].content.parts[0].text,
             });
+          } else if (data.error?.message) {
+            lastErrorMessage = data.error.message;
           }
-        } catch (restErr) {
-          // Try next model
+        } catch (e: any) {
+          lastErrorMessage = e.message;
         }
       }
 
       return NextResponse.json(
-        {
-          error:
-            'Google Gemini could not authenticate this key. Please ensure you copied the full key from aistudio.google.com/apikey.',
-        },
+        { error: lastErrorMessage || 'Google Gemini API failed to authenticate this key.' },
         { status: 400 }
       );
     }
