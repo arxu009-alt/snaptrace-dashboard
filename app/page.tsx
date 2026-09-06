@@ -177,12 +177,11 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 2. Hero Section with Glow Animation */}
+      {/* 2. Hero Section */}
       <section className="relative pt-24 pb-32 overflow-hidden">
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none animate-pulse" />
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10 animate-in fade-in duration-500">
-          
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090D16] border border-slate-800 text-xs font-semibold text-yellow-300 shadow-xl shadow-yellow-500/5">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>Sub-5KB SDK • 1-Click Cursor / Claude AI Export • Zero Alert Flood</span>
@@ -222,7 +221,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 3. Interactive Quickstart Terminal (Animated Scroll Reveal) */}
+      {/* 3. Interactive Quickstart Terminal */}
       <RevealOnScroll className="max-w-4xl mx-auto px-6 pb-28" delay={100}>
         <div id="quickstart" className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#060911] px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -259,7 +258,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </RevealOnScroll>
 
-      {/* 4. Sub-5KB SDK Section (Animated Scroll Reveal) */}
+      {/* 4. Sub-5KB SDK Section */}
       <section id="features" className="py-24 border-t border-slate-800/80 bg-[#060911]/60">
         <div className="max-w-6xl mx-auto px-6">
           <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
@@ -319,7 +318,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 5. BYOK AI Section (Animated Scroll Reveal) */}
+      {/* 5. BYOK AI Section */}
       <section id="ai-copilot" className="py-24 border-t border-slate-800/80 relative">
         <div className="max-w-6xl mx-auto px-6 space-y-12">
           
@@ -390,7 +389,7 @@ try {
         </div>
       </section>
 
-      {/* 6. Noise Deduplication Section (Animated Scroll Reveal) */}
+      {/* 6. Noise Deduplication Section */}
       <section id="dedup" className="py-24 border-t border-slate-800/80 bg-[#060911]/60">
         <div className="max-w-6xl mx-auto px-6">
           <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
@@ -444,7 +443,7 @@ try {
         </div>
       </section>
 
-      {/* 7. Client-Side PII Firewall (Animated Scroll Reveal) */}
+      {/* 7. Client-Side PII Firewall */}
       <section id="privacy" className="py-24 border-t border-slate-800/80">
         <div className="max-w-6xl mx-auto px-6">
           <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
@@ -483,7 +482,7 @@ try {
         </div>
       </section>
 
-      {/* 8. Comparison Table (Animated Scroll Reveal) */}
+      {/* 8. Comparison Table */}
       <section id="comparison" className="max-w-5xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Why Developers Choose SnapTrace</h2>
@@ -538,7 +537,7 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 9. 3-Tier Pricing Section (Animated Scroll Reveal) */}
+      {/* 9. REFINED 3-TIER PRICING SECTION (Clean 3-Column Layout) */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase">
@@ -552,7 +551,7 @@ try {
 
         <RevealOnScroll className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch" delay={150}>
           
-          {/* Tier 1: Developer Free */}
+          {/* Card 1: Developer Free */}
           <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
             <div className="space-y-4">
               <div className="space-y-1">
@@ -561,26 +560,26 @@ try {
                 <p className="text-xs text-slate-400 pt-1">Essential crash monitoring for side projects and hobby apps.</p>
               </div>
 
-              <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5">
+              <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
                 <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>10,000</strong> Events / Month</li>
                 <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 14-Day Data Retention</li>
                 <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Up to 2 Projects</li>
                 <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Sub-5KB Featherweight SDK</li>
-                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1-Click Cursor / Claude Prompt Export</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1-Click Cursor / Claude Export</li>
                 <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Discord & Gmail Alert Channels</li>
               </ul>
             </div>
 
             <Link
               href="/signup"
-              className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition"
+              className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer"
             >
               Start Free Forever →
             </Link>
           </div>
 
-          {/* Tier 2: Starter Pro ($9/mo) */}
-          <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
+          {/* Card 2: Starter Pro ($9/mo) */}
+          <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
             <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg">
               ★ Most Popular
             </span>
@@ -588,22 +587,21 @@ try {
             <div className="space-y-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Starter Pro</span>
-                <div className="text-3xl font-black text-white">$9 <span className="text-xs text-slate-400 font-normal">/ month flat rate</span></div>
+                <div className="text-3xl font-black text-white">$9 <span className="text-xs text-slate-400 font-normal">/ month flat</span></div>
                 <p className="text-xs text-slate-400 pt-1">For freelancers, indie hackers, and revenue-generating apps.</p>
               </div>
 
-              <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5">
+              <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5 font-mono">
                 <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>150,000</strong> Events / Month</li>
                 <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 30-Day Data Retention</li>
                 <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>Unlimited Projects</strong></li>
-                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>In-Dashboard BYOK AI Copilot Engine</strong></li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>In-Dashboard BYOK AI Copilot</strong></li>
                 <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Noise Deduplication Throttling</li>
                 <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Database Purge Tools</li>
               </ul>
             </div>
 
-       
-          </div><a
+            <a
               href="https://snaptrace.lemonsqueezy.com/checkout/buy/b7355f43-3ece-4fa9-a91e-ba847f3cd52e"
               target="_blank"
               rel="noopener noreferrer"
@@ -611,17 +609,18 @@ try {
             >
               Get Started with Pro ($9) →
             </a>
+          </div>
 
-          {/* Tier 3: Team Scale ($29/mo) */}
+          {/* Card 3: Team Scale ($29/mo) */}
           <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
             <div className="space-y-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
-                <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal">/ month flat rate</span></div>
-                <p className="text-xs text-slate-400 pt-1">For growing startups, agencies, and high-traffic production workloads.</p>
+                <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal">/ month flat</span></div>
+                <p className="text-xs text-slate-400 pt-1">For growing startups, agencies, and high-traffic production apps.</p>
               </div>
 
-              <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5">
+              <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
@@ -635,7 +634,7 @@ try {
               href="https://snaptrace.lemonsqueezy.com/checkout/buy/913b182d-9db4-41c3-9c93-ed68d83eaae0"
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition"
+              className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer"
             >
               Get Team Scale ($29) →
             </a>
@@ -644,7 +643,7 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 10. FAQ Section (Animated Scroll Reveal) */}
+      {/* 10. FAQ Section */}
       <section id="faq" className="max-w-4xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-10">
         <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
@@ -677,7 +676,7 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 11. Footer (Animated Scroll Reveal) */}
+      {/* 11. Footer */}
       <footer className="border-t border-slate-800/80 bg-[#060911] py-20 text-center space-y-6 relative overflow-hidden">
         <RevealOnScroll className="max-w-2xl mx-auto px-6 space-y-6 relative z-10">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
