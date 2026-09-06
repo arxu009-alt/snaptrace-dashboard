@@ -19,7 +19,7 @@ export default function SettingsPage() {
   const [currentTier, setCurrentTier] = useState<string>('free');
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
-  // Local Button Feedback States
+  // Button Feedback States
   const [loading, setLoading] = useState<boolean>(true);
   const [savingNotif, setSavingNotif] = useState<boolean>(false);
   const [notifSavedMsg, setNotifSavedMsg] = useState<string | null>(null);
@@ -33,8 +33,6 @@ export default function SettingsPage() {
   const [purging, setPurging] = useState<boolean>(false);
   const [purgeMsg, setPurgeMsg] = useState<string | null>(null);
 
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-
   // Live Lemon Squeezy Checkout URLs
   const PRO_CHECKOUT_URL = 'https://snaptrace.lemonsqueezy.com/checkout/buy/b7355f43-3ece-4fa9-a91e-ba847f3cd52e';
   const TEAM_CHECKOUT_URL = 'https://snaptrace.lemonsqueezy.com/checkout/buy/913b182d-9db4-41c3-9c93-ed68d83eaae0';
@@ -44,14 +42,16 @@ export default function SettingsPage() {
       setLoading(true);
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const uEmail = user.email || '';
-        setUserEmail(uEmail);
-
-        if (uEmail.toLowerCase() === 'arxu1045@gmail.com' || uEmail.toLowerCase() === 'arxu009@gmail.com') {
-          setIsOwner(true);
-        }
+      if (!user) {
+        setLoading(false);
+        return;
       }
+
+      const uEmail = user.email || '';
+      setUserEmail(uEmail);
+
+      const ownerCheck = uEmail.toLowerCase() === 'arxu1045@gmail.com' || uEmail.toLowerCase() === 'arxu009@gmail.com';
+      setIsOwner(ownerCheck);
 
       // Load AI Configuration
       const savedProvider = (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_ai_provider') : 'gemini') as any;
@@ -63,18 +63,34 @@ export default function SettingsPage() {
         setAiKeySaved(true);
       }
 
-      const { data: projects } = await supabase
+      // ⚠️ STRICT USER_ID FILTERING: Only fetch projects belonging to THIS user
+      const { data: userProjects } = await supabase
         .from('projects')
         .select('*')
-        .limit(1);
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      if (projects && projects.length > 0) {
-        const p = projects[0];
+      if (userProjects && userProjects.length > 0) {
+        const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
+        const p = userProjects.find((proj) => proj.id === savedProjectId) || userProjects[0];
+
         setProjectId(p.id || '');
         setApiKey(p.api_key || '');
         setEmail(p.recipient_email || p.alert_email || '');
         setDiscordWebhook(p.discord_webhook_url || p.discord_webhook || '');
-        setCurrentTier(p.plan_tier || 'free');
+        
+        if (ownerCheck) {
+          setCurrentTier('team_scale');
+        } else {
+          setCurrentTier(p.plan_tier || 'free');
+        }
+      } else {
+        // Brand new user with no projects yet
+        setProjectId('');
+        setApiKey('No project created yet');
+        setEmail(uEmail);
+        setDiscordWebhook('');
+        setCurrentTier(ownerCheck ? 'team_scale' : 'free');
       }
 
       setLoading(false);
@@ -83,23 +99,28 @@ export default function SettingsPage() {
     loadSettings();
   }, []);
 
-  // 1. Save Notifications with Inline Button Feedback
   const handleSaveNotifications = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!projectId) {
+      alert('Please create a project first under "API Keys & Projects".');
+      return;
+    }
+
     setSavingNotif(true);
     setNotifSavedMsg(null);
 
     try {
-      const res = await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, discordWebhook }),
-      });
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          recipient_email: email,
+          alert_email: email,
+          discord_webhook_url: discordWebhook,
+          discord_webhook: discordWebhook,
+        })
+        .eq('id', projectId);
 
-      const result = await res.json();
-      if (!res.ok || !result.success) {
-        throw new Error(result.error || 'Failed to save settings');
-      }
+      if (error) throw error;
 
       setNotifSavedMsg('✓ Notification Channels Saved!');
       setTimeout(() => setNotifSavedMsg(null), 3000);
@@ -110,7 +131,6 @@ export default function SettingsPage() {
     }
   };
 
-  // 2. Save AI Key with Inline Button Feedback
   const handleSaveAiKey = (e: React.FormEvent) => {
     e.preventDefault();
     setSavingAi(true);
@@ -118,7 +138,7 @@ export default function SettingsPage() {
     if (aiKey.trim()) {
       localStorage.setItem('snaptrace_ai_provider', aiProvider);
       localStorage.setItem('snaptrace_ai_key', aiKey.trim());
-      localStorage.setItem('snaptrace_openai_key', aiKey.trim()); // backwards compat
+      localStorage.setItem('snaptrace_openai_key', aiKey.trim());
       setAiKeySaved(true);
       setAiSavedMsg('✓ AI Key Saved Successfully!');
     } else {
@@ -132,9 +152,8 @@ export default function SettingsPage() {
     setTimeout(() => setAiSavedMsg(null), 3000);
   };
 
-  // 3. Send Test Alert with Inline Feedback
   const handleSendTestAlert = async () => {
-    if (!apiKey) {
+    if (!apiKey || apiKey === 'No project created yet') {
       alert('No active project API key found.');
       return;
     }
@@ -173,7 +192,6 @@ export default function SettingsPage() {
     }
   };
 
-  // 4. Purge Logs with Inline Feedback
   const handlePurgeResolved = async () => {
     if (!confirm('Are you sure you want to permanently delete all resolved error logs?')) return;
 
@@ -255,20 +273,22 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap">
-                  <button
-                    onClick={() => handleUpgradeCheckout(PRO_CHECKOUT_URL)}
-                    className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 cursor-pointer"
-                  >
-                    ⚡ Starter Pro ($9/mo)
-                  </button>
-                  <button
-                    onClick={() => handleUpgradeCheckout(TEAM_CHECKOUT_URL)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 font-bold text-xs rounded-xl transition cursor-pointer"
-                  >
-                    👑 Team Scale ($29/mo)
-                  </button>
-                </div>
+                {!isOwner && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={() => handleUpgradeCheckout(PRO_CHECKOUT_URL)}
+                      className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 cursor-pointer"
+                    >
+                      ⚡ Starter Pro ($9/mo)
+                    </button>
+                    <button
+                      onClick={() => handleUpgradeCheckout(TEAM_CHECKOUT_URL)}
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 font-bold text-xs rounded-xl transition cursor-pointer"
+                    >
+                      👑 Team Scale ($29/mo)
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
@@ -313,13 +333,13 @@ export default function SettingsPage() {
                   <span className="text-slate-200 font-mono block font-semibold">{userEmail}</span>
                 </div>
                 <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">Primary API Key</span>
-                  <span className="text-yellow-300 font-mono block truncate">{apiKey || 'No key loaded'}</span>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">Project API Key</span>
+                  <span className="text-yellow-300 font-mono block truncate">{apiKey || 'No key generated'}</span>
                 </div>
               </div>
             </div>
 
-            {/* 3. Notification Channels Form with INLINE SAVE FEEDBACK */}
+            {/* 3. Notification Channels Form */}
             <form onSubmit={handleSaveNotifications} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-3">
                 <div>
@@ -355,7 +375,7 @@ export default function SettingsPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="arxu1045@gmail.com"
+                    placeholder="you@company.com"
                     className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 transition"
                   />
                 </div>
@@ -372,7 +392,6 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Direct Inline Feedback beside Save Button */}
               <div className="flex items-center justify-end gap-3 pt-2">
                 {notifSavedMsg && (
                   <span className="text-xs font-bold text-emerald-400 font-mono animate-in fade-in">
@@ -389,7 +408,7 @@ export default function SettingsPage() {
               </div>
             </form>
 
-            {/* 4. BYOK AI Copilot Card (Single Clean Input + Provider Selector + Inline Save) */}
+            {/* 4. BYOK AI Copilot Card */}
             <form onSubmit={handleSaveAiKey} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
@@ -412,8 +431,6 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-3">
-                
-                {/* Provider Selector */}
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-300 block font-mono">SELECT AI MODEL PROVIDER</label>
                   <select
@@ -421,16 +438,14 @@ export default function SettingsPage() {
                     onChange={(e) => setAiProvider(e.target.value as any)}
                     className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-yellow-300 font-bold focus:outline-none focus:border-yellow-400 cursor-pointer"
                   >
-                    <option value="gemini">Google Gemini (100% Free - Gemini 1.5 Flash)</option>
+                    <option value="gemini">Google Gemini (100% Free - Gemini Flash)</option>
                     <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
-                    <option value="claude">Anthropic Claude</option>
                   </select>
                 </div>
 
-                {/* Single Input Box with Eye Toggle */}
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-300 block font-mono">
-                    {aiProvider === 'gemini' ? 'GOOGLE GEMINI API KEY (AIza... / AQ...)' : aiProvider === 'openai' ? 'OPENAI API KEY (sk-...)' : 'ANTHROPIC CLAUDE API KEY (sk-ant...)'}
+                    {aiProvider === 'gemini' ? 'GOOGLE GEMINI API KEY (AIza... / AQ...)' : 'OPENAI API KEY (sk-...)'}
                   </label>
                   
                   <div className="relative">
@@ -449,14 +464,9 @@ export default function SettingsPage() {
                       {showAiKey ? '🙈 Hide' : '👁️ Show'}
                     </button>
                   </div>
-                  <p className="text-[11px] text-slate-500 font-mono">
-                    Stored securely in your local browser storage and used directly when you click "Analyze with AI".
-                  </p>
                 </div>
-
               </div>
 
-              {/* Direct Inline Feedback beside Save Button */}
               <div className="flex items-center justify-end gap-3 pt-1">
                 {aiSavedMsg && (
                   <span className="text-xs font-bold text-emerald-400 font-mono animate-in fade-in">
@@ -473,7 +483,7 @@ export default function SettingsPage() {
               </div>
             </form>
 
-            {/* 5. Database Purge with INLINE FEEDBACK */}
+            {/* 5. Database Purge */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-red-900/30 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="border-b border-slate-800/80 pb-3">
                 <h2 className="text-sm font-bold text-red-400 flex items-center gap-2">

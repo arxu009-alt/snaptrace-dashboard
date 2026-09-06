@@ -35,23 +35,20 @@ export default function InspectErrorModal({ log, onClose, onDelete, userTier = '
   const rawStack = log.stack_trace || log.stack || '';
   const parsedFrames: ParsedFrame[] = parseStackTrace(rawStack);
 
-  useEffect(() => {
+ useEffect(() => {
     async function checkTier() {
       const { data: { user } } = await supabase.auth.getUser();
       const email = user?.email?.toLowerCase() || '';
+      const isOwnerAccount = email === 'arxu1045@gmail.com' || email === 'arxu009@gmail.com';
 
-      if (
-        email === 'arxu1045@gmail.com' ||
-        email === 'arxu009@gmail.com' ||
-        userTier === 'starter_pro' ||
-        userTier === 'team_scale'
-      ) {
+      if (isOwnerAccount || userTier === 'starter_pro' || userTier === 'team_scale') {
         setIsOwnerOrPro(true);
+      } else {
+        setIsOwnerOrPro(false);
       }
     }
     checkTier();
   }, [userTier]);
-
   const handleCopyForCursor = () => {
     const cursorPrompt = `Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:
 
