@@ -16,6 +16,8 @@ export default function DashboardLayout({ children }) {
   const [authChecking, setAuthChecking] = useState(true);
   const [userDisplayName, setUserDisplayName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [userPlanTier, setUserPlanTier] = useState('free');
+  const [isOwner, setIsOwner] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -41,6 +43,23 @@ export default function DashboardLayout({ children }) {
         const email = session.user?.email || '';
         setUserDisplayName(name || email.split('@')[0] || 'Developer');
         setUserEmail(email);
+
+        // Check owner email
+        if (email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com') {
+          setIsOwner(true);
+          setUserPlanTier('team_scale');
+        } else {
+          const { data: projects } = await supabase
+            .from('projects')
+            .select('plan_tier')
+            .eq('user_id', session.user.id)
+            .limit(1);
+
+          if (projects && projects.length > 0) {
+            setUserPlanTier(projects[0].plan_tier || 'free');
+          }
+        }
+
         setAuthChecking(false);
       }
     }
@@ -55,6 +74,11 @@ export default function DashboardLayout({ children }) {
         const email = session.user.email || '';
         setUserDisplayName(name || email.split('@')[0] || 'Developer');
         setUserEmail(email);
+
+        if (email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com') {
+          setIsOwner(true);
+          setUserPlanTier('team_scale');
+        }
       }
     });
 
@@ -106,7 +130,37 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  const userInitial = userDisplayName ? userDisplayName.charAt(0).toUpperCase() : 'D';
+  const userInitial = userDisplayName ? userDisplayName.charAt(0).toUpperCase() : 'M';
+
+  // Render Plan Tier Pill Badge
+  const renderTierPill = () => {
+    if (isOwner) {
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 uppercase tracking-wider shadow-sm flex items-center gap-1">
+          <span>👑</span> OWNER
+        </span>
+      );
+    }
+    if (userPlanTier === 'team_scale') {
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 uppercase tracking-wider shadow-sm">
+          TEAM
+        </span>
+      );
+    }
+    if (userPlanTier === 'starter_pro') {
+      return (
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 uppercase tracking-wider shadow-sm">
+          PRO
+        </span>
+      );
+    }
+    return (
+      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700 uppercase tracking-wider">
+        FREE
+      </span>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans">
@@ -117,7 +171,7 @@ export default function DashboardLayout({ children }) {
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
-        {/* Brand Header with BETA Badge */}
+        {/* Brand Header */}
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between min-w-[240px]">
           <Link href="/dashboard" className="transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
@@ -174,7 +228,7 @@ export default function DashboardLayout({ children }) {
         {/* Top Header Bar */}
         <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/80 backdrop-blur-md px-6 flex items-center justify-between z-40">
           
-          {/* Left Area: Sidebar Collapse Toggle + Breadcrumbs */}
+          {/* Left Area: Collapse Toggle + Breadcrumbs */}
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -197,14 +251,14 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
 
-          {/* Right Area: Feedback Button + Live Badge + User Profile */}
+          {/* Right Area: Feedback + Live Badge + Plan Badge Attached to Profile */}
           <div id="tour-header-actions" className="flex items-center space-x-3 sm:space-x-4">
             
             {/* Feedback Button */}
             <button
               onClick={() => setFeedbackOpen(true)}
               className="px-3 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-              title="Give beta feedback or feature requests"
+              title="Give beta feedback"
             >
               <span>💡</span>
               <span className="hidden sm:inline">Feedback</span>
@@ -221,34 +275,45 @@ export default function DashboardLayout({ children }) {
               </span>
             </div>
 
-            {/* Profile Avatar & Dropdown */}
+            {/* Profile Button with Integrated Plan Tier Badge */}
             <div className="relative">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2.5 p-1 rounded-xl hover:bg-slate-800/50 transition cursor-pointer"
+                className="flex items-center space-x-2.5 p-1.5 bg-slate-900/60 border border-slate-800 rounded-2xl hover:border-yellow-400/40 transition cursor-pointer"
               >
-                <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-yellow-500/20 border border-yellow-400/40">
+                <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-yellow-500 to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-yellow-500/20">
                   {userInitial}
                 </div>
-                <span className="hidden lg:inline text-xs text-slate-200 font-bold max-w-[130px] truncate">
+                
+                <span className="hidden lg:inline text-xs text-slate-200 font-bold max-w-[120px] truncate">
                   {userDisplayName}
                 </span>
+
+                {/* Visible Tier Badge */}
+                <div>
+                  {renderTierPill()}
+                </div>
+
                 <span className="text-slate-500 text-[10px]">▾</span>
               </button>
 
+              {/* Profile Dropdown Menu */}
               {profileDropdownOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-56 bg-[#090D16] border border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+                  className="absolute right-0 mt-2 w-60 bg-[#090D16] border border-slate-800 rounded-3xl shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-100 font-sans"
                   onMouseLeave={() => setProfileDropdownOpen(false)}
                 >
-                  <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
-                    <p className="text-xs text-white font-bold truncate">{userDisplayName}</p>
+                  <div className="px-3 py-2.5 border-b border-slate-800/80 mb-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-white font-bold truncate">{userDisplayName}</p>
+                      {renderTierPill()}
+                    </div>
                     <p className="text-[10px] text-slate-400 font-mono truncate">{userEmail}</p>
                   </div>
 
                   <button
                     onClick={handleTriggerTour}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-yellow-300 hover:bg-yellow-400/10 transition cursor-pointer text-left"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-yellow-300 hover:bg-yellow-400/10 transition cursor-pointer text-left font-semibold"
                   >
                     <span>🎓</span>
                     <span>Replay Setup Tour</span>
@@ -260,7 +325,7 @@ export default function DashboardLayout({ children }) {
                     className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
                   >
                     <span>⚙️</span>
-                    <span>Account & AI Settings</span>
+                    <span>Account & Subscription</span>
                   </Link>
 
                   <Link
