@@ -28,49 +28,90 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
 2. 🔍 Root Cause Analysis: Exactly which file/line caused it.
 3. 🛠️ Proposed Code Patch: Corrected code snippet to fix the issue.`;
 
-    // 1. Google Gemini Provider (100% Free - Works with AIza and AQ keys)
+    // 1. Google Gemini Provider (Handles all AQ. and AIza keys)
     if (provider === 'gemini' || key.startsWith('AQ') || key.startsWith('AIza') || !key.startsWith('sk-')) {
-      const models = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
-      let outputText = '';
-      let lastErr = '';
+      
+      // Approach A: Google's Official Universal Chat Endpoint
+      try {
+        const geminiChatRes = await fetch(
+          'https://generativelanguage.googleapis.com/v1beta/chat/completions',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${key}`,
+            },
+            body: JSON.stringify({
+              model: 'gemini-1.5-flash',
+              messages: [
+                {
+                  role: 'system',
+                  content:
+                    'You are an expert software engineer and crash diagnostic AI. Analyze the given exception and stack trace.',
+                },
+                { role: 'user', content: prompt },
+              ],
+              temperature: 0.2,
+            }),
+          }
+        );
 
-      for (const model of models) {
+        const geminiChatData = await geminiChatRes.json();
+        if (geminiChatRes.ok && geminiChatData.choices?.[0]?.message?.content) {
+          return NextResponse.json({
+            success: true,
+            analysis: geminiChatData.choices[0].message.content,
+          });
+        }
+      } catch (chatErr) {
+        // Fallback to Direct REST
+      }
+
+      // Approach B: Direct REST Fallback
+      const activeGeminiModels = [
+        'gemini-1.5-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash-8b',
+        'gemini-1.5-pro'
+      ];
+
+      for (const model of activeGeminiModels) {
         try {
-          const res = await fetch(
+          const restRes = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
             {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: {
+                'Content-Type': 'application/json',
+              },
               body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
               }),
             }
           );
 
-          const data = await res.json();
-
-          if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-            outputText = data.candidates[0].content.parts[0].text;
-            break;
-          } else if (data.error?.message) {
-            lastErr = data.error.message;
+          const restData = await restRes.json();
+          if (restRes.ok && restData.candidates?.[0]?.content?.parts?.[0]?.text) {
+            return NextResponse.json({
+              success: true,
+              analysis: restData.candidates[0].content.parts[0].text,
+            });
           }
-        } catch (e: any) {
-          lastErr = e.message;
+        } catch (restErr) {
+          // Try next model
         }
       }
 
-      if (!outputText) {
-        return NextResponse.json(
-          { error: lastErr || 'Google Gemini API request failed. Please check your key at aistudio.google.com.' },
-          { status: 400 }
-        );
-      }
-
-      return NextResponse.json({ success: true, analysis: outputText });
+      return NextResponse.json(
+        {
+          error:
+            'Google Gemini could not authenticate this key. Please ensure you copied the full key from aistudio.google.com/apikey.',
+        },
+        { status: 400 }
+      );
     }
 
-    // 2. OpenAI Provider (Requires account with positive balance)
+    // 2. OpenAI Provider (sk-...)
     if (key.startsWith('sk-')) {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -89,10 +130,9 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
       });
 
       const data = await res.json();
-
       if (!res.ok) {
         return NextResponse.json(
-          { error: data.error?.message || 'OpenAI API request failed.' },
+          { error: data.error?.message || 'OpenAI API key error.' },
           { status: 400 }
         );
       }
