@@ -93,7 +93,8 @@ ${rawStack || 'No stack trace provided'}
     setAiError(null);
 
     try {
-      const savedApiKey = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_openai_key') : null;
+      const savedProvider = (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_ai_provider') : 'gemini') || 'gemini';
+      const savedApiKey = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_ai_key') || localStorage.getItem('snaptrace_openai_key') : null;
 
       if (!savedApiKey) {
         setAiError('NO_KEY');
@@ -104,8 +105,8 @@ ${rawStack || 'No stack trace provided'}
       const key = savedApiKey.trim();
       let analysisText = '';
 
-      // 1. If Google Gemini API Key (Starts with 'AIzaSy...')
-      if (key.startsWith('AIza')) {
+      // 1. Google Gemini Provider
+      if (savedProvider === 'gemini' || key.startsWith('AIza') || key.startsWith('AQ')) {
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
           {
@@ -124,8 +125,8 @@ URL: ${log.url || 'N/A'}
 Stack Trace:
 ${rawStack || 'No stack trace provided'}
 
-Provide a structured, developer-friendly diagnosis in 3 clear sections:
-1. 💡 Plain English Summary: What went wrong.
+Provide a structured diagnosis in 3 clean sections:
+1. 💡 Plain English Summary: What broke and why.
 2. 🔍 Root Cause Analysis: Exactly which file/line caused it.
 3. 🛠️ Proposed Code Patch: Corrected code snippet to fix the issue.`,
                     },
@@ -138,12 +139,12 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
 
         const data = await res.json();
         if (!res.ok) {
-          throw new Error(data.error?.message || 'Google Gemini API request failed.');
+          throw new Error(data.error?.message || 'Google Gemini API key was rejected.');
         }
 
         analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No diagnosis generated.';
       } 
-      // 2. If OpenAI API Key (Starts with 'sk-...')
+      // 2. OpenAI Provider
       else {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -359,7 +360,7 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
             </div>
           )}
 
-          {/* 3. AI Diagnosis View (Supports Google Gemini & OpenAI) */}
+          {/* 3. AI Diagnosis View */}
           {activeTab === 'ai' && (
             <div className="space-y-4">
               {!isOwnerOrPro ? (
@@ -396,21 +397,21 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
               ) : aiLoading ? (
                 <div className="p-12 flex flex-col items-center justify-center space-y-3">
                   <div className="h-8 w-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs text-slate-400">Analyzing crash telemetry with AI model...</p>
+                  <p className="text-xs text-slate-400 font-mono">Analyzing crash telemetry with AI model...</p>
                 </div>
               ) : aiError === 'NO_KEY' ? (
                 <div className="p-6 bg-slate-900 border border-yellow-400/30 rounded-2xl text-center space-y-3 font-sans">
                   <div className="text-2xl">🔑</div>
                   <h3 className="text-sm font-bold text-white">No AI API Key Configured</h3>
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
-                    Paste your <strong>Free Google Gemini API Key</strong> or OpenAI key in Settings to unlock instant root-cause analysis and code fix patches!
+                    Paste your <strong>Google Gemini Key</strong> or OpenAI key in Settings to unlock instant root-cause analysis and code fix patches!
                   </p>
                   <Link
                     href="/dashboard/settings"
                     onClick={onClose}
                     className="inline-block px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 rounded-xl text-xs font-bold transition shadow-lg shadow-yellow-500/20"
                   >
-                    ⚙️ Open Settings to Paste Free Key
+                    ⚙️ Open Settings to Paste Key
                   </Link>
                 </div>
               ) : aiError ? (
