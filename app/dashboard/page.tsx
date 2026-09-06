@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface ErrorLog {
   id: number;
@@ -14,6 +15,7 @@ interface ErrorLog {
 }
 
 export default function DashboardOverviewPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [totalErrors, setTotalErrors] = useState(0);
   const [prodErrors, setProdErrors] = useState(0);
@@ -24,19 +26,32 @@ export default function DashboardOverviewPage() {
   const [hourlyDistribution, setHourlyDistribution] = useState<number[]>(new Array(12).fill(0));
 
   const loadDashboardData = useCallback(async () => {
+    // 1. Get user session
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
       return;
     }
 
-    const { data: userProjects } = await supabase
-      .from('projects')
-      .select('id, name, api_key')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    // 2. Fetch projects & errors in parallel for maximum loading speed
+    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
+    const isAll = !savedProjectId || savedProjectId === 'all';
 
-    if (!userProjects || userProjects.length === 0) {
+    const [projectsRes, errorsRes] = await Promise.all([
+      supabase
+        .from('projects')
+        .select('id, name, api_key')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false }),
+      isAll
+        ? supabase.from('errors').select('*').order('created_at', { ascending: false })
+        : supabase.from('errors').select('*').eq('project_id', savedProjectId).order('created_at', { ascending: false })
+    ]);
+
+    const userProjects = projectsRes.data || [];
+    const errors = errorsRes.data || [];
+
+    if (userProjects.length === 0) {
       setProjectKey('No API Key Created Yet');
       setTotalErrors(0);
       setProdErrors(0);
@@ -47,70 +62,46 @@ export default function DashboardOverviewPage() {
       return;
     }
 
-    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
-    const isAll = !savedProjectId || savedProjectId === 'all';
-    const userProjectIds = userProjects.map((p) => p.id);
-
-    let errorQuery = supabase
-      .from('errors')
-      .select('*')
-      .order('created_at', { ascending: false });
-
     if (isAll) {
       setSelectedProjectLabel('All Projects (Global Stream)');
       setProjectKey(userProjects[0].api_key);
-      errorQuery = errorQuery.in('project_id', userProjectIds);
     } else {
       const activeProject = userProjects.find((p) => p.id === savedProjectId) || userProjects[0];
       setSelectedProjectLabel(activeProject.name);
       setProjectKey(activeProject.api_key);
-      errorQuery = errorQuery.eq('project_id', activeProject.id);
     }
 
-    const { data: errors, error } = await errorQuery;
+    setTotalErrors(errors.length);
+    setProdErrors(errors.filter((e) => e.environment === 'production').length);
+    setDevErrors(errors.filter((e) => e.environment === 'development').length);
+    setRecentErrors(errors.slice(0, 6));
 
-    if (!error && errors) {
-      setTotalErrors(errors.length);
-      setProdErrors(errors.filter((e) => e.environment === 'production').length);
-      setDevErrors(errors.filter((e) => e.environment === 'development').length);
-      setRecentErrors(errors.slice(0, 6));
+    // 12-hour hourly buckets
+    const buckets = new Array(12).fill(0);
+    const now = Date.now();
+    const oneHourMs = 60 * 60 * 1000;
+    const twelveHoursMs = 12 * oneHourMs;
 
-      // Calculate 12-hour hourly buckets
-      const buckets = new Array(12).fill(0);
-      const now = Date.now();
-      const oneHourMs = 60 * 60 * 1000;
-      const twelveHoursMs = 12 * oneHourMs;
+    errors.forEach((err) => {
+      const rawDate = err.created_at;
+      const errTime = rawDate ? new Date(rawDate).getTime() : now;
 
-      errors.forEach((err) => {
-        const rawDate = err.created_at;
-        const errTime = rawDate ? new Date(rawDate).getTime() : now;
-
-        if (!isNaN(errTime)) {
-          const diff = now - errTime;
-          // Within last 12 hours (including current hour)
-          if (diff >= -15 * 60 * 1000 && diff <= twelveHoursMs) {
-            let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
-            if (bucketIndex < 0) bucketIndex = 0;
-            if (bucketIndex > 11) bucketIndex = 11;
-            buckets[bucketIndex] += 1;
-          }
+      if (!isNaN(errTime)) {
+        const diff = now - errTime;
+        if (diff >= -15 * 60 * 1000 && diff <= twelveHoursMs) {
+          let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
+          if (bucketIndex < 0) bucketIndex = 0;
+          if (bucketIndex > 11) bucketIndex = 11;
+          buckets[bucketIndex] += 1;
         }
-      });
-
-      // Ensure that if errors exist, the current hour shows active
-      if (errors.length > 0 && buckets.every(b => b === 0)) {
-        buckets[11] = Math.min(errors.length, 5);
       }
+    });
 
-      setHourlyDistribution(buckets);
-    } else {
-      setTotalErrors(0);
-      setProdErrors(0);
-      setDevErrors(0);
-      setRecentErrors([]);
-      setHourlyDistribution(new Array(12).fill(0));
+    if (errors.length > 0 && buckets.every(b => b === 0)) {
+      buckets[11] = Math.min(errors.length, 5);
     }
 
+    setHourlyDistribution(buckets);
     setLoading(false);
   }, []);
 
@@ -118,7 +109,6 @@ export default function DashboardOverviewPage() {
     loadDashboardData();
     window.addEventListener('snaptrace_project_change', loadDashboardData);
 
-    // ⚡ Instant Real-Time WebSocket Injection
     const channel = supabase
       .channel('realtime-overview-feed')
       .on(
@@ -130,26 +120,18 @@ export default function DashboardOverviewPage() {
         },
         (payload) => {
           const newErr = payload.new as ErrorLog;
-          
-          // 1. Instantly increment total counters live
           setTotalErrors((prev) => prev + 1);
           if (newErr.environment === 'production') {
             setProdErrors((prev) => prev + 1);
           } else {
             setDevErrors((prev) => prev + 1);
           }
-
-          // 2. Instantly push to top of Recent List
           setRecentErrors((prev) => [newErr, ...prev.slice(0, 5)]);
-
-          // 3. Instantly bump the rightmost velocity bar
           setHourlyDistribution((prev) => {
             const copy = [...prev];
             copy[11] = (copy[11] || 0) + 1;
             return copy;
           });
-
-          // 4. Sync full background data
           loadDashboardData();
         }
       )
@@ -162,6 +144,11 @@ export default function DashboardOverviewPage() {
   }, [loadDashboardData]);
 
   const maxBucketVal = Math.max(...hourlyDistribution, 1);
+
+  // Click handler to jump to error in Exception Logs
+  const handleRecentErrorClick = (err: ErrorLog) => {
+    router.push(`/dashboard/errors?errorId=${err.id}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
@@ -242,7 +229,7 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
 
-            {/* 2. Visual 12-Hour Velocity Bar Chart (Fixed Height Rendering) */}
+            {/* 2. Visual 12-Hour Velocity Bar Chart */}
             <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
                 <div>
@@ -257,7 +244,6 @@ export default function DashboardOverviewPage() {
                 </span>
               </div>
 
-              {/* Chart Grid with Explicit 120px Height */}
               <div className="pt-4 pb-2">
                 <div className="h-32 w-full flex items-end justify-between gap-2 sm:gap-3 px-2">
                   {hourlyDistribution.map((count, idx) => {
@@ -266,12 +252,10 @@ export default function DashboardOverviewPage() {
                     
                     return (
                       <div key={idx} className="flex-1 h-full flex flex-col justify-end items-center gap-2 group relative">
-                        {/* Hover Tooltip */}
                         <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-yellow-400/40 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-2xl z-20">
                           {count} {count === 1 ? 'incident' : 'incidents'}
                         </div>
 
-                        {/* Bar Pillar */}
                         <div className="w-full bg-[#05070E] rounded-xl h-full flex items-end overflow-hidden p-1 border border-slate-800/80">
                           <div
                             style={{ height: `${hasErrors ? Math.max(heightPercent, 35) : 6}%` }}
@@ -295,14 +279,17 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
 
-            {/* 3. Bottom Grid */}
+            {/* 3. Bottom Grid: CLICKABLE Recent Exceptions */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
               <div className="lg:col-span-2 bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
                 <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
-                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>🚨</span> Recent Captured Crashes
-                  </h2>
+                  <div>
+                    <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span>🚨</span> Recent Captured Crashes
+                    </h2>
+                    <p className="text-[11px] text-slate-500 font-mono">Click any exception row to inspect full trace & AI fixes</p>
+                  </div>
                   <Link
                     href="/dashboard/errors"
                     className="text-xs text-yellow-400 hover:underline font-semibold transition"
@@ -318,31 +305,40 @@ export default function DashboardOverviewPage() {
                 ) : (
                   <div className="space-y-2.5">
                     {recentErrors.map((err) => (
-                      <div
+                      <button
                         key={err.id}
-                        className="flex items-center justify-between p-3.5 bg-[#05070E] border border-slate-800/80 hover:border-slate-700 rounded-2xl text-xs transition"
+                        onClick={() => handleRecentErrorClick(err)}
+                        className="w-full text-left flex items-center justify-between p-3.5 bg-[#05070E] border border-slate-800/80 hover:border-yellow-400/50 hover:bg-[#080d1a] rounded-2xl text-xs transition cursor-pointer group"
                       >
                         <div className="space-y-1 truncate max-w-md">
-                          <p className="font-semibold text-slate-200 truncate font-mono text-[12px]">{err.message}</p>
+                          <p className="font-semibold text-slate-200 group-hover:text-yellow-300 truncate font-mono text-[12px] transition">
+                            {err.message}
+                          </p>
                           <p className="text-slate-500 font-mono text-[10px]">
                             {new Date(err.created_at).toLocaleString()}
                           </p>
                         </div>
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
-                            err.environment === 'production'
-                              ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                          }`}
-                        >
-                          {err.environment}
-                        </span>
-                      </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
+                              err.environment === 'production'
+                                ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                            }`}
+                          >
+                            {err.environment}
+                          </span>
+                          <span className="text-slate-600 group-hover:text-yellow-400 transition font-mono text-xs">
+                            →
+                          </span>
+                        </div>
+                      </button>
                     ))}
                   </div>
                 )}
               </div>
 
+              {/* Quick Shortcuts */}
               <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="border-b border-slate-800/80 pb-3">

@@ -30,25 +30,30 @@ export default function InspectErrorModal({ log, onClose, onDelete, userTier = '
   const [aiError, setAiError] = useState<string | null>(null);
   const [copiedRaw, setCopiedRaw] = useState(false);
   const [copiedCursor, setCopiedCursor] = useState(false);
+  
+  // State initialization prevents badge flash
   const [isOwnerOrPro, setIsOwnerOrPro] = useState(false);
+  const [tierVerified, setTierVerified] = useState(false);
 
   const rawStack = log.stack_trace || log.stack || '';
   const parsedFrames: ParsedFrame[] = parseStackTrace(rawStack);
 
- useEffect(() => {
+  useEffect(() => {
     async function checkTier() {
       const { data: { user } } = await supabase.auth.getUser();
       const email = user?.email?.toLowerCase() || '';
-      const isOwnerAccount = email === 'arxu1045@gmail.com' || email === 'arxu009@gmail.com';
 
+      const isOwnerAccount = email === 'arxu1045@gmail.com' || email === 'arxu009@gmail.com';
       if (isOwnerAccount || userTier === 'starter_pro' || userTier === 'team_scale') {
         setIsOwnerOrPro(true);
       } else {
         setIsOwnerOrPro(false);
       }
+      setTierVerified(true);
     }
     checkTier();
   }, [userTier]);
+
   const handleCopyForCursor = () => {
     const cursorPrompt = `Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:
 
@@ -99,7 +104,6 @@ ${rawStack || 'No stack trace provided'}
         return;
       }
 
-      // Secure Server-Side AI Execution (Zero Browser CORS / Zero 404 Errors)
       const res = await fetch('/api/ai/diagnose', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -169,7 +173,10 @@ ${rawStack || 'No stack trace provided'}
             >
               <span>✨</span>
               <span>Analyze with AI</span>
-              {!isOwnerOrPro && <span className="text-[9px] bg-slate-950/20 px-1 py-0.2 rounded font-mono">PRO</span>}
+              {/* Only render PRO badge if tier verification finished and user is not Pro */}
+              {tierVerified && !isOwnerOrPro && (
+                <span className="text-[9px] bg-slate-950/20 px-1 py-0.2 rounded font-mono">PRO</span>
+              )}
             </button>
 
             <button
@@ -234,7 +241,9 @@ ${rawStack || 'No stack trace provided'}
             }`}
           >
             <span>✨ AI Diagnosis</span>
-            {!isOwnerOrPro && <span className="px-1.5 py-0.2 bg-yellow-400/20 text-yellow-300 text-[9px] rounded font-bold">PRO</span>}
+            {tierVerified && !isOwnerOrPro && (
+              <span className="px-1.5 py-0.2 bg-yellow-400/20 text-yellow-300 text-[9px] rounded font-bold">PRO</span>
+            )}
           </button>
         </div>
 
@@ -305,7 +314,7 @@ ${rawStack || 'No stack trace provided'}
           {/* 3. AI Diagnosis View */}
           {activeTab === 'ai' && (
             <div className="space-y-4">
-              {!isOwnerOrPro ? (
+              {tierVerified && !isOwnerOrPro ? (
                 <div className="p-8 bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl text-center space-y-4 shadow-2xl">
                   <div className="text-3xl">🤖</div>
                   <div className="space-y-1">

@@ -24,6 +24,7 @@ export default function ExceptionLogsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const urlProjectId = searchParams.get('projectId');
+  const urlErrorId = searchParams.get('errorId');
 
   const [logs, setLogs] = useState<ErrorLog[]>([]);
   const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
@@ -31,11 +32,9 @@ export default function ExceptionLogsPage() {
   const [currentProjectName, setCurrentProjectName] = useState<string>('All Projects');
   const [isUrlFiltered, setIsUrlFiltered] = useState<boolean>(false);
 
-  // Bulk Resolve Modal State
   const [showBulkResolveModal, setShowBulkResolveModal] = useState<boolean>(false);
   const [bulkResolving, setBulkResolving] = useState<boolean>(false);
 
-  // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'development'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unresolved' | 'resolved'>('unresolved');
@@ -86,9 +85,17 @@ export default function ExceptionLogsPage() {
       console.error('Error fetching logs:', error.message);
     } else if (data) {
       setLogs(data);
+
+      // Auto-open Inspect Modal if errorId was passed from Overview click!
+      if (urlErrorId) {
+        const matched = data.find((l) => String(l.id) === String(urlErrorId));
+        if (matched) {
+          setSelectedLog(matched);
+        }
+      }
     }
     setLoading(false);
-  }, [urlProjectId]);
+  }, [urlProjectId, urlErrorId]);
 
   useEffect(() => {
     loadLogs();
@@ -136,7 +143,6 @@ export default function ExceptionLogsPage() {
     }
   };
 
-  // Bulk Resolve Handler
   const handleBulkResolveConfirm = async () => {
     const unresolvedList = logs.filter((l) => (l.status || 'unresolved') === 'unresolved');
     if (unresolvedList.length === 0) {
@@ -147,7 +153,6 @@ export default function ExceptionLogsPage() {
     setBulkResolving(true);
     const unresolvedIds = unresolvedList.map((l) => l.id);
 
-    // Optimistic UI update
     setLogs((prev) =>
       prev.map((l) => (unresolvedIds.includes(l.id) ? { ...l, status: 'resolved' } : l))
     );
@@ -247,8 +252,6 @@ export default function ExceptionLogsPage() {
         <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-4 space-y-4 shadow-xl">
           
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-            
-            {/* Search Input */}
             <div className="flex-1 relative">
               <span className="absolute left-3.5 top-2.5 text-slate-500 text-xs">🔍</span>
               <input
@@ -260,7 +263,6 @@ export default function ExceptionLogsPage() {
               />
             </div>
 
-            {/* Environment Filter Pills */}
             <div className="flex items-center space-x-1 bg-[#05070E] border border-slate-800 p-1 rounded-xl self-start md:self-auto">
               {(['all', 'production', 'development'] as const).map((env) => (
                 <button
@@ -276,13 +278,10 @@ export default function ExceptionLogsPage() {
                 </button>
               ))}
             </div>
-
           </div>
 
-          {/* Triage Status Tabs & Bulk Action Button */}
+          {/* Triage Status Tabs */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-800/80 pt-3 text-xs">
-            
-            {/* Left Tabs */}
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setStatusFilter('unresolved')}
@@ -324,23 +323,19 @@ export default function ExceptionLogsPage() {
               </button>
             </div>
 
-            {/* Right: Mark All as Resolved Button */}
             {unresolvedCount > 0 && (
               <button
                 onClick={() => setShowBulkResolveModal(true)}
                 className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shadow-sm"
-                title="Mark all unresolved errors as resolved"
               >
                 <span>✓</span>
                 <span>Mark All as Resolved</span>
               </button>
             )}
-
           </div>
-
         </div>
 
-        {/* Exception Table with Wide Columns */}
+        {/* Exception Table */}
         <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           {loading ? (
             <div className="p-20 flex flex-col items-center justify-center space-y-4 animate-in fade-in">
@@ -387,7 +382,6 @@ export default function ExceptionLogsPage() {
                           isResolved ? 'opacity-50 bg-[#05070E]/50' : ''
                         }`}
                       >
-                        {/* Status Checkbox */}
                         <td className="py-4 px-4 text-center">
                           <button
                             onClick={() => handleToggleStatus(log.id, log.status)}
@@ -402,19 +396,16 @@ export default function ExceptionLogsPage() {
                           </button>
                         </td>
 
-                        {/* Timestamp */}
                         <td className="py-4 px-4 text-slate-400 font-mono text-[11px] whitespace-nowrap">
                           {new Date(log.created_at).toLocaleString()}
                         </td>
 
-                        {/* Message */}
                         <td className="py-4 px-4 font-mono font-medium truncate max-w-xs md:max-w-sm">
                           <span className={isResolved ? 'line-through text-slate-400' : 'text-slate-100 font-semibold'}>
                             {log.message || log.stack || 'Unknown exception'}
                           </span>
                         </td>
 
-                        {/* Environment Badge */}
                         <td className="py-4 px-4 whitespace-nowrap">
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
@@ -427,7 +418,6 @@ export default function ExceptionLogsPage() {
                           </span>
                         </td>
 
-                        {/* Actions */}
                         <td className="py-4 px-6 text-right whitespace-nowrap space-x-2">
                           <button
                             onClick={() => setSelectedLog(log)}
@@ -437,7 +427,7 @@ export default function ExceptionLogsPage() {
                           </button>
                           <button
                             onClick={() => handleDeleteLog(log.id)}
-                            className="px-2.5 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-xs text-red-400 font-medium rounded-xl border border-red-800/50 transition cursor-pointer"
+                            className="px-2.5 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-semibold rounded-xl transition cursor-pointer"
                           >
                             Delete
                           </button>
@@ -455,16 +445,21 @@ export default function ExceptionLogsPage() {
         {selectedLog && (
           <InspectErrorModal
             log={selectedLog}
-            onClose={() => setSelectedLog(null)}
+            onClose={() => {
+              setSelectedLog(null);
+              // Clean url query if errorId was present
+              if (urlErrorId) {
+                router.replace('/dashboard/errors');
+              }
+            }}
             onDelete={handleDeleteLog}
           />
         )}
 
-        {/* Bulk Mark As Resolved Confirmation Modal */}
+        {/* Bulk Resolve Modal */}
         {showBulkResolveModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
             <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl shadow-yellow-500/10">
-              
               <div className="flex items-start gap-3">
                 <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-xl">
                   ✓
@@ -501,7 +496,6 @@ export default function ExceptionLogsPage() {
                   {bulkResolving ? 'Resolving All...' : 'Confirm & Mark Resolved →'}
                 </button>
               </div>
-
             </div>
           </div>
         )}

@@ -6,7 +6,7 @@ import SnapTraceLogo from '@/components/SnapTraceLogo';
 
 export default function SettingsPage() {
   const [userEmail, setUserEmail] = useState<string>('');
-  const [aiProvider, setAiProvider] = useState<'gemini' | 'openai' | 'claude'>('gemini');
+  const [aiProvider, setAiProvider] = useState<'gemini' | 'openai'>('gemini');
   const [aiKey, setAiKey] = useState<string>('');
   const [showAiKey, setShowAiKey] = useState<boolean>(false);
   const [aiKeySaved, setAiKeySaved] = useState<boolean>(false);
@@ -19,7 +19,7 @@ export default function SettingsPage() {
   const [currentTier, setCurrentTier] = useState<string>('free');
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
-  // Button Feedback States
+  // Feedback States
   const [loading, setLoading] = useState<boolean>(true);
   const [savingNotif, setSavingNotif] = useState<boolean>(false);
   const [notifSavedMsg, setNotifSavedMsg] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export default function SettingsPage() {
   const [purging, setPurging] = useState<boolean>(false);
   const [purgeMsg, setPurgeMsg] = useState<string | null>(null);
 
-  // Live Lemon Squeezy Checkout URLs
+  // Checkout URLs
   const PRO_CHECKOUT_URL = 'https://snaptrace.lemonsqueezy.com/checkout/buy/b7355f43-3ece-4fa9-a91e-ba847f3cd52e';
   const TEAM_CHECKOUT_URL = 'https://snaptrace.lemonsqueezy.com/checkout/buy/913b182d-9db4-41c3-9c93-ed68d83eaae0';
 
@@ -53,7 +53,6 @@ export default function SettingsPage() {
       const ownerCheck = uEmail.toLowerCase() === 'arxu1045@gmail.com' || uEmail.toLowerCase() === 'arxu009@gmail.com';
       setIsOwner(ownerCheck);
 
-      // Load AI Configuration
       const savedProvider = (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_ai_provider') : 'gemini') as any;
       const savedKey = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_ai_key') || localStorage.getItem('snaptrace_openai_key') : '';
       
@@ -63,7 +62,7 @@ export default function SettingsPage() {
         setAiKeySaved(true);
       }
 
-      // ⚠️ STRICT USER_ID FILTERING: Only fetch projects belonging to THIS user
+      // STRICT USER_ID FILTERING
       const { data: userProjects } = await supabase
         .from('projects')
         .select('*')
@@ -85,7 +84,6 @@ export default function SettingsPage() {
           setCurrentTier(p.plan_tier || 'free');
         }
       } else {
-        // Brand new user with no projects yet
         setProjectId('');
         setApiKey('No project created yet');
         setEmail(uEmail);
@@ -214,6 +212,8 @@ export default function SettingsPage() {
     window.open(finalUrl, '_blank');
   };
 
+  const isProActive = isOwner || currentTier === 'starter_pro' || currentTier === 'team_scale';
+
   const getTierBadge = () => {
     if (isOwner) {
       return (
@@ -306,8 +306,8 @@ export default function SettingsPage() {
                 </div>
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">In-Dashboard AI</span>
-                  <span className={isOwner || currentTier !== 'free' ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
-                    {isOwner || currentTier !== 'free' ? '✓ Unlimited Copilot Active' : 'Prompt Export Only'}
+                  <span className={isProActive ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
+                    {isProActive ? '✓ Unlimited Copilot Active' : 'Locked (Pro Feature)'}
                   </span>
                 </div>
               </div>
@@ -408,8 +408,8 @@ export default function SettingsPage() {
               </div>
             </form>
 
-            {/* 4. BYOK AI Copilot Card */}
-            <form onSubmit={handleSaveAiKey} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
+            {/* 4. BYOK AI Copilot Card (Locked for Free Non-Owner Accounts) */}
+            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4 relative overflow-hidden">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -421,67 +421,85 @@ export default function SettingsPage() {
                 </div>
                 <span
                   className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase font-mono ${
-                    aiKeySaved
+                    isProActive
                       ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                      : 'bg-slate-800 text-slate-400'
+                      : 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/30'
                   }`}
                 >
-                  {aiKeySaved ? '✓ AI Key Active' : 'No Key Set'}
+                  {isProActive ? '✓ AI Key Active' : '🔒 Starter Pro Feature'}
                 </span>
               </div>
 
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block font-mono">SELECT AI MODEL PROVIDER</label>
-                  <select
-                    value={aiProvider}
-                    onChange={(e) => setAiProvider(e.target.value as any)}
-                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-yellow-300 font-bold focus:outline-none focus:border-yellow-400 cursor-pointer"
+              {!isProActive ? (
+                /* Free Tier Lock Overlay / Message */
+                <div className="p-6 bg-[#05070E] rounded-2xl border border-yellow-400/30 text-center space-y-3">
+                  <div className="text-2xl">🔒</div>
+                  <h3 className="text-sm font-bold text-white">In-Dashboard AI Copilot is Locked</h3>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                    Free accounts can export 1-click prompts for Cursor & Claude. To unlock direct in-dashboard AI root-cause diagnostics and code patches, upgrade to Starter Pro.
+                  </p>
+                  <button
+                    onClick={() => handleUpgradeCheckout(PRO_CHECKOUT_URL)}
+                    className="px-6 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition cursor-pointer"
                   >
-                    <option value="gemini">Google Gemini (100% Free - Gemini Flash)</option>
-                    <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
-                  </select>
+                    ⚡ Upgrade to Starter Pro ($9/mo) to Unlock →
+                  </button>
                 </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300 block font-mono">
-                    {aiProvider === 'gemini' ? 'GOOGLE GEMINI API KEY (AIza... / AQ...)' : 'OPENAI API KEY (sk-...)'}
-                  </label>
-                  
-                  <div className="relative">
-                    <input
-                      type={showAiKey ? 'text' : 'password'}
-                      value={aiKey}
-                      onChange={(e) => setAiKey(e.target.value)}
-                      placeholder={aiProvider === 'gemini' ? 'Paste your Google Gemini Key here' : 'sk-proj-...'}
-                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl pl-4 pr-12 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 font-mono transition"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowAiKey(!showAiKey)}
-                      className="absolute right-3.5 top-2.5 text-slate-400 hover:text-white text-xs cursor-pointer"
+              ) : (
+                /* Unlocked for Owner & Pro Accounts */
+                <form onSubmit={handleSaveAiKey} className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-300 block font-mono">SELECT AI MODEL PROVIDER</label>
+                    <select
+                      value={aiProvider}
+                      onChange={(e) => setAiProvider(e.target.value as any)}
+                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-yellow-300 font-bold focus:outline-none focus:border-yellow-400 cursor-pointer"
                     >
-                      {showAiKey ? '🙈 Hide' : '👁️ Show'}
+                      <option value="gemini">Google Gemini (Gemini 2.5 Flash Lite - Free)</option>
+                      <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-300 block font-mono">
+                      {aiProvider === 'gemini' ? 'GOOGLE GEMINI API KEY (AQ... / AIza...)' : 'OPENAI API KEY (sk-...)'}
+                    </label>
+                    
+                    <div className="relative">
+                      <input
+                        type={showAiKey ? 'text' : 'password'}
+                        value={aiKey}
+                        onChange={(e) => setAiKey(e.target.value)}
+                        placeholder={aiProvider === 'gemini' ? 'Paste your Google Gemini Key here' : 'sk-proj-...'}
+                        className="w-full bg-[#05070E] border border-slate-800 rounded-xl pl-4 pr-12 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 font-mono transition"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAiKey(!showAiKey)}
+                        className="absolute right-3.5 top-2.5 text-slate-400 hover:text-white text-xs cursor-pointer"
+                      >
+                        {showAiKey ? '🙈 Hide' : '👁️ Show'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-1">
+                    {aiSavedMsg && (
+                      <span className="text-xs font-bold text-emerald-400 font-mono animate-in fade-in">
+                        {aiSavedMsg}
+                      </span>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={savingAi}
+                      className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-lg shadow-purple-600/20"
+                    >
+                      {savingAi ? 'Saving...' : 'Save AI Configuration →'}
                     </button>
                   </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-1">
-                {aiSavedMsg && (
-                  <span className="text-xs font-bold text-emerald-400 font-mono animate-in fade-in">
-                    {aiSavedMsg}
-                  </span>
-                )}
-                <button
-                  type="submit"
-                  disabled={savingAi}
-                  className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-lg shadow-purple-600/20"
-                >
-                  {savingAi ? 'Saving...' : 'Save AI Configuration →'}
-                </button>
-              </div>
-            </form>
+                </form>
+              )}
+            </div>
 
             {/* 5. Database Purge */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-red-900/30 rounded-3xl p-6 shadow-xl space-y-4">
