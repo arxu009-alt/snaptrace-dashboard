@@ -104,68 +104,64 @@ ${rawStack || 'No stack trace provided'}
 
       const key = savedApiKey.trim();
       let analysisText = '';
+      let executionSuccess = false;
+      let lastErrorMessage = '';
 
-      // 1. Google Gemini (Supports both v1 REST & OpenAI-compatible format)
-      if (savedProvider === 'gemini' || key.startsWith('AIza') || key.startsWith('AQ')) {
-        let res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${key}`,
-            },
-            body: JSON.stringify({
-              model: 'gemini-1.5-flash',
-              messages: [
-                {
-                  role: 'system',
-                  content:
-                    'You are an expert crash diagnostic AI for SnapTrace. Analyze this runtime error and provide: 1. Plain English Summary, 2. Root Cause, 3. Code Fix Snippet.',
-                },
-                {
-                  role: 'user',
-                  content: `Error: ${log.message}\nEnvironment: ${log.environment}\nURL: ${log.url || 'N/A'}\nStack Trace:\n${rawStack}`,
-                },
-              ],
-            }),
-          }
-        );
+      const promptText = `You are an expert crash diagnostic AI for SnapTrace. Analyze this runtime error:
 
-        // Fallback to standard generateContent if OpenAI bridge differs
-        if (!res.ok) {
-          res = await fetch(
-            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [
-                  {
-                    parts: [
-                      {
-                        text: `You are an expert crash diagnostic AI for SnapTrace. Analyze this error:\nError: ${log.message}\nURL: ${log.url || 'N/A'}\nStack:\n${rawStack}\n\nProvide 1. Plain English Summary, 2. Root Cause, 3. Code Fix snippet.`,
-                      },
-                    ],
-                  },
-                ],
-              }),
+Error Message: ${log.message}
+Environment: ${log.environment}
+URL: ${log.url || 'N/A'}
+Stack Trace:
+${rawStack || 'No stack trace provided'}
+
+Provide a structured, developer-friendly diagnosis in 3 clear sections:
+1. 💡 Plain English Summary: What broke and why.
+2. 🔍 Root Cause Analysis: Exactly which file/line caused it.
+3. 🛠️ Proposed Code Patch: Corrected code snippet to fix the issue.`;
+
+      // 1. Google Gemini Multi-Model Cascade (Auto-tries active models)
+      if (savedProvider === 'gemini' || key.startsWith('AIza') || key.startsWith('AQ') || !key.startsWith('sk-')) {
+        const geminiModels = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
+
+        for (const model of geminiModels) {
+          try {
+            const res = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-goog-api-key': key,
+                },
+                body: JSON.stringify({
+                  contents: [
+                    {
+                      parts: [{ text: promptText }],
+                    },
+                  ],
+                }),
+              }
+            );
+
+            const data = await res.json();
+            if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+              analysisText = data.candidates[0].content.parts[0].text;
+              executionSuccess = true;
+              break;
+            } else {
+              lastErrorMessage = data.error?.message || `Failed on model ${model}`;
             }
-          );
+          } catch (e: any) {
+            lastErrorMessage = e.message;
+          }
         }
 
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error?.message || 'Google Gemini API request failed.');
+        if (!executionSuccess) {
+          throw new Error(lastErrorMessage || 'Google Gemini was unable to process the request. Please verify your API key.');
         }
-
-        // Parse result from either OpenAI bridge or generateContent
-        analysisText =
-          data.choices?.[0]?.message?.content ||
-          data.candidates?.[0]?.content?.parts?.[0]?.text ||
-          'No diagnosis generated.';
       } 
-      // 2. OpenAI (GPT-4o)
+      // 2. OpenAI Provider (GPT-4o)
       else {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -381,7 +377,7 @@ ${rawStack || 'No stack trace provided'}
             </div>
           )}
 
-          {/* 3. AI Diagnosis View */}
+          {/* 3. AI Diagnosis View (Universal Cascade) */}
           {activeTab === 'ai' && (
             <div className="space-y-4">
               {!isOwnerOrPro ? (
@@ -438,7 +434,7 @@ ${rawStack || 'No stack trace provided'}
               ) : aiError ? (
                 <div className="p-4 bg-red-950/30 border border-red-500/30 rounded-xl space-y-1 font-mono">
                   <p className="text-xs font-semibold text-red-400">⚠️ AI Diagnosis Error</p>
-                  <p className="text-xs text-slate-300">{aiError}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{aiError}</p>
                 </div>
               ) : aiAnalysis ? (
                 <div className="p-5 bg-gradient-to-b from-[#0e1424] to-[#070b14] border border-yellow-400/30 rounded-2xl space-y-3 font-sans">
