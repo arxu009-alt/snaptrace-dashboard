@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
+// Memory cache so once a model succeeds, it remembers it for instant 1s replies
+let cachedWorkingGeminiModel: string | null = null;
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -76,15 +79,15 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
       }
     }
 
-    // 3. Google Gemini Provider (Handles all AQ. and AIza keys with 2026 models)
-    let candidateModels = [
-      'gemini-2.5-flash-lite',
-      'gemini-2.0-flash',
-      'gemini-2.0-flash-lite',
-      'gemini-1.5-flash-8b',
-    ];
+    // 3. Google Gemini Provider (Handles all AQ. and AIza keys)
+    let candidateModels: string[] = [];
 
-    // Query Google to discover all active models on this key
+    // If we already know the working model from a previous call, try it first!
+    if (cachedWorkingGeminiModel) {
+      candidateModels.push(cachedWorkingGeminiModel);
+    }
+
+    // Query Google to discover active models for this key
     try {
       const listRes = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`
@@ -93,15 +96,33 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
       if (listData.models && Array.isArray(listData.models)) {
         const activeModels = listData.models
           .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
-          .map((m: any) => m.name.replace(/^models\//, ''));
+          .map((m: any) => m.name.replace(/^models\//, ''))
+          // Prioritize fast 'flash' models first
+          .sort((a: string, b: string) => {
+            const aFlash = a.includes('flash') ? 0 : 1;
+            const bFlash = b.includes('flash') ? 0 : 1;
+            return aFlash - bFlash;
+          });
 
         if (activeModels.length > 0) {
+          // Put the verified active models at the FRONT so they run immediately!
           candidateModels = Array.from(new Set([...candidateModels, ...activeModels]));
         }
       }
     } catch (e) {
-      // Use standard candidates
+      // Keep going if discovery hits a timeout
     }
+
+    // Standard fallback list appended at the end
+    candidateModels = Array.from(
+      new Set([
+        ...candidateModels,
+        'gemini-2.5-flash-lite',
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-lite',
+        'gemini-1.5-flash-8b',
+      ])
+    );
 
     let lastError = '';
 
@@ -121,6 +142,9 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
         const data = await res.json();
 
         if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+          // Cache this working model for future instant calls
+          cachedWorkingGeminiModel = model;
+
           return NextResponse.json({
             success: true,
             analysis: data.candidates[0].content.parts[0].text,
