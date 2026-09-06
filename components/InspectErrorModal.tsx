@@ -102,106 +102,27 @@ ${rawStack || 'No stack trace provided'}
         return;
       }
 
-      const key = savedApiKey.trim();
-      let analysisText = '';
+      // Secure Server-Side AI Execution (Zero Browser CORS / Zero 404 Errors)
+      const res = await fetch('/api/ai/diagnose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: savedApiKey.trim(),
+          provider: savedProvider,
+          message: log.message,
+          stackTrace: rawStack,
+          url: log.url,
+          environment: log.environment,
+        }),
+      });
 
-      const promptText = `You are an expert crash diagnostic AI engineer for SnapTrace. Analyze this runtime exception:
+      const data = await res.json();
 
-Error Message: ${log.message}
-Environment: ${log.environment}
-URL: ${log.url || 'N/A'}
-Stack Trace:
-${rawStack || 'No stack trace provided'}
-
-Provide a structured, developer-friendly diagnosis in 3 clear sections:
-1. 💡 Plain English Summary: What broke and why.
-2. 🔍 Root Cause Analysis: Exactly which file/line caused it.
-3. 🛠️ Proposed Code Patch: Corrected code snippet to fix the issue.`;
-
-      // 1. Google Gemini Active Production Models
-      if (savedProvider === 'gemini' || key.startsWith('AQ') || key.startsWith('AIza') || !key.startsWith('sk-')) {
-        const modelsToTry = [
-          'gemini-2.0-flash',
-          'gemini-1.5-flash-latest',
-          'gemini-1.5-flash-002',
-          'gemini-1.5-flash',
-          'gemini-pro',
-        ];
-
-        let executionSuccess = false;
-        let lastErrorMessage = '';
-
-        for (const model of modelsToTry) {
-          try {
-            const res = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'x-goog-api-key': key,
-                },
-                body: JSON.stringify({
-                  contents: [
-                    {
-                      parts: [{ text: promptText }],
-                    },
-                  ],
-                }),
-              }
-            );
-
-            const data = await res.json();
-            if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-              analysisText = data.candidates[0].content.parts[0].text;
-              executionSuccess = true;
-              break;
-            } else {
-              lastErrorMessage = data.error?.message || `Model ${model} returned error`;
-            }
-          } catch (e: any) {
-            lastErrorMessage = e.message;
-          }
-        }
-
-        if (!executionSuccess) {
-          throw new Error(lastErrorMessage || 'Google Gemini API request failed. Please check your API key.');
-        }
-      } 
-      // 2. OpenAI Provider (GPT-4o)
-      else {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${key}`,
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'You are an expert software engineer and crash diagnostic AI. Analyze the given exception and stack trace. Provide a clean 3-part response: 1. Plain English Summary, 2. Root Cause, 3. Proposed Code Fix with snippet.',
-              },
-              {
-                role: 'user',
-                content: `Error: ${log.message}\nEnvironment: ${log.environment}\nURL: ${log.url || 'N/A'}\nStack Trace:\n${rawStack}`,
-              },
-            ],
-            temperature: 0.2,
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error?.message || 'OpenAI API request failed.');
-        }
-
-        analysisText = data.choices?.[0]?.message?.content || 'No diagnosis generated.';
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to generate AI diagnosis');
       }
 
-      setAiAnalysis(analysisText);
+      setAiAnalysis(data.analysis);
     } catch (err: any) {
       setAiError(err.message || 'An unexpected error occurred during AI analysis.');
     } finally {
@@ -421,7 +342,7 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
               ) : aiLoading ? (
                 <div className="p-12 flex flex-col items-center justify-center space-y-3">
                   <div className="h-8 w-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-                  <p className="text-xs text-slate-400 font-mono">Analyzing crash telemetry with Google Gemini...</p>
+                  <p className="text-xs text-slate-400 font-mono">Analyzing crash telemetry with AI Copilot...</p>
                 </div>
               ) : aiError === 'NO_KEY' ? (
                 <div className="p-6 bg-slate-900 border border-yellow-400/30 rounded-2xl text-center space-y-3 font-sans">
