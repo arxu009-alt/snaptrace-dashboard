@@ -385,7 +385,14 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-300 block font-mono">OPENAI API KEY (sk-...)</label>
+               <label className="text-xs font-semibold text-slate-300 block font-mono">AI COPILOT KEY (Google Gemini AIza... or OpenAI sk-...)</label>
+<input
+  type="password"
+  value={openaiKey}
+  onChange={(e) => setOpenaiKey(e.target.value)}
+  placeholder="AIzaSy... (Google Gemini Free) or sk-proj... (OpenAI)"
+  className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 font-mono transition"
+/>
                 <input
                   type="password"
                   value={openaiKey}

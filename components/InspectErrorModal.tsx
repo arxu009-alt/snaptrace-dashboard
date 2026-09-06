@@ -40,7 +40,6 @@ export default function InspectErrorModal({ log, onClose, onDelete, userTier = '
       const { data: { user } } = await supabase.auth.getUser();
       const email = user?.email?.toLowerCase() || '';
 
-      // Owner override or Pro/Team subscription check
       if (
         email === 'arxu1045@gmail.com' ||
         email === 'arxu009@gmail.com' ||
@@ -86,7 +85,6 @@ ${rawStack || 'No stack trace provided'}
   const handleAnalyzeWithAI = async () => {
     setActiveTab('ai');
 
-    // If free tier and not owner -> show upgrade view in AI tab
     if (!isOwnerOrPro) {
       return;
     }
@@ -103,35 +101,82 @@ ${rawStack || 'No stack trace provided'}
         return;
       }
 
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${savedApiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert software engineer and crash diagnostic AI. Analyze the given exception and stack trace. Provide a clean 3-part response: 1. Plain English Summary, 2. Root Cause, 3. Proposed Code Fix with snippet.',
-            },
-            {
-              role: 'user',
-              content: `Error: ${log.message}\nEnvironment: ${log.environment}\nURL: ${log.url || 'N/A'}\nStack Trace:\n${rawStack}`,
-            },
-          ],
-          temperature: 0.2,
-        }),
-      });
+      const key = savedApiKey.trim();
+      let analysisText = '';
 
-      const data = await res.json();
+      // 1. If Google Gemini API Key (Starts with 'AIzaSy...')
+      if (key.startsWith('AIza')) {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: `You are an expert crash diagnostic AI engineer for SnapTrace. Analyze this runtime exception:
+                      
+Error Message: ${log.message}
+Environment: ${log.environment}
+URL: ${log.url || 'N/A'}
+Stack Trace:
+${rawStack || 'No stack trace provided'}
 
-      if (!res.ok) {
-        throw new Error(data.error?.message || 'Failed to generate AI diagnosis');
+Provide a structured, developer-friendly diagnosis in 3 clear sections:
+1. 💡 Plain English Summary: What went wrong.
+2. 🔍 Root Cause Analysis: Exactly which file/line caused it.
+3. 🛠️ Proposed Code Patch: Corrected code snippet to fix the issue.`,
+                    },
+                  ],
+                },
+              ],
+            }),
+          }
+        );
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Google Gemini API request failed.');
+        }
+
+        analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No diagnosis generated.';
+      } 
+      // 2. If OpenAI API Key (Starts with 'sk-...')
+      else {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${key}`,
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              {
+                role: 'system',
+                content:
+                  'You are an expert software engineer and crash diagnostic AI. Analyze the given exception and stack trace. Provide a clean 3-part response: 1. Plain English Summary, 2. Root Cause, 3. Proposed Code Fix with snippet.',
+              },
+              {
+                role: 'user',
+                content: `Error: ${log.message}\nEnvironment: ${log.environment}\nURL: ${log.url || 'N/A'}\nStack Trace:\n${rawStack}`,
+              },
+            ],
+            temperature: 0.2,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'OpenAI API request failed.');
+        }
+
+        analysisText = data.choices?.[0]?.message?.content || 'No diagnosis generated.';
       }
 
-      setAiAnalysis(data.choices[0]?.message?.content || 'No analysis generated.');
+      setAiAnalysis(analysisText);
     } catch (err: any) {
       setAiError(err.message || 'An unexpected error occurred during AI analysis.');
     } finally {
@@ -314,11 +359,10 @@ ${rawStack || 'No stack trace provided'}
             </div>
           )}
 
-          {/* 3. AI Diagnosis View (Tier Gated) */}
+          {/* 3. AI Diagnosis View (Supports Google Gemini & OpenAI) */}
           {activeTab === 'ai' && (
             <div className="space-y-4">
               {!isOwnerOrPro ? (
-                /* Free User Upgrade Card */
                 <div className="p-8 bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl text-center space-y-4 shadow-2xl">
                   <div className="text-3xl">🤖</div>
                   <div className="space-y-1">
@@ -357,16 +401,16 @@ ${rawStack || 'No stack trace provided'}
               ) : aiError === 'NO_KEY' ? (
                 <div className="p-6 bg-slate-900 border border-yellow-400/30 rounded-2xl text-center space-y-3 font-sans">
                   <div className="text-2xl">🔑</div>
-                  <h3 className="text-sm font-bold text-white">No OpenAI API Key Configured</h3>
+                  <h3 className="text-sm font-bold text-white">No AI API Key Configured</h3>
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
-                    Add your OpenAI API key in your Settings panel to enable instant AI bug summaries, root-cause diagnosis, and code patches.
+                    Paste your <strong>Free Google Gemini API Key</strong> or OpenAI key in Settings to unlock instant root-cause analysis and code fix patches!
                   </p>
                   <Link
                     href="/dashboard/settings"
                     onClick={onClose}
                     className="inline-block px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 rounded-xl text-xs font-bold transition shadow-lg shadow-yellow-500/20"
                   >
-                    ⚙️ Open Settings to Add Key
+                    ⚙️ Open Settings to Paste Free Key
                   </Link>
                 </div>
               ) : aiError ? (
