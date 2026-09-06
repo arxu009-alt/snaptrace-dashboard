@@ -26,33 +26,26 @@ export default function DashboardOverviewPage() {
   const [hourlyDistribution, setHourlyDistribution] = useState<number[]>(new Array(12).fill(0));
 
   const loadDashboardData = useCallback(async () => {
-    // 1. Get user session
+    setLoading(true);
+
+    // 1. Identify currently authenticated user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       setLoading(false);
       return;
     }
 
-    // 2. Fetch projects & errors in parallel for maximum loading speed
-    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
-    const isAll = !savedProjectId || savedProjectId === 'all';
+    // 2. Fetch ONLY projects belonging to this user
+    const { data: userProjects, error: projErr } = await supabase
+      .from('projects')
+      .select('id, name, api_key')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
 
-    const [projectsRes, errorsRes] = await Promise.all([
-      supabase
-        .from('projects')
-        .select('id, name, api_key')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false }),
-      isAll
-        ? supabase.from('errors').select('*').order('created_at', { ascending: false })
-        : supabase.from('errors').select('*').eq('project_id', savedProjectId).order('created_at', { ascending: false })
-    ]);
-
-    const userProjects = projectsRes.data || [];
-    const errors = errorsRes.data || [];
-
-    if (userProjects.length === 0) {
-      setProjectKey('No API Key Created Yet');
+    // 3. If user has NO projects (brand new user), set everything to ZERO
+    if (projErr || !userProjects || userProjects.length === 0) {
+      setProjectKey('No Project Created Yet');
+      setSelectedProjectLabel('No Projects');
       setTotalErrors(0);
       setProdErrors(0);
       setDevErrors(0);
@@ -62,46 +55,73 @@ export default function DashboardOverviewPage() {
       return;
     }
 
+    const userProjectIds = userProjects.map((p) => p.id);
+    const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
+
+    // Validate that savedProjectId actually belongs to this user
+    const isValidProject = savedProjectId && savedProjectId !== 'all' && userProjectIds.includes(savedProjectId);
+    const isAll = !isValidProject;
+
+    // 4. STRICT QUERY: Filter ONLY by this user's project IDs
+    let errorQuery = supabase
+      .from('errors')
+      .select('*')
+      .order('created_at', { ascending: false });
+
     if (isAll) {
       setSelectedProjectLabel('All Projects (Global Stream)');
       setProjectKey(userProjects[0].api_key);
+      // ONLY fetch errors matching this user's project IDs
+      errorQuery = errorQuery.in('project_id', userProjectIds);
     } else {
       const activeProject = userProjects.find((p) => p.id === savedProjectId) || userProjects[0];
       setSelectedProjectLabel(activeProject.name);
       setProjectKey(activeProject.api_key);
+      errorQuery = errorQuery.eq('project_id', activeProject.id);
     }
 
-    setTotalErrors(errors.length);
-    setProdErrors(errors.filter((e) => e.environment === 'production').length);
-    setDevErrors(errors.filter((e) => e.environment === 'development').length);
-    setRecentErrors(errors.slice(0, 6));
+    const { data: errors, error: errFetchError } = await errorQuery;
 
-    // 12-hour hourly buckets
-    const buckets = new Array(12).fill(0);
-    const now = Date.now();
-    const oneHourMs = 60 * 60 * 1000;
-    const twelveHoursMs = 12 * oneHourMs;
+    if (!errFetchError && errors) {
+      setTotalErrors(errors.length);
+      setProdErrors(errors.filter((e) => e.environment === 'production').length);
+      setDevErrors(errors.filter((e) => e.environment === 'development').length);
+      setRecentErrors(errors.slice(0, 6));
 
-    errors.forEach((err) => {
-      const rawDate = err.created_at;
-      const errTime = rawDate ? new Date(rawDate).getTime() : now;
+      // Calculate 12-hour distribution
+      const buckets = new Array(12).fill(0);
+      const now = Date.now();
+      const oneHourMs = 60 * 60 * 1000;
+      const twelveHoursMs = 12 * oneHourMs;
 
-      if (!isNaN(errTime)) {
-        const diff = now - errTime;
-        if (diff >= -15 * 60 * 1000 && diff <= twelveHoursMs) {
-          let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
-          if (bucketIndex < 0) bucketIndex = 0;
-          if (bucketIndex > 11) bucketIndex = 11;
-          buckets[bucketIndex] += 1;
+      errors.forEach((err) => {
+        const rawDate = err.created_at;
+        const errTime = rawDate ? new Date(rawDate).getTime() : now;
+
+        if (!isNaN(errTime)) {
+          const diff = now - errTime;
+          if (diff >= -15 * 60 * 1000 && diff <= twelveHoursMs) {
+            let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
+            if (bucketIndex < 0) bucketIndex = 0;
+            if (bucketIndex > 11) bucketIndex = 11;
+            buckets[bucketIndex] += 1;
+          }
         }
-      }
-    });
+      });
 
-    if (errors.length > 0 && buckets.every(b => b === 0)) {
-      buckets[11] = Math.min(errors.length, 5);
+      if (errors.length > 0 && buckets.every((b) => b === 0)) {
+        buckets[11] = Math.min(errors.length, 5);
+      }
+
+      setHourlyDistribution(buckets);
+    } else {
+      setTotalErrors(0);
+      setProdErrors(0);
+      setDevErrors(0);
+      setRecentErrors([]);
+      setHourlyDistribution(new Array(12).fill(0));
     }
 
-    setHourlyDistribution(buckets);
     setLoading(false);
   }, []);
 
@@ -109,6 +129,7 @@ export default function DashboardOverviewPage() {
     loadDashboardData();
     window.addEventListener('snaptrace_project_change', loadDashboardData);
 
+    // Secure Realtime Listener: re-queries via loadDashboardData to respect user_id
     const channel = supabase
       .channel('realtime-overview-feed')
       .on(
@@ -118,20 +139,7 @@ export default function DashboardOverviewPage() {
           schema: 'public',
           table: 'errors',
         },
-        (payload) => {
-          const newErr = payload.new as ErrorLog;
-          setTotalErrors((prev) => prev + 1);
-          if (newErr.environment === 'production') {
-            setProdErrors((prev) => prev + 1);
-          } else {
-            setDevErrors((prev) => prev + 1);
-          }
-          setRecentErrors((prev) => [newErr, ...prev.slice(0, 5)]);
-          setHourlyDistribution((prev) => {
-            const copy = [...prev];
-            copy[11] = (copy[11] || 0) + 1;
-            return copy;
-          });
+        () => {
           loadDashboardData();
         }
       )
@@ -145,7 +153,6 @@ export default function DashboardOverviewPage() {
 
   const maxBucketVal = Math.max(...hourlyDistribution, 1);
 
-  // Click handler to jump to error in Exception Logs
   const handleRecentErrorClick = (err: ErrorLog) => {
     router.push(`/dashboard/errors?errorId=${err.id}`);
   };
@@ -279,7 +286,7 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
 
-            {/* 3. Bottom Grid: CLICKABLE Recent Exceptions */}
+            {/* 3. Bottom Grid: Clickable Recent Exceptions */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
               <div className="lg:col-span-2 bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
@@ -300,7 +307,7 @@ export default function DashboardOverviewPage() {
 
                 {recentErrors.length === 0 ? (
                   <div className="p-8 text-center text-slate-500 text-xs font-mono">
-                    No exceptions logged for this project yet.
+                    No exceptions logged for this account yet.
                   </div>
                 ) : (
                   <div className="space-y-2.5">
