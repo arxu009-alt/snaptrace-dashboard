@@ -28,83 +28,46 @@ Provide a structured, developer-friendly diagnosis in 3 clear sections:
 2. 🔍 Root Cause Analysis: Exactly which file/line caused it.
 3. 🛠️ Proposed Code Patch: Corrected code snippet to fix the issue.`;
 
-    // 1. Google Gemini (Official OpenAI-Compatible Endpoint with /openai/ path)
+    // 1. Google Gemini Provider (Using gemini-1.5-flash with x-goog-api-key header)
     if (provider === 'gemini' || key.startsWith('AQ') || key.startsWith('AIza') || !key.startsWith('sk-')) {
-      const modelsToTry = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
-      let lastErrorMessage = '';
-
-      // Primary: Official Google OpenAI-Compatible Chat Completions
-      for (const model of modelsToTry) {
-        try {
-          const res = await fetch(
-            'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${key}`,
-              },
-              body: JSON.stringify({
-                model: model,
-                messages: [
-                  {
-                    role: 'system',
-                    content:
-                      'You are an expert crash diagnostic AI for SnapTrace. Analyze the error and provide a fix.',
-                  },
-                  { role: 'user', content: prompt },
-                ],
-                temperature: 0.2,
-              }),
-            }
-          );
-
-          const data = await res.json();
-          if (res.ok && data.choices?.[0]?.message?.content) {
-            return NextResponse.json({
-              success: true,
-              analysis: data.choices[0].message.content,
-            });
-          } else if (data.error?.message) {
-            lastErrorMessage = data.error.message;
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': key,
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [{ text: prompt }],
+                },
+              ],
+            }),
           }
-        } catch (e: any) {
-          lastErrorMessage = e.message;
-        }
-      }
+        );
 
-      // Secondary Fallback: Direct REST generateContent
-      for (const model of modelsToTry) {
-        try {
-          const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-              }),
-            }
+        const data = await res.json();
+
+        if (!res.ok) {
+          const errorMsg = data.error?.message || 'Google Gemini API request failed.';
+          return NextResponse.json({ error: errorMsg }, { status: 400 });
+        }
+
+        const analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!analysisText) {
+          return NextResponse.json(
+            { error: 'Google Gemini returned an empty response. Please try again.' },
+            { status: 400 }
           );
-
-          const data = await res.json();
-          if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-            return NextResponse.json({
-              success: true,
-              analysis: data.candidates[0].content.parts[0].text,
-            });
-          } else if (data.error?.message) {
-            lastErrorMessage = data.error.message;
-          }
-        } catch (e: any) {
-          lastErrorMessage = e.message;
         }
-      }
 
-      return NextResponse.json(
-        { error: lastErrorMessage || 'Google Gemini API failed to authenticate this key.' },
-        { status: 400 }
-      );
+        return NextResponse.json({ success: true, analysis: analysisText });
+      } catch (err: any) {
+        return NextResponse.json({ error: `Gemini Connection Error: ${err.message}` }, { status: 500 });
+      }
     }
 
     // 2. OpenAI Provider (sk-...)
