@@ -105,46 +105,67 @@ ${rawStack || 'No stack trace provided'}
       const key = savedApiKey.trim();
       let analysisText = '';
 
-      // 1. Google Gemini Provider
+      // 1. Google Gemini (Supports both v1 REST & OpenAI-compatible format)
       if (savedProvider === 'gemini' || key.startsWith('AIza') || key.startsWith('AQ')) {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+        let res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${key}`,
+            },
             body: JSON.stringify({
-              contents: [
+              model: 'gemini-1.5-flash',
+              messages: [
                 {
-                  parts: [
-                    {
-                      text: `You are an expert crash diagnostic AI engineer for SnapTrace. Analyze this runtime exception:
-                      
-Error Message: ${log.message}
-Environment: ${log.environment}
-URL: ${log.url || 'N/A'}
-Stack Trace:
-${rawStack || 'No stack trace provided'}
-
-Provide a structured diagnosis in 3 clean sections:
-1. 💡 Plain English Summary: What broke and why.
-2. 🔍 Root Cause Analysis: Exactly which file/line caused it.
-3. 🛠️ Proposed Code Patch: Corrected code snippet to fix the issue.`,
-                    },
-                  ],
+                  role: 'system',
+                  content:
+                    'You are an expert crash diagnostic AI for SnapTrace. Analyze this runtime error and provide: 1. Plain English Summary, 2. Root Cause, 3. Code Fix Snippet.',
+                },
+                {
+                  role: 'user',
+                  content: `Error: ${log.message}\nEnvironment: ${log.environment}\nURL: ${log.url || 'N/A'}\nStack Trace:\n${rawStack}`,
                 },
               ],
             }),
           }
         );
 
-        const data = await res.json();
+        // Fallback to standard generateContent if OpenAI bridge differs
         if (!res.ok) {
-          throw new Error(data.error?.message || 'Google Gemini API key was rejected.');
+          res = await fetch(
+            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      {
+                        text: `You are an expert crash diagnostic AI for SnapTrace. Analyze this error:\nError: ${log.message}\nURL: ${log.url || 'N/A'}\nStack:\n${rawStack}\n\nProvide 1. Plain English Summary, 2. Root Cause, 3. Code Fix snippet.`,
+                      },
+                    ],
+                  },
+                ],
+              }),
+            }
+          );
         }
 
-        analysisText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No diagnosis generated.';
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error?.message || 'Google Gemini API request failed.');
+        }
+
+        // Parse result from either OpenAI bridge or generateContent
+        analysisText =
+          data.choices?.[0]?.message?.content ||
+          data.candidates?.[0]?.content?.parts?.[0]?.text ||
+          'No diagnosis generated.';
       } 
-      // 2. OpenAI Provider
+      // 2. OpenAI (GPT-4o)
       else {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -415,7 +436,7 @@ Provide a structured diagnosis in 3 clean sections:
                   </Link>
                 </div>
               ) : aiError ? (
-                <div className="p-4 bg-red-950/30 border border-red-500/30 rounded-xl space-y-1">
+                <div className="p-4 bg-red-950/30 border border-red-500/30 rounded-xl space-y-1 font-mono">
                   <p className="text-xs font-semibold text-red-400">⚠️ AI Diagnosis Error</p>
                   <p className="text-xs text-slate-300">{aiError}</p>
                 </div>
