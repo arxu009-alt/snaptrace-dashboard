@@ -255,60 +255,47 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-6">
 
-            {/* 1. Subscription & Billing Plan Card */}
+           {/* 1. Subscription & Billing Plan Card */}
             <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-5 relative">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2.5 flex-wrap">
                     <span className="text-xl">💎</span>
                     <h2 className="text-base font-bold text-white">Subscription & Plan Status</h2>
-                    {getTierBadge()}
+                    {isOwner ? (
+                      <span className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black rounded-full text-xs font-mono uppercase tracking-wider shadow-sm">
+                        👑 OWNER PRO (Unlimited)
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 rounded-full text-xs font-bold font-mono uppercase">
+                        ⚡ FOUNDER BETA PASS (ACTIVE)
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-400">
                     {isOwner
                       ? 'Owner account with full unlimited access to all features.'
-                      : currentTier === 'free'
-                      ? 'You are on the free tier (10,000 events/mo included).'
-                      : 'Active Pro telemetry subscription with in-dashboard AI diagnostics.'}
+                      : 'You are enrolled in the exclusive First 50 Developers Public Beta program.'}
                   </p>
                 </div>
 
-                {!isOwner && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <button
-                      onClick={() => handleUpgradeCheckout(PRO_CHECKOUT_URL)}
-                      className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 cursor-pointer"
-                    >
-                      ⚡ Starter Pro ($9/mo)
-                    </button>
-                    <button
-                      onClick={() => handleUpgradeCheckout(TEAM_CHECKOUT_URL)}
-                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 font-bold text-xs rounded-xl transition cursor-pointer"
-                    >
-                      👑 Team Scale ($29/mo)
-                    </button>
-                  </div>
-                )}
+                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl font-bold self-start sm:self-auto">
+                  ✓ Pro Features Unlocked for Beta
+                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Monthly Event Cap</span>
-                  <span className="text-slate-200 font-semibold">
-                    {isOwner ? 'Unlimited (Owner)' : currentTier === 'team_scale' ? '1,000,000' : currentTier === 'starter_pro' ? '150,000' : '10,000'} events
-                  </span>
+                  <span className="text-slate-200 font-semibold">150,000 events</span>
                 </div>
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Data Retention</span>
-                  <span className="text-slate-200 font-semibold">
-                    {isOwner ? '90 Days' : currentTier === 'team_scale' ? '90 Days' : currentTier === 'starter_pro' ? '30 Days' : '14 Days'}
-                  </span>
+                  <span className="text-slate-200 font-semibold">30 Days</span>
                 </div>
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">In-Dashboard AI</span>
-                  <span className={isProActive ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
-                    {isProActive ? '✓ Unlimited Copilot Active' : 'Locked (Pro Feature)'}
-                  </span>
+                  <span className="text-emerald-400 font-bold">✓ Unlimited Copilot Active</span>
                 </div>
               </div>
             </div>

@@ -107,12 +107,16 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
   const faqs = [
     {
+      q: 'How does the First 50 Developers Beta access work?',
+      a: 'During our Public Beta launch, the first 50 developers who create an account get automatic Lifetime Starter Pro access ($9/mo value) for $0. Once the first 50 spots are claimed, subsequent users will enter on the standard Free tier.'
+    },
+    {
       q: 'How is SnapTrace faster than Sentry?',
-      a: 'Sentry’s JavaScript SDK adds over 100KB of minified code with complex distributed tracing logic. SnapTrace is a featherweight <5KB zero-dependency script that intercepts uncaught exceptions and sends telemetry using navigator.sendBeacon, resulting in zero impact on Google Core Web Vitals.'
+      a: 'Sentry’s JavaScript SDK adds over 100KB of minified code. SnapTrace is a featherweight <5KB zero-dependency script that intercepts uncaught exceptions and sends telemetry using navigator.sendBeacon, resulting in zero impact on Google Core Web Vitals.'
     },
     {
       q: 'How does BYOK (Bring Your Own Key) AI work on the Pro plan?',
-      a: 'On the Pro plan, you can paste your own OpenAI API key in Settings. Whenever an exception occurs, clicking "Analyze with AI" produces instant root-cause explanations and copy-paste code patches with zero platform markup.'
+      a: 'On the Pro plan, you can paste your own Google Gemini or OpenAI key in Settings. Whenever an exception occurs, clicking "Analyze with AI" produces instant root-cause explanations and copy-paste code patches with zero platform markup.'
     },
     {
       q: 'What does Client-Side PII Scrubbing mean?',
@@ -121,10 +125,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
     {
       q: 'Will I get spammed with 10,000 emails if a loop breaks?',
       a: 'No. SnapTrace uses deterministic fingerprint hashing and a 60-second loop throttling engine. If an error throws 500 times in 10 seconds, it sends the 1st crash instantly, silences duplicate alerts, and sends an aggregated summary count tag [x500].'
-    },
-    {
-      q: 'Is there a free plan for hobbyists?',
-      a: 'Yes! Our Developer Free plan includes 10,000 events/month forever, 14-day retention, Discord alerts, and 1-click prompt export for Cursor and Claude.'
     }
   ];
 
@@ -142,7 +142,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden">
       
-      {/* 1. Sentry-Style Sticky Navigation Bar */}
+      {/* 1. Global Navigation Bar */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/85 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition">
@@ -171,7 +171,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               href="/signup"
               className="text-xs font-bold bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 px-4 py-2 rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
             >
-              Get Started Free →
+              Claim Beta Pass →
             </Link>
           </div>
         </div>
@@ -182,9 +182,11 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none animate-pulse" />
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10 animate-in fade-in duration-500">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090D16] border border-slate-800 text-xs font-semibold text-yellow-300 shadow-xl shadow-yellow-500/5">
+          
+          {/* Founding 50 FOMO Banner */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090D16] border-2 border-yellow-400/40 text-xs font-bold text-yellow-300 shadow-xl shadow-yellow-500/10">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Sub-5KB SDK • 1-Click Cursor / Claude AI Export • Zero Alert Flood</span>
+            <span>⚡ Public Beta: Free Lifetime Pro for First 50 Devs (38 spots left)</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.1]">
@@ -201,9 +203,9 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Link
               href="/signup"
-              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-sm font-bold rounded-xl shadow-xl shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-sm font-black rounded-xl shadow-xl shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
             >
-              Start Monitoring in 60s (Free) →
+              Claim Your Free Founding Spot →
             </Link>
             <Link
               href="/dashboard"
@@ -216,7 +218,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400">
             <span className="flex items-center gap-1.5"><span className="text-emerald-400">✓</span> No credit card required</span>
             <span className="flex items-center gap-1.5"><span className="text-emerald-400">✓</span> Drop-in 3 lines of code</span>
-            <span className="flex items-center gap-1.5"><span className="text-emerald-400">✓</span> 100% Free forever tier</span>
+            <span className="flex items-center gap-1.5"><span className="text-emerald-400">✓</span> 100% Free Lifetime Beta Pass</span>
           </div>
         </div>
       </section>
@@ -330,7 +332,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               Connect your favorite AI to diagnose bugs instantly
             </h2>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Don’t pay $40/month for locked-in AI features. Add your own OpenAI key or use our <strong>1-Click Prompt Export</strong> directly into <strong>Cursor</strong>, <strong>Claude Code</strong>, or <strong>ChatGPT</strong>.
+              Don’t pay $40/month for locked-in AI features. Add your own OpenAI or Google Gemini key or use our <strong>1-Click Prompt Export</strong> directly into <strong>Cursor</strong>, <strong>Claude Code</strong>, or <strong>ChatGPT</strong>.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
@@ -348,7 +350,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#090D16] border border-emerald-500/40 shadow-lg shadow-emerald-500/10">
                 <span className="text-emerald-400 text-xs">⚡</span>
-                <span className="text-xs font-bold text-slate-200">OpenAI GPT-4o</span>
+                <span className="text-xs font-bold text-slate-200">Google Gemini & OpenAI</span>
               </div>
             </div>
           </RevealOnScroll>
@@ -516,7 +518,7 @@ try {
               </tr>
               <tr>
                 <td className="p-4 font-semibold text-white">In-Dashboard AI Diagnosis (BYOK)</td>
-                <td className="p-4 text-emerald-400 font-bold">✓ Included in Pro ($9/mo)</td>
+                <td className="p-4 text-emerald-400 font-bold">✓ Included in Beta Pro Pass</td>
                 <td className="p-4 text-slate-500">$$$ Expensive addon</td>
                 <td className="p-4 text-slate-500">✕ None</td>
               </tr>
@@ -537,15 +539,15 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 9. REFINED 3-TIER PRICING SECTION (Clean 3-Column Layout) */}
+      {/* 9. 3-TIER PRICING SECTION (Clean Launch Campaign) */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase">
-            <span>💎</span> Predictable Monthly Recurring Plans
+            <span>💎</span> Public Beta Launch Campaign
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Simple, transparent pricing</h2>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Exclusive Founding Developer Tiers</h2>
           <p className="text-sm text-slate-400 max-w-xl mx-auto">
-            Zero surprise overage bills. Generous capacity for developers, indie hackers, and growing teams.
+            Join during the public beta to unlock lifetime privileges with zero credit card required.
           </p>
         </RevealOnScroll>
 
@@ -578,17 +580,17 @@ try {
             </Link>
           </div>
 
-          {/* Card 2: Starter Pro ($9/mo) */}
+          {/* Card 2: Starter Pro ($9/mo value - FREE IN BETA) */}
           <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
             <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg">
-              ★ Most Popular
+              ★ First 50 Free Pass
             </span>
 
             <div className="space-y-4">
               <div className="space-y-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Starter Pro</span>
-                <div className="text-3xl font-black text-white">$9 <span className="text-xs text-slate-400 font-normal">/ month flat</span></div>
-                <p className="text-xs text-slate-400 pt-1">For freelancers, indie hackers, and revenue-generating apps.</p>
+                <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Starter Pro (Beta Pass)</span>
+                <div className="text-3xl font-black text-white">$0 <span className="text-xs text-yellow-300 font-mono font-bold line-through ml-1">$9/mo</span></div>
+                <p className="text-xs text-slate-400 pt-1">Free Lifetime Pro access for the first 50 beta developers.</p>
               </div>
 
               <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5 font-mono">
@@ -601,23 +603,21 @@ try {
               </ul>
             </div>
 
-            <a
-              href="https://snaptrace.lemonsqueezy.com/checkout/buy/b7355f43-3ece-4fa9-a91e-ba847f3cd52e"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/signup"
               className="block w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl transition shadow-xl shadow-yellow-500/20 cursor-pointer"
             >
-              Get Started with Pro ($9) →
-            </a>
+              Claim Free Pro Beta Pass →
+            </Link>
           </div>
 
-          {/* Card 3: Team Scale ($29/mo) */}
+          {/* Card 3: Team Scale */}
           <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
             <div className="space-y-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
-                <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal">/ month flat</span></div>
-                <p className="text-xs text-slate-400 pt-1">For growing startups, agencies, and high-traffic production apps.</p>
+                <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal">/ month</span></div>
+                <p className="text-xs text-slate-400 pt-1">For high-traffic production workloads and growing teams.</p>
               </div>
 
               <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
@@ -630,14 +630,12 @@ try {
               </ul>
             </div>
 
-            <a
-              href="https://snaptrace.lemonsqueezy.com/checkout/buy/913b182d-9db4-41c3-9c93-ed68d83eaae0"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/signup"
               className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer"
             >
-              Get Team Scale ($29) →
-            </a>
+              Join Beta Waitlist →
+            </Link>
           </div>
 
         </RevealOnScroll>
@@ -683,14 +681,14 @@ try {
             Ready to catch bugs in a snap?
           </h2>
           <p className="text-sm text-slate-400 leading-relaxed">
-            Join developers catching crashes in real time with zero noise and instant AI diagnoses.
+            Join early developers catching crashes in real time with zero noise and instant AI diagnoses.
           </p>
           <div className="pt-2">
             <Link
               href="/signup"
               className="inline-block px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-sm rounded-xl shadow-xl shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
             >
-              Start Tracking for Free in 60s →
+              Claim Your Free Beta Pass in 60s →
             </Link>
           </div>
           
