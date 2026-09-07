@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import React from 'react';
 import { SnapTraceProvider } from '@/components/SnapTraceProvider';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -116,6 +117,7 @@ export default function RootLayout({
         <SnapTraceProvider apiKey={process.env.SNAPTRACE_API_KEY || ''}>
           {children}
         </SnapTraceProvider>
+        <Analytics />
       </body>
     </html>
   );
