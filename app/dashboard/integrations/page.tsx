@@ -3,11 +3,26 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-type LanguageKey = 'js' | 'html' | 'css' | 'python' | 'curl' | 'ruby' | 'kotlin' | 'php';
+type LanguageKey =
+  | 'js'
+  | 'nextjs'
+  | 'python'
+  | 'node'
+  | 'go'
+  | 'rust'
+  | 'csharp'
+  | 'php'
+  | 'ruby'
+  | 'kotlin'
+  | 'flutter'
+  | 'cloudflare'
+  | 'curl'
+  | 'html';
 
 interface IntegrationSnippet {
   name: string;
   icon: string;
+  category: string;
   installCmd?: string;
   guide: string[];
   code: (apiKey: string) => string;
@@ -15,7 +30,7 @@ interface IntegrationSnippet {
 
 export default function LanguageIntegrationsPage() {
   const [apiKey, setApiKey] = useState<string>('YOUR_SNAPTRACE_API_KEY');
-  const [activeTab, setActiveTab] = useState<LanguageKey>('js');
+  const [activeTab, setActiveTab] = useState<LanguageKey>('nextjs');
   const [copied, setCopied] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -31,7 +46,6 @@ export default function LanguageIntegrationsPage() {
         .order('created_at', { ascending: false });
 
       if (projects && projects.length > 0) {
-        // Read the currently active project selected in the sidebar
         const savedId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
         const activeProj = projects.find((p) => p.id === savedId) || projects[0];
 
@@ -45,8 +59,6 @@ export default function LanguageIntegrationsPage() {
 
   useEffect(() => {
     fetchApiKey();
-
-    // Listen to project switch events in the sidebar
     window.addEventListener('snaptrace_project_change', fetchApiKey);
     return () => {
       window.removeEventListener('snaptrace_project_change', fetchApiKey);
@@ -54,356 +66,380 @@ export default function LanguageIntegrationsPage() {
   }, [fetchApiKey]);
 
   const integrations: Record<LanguageKey, IntegrationSnippet> = {
-    js: {
-      name: 'JavaScript / Node.js',
-      icon: '🟨',
-      installCmd: 'npm install snaptrace-client # Or use native fetch API',
+    nextjs: {
+      name: 'Next.js (App Router)',
+      icon: '▲',
+      category: 'Fullstack Framework',
+      installCmd: '// Zero dependencies. Drop into your root layout:',
       guide: [
-        'Wrap your application entry point or global error boundary with a try/catch block.',
-        'Extract error details (message, stack trace, current URL) and send a POST request to SnapTrace.',
-        'Supports standard Node.js runtime, Next.js, Express, React, and browser contexts.',
+        'Place this script tag inside your root `app/layout.tsx` file inside `<head>`.',
+        'Automatically intercepts client-side uncaught exceptions, hydration errors, and unhandled promise rejections.',
+        'Uses `navigator.sendBeacon` for zero impact on Core Web Vitals.',
       ],
-      code: (key) => `// SnapTrace Error Handler for JavaScript / Node.js
-async function sendSnapTraceError(error, environment = 'production') {
-  try {
-    await fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        apiKey: '${key}',
-        message: error.message || String(error),
-        stackTrace: error.stack || null,
-        environment: environment,
-        url: typeof window !== 'undefined' ? window.location.href : 'Server-side',
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Node.js Runtime'
-      })
-    });
-  } catch (err) {
-    console.error('SnapTrace Telemetry Dispatch Failed:', err);
-  }
-}
+      code: (key) => `// app/layout.tsx
+import Script from 'next/script';
 
-// Example Usage
-try {
-  throw new Error('Database connection timeout in payment gateway');
-} catch (err) {
-  sendSnapTraceError(err, 'production');
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <Script
+          src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
+          strategy="beforeInteractive"
+          data-api-key="${key}"
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
 }`,
     },
-    html: {
-      name: 'HTML5 / Script Tag',
-      icon: '🌐',
-      installCmd: '<!-- Place script tag inside your HTML <head> or <body> -->',
+    js: {
+      name: 'JavaScript / React / Vue',
+      icon: '🟨',
+      category: 'Frontend Client',
+      installCmd: '<!-- Paste into your HTML head before other scripts -->',
       guide: [
-        'Include this lightweight script directly inside your HTML pages.',
-        'Automatically captures unhandled JavaScript exceptions (window.onerror) and uncaught Promise rejections.',
-        'Requires zero npm dependencies or build steps.',
+        'Works with React, Vue, Svelte, Angular, Vite, and Vanilla JavaScript.',
+        'Automatically captures `window.onerror` and `window.onunhandledrejection`.',
+        'Sanitizes passwords, tokens, and credit cards directly on the client.',
       ],
-      code: (key) => `<!-- SnapTrace Global Telemetry Listener for HTML5 -->
-<script>
-  (function() {
-    function dispatchSnapTrace(message, stack) {
-      fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: '${key}',
-          message: message,
-          stackTrace: stack || null,
-          environment: 'production',
-          url: window.location.href,
-          userAgent: navigator.userAgent
-        })
-      }).catch(function(err) {
-        console.error('SnapTrace logging error:', err);
-      });
-    }
-
-    // Catch runtime errors
-    window.addEventListener('error', function(e) {
-      dispatchSnapTrace(e.message, e.error ? e.error.stack : null);
-    });
-
-    // Catch unhandled promises
-    window.addEventListener('unhandledrejection', function(e) {
-      dispatchSnapTrace('Unhandled Promise Rejection: ' + e.reason, null);
-    });
-  })();
-</script>`,
-    },
-    css: {
-      name: 'CSS / Resource Monitoring',
-      icon: '🎨',
-      installCmd: '<!-- Add resource failure monitor in HTML head where CSS stylesheets are loaded -->',
-      guide: [
-        'CSS stylesheet load failures cannot send HTTP requests directly; use this DOM event capture listener.',
-        'Monitors failing <link rel="stylesheet"> tags, webfonts, and broken background images.',
-        'Dispatches immediate error logs when critical stylesheets fail to load from CDN.',
-      ],
-      code: (key) => `<!-- SnapTrace CSS & Asset Load Failure Reporter -->
-<script>
-  document.addEventListener('error', function(event) {
-    var target = event.target || event.srcElement;
-    if (target && (target.tagName === 'LINK' || target.tagName === 'IMG')) {
-      fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: '${key}',
-          message: 'Resource load failure: ' + (target.href || target.src),
-          stackTrace: 'Failed DOM Node: <' + target.tagName.toLowerCase() + '>',
-          environment: 'production',
-          url: window.location.href,
-          userAgent: navigator.userAgent
-        })
-      });
-    }
-  }, true); // Captures loading errors before event bubbling
-</script>`,
+      code: (key) => `<script 
+  src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
+  data-api-key="${key}"
+  async
+></script>`,
     },
     python: {
-      name: 'Python',
+      name: 'Python (Django / FastAPI)',
       icon: '🐍',
+      category: 'Backend Language',
       installCmd: 'pip install requests',
       guide: [
-        'Ensure the \`requests\` library is installed in your Python environment.',
-        'Catch exceptions in your FastAPI, Django, Flask, or script functions.',
-        'Pass \`sys.exc_info()\` or \`traceback.format_exc()\` to include stack traces.',
+        'Wrap exception blocks in your FastAPI, Django, or Flask routes.',
+        'Dispatches async POST telemetry with full traceback formatting.',
+        'Supports Celery background worker crash logging.',
       ],
-      code: (key) => `# SnapTrace Error Telemetry Handler for Python
-import requests
-import traceback
-import sys
+      code: (key) => `# Python Telemetry Client
+import requests, traceback
 
-def send_snaptrace_error(exception, environment="production", url="http://localhost"):
-    payload = {
-        "apiKey": "${key}",
-        "message": str(exception),
-        "stackTrace": traceback.format_exc(),
-        "environment": environment,
-        "url": url,
-        "userAgent": f"Python {sys.version.split()[0]}"
-    }
-    
+def capture_snaptrace(exception, route="https://api.mycompany.com"):
     try:
-        response = requests.post(
-            "https://snaptrace-dashboard.vercel.app/api/v1/log",
-            json=payload,
-            headers={"Content-Type": "application/json"},
-            timeout=5
-        )
-        return response.status_code == 200
-    except Exception as e:
-        print(f"Failed to dispatch SnapTrace alert: {e}")
-        return False
+        requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
+            "apiKey": "${key}",
+            "message": str(exception),
+            "stackTrace": traceback.format_exc(),
+            "url": route,
+            "environment": "production"
+        }, timeout=2)
+    except Exception:
+        pass`,
+    },
+    node: {
+      name: 'Node.js (Express / NestJS)',
+      icon: '🟩',
+      category: 'Backend Runtime',
+      installCmd: '// Uses standard native fetch in Node 18+',
+      guide: [
+        'Hook into `process.on("uncaughtException")` or Express error middleware.',
+        'Dispatches backend telemetry without external npm dependencies.',
+      ],
+      code: (key) => `// server.js
+process.on('uncaughtException', (err) => {
+  fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      apiKey: '${key}',
+      message: err.message,
+      stackTrace: err.stack,
+      environment: process.env.NODE_ENV || 'production'
+    })
+  }).catch(() => {});
+});`,
+    },
+    go: {
+      name: 'Go (Golang)',
+      icon: '🐹',
+      category: 'Backend Language',
+      installCmd: '// Uses standard library net/http and encoding/json',
+      guide: [
+        'Call `SendSnapTrace(err)` inside your recover() handlers or Gin error middleware.',
+        'Runs asynchronously with zero performance overhead.',
+      ],
+      code: (key) => `package main
 
-# Example Usage
-try:
-    result = 10 / 0
-except Exception as e:
-    send_snaptrace_error(e, environment="production", url="api/v1/checkout")`,
+import (
+  "bytes"
+  "encoding/json"
+  "net/http"
+)
+
+func SendSnapTrace(err error, route string) {
+  payload, _ := json.Marshal(map[string]string{
+    "apiKey":      "${key}",
+    "message":     err.Error(),
+    "environment": "production",
+    "url":         route,
+  })
+  go http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))
+}`,
+    },
+    rust: {
+      name: 'Rust (Axum / Actix)',
+      icon: '🦀',
+      category: 'Systems Language',
+      installCmd: 'cargo add reqwest serde_json',
+      guide: [
+        'Integrate into your Axum/Actix error responders or Tokio tasks.',
+        'Non-blocking async telemetry reporting.',
+      ],
+      code: (key) => `async fn capture_snaptrace(err: &str, route: &str) {
+    let payload = serde_json::json!({
+        "apiKey": "${key}",
+        "message": err,
+        "url": route,
+        "environment": "production"
+    });
+    let _ = reqwest::Client::new()
+        .post("https://snaptrace-dashboard.vercel.app/api/v1/log")
+        .json(&payload)
+        .send()
+        .await;
+}`,
+    },
+    csharp: {
+      name: 'C# / .NET Core',
+      icon: '🔷',
+      category: 'Backend / Enterprise',
+      installCmd: '// Uses System.Net.Http.Json',
+      guide: [
+        'Add to your ASP.NET Core global exception filter middleware.',
+        'Compatible with .NET 6, 7, 8 and Unity game runtime.',
+      ],
+      code: (key) => `public static async Task CaptureSnapTrace(Exception ex, string url = "API Service") {
+    var payload = new {
+        apiKey = "${key}",
+        message = ex.Message,
+        stackTrace = ex.StackTrace,
+        url = url,
+        environment = "production"
+    };
+    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);
+}`,
+    },
+    php: {
+      name: 'PHP (Laravel / WordPress)',
+      icon: '🐘',
+      category: 'Backend Language',
+      installCmd: '// Uses native PHP cURL extension',
+      guide: [
+        'Hook into `set_exception_handler()` or Laravel `Handler.php`.',
+        'Dispatches stack traces with server request context.',
+      ],
+      code: (key) => `<?php
+set_exception_handler(function ($e) {
+    $ch = curl_init('https://snaptrace-dashboard.vercel.app/api/v1/log');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+        'apiKey' => '${key}',
+        'message' => $e->getMessage(),
+        'stackTrace' => $e->getTraceAsString(),
+        'environment' => 'production'
+    ]));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_exec($ch);
+});
+?>`,
+    },
+    ruby: {
+      name: 'Ruby on Rails',
+      icon: '💎',
+      category: 'Backend Framework',
+      installCmd: '// Uses standard library Net::HTTP and JSON',
+      guide: [
+        'Add to `ApplicationController` rescue_from or Sinatra error block.',
+        'Formats backtrace into structured telemetry.',
+      ],
+      code: (key) => `def send_snaptrace_alert(exception)
+  uri = URI('https://snaptrace-dashboard.vercel.app/api/v1/log')
+  Net::HTTP.post(uri, {
+    apiKey: '${key}',
+    message: exception.message,
+    stackTrace: exception.backtrace&.join("\\n"),
+    environment: 'production'
+  }.to_json, "Content-Type" => "application/json") rescue nil
+end`,
+    },
+    kotlin: {
+      name: 'Kotlin / Android / Java',
+      icon: '☕',
+      category: 'Mobile & JVM',
+      installCmd: 'implementation("com.squareup.okhttp3:okhttp:4.12.0")',
+      guide: [
+        'Hook into `Thread.setDefaultUncaughtExceptionHandler`.',
+        'Captures mobile runtime exceptions with Android device context.',
+      ],
+      code: (key) => `fun reportSnapTrace(e: Throwable, context: String = "Android App") {
+    val json = JSONObject().apply {
+        put("apiKey", "${key}")
+        put("message", e.localizedMessage ?: "Unknown Error")
+        put("stackTrace", e.stackTraceToString())
+        put("environment", "production")
+        put("url", context)
+    }
+    val body = json.toString().toRequestBody("application/json".toMediaType())
+    OkHttpClient().newCall(Request.Builder().url("https://snaptrace-dashboard.vercel.app/api/v1/log").post(body).build()).enqueue(object: Callback {
+        override fun onFailure(call: Call, e: IOException) {}
+        override fun onResponse(call: Call, response: Response) { response.close() }
+    })
+}`,
+    },
+    flutter: {
+      name: 'Flutter / Dart',
+      icon: '📱',
+      category: 'Mobile Framework',
+      installCmd: 'flutter pub add http',
+      guide: [
+        'Hook into `FlutterError.onError` and `PlatformDispatcher.instance.onError`.',
+        'Captures iOS & Android cross-platform exceptions.',
+      ],
+      code: (key) => `void captureSnapTrace(Object error, StackTrace stack) {
+  http.post(
+    Uri.parse('https://snaptrace-dashboard.vercel.app/api/v1/log'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'apiKey': '${key}',
+      'message': error.toString(),
+      'stackTrace': stack.toString(),
+      'environment': 'production'
+    }),
+  );
+}`,
+    },
+    cloudflare: {
+      name: 'Cloudflare Workers / Edge',
+      icon: '☁️',
+      category: 'Serverless Edge',
+      installCmd: '// Uses standard Fetch & ExecutionContext.waitUntil',
+      guide: [
+        'Wrap your worker `fetch` handler in try/catch.',
+        'Uses `ctx.waitUntil()` to deliver telemetry without blocking edge responses.',
+      ],
+      code: (key) => `export default {
+  async fetch(req, env, ctx) {
+    try {
+      return await handleRequest(req);
+    } catch (err) {
+      ctx.waitUntil(fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: '${key}',
+          message: err.message,
+          stackTrace: err.stack,
+          environment: 'production'
+        })
+      }));
+      return new Response('Edge Execution Error', { status: 500 });
+    }
+  }
+};`,
     },
     curl: {
       name: 'cURL / REST API',
       icon: '🌐',
+      category: 'DevOps & CI/CD',
+      installCmd: 'curl -X POST ...',
       guide: [
-        'Send raw JSON payloads directly to the SnapTrace ingestion endpoint via HTTP POST.',
-        'Ideal for shell scripts, GitHub Actions, server status monitors, or backend cron jobs.',
-        'No external SDK dependencies required.',
+        'Send raw JSON payloads directly via HTTP POST.',
+        'Ideal for GitHub Actions, Bash scripts, and cron monitors.',
       ],
-      code: (key) => `# Direct cURL Telemetry Payload Test
-curl -X POST https://snaptrace-dashboard.vercel.app/api/v1/log \\
+      code: (key) => `curl -X POST https://snaptrace-dashboard.vercel.app/api/v1/log \\
   -H "Content-Type: application/json" \\
   -d '{
     "apiKey": "${key}",
     "message": "Critical process crash on worker-01",
-    "stackTrace": "ProcessExitedError: Signal SIGSEGV at address 0x00000008",
+    "stackTrace": "ProcessExitedError: Signal SIGSEGV",
     "environment": "production",
-    "url": "https://worker-01.internal/jobs",
-    "userAgent": "cURL/7.68.0 Telemetry Client"
+    "url": "https://worker-01.internal/jobs"
   }'`,
     },
-    ruby: {
-      name: 'Ruby',
-      icon: '💎',
-      installCmd: 'gem install net-http json',
+    html: {
+      name: 'HTML5 Resource Catcher',
+      icon: '🎨',
+      category: 'Asset Monitoring',
+      installCmd: '<!-- Paste in HTML head -->',
       guide: [
-        'Uses standard Ruby \`net/http\` and \`json\` libraries.',
-        'Integrate into Rails rescue_from blocks or Sinatra error handlers.',
-        'Captures backtraces via \`exception.backtrace.join("\\n")\`.',
+        'Intercepts broken images, failing CDN stylesheets, and missing scripts.',
+        'Uses DOM error event capture before event bubbling.',
       ],
-      code: (key) => `# SnapTrace Ruby Exception Handler
-require 'net/http'
-require 'uri'
-require 'json'
-
-def send_snaptrace_error(exception, environment = 'production')
-  uri = URI.parse('https://snaptrace-dashboard.vercel.app/api/v1/log')
-  header = { 'Content-Type': 'application/json' }
-  
-  body = {
-    apiKey: '${key}',
-    message: exception.message,
-    stackTrace: exception.backtrace ? exception.backtrace.join("\\n") : nil,
-    environment: environment,
-    url: 'Ruby Backend Service',
-    userAgent: "Ruby #{RUBY_VERSION}"
-  }
-
-  http = Net::HTTP.new(uri.host, uri.port)
-  http.use_ssl = true
-  
-  request = Net::HTTP::Post.new(uri.request_uri, header)
-  request.body = body.to_json
-  
-  http.request(request)
-rescue => e
-  puts "SnapTrace dispatch error: #{e.message}"
-end
-
-# Example Usage
-begin
-  raise "Order processing failed due to insufficient inventory"
-rescue => e
-  send_snaptrace_error(e, 'production')
-end`,
-    },
-    kotlin: {
-      name: 'Kotlin / Android',
-      icon: '🟪',
-      installCmd: 'implementation("com.squareup.okhttp3:okhttp:4.12.0")',
-      guide: [
-        'Add OkHttp or Ktor client to your Android / Kotlin project dependencies.',
-        'Call the dispatcher inside global UncaughtExceptionHandler or coroutine exception handlers.',
-        'Ensure internet permissions are added in \`AndroidManifest.xml\`.',
-      ],
-      code: (key) => `// SnapTrace Kotlin Error Reporter
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import java.io.StringWriter
-import java.io.PrintWriter
-
-fun sendSnapTraceError(exception: Throwable, environment: String = "production") {
-    val client = OkHttpClient()
-    val sw = StringWriter()
-    exception.printStackTrace(PrintWriter(sw))
-
-    val jsonPayload = JSONObject().apply {
-        put("apiKey", "${key}")
-        put("message", exception.message ?: "Unknown Kotlin Exception")
-        put("stackTrace", sw.toString())
-        put("environment", environment)
-        put("url", "Android Native App")
-        put("userAgent", "Kotlin/\${KotlinVersion.CURRENT}")
+      code: (key) => `<script>
+  document.addEventListener('error', function(e) {
+    var target = e.target;
+    if (target && (target.tagName === 'IMG' || target.tagName === 'LINK' || target.tagName === 'SCRIPT')) {
+      fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: '${key}',
+          message: 'Asset load failure: ' + (target.src || target.href),
+          environment: 'production',
+          url: window.location.href
+        }),
+        keepalive: true
+      });
     }
-
-    val body = jsonPayload.toString().toRequestBody("application/json; charset=utf-8".toMediaType())
-    val request = Request.Builder()
-        .url("https://snaptrace-dashboard.vercel.app/api/v1/log")
-        .post(body)
-        .build()
-
-    Thread {
-        try {
-            client.newCall(request).execute()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }.start()
-}`,
-    },
-    php: {
-      name: 'PHP',
-      icon: '🐘',
-      installCmd: 'extension=curl # Ensure cURL extension is enabled in php.ini',
-      guide: [
-        'Uses standard PHP cURL functionality.',
-        'Integrate into custom exception handlers via \`set_exception_handler()\`.',
-        'Works across Laravel, Symfony, WordPress, and custom PHP apps.',
-      ],
-      code: (key) => `<?php
-// SnapTrace Telemetry Handler for PHP
-function sendSnapTraceError(Throwable $exception, $environment = 'production') {
-    $url = 'https://snaptrace-dashboard.vercel.app/api/v1/log';
-    
-    $payload = [
-        'apiKey' => '${key}',
-        'message' => $exception->getMessage(),
-        'stackTrace' => $exception->getTraceAsString(),
-        'environment' => $environment,
-        'url' => $_SERVER['REQUEST_URI'] ?? 'CLI / Background Job',
-        'userAgent' => $_SERVER['HTTP_USER_AGENT'] ?? ('PHP ' . PHP_VERSION)
-    ];
-
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json'
-    ]);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-
-    $response = curl_exec($ch);
-    curl_close($ch);
-    return $response;
-}
-
-// Example Usage
-try {
-    throw new Exception("SQLSTATE[HY000] [2002] Connection refused");
-} catch (Throwable $e) {
-    sendSnapTraceError($e, 'production');
-}
-?>`,
+  }, true);
+</script>`,
     },
   };
 
+  const current = integrations[activeTab] || integrations['nextjs'];
+
   const handleCopy = () => {
-    const textToCopy = integrations[activeTab].code(apiKey);
-    navigator.clipboard.writeText(textToCopy);
+    navigator.clipboard.writeText(current.code(apiKey));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-8 font-sans">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="border-b border-slate-800 pb-4">
-          <h1 className="text-2xl font-bold tracking-tight text-white">Language Integrations</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Copy production-ready telemetry snippets and SDK code for your stack.
+        <div className="border-b border-slate-800/80 pb-5">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
+            <span>Language & Framework Integrations</span>
+          </h1>
+          <p className="text-xs text-slate-400 font-mono mt-1">
+            Production-ready drop-in code snippets with your active project credentials pre-injected.
           </p>
         </div>
 
         {/* API Key Banner */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+        <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
           <div className="space-y-1">
-            <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider block">
-              Active Project API Key
+            <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest font-mono block">
+              Active Ingestion Key
             </span>
             <p className="text-xs text-slate-400">
-              Snippets below are pre-configured with your active project key.
+              All snippets below are automatically populated with this project token.
             </p>
           </div>
-          <code className="bg-slate-950 px-3 py-1.5 rounded border border-slate-800 font-mono text-xs text-purple-300 truncate max-w-md">
-            {loading ? 'Fetching API Key...' : apiKey}
+          <code className="bg-[#05070E] px-4 py-2 rounded-xl border border-slate-800 font-mono text-xs text-yellow-300 truncate max-w-md">
+            {loading ? 'Fetching active key...' : apiKey}
           </code>
         </div>
 
-        {/* Tabs & Code Panel */}
+        {/* Grid: Language Selector + Code Box */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           
-          {/* Language Selector Sidebar */}
-          <div className="lg:col-span-1 space-y-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3 px-1">
-              Select Language
+          {/* Left: Language Tabs */}
+          <div className="lg:col-span-1 space-y-1.5 max-h-[600px] overflow-y-auto pr-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2 px-1 font-mono">
+              Supported Stacks ({Object.keys(integrations).length})
             </span>
+
             {(Object.keys(integrations) as LanguageKey[]).map((lang) => {
               const item = integrations[lang];
               const isActive = activeTab === lang;
@@ -411,80 +447,87 @@ try {
                 <button
                   key={lang}
                   onClick={() => setActiveTab(lang)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-medium transition text-left cursor-pointer ${
+                  className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition text-left cursor-pointer ${
                     isActive
-                      ? 'bg-purple-600/20 text-purple-300 border border-purple-500/40 shadow-md'
-                      : 'bg-slate-900 text-slate-400 border border-slate-800/80 hover:bg-slate-800/60 hover:text-slate-200'
+                      ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/40 shadow-sm font-bold'
+                      : 'bg-[#090D16] text-slate-400 border border-slate-800 hover:bg-slate-800/60 hover:text-slate-200'
                   }`}
                 >
                   <span className="text-base">{item.icon}</span>
-                  <span className="font-semibold">{item.name}</span>
+                  <div className="truncate">
+                    <div className="truncate">{item.name}</div>
+                    <span className="text-[9px] text-slate-500 font-mono block">{item.category}</span>
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Snippet Display Box */}
-          <div className="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-6 shadow-xl flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl">{integrations[activeTab].icon}</span>
-                  <h2 className="text-lg font-bold text-white">
-                    {integrations[activeTab].name} Integration Setup
-                  </h2>
+          {/* Right: Code Viewer & Setup Guide */}
+          <div className="lg:col-span-3 bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 space-y-6 shadow-2xl flex flex-col justify-between">
+            <div className="space-y-5">
+              
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl p-2 bg-yellow-400/10 border border-yellow-400/20 rounded-xl text-yellow-400">{current.icon}</span>
+                  <div>
+                    <h2 className="text-base font-bold text-white">
+                      {current.name} Integration
+                    </h2>
+                    <span className="text-[10px] text-yellow-400 font-mono uppercase">{current.category}</span>
+                  </div>
                 </div>
                 <button
                   onClick={handleCopy}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-2 shadow-lg cursor-pointer"
+                  className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 shadow-lg shadow-yellow-500/20 cursor-pointer self-start sm:self-auto font-mono"
                 >
-                  <span>{copied ? '✓ Copied to Clipboard' : '📋 Copy Snippet'}</span>
+                  <span>{copied ? '✓ Snippet Copied!' : '📋 Copy Snippet'}</span>
                 </button>
               </div>
 
-              {/* Package installation command */}
-              {integrations[activeTab].installCmd && (
-                <div className="space-y-1">
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Installation / Requirements
+              {/* Install / Requirement note */}
+              {current.installCmd && (
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+                    Installation / Dependency
                   </span>
-                  <pre className="bg-slate-950 border border-slate-800 p-3 rounded-lg text-xs font-mono text-emerald-400 overflow-x-auto">
-                    {integrations[activeTab].installCmd}
+                  <pre className="bg-[#05070E] border border-slate-800 p-3 rounded-xl text-xs font-mono text-emerald-400 overflow-x-auto">
+                    {current.installCmd}
                   </pre>
                 </div>
               )}
 
               {/* Step-by-step Setup Guide */}
               <div className="space-y-2">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                  Integration Guide
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+                  Setup Instructions
                 </span>
-                <ul className="space-y-1.5 text-xs text-slate-300 bg-slate-950/50 p-3 rounded-lg border border-slate-800/60">
-                  {integrations[activeTab].guide.map((step, idx) => (
-                    <li key={idx} className="flex items-start space-x-2">
-                      <span className="text-purple-400 font-bold">•</span>
+                <ul className="space-y-2 text-xs text-slate-300 bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 font-mono">
+                  {current.guide.map((step, idx) => (
+                    <li key={idx} className="flex items-start space-x-2.5">
+                      <span className="text-yellow-400 font-bold">•</span>
                       <span>{step}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              {/* Code Editor Preview */}
-              <div className="space-y-2 pt-2">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              {/* Code Snippet Editor */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
                   Production Code Snippet
                 </span>
-                <div className="relative">
-                  <pre className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-xs font-mono text-purple-200 overflow-x-auto leading-relaxed max-h-[400px]">
-                    {integrations[activeTab].code(apiKey)}
-                  </pre>
-                </div>
+                <pre className="bg-[#05070E] border border-slate-800 p-4 rounded-2xl text-xs font-mono text-yellow-300 overflow-x-auto leading-relaxed max-h-[380px] shadow-inner">
+                  <code>{current.code(apiKey)}</code>
+                </pre>
               </div>
+
             </div>
 
-            <div className="pt-4 border-t border-slate-800 text-right">
-              <span className="text-[11px] text-slate-500">
-                Endpoint: <code className="text-slate-400">POST /api/v1/log</code>
+            <div className="pt-4 border-t border-slate-800/80 text-right">
+              <span className="text-[11px] text-slate-500 font-mono">
+                Ingestion Endpoint: <code className="text-yellow-400">POST /api/v1/log</code>
               </span>
             </div>
           </div>

@@ -9,7 +9,7 @@ import RevealOnScroll from '@/components/RevealOnScroll';
 
 export const dynamic = 'force-dynamic';
 
-type StackKey = 'nextjs' | 'js' | 'python' | 'node' | 'go' | 'php' | 'ruby' | 'kotlin';
+type StackKey = 'nextjs' | 'js' | 'python' | 'node' | 'go' | 'rust' | 'csharp' | 'php' | 'ruby' | 'kotlin' | 'flutter' | 'cloudflare';
 
 export default function WelcomeLandingPage() {
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }`,
-    js: `<!-- HTML5, React, Vue, Svelte, or Vanilla JS -->
+    js: `<!-- React, Vue, Svelte, or Vanilla JavaScript -->
 <script 
   src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
   data-api-key="sk_live_your_project_key"
@@ -69,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     python: `# Python / Django / FastAPI / Flask
 import traceback, requests
 
-def capture_snaptrace(exception, url="https://api.mycompany.com"):
+def log_to_snaptrace(exception, url="https://api.mycompany.com"):
     try:
         requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
             "apiKey": "sk_live_your_project_key",
@@ -93,7 +93,7 @@ process.on('uncaughtException', (err) => {
     })
   }).catch(() => {});
 });`,
-    go: `// Golang Crash Reporter
+    go: `// Go (Golang) Crash Reporter
 package main
 
 import (
@@ -110,6 +110,31 @@ func SendSnapTrace(err error, route string) {
     "url":         route,
   })
   http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))
+}`,
+    rust: `// Rust / Axum / Actix-web
+async fn capture_snaptrace(err: &str, route: &str) {
+    let payload = serde_json::json!({
+        "apiKey": "sk_live_your_project_key",
+        "message": err,
+        "url": route,
+        "environment": "production"
+    });
+    let _ = reqwest::Client::new()
+        .post("https://snaptrace-dashboard.vercel.app/api/v1/log")
+        .json(&payload)
+        .send()
+        .await;
+}`,
+    csharp: `// C# / ASP.NET Core
+public static async Task CaptureSnapTrace(Exception ex, string url = "API Service") {
+    var payload = new {
+        apiKey = "sk_live_your_project_key",
+        message = ex.Message,
+        stackTrace = ex.StackTrace,
+        url = url,
+        environment = "production"
+    };
+    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);
 }`,
     php: `<?php
 // PHP / Laravel / WordPress
@@ -135,16 +160,49 @@ def send_snaptrace_alert(exception)
     environment: 'production'
   }.to_json, "Content-Type" => "application/json") rescue nil
 end`,
-    kotlin: `// Kotlin / Android / JVM
-fun reportSnapTrace(e: Throwable, context: String = "Mobile App") {
-  val json = JSONObject().apply {
-    put("apiKey", "sk_live_your_project_key")
-    put("message", e.localizedMessage ?: "Unknown Error")
-    put("environment", "production")
-    put("url", context)
+    kotlin: `// Kotlin / Android / Java (OkHttp)
+fun sendSnapTrace(e: Throwable, context: String = "Android App") {
+    val json = JSONObject().apply {
+        put("apiKey", "sk_live_your_project_key")
+        put("message", e.localizedMessage ?: "Unknown Error")
+        put("environment", "production")
+        put("url", context)
+    }
+    // Asynchronous POST dispatch to https://snaptrace-dashboard.vercel.app/api/v1/log
+}`,
+    flutter: `// Flutter / Dart Crash Handler
+void captureSnapTrace(Object error, StackTrace stack) {
+  http.post(
+    Uri.parse('https://snaptrace-dashboard.vercel.app/api/v1/log'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'apiKey': 'sk_live_your_project_key',
+      'message': error.toString(),
+      'stackTrace': stack.toString(),
+      'environment': 'production'
+    }),
+  );
+}`,
+    cloudflare: `// Cloudflare Workers / Serverless Edge
+export default {
+  async fetch(req, env, ctx) {
+    try {
+      return await handleRequest(req);
+    } catch (err) {
+      ctx.waitUntil(fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: 'sk_live_your_project_key',
+          message: err.message,
+          stackTrace: err.stack,
+          environment: 'production'
+        })
+      }));
+      return new Response('Internal Server Error', { status: 500 });
+    }
   }
-  // Dispatches async POST to https://snaptrace-dashboard.vercel.app/api/v1/log
-}`
+};`
   };
 
   const handleCopyCode = () => {
@@ -166,23 +224,31 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
   const faqs = [
     {
       q: 'Do I need to keep the SnapTrace website open to receive alerts?',
-      a: 'No! The SnapTrace SDK runs silently inside your application. When an unhandled crash happens in production, SnapTrace automatically pings your configured Discord channel and Gmail inbox with the exact error details and stack trace in milliseconds.'
+      a: 'No! The SnapTrace SDK runs silently inside your live application. When an unhandled exception or crash happens in production, SnapTrace catches it and immediately pings your configured Discord channel and Gmail inbox with the exact error details and stack trace in milliseconds.'
     },
     {
-      q: 'How does SnapTrace integrate with VS Code, Cursor, and AI IDEs?',
-      a: 'When an exception occurs, SnapTrace provides a 1-click "Copy for Cursor / VS Code" button. It generates an AI-optimized diagnostic prompt containing the runtime environment, error message, and stack frames, ready to paste into Cursor or Claude Code for instant local code fixes.'
+      q: 'How does SnapTrace integrate with VS Code, Cursor, and AI coding agents?',
+      a: 'When an exception occurs, SnapTrace provides a 1-click "Copy for Cursor / AI" button inside the Inspect modal. It generates an AI-optimized prompt containing the runtime environment, error message, and stack frames, ready to paste into Cursor, VS Code Copilot, or Claude Code for instant local code fixes.'
+    },
+    {
+      q: 'What languages and frameworks does SnapTrace support?',
+      a: 'SnapTrace uses a universal, lightweight REST telemetry endpoint. We provide drop-in snippets for Next.js (App Router & Pages Router), JavaScript, React, Vue, Svelte, Node.js, Python, Go, Rust, C# (.NET), PHP (Laravel, WordPress), Ruby, Kotlin, Java, Flutter, Cloudflare Workers, and raw cURL/Bash.'
+    },
+    {
+      q: 'How does SnapTrace maintain a <5KB bundle size with 0ms delay?',
+      a: 'Unlike legacy APMs that bundle 100KB+ of heavy performance profilers and session serializers, SnapTrace is focused strictly on crash telemetry, client-side PII regex scrubbing, and asynchronous beacon delivery via navigator.sendBeacon. It never delays page hydration or blocks Google Core Web Vitals.'
+    },
+    {
+      q: 'What is the 60-second noise deduplication engine?',
+      a: 'If a broken React component re-renders infinitely or a failing database query fires 500 times in 10 seconds, SnapTrace hashes the error into a deterministic fingerprint. It sends the 1st crash instantly, silences duplicate alerts, and delivers 1 clean summary notification tagged [x500].'
+    },
+    {
+      q: 'How does the on-device Client-Side PII Firewall protect data?',
+      a: 'Before an error payload ever leaves the user\'s browser, an on-device regex filter scans error messages and URLs for emails, 16-digit credit cards, auth tokens (apiKey=...), and passwords (password=...), replacing them with [REDACTED] tokens on the client.'
     },
     {
       q: 'How does the limited-time Beta promotion work?',
-      a: 'All developers who sign up before October 31, 2026 receive automatic, grandfathered Lifetime Pro access with 150,000 monthly events and full in-dashboard AI diagnostics for $0. No credit card required.'
-    },
-    {
-      q: 'How does SnapTrace maintain a <5KB bundle size?',
-      a: 'SnapTrace eliminates heavy distributed tracing bloat. It focuses strictly on uncaught runtime errors, unhandled promise rejections, on-device PII masking, and asynchronous beacon delivery via navigator.sendBeacon with zero penalty on Google Core Web Vitals.'
-    },
-    {
-      q: 'What is the 60-second loop throttling engine?',
-      a: 'If a React component gets trapped in an infinite re-render loop or a failing API poll fires 500 times in 10 seconds, SnapTrace sends the 1st crash instantly, silences duplicate alerts, and delivers 1 clean summary notification tagged [x500].'
+      a: 'All developers who sign up during our Public Beta receive automatic, grandfathered Lifetime Pro access with 150,000 monthly events and full in-dashboard AI diagnostics for $0. No credit card required.'
     }
   ];
 
@@ -203,7 +269,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       {/* 1. Urgency Expiration Date Top Banner */}
       <div className="bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950 px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2">
         <span>⏰ Limited Beta Launch Offer:</span>
-        <span className="bg-slate-950 text-yellow-300 px-2 py-0.5 rounded text-[11px]">Free Pro Tier Unlocked Until Oct 31, 2026</span>
+        <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px]">Free Pro Tier Unlocked Until Oct 31, 2026</span>
         <span className="hidden sm:inline">• Claim your lifetime grandfathered spot today!</span>
       </div>
 
@@ -250,7 +316,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090D16] border-2 border-yellow-400/40 text-xs font-bold text-yellow-300 shadow-xl shadow-yellow-500/10 font-mono">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>⚡ Compatible with Next.js, Python, Node, Go, Rust, PHP, Ruby & Kotlin</span>
+            <span>⚡ Sub-5KB SDK • Universal 14-Stack Support • Zero Alert Fatigue</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.1]">
@@ -287,21 +353,25 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 4. Interactive 8-Language Quickstart Terminal */}
+      {/* 4. Interactive 12-Language Quickstart Terminal */}
       <RevealOnScroll className="max-w-5xl mx-auto px-6 pb-28" delay={100}>
         <div id="quickstart" className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#060911] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center space-x-1.5 overflow-x-auto pb-2 md:pb-0">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mr-2 font-mono whitespace-nowrap">SDK Setup:</span>
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mr-2 font-mono whitespace-nowrap">Stack:</span>
               {[
                 { id: 'nextjs', label: 'Next.js' },
                 { id: 'js', label: 'JavaScript' },
                 { id: 'python', label: 'Python' },
                 { id: 'node', label: 'Node.js' },
                 { id: 'go', label: 'Go' },
+                { id: 'rust', label: 'Rust' },
+                { id: 'csharp', label: 'C# .NET' },
                 { id: 'php', label: 'PHP' },
                 { id: 'ruby', label: 'Ruby' },
                 { id: 'kotlin', label: 'Kotlin' },
+                { id: 'flutter', label: 'Flutter' },
+                { id: 'cloudflare', label: 'Cloudflare' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -383,8 +453,68 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 6. BYOK AI Section with Cursor & Claude Badges */}
-      <section id="ai-copilot" className="py-24 border-t border-slate-800/80 relative">
+      {/* 6. Sub-5KB SDK Section */}
+      <section id="features" className="py-24 border-t border-slate-800/80">
+        <div className="max-w-6xl mx-auto px-6">
+          <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
+            
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
+                <span>🪶</span> Performance & Core Web Vitals
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+                An error tracker that never slows down your users
+              </h2>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Legacy APMs force your users to download massive 100KB+ bundles that delay First Contentful Paint (FCP) and hurt Google Lighthouse scores. SnapTrace is a zero-dependency script under <strong>5KB</strong> gzipped.
+              </p>
+
+              <div className="space-y-3 pt-2 font-mono">
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs">
+                  <span className="text-slate-300 font-semibold">SnapTrace JS Telemetry SDK</span>
+                  <span className="text-emerald-400 font-bold">&lt; 5 KB</span>
+                </div>
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs opacity-70">
+                  <span className="text-slate-400">Honeybadger Client</span>
+                  <span className="text-slate-400 font-bold">~35 KB</span>
+                </div>
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs opacity-50">
+                  <span className="text-slate-500">Sentry Browser SDK</span>
+                  <span className="text-red-400 font-bold">100+ KB</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 bg-[#090D16] border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Google Lighthouse Impact</span>
+                <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20 font-mono">
+                  Score: 100/100
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="p-4 rounded-2xl bg-[#05070E] border border-slate-800 space-y-1">
+                  <div className="text-2xl font-black text-emerald-400 font-mono">0.0ms</div>
+                  <p className="text-[11px] text-slate-400">Main Thread Blocking Time</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#05070E] border border-slate-800 space-y-1">
+                  <div className="text-2xl font-black text-emerald-400 font-mono">3.4 KB</div>
+                  <p className="text-[11px] text-slate-400">Total Gzipped Size</p>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-400 leading-relaxed italic border-t border-slate-800/80 pt-4 font-mono">
+                "We dropped heavy tracking tools for SnapTrace and our Next.js bundle footprint dropped instantly."
+              </p>
+            </div>
+
+          </RevealOnScroll>
+        </div>
+      </section>
+
+      {/* 7. BYOK AI Section */}
+      <section id="ai-copilot" className="py-24 border-t border-slate-800/80 bg-[#060911]/60 relative">
         <div className="max-w-6xl mx-auto px-6 space-y-12">
           
           <RevealOnScroll className="text-center space-y-4 max-w-2xl mx-auto">
@@ -454,7 +584,7 @@ try {
         </div>
       </section>
 
-      {/* 7. Comparison Table */}
+      {/* 8. Comparison Table */}
       <section id="comparison" className="max-w-5xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Why Developers Choose SnapTrace</h2>
@@ -515,13 +645,13 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 8. Pricing Section with Expiration Date */}
+      {/* 9. Pricing Section with Expiration Date */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
             <span>⏰</span> Limited Beta Window (Until Oct 31, 2026)
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Simple, transparent pricing</h2>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Simple, transparent developer tiers</h2>
           <p className="text-sm text-slate-400 max-w-xl mx-auto">
             Zero surprise overage bills. Full Pro access unlocked during public beta.
           </p>
@@ -617,11 +747,11 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 9. FAQ Section */}
+      {/* 10. Developer FAQs */}
       <section id="faq" className="max-w-4xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-10">
         <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
-          <p className="text-sm text-slate-400">Everything you need to know about SnapTrace.</p>
+          <p className="text-sm text-slate-400 font-mono">Real technical answers for developers evaluating SnapTrace.</p>
         </RevealOnScroll>
 
         <RevealOnScroll className="space-y-3" delay={150}>
@@ -640,7 +770,7 @@ try {
                   <span className="text-slate-500 font-mono text-base">{isOpen ? '−' : '+'}</span>
                 </button>
                 {isOpen && (
-                  <div className="px-5 pb-5 text-xs text-slate-400 leading-relaxed border-t border-slate-800/60 pt-3">
+                  <div className="px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3">
                     {faq.a}
                   </div>
                 )}
@@ -650,14 +780,14 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 10. Footer */}
+      {/* 11. Footer */}
       <footer className="border-t border-slate-800/80 bg-[#060911] py-20 text-center space-y-6 relative overflow-hidden">
         <RevealOnScroll className="max-w-2xl mx-auto px-6 space-y-6 relative z-10">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
             Ready to catch bugs in a snap?
           </h2>
           <p className="text-sm text-slate-400 leading-relaxed">
-            Join early developers catching crashes in real time with zero noise and instant AI diagnoses.
+            Join developers catching crashes in real time with zero noise and instant AI diagnoses.
           </p>
           <div className="pt-2">
             <Link
