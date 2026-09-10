@@ -199,7 +199,7 @@ export default {
           environment: 'production'
         })
       }));
-      return new Response('Internal Server Error', { status: 500 });
+      return new Response('Edge Execution Error', { status: 500 });
     }
   }
 };`
@@ -223,28 +223,24 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
   const faqs = [
     {
-      q: 'Do I need to keep the SnapTrace website open to receive alerts?',
-      a: 'No! The SnapTrace SDK runs silently inside your live application. When an unhandled exception or crash happens in production, SnapTrace catches it and immediately pings your configured Discord channel and Gmail inbox with the exact error details and stack trace in milliseconds.'
+      q: 'How does SnapTrace collapse cascading multi-error outages?',
+      a: 'During an outage, a single database connection drop often triggers 4 or 5 different downstream errors (auth fails, queries fail, UI renders fail). Instead of sending 5 separate noisy alerts that you have to piece together manually on a Sunday, SnapTrace groups cascading failures and isolates the single root cause with an instant AI fix.'
     },
     {
-      q: 'How does SnapTrace integrate with VS Code, Cursor, and AI coding agents?',
+      q: 'Do I need to keep the SnapTrace website open to receive alerts?',
+      a: 'No! The SnapTrace SDK runs silently inside your live application. When an unhandled crash happens in production, SnapTrace automatically pings your configured Discord channel and Gmail inbox with the exact error details and stack trace in milliseconds.'
+    },
+    {
+      q: 'How does SnapTrace integrate with VS Code, Cursor, and AI IDEs?',
       a: 'When an exception occurs, SnapTrace provides a 1-click "Copy for Cursor / AI" button inside the Inspect modal. It generates an AI-optimized prompt containing the runtime environment, error message, and stack frames, ready to paste into Cursor, VS Code Copilot, or Claude Code for instant local code fixes.'
     },
     {
       q: 'What languages and frameworks does SnapTrace support?',
-      a: 'SnapTrace uses a universal, lightweight REST telemetry endpoint. We provide drop-in snippets for Next.js (App Router & Pages Router), JavaScript, React, Vue, Svelte, Node.js, Python, Go, Rust, C# (.NET), PHP (Laravel, WordPress), Ruby, Kotlin, Java, Flutter, Cloudflare Workers, and raw cURL/Bash.'
+      a: 'SnapTrace uses a universal REST telemetry endpoint. We provide drop-in snippets for Next.js (App Router & Pages Router), JavaScript, React, Vue, Svelte, Node.js, Python, Go, Rust, C# (.NET), PHP (Laravel, WordPress), Ruby, Kotlin, Java, Flutter, Cloudflare Workers, and raw cURL/Bash.'
     },
     {
       q: 'How does SnapTrace maintain a <5KB bundle size with 0ms delay?',
       a: 'Unlike legacy APMs that bundle 100KB+ of heavy performance profilers and session serializers, SnapTrace is focused strictly on crash telemetry, client-side PII regex scrubbing, and asynchronous beacon delivery via navigator.sendBeacon. It never delays page hydration or blocks Google Core Web Vitals.'
-    },
-    {
-      q: 'What is the 60-second noise deduplication engine?',
-      a: 'If a broken React component re-renders infinitely or a failing database query fires 500 times in 10 seconds, SnapTrace hashes the error into a deterministic fingerprint. It sends the 1st crash instantly, silences duplicate alerts, and delivers 1 clean summary notification tagged [x500].'
-    },
-    {
-      q: 'How does the on-device Client-Side PII Firewall protect data?',
-      a: 'Before an error payload ever leaves the user\'s browser, an on-device regex filter scans error messages and URLs for emails, 16-digit credit cards, auth tokens (apiKey=...), and passwords (password=...), replacing them with [REDACTED] tokens on the client.'
     },
     {
       q: 'How does the limited-time Beta promotion work?',
@@ -282,6 +278,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
           <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300 font-mono">
             <a href="#how-it-works" className="hover:text-yellow-400 transition">How It Works</a>
+            <a href="#grouping" className="hover:text-yellow-400 transition text-yellow-300 font-bold">Root-Cause Collapse</a>
             <a href="#quickstart" className="hover:text-yellow-400 transition">SDK Setup</a>
             <a href="#ai-copilot" className="hover:text-yellow-400 transition flex items-center gap-1.5 text-yellow-300">
               <span>✨</span> AI Diagnostics
@@ -316,18 +313,18 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090D16] border-2 border-yellow-400/40 text-xs font-bold text-yellow-300 shadow-xl shadow-yellow-500/10 font-mono">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>⚡ Sub-5KB SDK • Universal 14-Stack Support • Zero Alert Fatigue</span>
+            <span>⚡ Sub-5KB SDK • Cascading Outage Collapse • Zero Alert Spam</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.1]">
-            Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>. Fix it in seconds without the{' '}
+            Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>. Stop spending Sundays connecting the{' '}
             <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
-              bloat or alert flood.
+              dots by hand.
             </span>
           </h1>
 
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed">
-            The featherweight (<span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>) telemetry client with on-device PII masking, 60s noise throttling, and 1-click AI prompt exports for VS Code, Cursor, and Claude.
+            SnapTrace automatically collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes for VS Code & Cursor.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 font-mono">
@@ -353,8 +350,89 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 4. Interactive 12-Language Quickstart Terminal */}
-      <RevealOnScroll className="max-w-5xl mx-auto px-6 pb-28" delay={100}>
+      {/* 4. NEW EUSEBIU FEATURE SHOWCASE: Cascading Root-Cause Grouping */}
+      <section id="grouping" className="py-24 border-t border-slate-800/80 bg-[#060911]/80">
+        <div className="max-w-6xl mx-auto px-6 space-y-12">
+          
+          <RevealOnScroll className="text-center space-y-3 max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold font-mono uppercase">
+              <span>🎯</span> The #1 Weekend Debugging Killer
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight">
+              4 separate error reports. 1 underlying cause.
+            </h2>
+            <p className="text-sm text-slate-400 leading-relaxed font-sans">
+              The bugs that cost developers the most time are rarely the loud ones. It's having multiple downstream errors hit your inbox, only to spend your Sunday reading logs by hand to realize they all came from the exact same database timeout.
+            </p>
+          </RevealOnScroll>
+
+          {/* Visual Comparison: Traditional vs SnapTrace */}
+          <RevealOnScroll className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto" delay={150}>
+            
+            {/* The Old Noisy Way */}
+            <div className="bg-[#090D16] border border-red-500/30 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span className="text-xs font-bold text-red-400 uppercase font-mono">Traditional APMs (Noisy)</span>
+                <span className="text-[10px] font-mono bg-red-950 text-red-300 px-2 py-0.5 rounded">4 Separate Alerts</span>
+              </div>
+
+              <div className="space-y-2 text-xs font-mono opacity-80">
+                <div className="p-3 bg-[#05070E] rounded-xl border border-red-500/20 text-red-300">
+                  🚨 Alert 1: AuthMiddleware: Token validation failed (/api/auth)
+                </div>
+                <div className="p-3 bg-[#05070E] rounded-xl border border-red-500/20 text-red-300">
+                  🚨 Alert 2: ProfileService: Cannot read null of user (/profile)
+                </div>
+                <div className="p-3 bg-[#05070E] rounded-xl border border-red-500/20 text-red-300">
+                  🚨 Alert 3: OrderQueue: Job worker disconnected (/jobs)
+                </div>
+                <div className="p-3 bg-[#05070E] rounded-xl border border-red-500/20 text-red-300">
+                  🚨 Alert 4: HTTP 500: Internal Server Error (/checkout)
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-500 italic pt-2">
+                ❌ Developer wastes hours reading 4 stack traces to figure out the connection.
+              </p>
+            </div>
+
+            {/* The SnapTrace Solution */}
+            <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl relative">
+              <span className="absolute -top-3 right-6 px-3 py-0.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider font-mono">
+                SnapTrace Collapse
+              </span>
+
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <span className="text-xs font-bold text-yellow-400 uppercase font-mono">SnapTrace Unified Incident</span>
+                <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
+                  1 Clean Incident
+                </span>
+              </div>
+
+              <div className="p-4 bg-[#05070E] rounded-2xl border border-yellow-400/30 space-y-2 text-xs font-mono">
+                <div className="text-yellow-300 font-bold flex items-center gap-1.5">
+                  <span>⚡</span> Root Cause Isolated: PostgreSQL Pool Exhausted
+                </div>
+                <p className="text-slate-400 text-[11px]">
+                  4 downstream cascade crashes collapsed under <code className="text-slate-200">database.js:18</code>.
+                </p>
+                <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-emerald-400">
+                  <span>✨ AI Code Patch Ready</span>
+                  <span className="underline">Release client to pool</span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-300 pt-2 font-mono">
+                ✓ 1 notification on Discord. Root cause identified in 2 seconds. Sunday saved.
+              </p>
+            </div>
+
+          </RevealOnScroll>
+        </div>
+      </section>
+
+      {/* 5. Interactive 12-Language Quickstart Terminal */}
+      <RevealOnScroll className="max-w-5xl mx-auto px-6 py-24" delay={100}>
         <div id="quickstart" className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#060911] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center space-x-1.5 overflow-x-auto pb-2 md:pb-0">
@@ -402,56 +480,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           </div>
         </div>
       </RevealOnScroll>
-
-      {/* 5. How It Works Pipeline */}
-      <section id="how-it-works" className="py-24 border-t border-slate-800/80 bg-[#060911]/80">
-        <div className="max-w-6xl mx-auto px-6 space-y-12">
-          
-          <RevealOnScroll className="text-center space-y-3 max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold font-mono uppercase">
-              <span>⚙️</span> The Telemetry Pipeline
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white">How SnapTrace Catches Crashes in 4 Steps</h2>
-            <p className="text-sm text-slate-400 font-mono">From client browser crash to instant Discord alert in milliseconds.</p>
-          </RevealOnScroll>
-
-          <RevealOnScroll className="grid grid-cols-1 md:grid-cols-4 gap-4" delay={150}>
-            
-            <div className="p-5 rounded-2xl bg-[#090D16] border border-slate-800 space-y-2">
-              <span className="text-[10px] font-mono font-bold text-yellow-400 px-2 py-0.5 rounded bg-yellow-400/10">01 • AUTO-INTERCEPT</span>
-              <h3 className="text-sm font-bold text-white">Capture Uncaught Crash</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Global listeners intercept runtime exceptions and promise rejections with zero main-thread delay.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-[#090D16] border border-slate-800 space-y-2">
-              <span className="text-[10px] font-mono font-bold text-blue-400 px-2 py-0.5 rounded bg-blue-500/10">02 • PII FIREWALL</span>
-              <h3 className="text-sm font-bold text-white">On-Device Masking</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Client regex replaces passwords, auth tokens, emails, and credit cards with [REDACTED] before transmission.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-[#090D16] border border-slate-800 space-y-2">
-              <span className="text-[10px] font-mono font-bold text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10">03 • NOISE THROTTLING</span>
-              <h3 className="text-sm font-bold text-white">60s Loop Suppressor</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Fingerprints group repeat crashes. 500 loop errors collapse into 1 alert tagged with occurrence count [x500].
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-[#090D16] border border-slate-800 space-y-2">
-              <span className="text-[10px] font-mono font-bold text-purple-400 px-2 py-0.5 rounded bg-purple-500/10">04 • DISCORD & EMAIL</span>
-              <h3 className="text-sm font-bold text-white">Instant Alert Delivery</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Telemetry streams live to your dashboard, rich Discord embeds, and Gmail inbox in under 1 second.
-              </p>
-            </div>
-
-          </RevealOnScroll>
-        </div>
-      </section>
 
       {/* 6. Sub-5KB SDK Section */}
       <section id="features" className="py-24 border-t border-slate-800/80">
@@ -588,7 +616,7 @@ try {
       <section id="comparison" className="max-w-5xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Why Developers Choose SnapTrace</h2>
-          <p className="text-sm text-slate-400 max-w-xl mx-auto">
+          <p className="text-sm text-slate-400 max-w-xl mx-auto font-mono">
             Built to replace bloated, noisy enterprise APMs.
           </p>
         </RevealOnScroll>
@@ -609,6 +637,12 @@ try {
                 <td className="p-4 text-emerald-400 font-bold">&lt; 5 KB (Featherweight)</td>
                 <td className="p-4 text-slate-500">~100 KB+</td>
                 <td className="p-4 text-slate-500">~100 KB+</td>
+              </tr>
+              <tr>
+                <td className="p-4 font-semibold text-white">Cascading Root-Cause Collapse</td>
+                <td className="p-4 text-emerald-400 font-bold">✓ Multi-crash unified incident</td>
+                <td className="p-4 text-slate-500">Noisy separate alerts</td>
+                <td className="p-4 text-slate-500">✕ None</td>
               </tr>
               <tr>
                 <td className="p-4 font-semibold text-white">Free Tier Events</td>
@@ -634,18 +668,12 @@ try {
                 <td className="p-4 text-slate-500">✕ Manual copy</td>
                 <td className="p-4 text-slate-500">✕ Manual copy</td>
               </tr>
-              <tr>
-                <td className="p-4 font-semibold text-white">Loop Throttling (Anti-Spam)</td>
-                <td className="p-4 text-emerald-400 font-bold">✓ 60s window [x500]</td>
-                <td className="p-4 text-slate-500">Manual spike rules</td>
-                <td className="p-4 text-slate-500">✕ Quota burns</td>
-              </tr>
             </tbody>
           </table>
         </RevealOnScroll>
       </section>
 
-      {/* 9. Pricing Section with Expiration Date */}
+      {/* 9. Pricing Section */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
@@ -770,7 +798,7 @@ try {
                   <span className="text-slate-500 font-mono text-base">{isOpen ? '−' : '+'}</span>
                 </button>
                 {isOpen && (
-                  <div className="px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3">
+                  <div className="px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3 font-sans">
                     {faq.a}
                   </div>
                 )}
@@ -787,7 +815,7 @@ try {
             Ready to catch bugs in a snap?
           </h2>
           <p className="text-sm text-slate-400 leading-relaxed">
-            Join developers catching crashes in real time with zero noise and instant AI diagnoses.
+            Join early developers catching crashes in real time with zero noise and instant AI diagnoses.
           </p>
           <div className="pt-2">
             <Link
