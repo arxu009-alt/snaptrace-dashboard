@@ -19,6 +19,9 @@ export default function WelcomeLandingPage() {
   const [copiedCursorPrompt, setCopiedCursorPrompt] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
+  // Mega-menu hover states
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
   useEffect(() => {
     async function checkUserSession() {
       try {
@@ -269,25 +272,97 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         <span className="hidden sm:inline">• Claim your lifetime grandfathered spot today!</span>
       </div>
 
-      {/* 2. Sentry-Style Sticky Navigation Bar */}
-      <header className="border-b border-slate-800/80 bg-[#090D16]/85 backdrop-blur-xl sticky top-0 z-50 transition-all">
+      {/* 2. SENTRY-STYLE STICKY NAVIGATION BAR WITH INTERACTIVE MEGA MENUS */}
+      <header className="border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300 font-mono">
-            <a href="#how-it-works" className="hover:text-yellow-400 transition">How It Works</a>
-            <a href="#grouping" className="hover:text-yellow-400 transition text-yellow-300 font-bold">Root-Cause Collapse</a>
+          {/* Sentry-Style Dropdown Mega-Menu Navigation */}
+          <nav className="hidden lg:flex items-center space-x-6 text-xs font-semibold text-slate-300 font-mono">
+            
+            {/* Dropdown 1: Platform */}
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown('platform')}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button className="hover:text-yellow-400 transition flex items-center gap-1 py-4">
+                Platform <span className="text-[10px] text-slate-500">▾</span>
+              </button>
+
+              {openDropdown === 'platform' && (
+                <div className="absolute top-12 left-0 w-80 bg-[#090D16] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-3 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Capabilities</div>
+                  <div className="space-y-2">
+                    <a href="#features" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">🪶</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">Sub-5KB Telemetry SDK</div>
+                        <div className="text-[10px] text-slate-400">Zero Core Web Vitals penalty</div>
+                      </div>
+                    </a>
+                    <a href="#grouping" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">🎯</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">Root-Cause Collapse</div>
+                        <div className="text-[10px] text-slate-400">Multi-crash incident grouping</div>
+                      </div>
+                    </a>
+                    <a href="#features" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">🔒</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">Client-Side PII Firewall</div>
+                        <div className="text-[10px] text-slate-400">On-device password/card masking</div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Dropdown 2: AI & Tools */}
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown('ai')}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button className="hover:text-yellow-400 transition flex items-center gap-1.5 py-4 text-yellow-300">
+                <span>✨</span> AI Copilot <span className="text-[10px] text-slate-500">▾</span>
+              </button>
+
+              {openDropdown === 'ai' && (
+                <div className="absolute top-12 left-0 w-80 bg-[#090D16] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-3 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">AI Diagnostics</div>
+                  <div className="space-y-2">
+                    <a href="#ai-copilot" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">🤖</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">BYOK AI Diagnosis</div>
+                        <div className="text-[10px] text-slate-400">Free Gemini & OpenAI integration</div>
+                      </div>
+                    </a>
+                    <a href="#ai-copilot" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">📋</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">Cursor & Claude 1-Click Export</div>
+                        <div className="text-[10px] text-slate-400">Pre-formatted prompt for your IDE</div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <a href="#quickstart" className="hover:text-yellow-400 transition">SDK Setup</a>
-            <a href="#ai-copilot" className="hover:text-yellow-400 transition flex items-center gap-1.5 text-yellow-300">
-              <span>✨</span> AI Diagnostics
-            </a>
-            <a href="#comparison" className="hover:text-yellow-400 transition">Why Us</a>
+            <a href="#comparison" className="hover:text-yellow-400 transition">Why SnapTrace</a>
             <a href="#pricing" className="hover:text-yellow-400 transition font-bold text-yellow-400">Pricing</a>
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
+          {/* Action CTAs */}
           <div className="flex items-center space-x-3">
             <Link
               href="/login"
@@ -306,14 +381,14 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       </header>
 
       {/* 3. Hero Section */}
-      <section className="relative pt-20 pb-28 overflow-hidden">
+      <section className="relative pt-20 pb-20 overflow-hidden">
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none animate-pulse" />
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10 animate-in fade-in duration-500">
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090D16] border-2 border-yellow-400/40 text-xs font-bold text-yellow-300 shadow-xl shadow-yellow-500/10 font-mono">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>⚡ Sub-5KB SDK • Cascading Outage Collapse • Zero Alert Spam</span>
+            <span>⚡ Sub-5KB SDK • Universal 14-Stack Support • Zero Alert Fatigue</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.1]">
@@ -342,7 +417,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </Link>
           </div>
 
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400 font-mono">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400 font-mono">
             <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Zero dependencies</span>
             <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> No credit card required</span>
             <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Drop-in 3 lines of code</span>
@@ -350,89 +425,64 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 4. NEW EUSEBIU FEATURE SHOWCASE: Cascading Root-Cause Grouping */}
-      <section id="grouping" className="py-24 border-t border-slate-800/80 bg-[#060911]/80">
-        <div className="max-w-6xl mx-auto px-6 space-y-12">
-          
-          <RevealOnScroll className="text-center space-y-3 max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold font-mono uppercase">
-              <span>🎯</span> The #1 Weekend Debugging Killer
+      {/* 4. SENTRY-STYLE INTERACTIVE ROOT-CAUSE SCANNER MOCKUP */}
+      <RevealOnScroll className="max-w-5xl mx-auto px-6 pb-24" delay={100}>
+        <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-mono text-xs">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
+              <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
+              <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
+              <span className="text-slate-400 font-bold ml-2">Live Production Incident Scanner</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-white leading-tight">
-              4 separate error reports. 1 underlying cause.
-            </h2>
-            <p className="text-sm text-slate-400 leading-relaxed font-sans">
-              The bugs that cost developers the most time are rarely the loud ones. It's having multiple downstream errors hit your inbox, only to spend your Sunday reading logs by hand to realize they all came from the exact same database timeout.
-            </p>
-          </RevealOnScroll>
+            <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold uppercase text-[10px]">
+              Active Root Cause Trace
+            </span>
+          </div>
 
-          {/* Visual Comparison: Traditional vs SnapTrace */}
-          <RevealOnScroll className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto" delay={150}>
-            
-            {/* The Old Noisy Way */}
-            <div className="bg-[#090D16] border border-red-500/30 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <span className="text-xs font-bold text-red-400 uppercase font-mono">Traditional APMs (Noisy)</span>
-                <span className="text-[10px] font-mono bg-red-950 text-red-300 px-2 py-0.5 rounded">4 Separate Alerts</span>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            {/* Left: Execution Flow Path */}
+            <div className="md:col-span-7 space-y-2.5 text-xs font-mono">
+              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 flex items-center justify-between">
+                <span className="text-slate-300">1. User submits checkout form</span>
+                <span className="text-emerald-400 font-bold">✓ 200 OK</span>
               </div>
-
-              <div className="space-y-2 text-xs font-mono opacity-80">
-                <div className="p-3 bg-[#05070E] rounded-xl border border-red-500/20 text-red-300">
-                  🚨 Alert 1: AuthMiddleware: Token validation failed (/api/auth)
-                </div>
-                <div className="p-3 bg-[#05070E] rounded-xl border border-red-500/20 text-red-300">
-                  🚨 Alert 2: ProfileService: Cannot read null of user (/profile)
-                </div>
-                <div className="p-3 bg-[#05070E] rounded-xl border border-red-500/20 text-red-300">
-                  🚨 Alert 3: OrderQueue: Job worker disconnected (/jobs)
-                </div>
-                <div className="p-3 bg-[#05070E] rounded-xl border border-red-500/20 text-red-300">
-                  🚨 Alert 4: HTTP 500: Internal Server Error (/checkout)
-                </div>
+              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 flex items-center justify-between">
+                <span className="text-slate-300">2. Frontend dispatches POST /v1/order</span>
+                <span className="text-emerald-400 font-bold">✓ 200 OK</span>
               </div>
+              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 flex items-center justify-between">
+                <span className="text-slate-300">3. Next.js Server Action executes</span>
+                <span className="text-emerald-400 font-bold">✓ 200 OK</span>
+              </div>
+              <div className="p-3.5 bg-red-950/30 rounded-xl border-2 border-red-500/50 flex items-center justify-between shadow-lg">
+                <span className="text-red-300 font-bold">4. database.js:18 pool.connect()</span>
+                <span className="text-red-400 font-bold animate-pulse">🚨 CRASH ORIGIN</span>
+              </div>
+            </div>
 
-              <p className="text-[11px] text-slate-500 italic pt-2">
-                ❌ Developer wastes hours reading 4 stack traces to figure out the connection.
+            {/* Right: AI Root Cause Isolated Box */}
+            <div className="md:col-span-5 p-5 bg-[#05070E] rounded-2xl border border-yellow-400/40 space-y-3 font-mono text-xs shadow-xl">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-400">
+                ⚡ SNAPTRACE ISOLATION ENGINE
+              </div>
+              <div className="text-white font-bold text-sm">
+                Root Cause: Connection Pool Exhaustion
+              </div>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                4 downstream HTTP 500 crashes collapsed under <code className="text-yellow-300">database.js</code>. Client connection wasn't released.
               </p>
-            </div>
-
-            {/* The SnapTrace Solution */}
-            <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl relative">
-              <span className="absolute -top-3 right-6 px-3 py-0.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider font-mono">
-                SnapTrace Collapse
-              </span>
-
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <span className="text-xs font-bold text-yellow-400 uppercase font-mono">SnapTrace Unified Incident</span>
-                <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
-                  1 Clean Incident
-                </span>
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-emerald-400 font-bold">
+                <span>Code Patch Generated</span>
+                <span>client.release()</span>
               </div>
-
-              <div className="p-4 bg-[#05070E] rounded-2xl border border-yellow-400/30 space-y-2 text-xs font-mono">
-                <div className="text-yellow-300 font-bold flex items-center gap-1.5">
-                  <span>⚡</span> Root Cause Isolated: PostgreSQL Pool Exhausted
-                </div>
-                <p className="text-slate-400 text-[11px]">
-                  4 downstream cascade crashes collapsed under <code className="text-slate-200">database.js:18</code>.
-                </p>
-                <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-emerald-400">
-                  <span>✨ AI Code Patch Ready</span>
-                  <span className="underline">Release client to pool</span>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-slate-300 pt-2 font-mono">
-                ✓ 1 notification on Discord. Root cause identified in 2 seconds. Sunday saved.
-              </p>
             </div>
-
-          </RevealOnScroll>
+          </div>
         </div>
       </section>
 
       {/* 5. Interactive 12-Language Quickstart Terminal */}
-      <RevealOnScroll className="max-w-5xl mx-auto px-6 py-24" delay={100}>
+      <RevealOnScroll className="max-w-5xl mx-auto px-6 pb-24" delay={100}>
         <div id="quickstart" className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#060911] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center space-x-1.5 overflow-x-auto pb-2 md:pb-0">
@@ -482,7 +532,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       </RevealOnScroll>
 
       {/* 6. Sub-5KB SDK Section */}
-      <section id="features" className="py-24 border-t border-slate-800/80">
+      <section id="features" className="py-24 border-t border-slate-800/80 bg-[#060911]/60">
         <div className="max-w-6xl mx-auto px-6">
           <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
             
@@ -542,7 +592,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       </section>
 
       {/* 7. BYOK AI Section */}
-      <section id="ai-copilot" className="py-24 border-t border-slate-800/80 bg-[#060911]/60 relative">
+      <section id="ai-copilot" className="py-24 border-t border-slate-800/80 relative">
         <div className="max-w-6xl mx-auto px-6 space-y-12">
           
           <RevealOnScroll className="text-center space-y-4 max-w-2xl mx-auto">
@@ -673,7 +723,7 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 9. Pricing Section */}
+      {/* 9. Pricing Section with Expiration Date */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
@@ -775,7 +825,40 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 10. Developer FAQs */}
+      {/* 10. SENTRY-STYLE SECURITY & COMPLIANCE TRUST BADGES */}
+      <section className="py-20 border-t border-slate-800/80 bg-[#060911]/60">
+        <div className="max-w-6xl mx-auto px-6 text-center space-y-8">
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-yellow-400">Security by Default</h3>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Built for Developer Privacy & Performance</h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-xs font-mono">
+            <div className="p-4 bg-[#090D16] border border-slate-800 rounded-2xl space-y-1">
+              <span className="text-xl">🛡️</span>
+              <div className="text-white font-bold">GDPR Ready</div>
+              <div className="text-[10px] text-slate-400">On-device PII masking</div>
+            </div>
+            <div className="p-4 bg-[#090D16] border border-slate-800 rounded-2xl space-y-1">
+              <span className="text-xl">🪶</span>
+              <div className="text-white font-bold">&lt;5KB Footprint</div>
+              <div className="text-[10px] text-slate-400">100/100 Core Web Vitals</div>
+            </div>
+            <div className="p-4 bg-[#090D16] border border-slate-800 rounded-2xl space-y-1">
+              <span className="text-xl">🔇</span>
+              <div className="text-white font-bold">Anti-Noise Guard</div>
+              <div className="text-[10px] text-slate-400">SHA-256 loop throttling</div>
+            </div>
+            <div className="p-4 bg-[#090D16] border border-slate-800 rounded-2xl space-y-1">
+              <span className="text-xl">🔓</span>
+              <div className="text-white font-bold">No Vendor Lock-in</div>
+              <div className="text-[10px] text-slate-400">Universal REST protocol</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 11. FAQ Section */}
       <section id="faq" className="max-w-4xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-10">
         <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
@@ -808,32 +891,80 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 11. Footer */}
-      <footer className="border-t border-slate-800/80 bg-[#060911] py-20 text-center space-y-6 relative overflow-hidden">
-        <RevealOnScroll className="max-w-2xl mx-auto px-6 space-y-6 relative z-10">
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
-            Ready to catch bugs in a snap?
-          </h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            Join early developers catching crashes in real time with zero noise and instant AI diagnoses.
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/signup"
-              className="inline-block px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-sm rounded-xl shadow-xl shadow-yellow-500/20 transition transform hover:-translate-y-0.5 font-mono"
-            >
-              Claim Your Free Beta Pass in 60s →
-            </Link>
-          </div>
+      {/* 12. SENTRY-STYLE ENTERPRISE FOOTER */}
+      <footer className="border-t border-slate-800/80 bg-[#060911] py-20 relative overflow-hidden font-sans">
+        <div className="max-w-7xl mx-auto px-6 space-y-12">
           
-          <div className="pt-10 text-xs text-slate-500 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono">
-            <span>© {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform.</span>
-            <div className="flex items-center space-x-6 text-slate-400">
-              <Link href="/privacy" className="hover:text-yellow-400 transition">Privacy Policy</Link>
-              <Link href="/terms" className="hover:text-yellow-400 transition">Terms of Service</Link>
+          {/* Top CTA */}
+          <div className="text-center space-y-4 max-w-xl mx-auto">
+            <h2 className="text-2xl sm:text-4xl font-black text-white">
+              Ready to catch bugs in a snap?
+            </h2>
+            <p className="text-xs text-slate-400 leading-relaxed font-mono">
+              Join developers catching crashes in real time with zero noise and instant AI diagnoses.
+            </p>
+            <div className="pt-1 font-mono">
+              <Link
+                href="/signup"
+                className="inline-block px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-sm rounded-xl shadow-xl shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
+              >
+                Claim Your Free Beta Pass in 60s →
+              </Link>
             </div>
           </div>
-        </RevealOnScroll>
+
+          {/* Sentry-Style 4-Column Footer Navigation */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 border-t border-slate-800/80 text-xs font-mono">
+            <div className="space-y-3">
+              <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Platform</span>
+              <ul className="space-y-2 text-slate-400">
+                <li><a href="#features" className="hover:text-white transition">Telemetry Ingestion</a></li>
+                <li><a href="#features" className="hover:text-white transition">&lt;5KB Client SDK</a></li>
+                <li><a href="#ai-copilot" className="hover:text-white transition">AI Root Cause Engine</a></li>
+                <li><a href="#features" className="hover:text-white transition">Client-Side PII Firewall</a></li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Stacks & SDKs</span>
+              <ul className="space-y-2 text-slate-400">
+                <li><a href="#quickstart" className="hover:text-white transition">Next.js App Router</a></li>
+                <li><a href="#quickstart" className="hover:text-white transition">Python & FastAPI</a></li>
+                <li><a href="#quickstart" className="hover:text-white transition">Node.js / Express</a></li>
+                <li><a href="#quickstart" className="hover:text-white transition">Go, Rust & PHP</a></li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Compare</span>
+              <ul className="space-y-2 text-slate-400">
+                <li><Link href="/vs/sentry" className="hover:text-white transition">SnapTrace vs. Sentry</Link></li>
+                <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. GlitchTip</a></li>
+                <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. Honeybadger</a></li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
+              <ul className="space-y-2 text-slate-400">
+                <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
+                <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
+                <li><span className="text-emerald-400">● Systems Operational</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-mono gap-3">
+            <span>© {new Date().getFullYear()} SnapTrace. All rights reserved. The Independent Developer Telemetry Platform.</span>
+            <div className="flex items-center space-x-4 text-slate-400">
+              <Link href="/privacy" className="hover:text-yellow-400">Privacy</Link>
+              <Link href="/terms" className="hover:text-yellow-400">Terms</Link>
+              <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
+            </div>
+          </div>
+
+        </div>
       </footer>
 
     </div>
