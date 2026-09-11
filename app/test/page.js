@@ -4,22 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
 
-interface CapturedEvent {
-  id: string;
-  type: string;
-  originalMessage: string;
-  sanitizedMessage: string;
-  timestamp: string;
-  deliveryMethod: string;
-  status: string;
-  fingerprint: string;
-}
-
 export default function TestPlaygroundPage() {
   const [sdkLoaded, setSdkLoaded] = useState(false);
   const [lastAction, setLastAction] = useState(null);
   const [loopProgress, setLoopProgress] = useState(0);
-  const [capturedEvents, setCapturedEvents] = useState<CapturedEvent[]>([]);
+  const [capturedEvents, setCapturedEvents] = useState([]);
 
   useEffect(() => {
     // Inject and initialize local SDK
@@ -30,7 +19,7 @@ export default function TestPlaygroundPage() {
       if (window.SnapTrace) {
         window.SnapTrace.init({
           apiKey: 'st_demo_telemetry_key_live',
-          endpoint: '/api/v1/log'
+          endpoint: '/api/v1/log',
         });
         setSdkLoaded(true);
       }
@@ -38,19 +27,21 @@ export default function TestPlaygroundPage() {
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
 
   // Helper to add live visual log to in-page console
-  const addVisualLog = (type: string, origMsg: string, scrubbedMsg: string, fingerprint: string) => {
-    const newEntry: CapturedEvent = {
+  const addVisualLog = (type, origMsg, scrubbedMsg, fingerprint) => {
+    const newEntry = {
       id: Math.random().toString(36).substring(2, 9),
-      type,
+      type: type,
       originalMessage: origMsg,
       sanitizedMessage: scrubbedMsg,
       timestamp: new Date().toLocaleTimeString(),
-      deliveryMethod: navigator.sendBeacon ? 'navigator.sendBeacon (0ms delay)' : 'fetch (keepalive)',
+      deliveryMethod: typeof navigator !== 'undefined' && navigator.sendBeacon ? 'navigator.sendBeacon (0ms delay)' : 'fetch (keepalive)',
       status: '200 Ingested',
       fingerprint: fingerprint || 'st_' + Math.floor(Math.random() * 1000000).toString(16),
     };
@@ -65,8 +56,8 @@ export default function TestPlaygroundPage() {
 
     try {
       // @ts-ignore
-      nonExistentPaymentFunction();
-    } catch (err: any) {
+      window.nonExistentPaymentFunction();
+    } catch (err) {
       if (window.SnapTrace) {
         window.SnapTrace.captureException(err);
       }
