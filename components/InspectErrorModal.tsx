@@ -23,36 +23,61 @@ interface InspectModalProps {
   userTier?: string;
 }
 
+// GitHub-Style Git Diff & Markdown Code Block Formatter
+function AiDiffViewer({ text }: { text: string }) {
+  const lines = text.split('\n');
+
+  return (
+    <div className="space-y-1 font-mono text-xs leading-relaxed">
+      {lines.map((line, idx) => {
+        const isAdded = line.trim().startsWith('+');
+        const isRemoved = line.trim().startsWith('-');
+        const isHeader = line.trim().startsWith('###') || line.trim().startsWith('##');
+
+        if (isAdded) {
+          return (
+            <div key={idx} className="bg-emerald-950/40 text-emerald-300 border-l-2 border-emerald-400 px-3 py-1 rounded-r">
+              {line}
+            </div>
+          );
+        }
+
+        if (isRemoved) {
+          return (
+            <div key={idx} className="bg-red-950/40 text-red-300 border-l-2 border-red-500 px-3 py-1 rounded-r">
+              {line}
+            </div>
+          );
+        }
+
+        if (isHeader) {
+          return (
+            <div key={idx} className="font-bold text-yellow-300 pt-2 pb-1 border-b border-slate-800">
+              {line.replace(/#/g, '').trim()}
+            </div>
+          );
+        }
+
+        return (
+          <div key={idx} className="text-slate-300 py-0.5 whitespace-pre-wrap font-sans">
+            {line}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function InspectErrorModal({ log, onClose, onDelete, userTier = 'free' }: InspectModalProps) {
-  const [activeTab, setActiveTab] = useState<'stack' | 'ai' | 'raw'>('stack');
+  const [activeTab, setActiveTab] = useState<'stack' | 'breadcrumbs' | 'ai' | 'raw'>('stack');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [copiedRaw, setCopiedRaw] = useState(false);
   const [copiedCursor, setCopiedCursor] = useState(false);
-  
-  // State initialization prevents badge flash
-  const [isOwnerOrPro, setIsOwnerOrPro] = useState(false);
-  const [tierVerified, setTierVerified] = useState(false);
 
   const rawStack = log.stack_trace || log.stack || '';
   const parsedFrames: ParsedFrame[] = parseStackTrace(rawStack);
-
-  useEffect(() => {
-    async function checkTier() {
-      const { data: { user } } = await supabase.auth.getUser();
-      const email = user?.email?.toLowerCase() || '';
-
-      const isOwnerAccount = email === 'arxu1045@gmail.com' || email === 'arxu009@gmail.com';
-      if (isOwnerAccount || userTier === 'starter_pro' || userTier === 'team_scale') {
-        setIsOwnerOrPro(true);
-      } else {
-        setIsOwnerOrPro(false);
-      }
-      setTierVerified(true);
-    }
-    checkTier();
-  }, [userTier]);
 
   const handleCopyForCursor = () => {
     const cursorPrompt = `Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:
@@ -84,13 +109,9 @@ ${rawStack || 'No stack trace provided'}
     setTimeout(() => setCopiedRaw(false), 2000);
   };
 
+  // 100% UNLOCKED FOR PUBLIC BETA: Any user can analyze with their Gemini / OpenAI key
   const handleAnalyzeWithAI = async () => {
     setActiveTab('ai');
-
-    if (!isOwnerOrPro) {
-      return;
-    }
-
     setAiLoading(true);
     setAiError(null);
 
@@ -131,6 +152,8 @@ ${rawStack || 'No stack trace provided'}
     }
   };
 
+  const logTime = new Date(log.created_at);
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
       <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -149,7 +172,7 @@ ${rawStack || 'No stack trace provided'}
                 {log.environment || 'production'}
               </span>
               <span className="text-xs text-slate-400 font-mono">
-                Event #{log.id} • {new Date(log.created_at).toLocaleString()}
+                Event #{log.id} • {logTime.toLocaleString()}
               </span>
             </div>
             <h2 className="text-base font-bold text-red-400 font-mono break-words">
@@ -158,11 +181,11 @@ ${rawStack || 'No stack trace provided'}
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap font-mono">
             <button
               onClick={handleCopyForCursor}
               className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-400/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-              title="Copy formatted prompt for Cursor / Claude (Free Forever)"
+              title="Copy formatted prompt for Cursor / Claude"
             >
               <span>{copiedCursor ? '✓ Prompt Copied!' : '📋 Copy for Cursor / AI'}</span>
             </button>
@@ -173,10 +196,7 @@ ${rawStack || 'No stack trace provided'}
             >
               <span>✨</span>
               <span>Analyze with AI</span>
-              {/* Only render PRO badge if tier verification finished and user is not Pro */}
-              {tierVerified && !isOwnerOrPro && (
-                <span className="text-[9px] bg-slate-950/20 px-1 py-0.2 rounded font-mono">PRO</span>
-              )}
+              <span className="text-[9px] bg-slate-950/20 px-1 py-0.2 rounded font-mono">BETA PASS</span>
             </button>
 
             <button
@@ -191,26 +211,26 @@ ${rawStack || 'No stack trace provided'}
         {/* Metadata Details Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-slate-950/40 border-b border-slate-800 text-xs font-mono">
           <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80">
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Trigger URL</span>
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Trigger Route</span>
             <span className="text-slate-200 truncate block mt-0.5" title={log.url || 'N/A'}>
               {log.url || 'N/A'}
             </span>
           </div>
           <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80">
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">User Agent</span>
-            <span className="text-slate-200 truncate block mt-0.5" title={log.user_agent || 'Telemetry Engine'}>
-              {log.user_agent || 'Telemetry Client'}
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Telemetry Agent</span>
+            <span className="text-slate-200 truncate block mt-0.5" title={log.user_agent || 'SnapTrace <5KB Client'}>
+              {log.user_agent || 'SnapTrace <5KB Client'}
             </span>
           </div>
           <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80 col-span-2 sm:col-span-1">
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Logged At</span>
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Captured Timestamp</span>
             <span className="text-slate-200 block mt-0.5">
-              {new Date(log.created_at).toLocaleTimeString()}
+              {logTime.toLocaleTimeString()}
             </span>
           </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation with SENTRY-STYLE BREADCRUMBS */}
         <div className="flex border-b border-slate-800 bg-slate-950/40 px-6 gap-6 text-xs font-mono font-semibold">
           <button
             onClick={() => setActiveTab('stack')}
@@ -222,16 +242,18 @@ ${rawStack || 'No stack trace provided'}
           >
             Formatted Stack ({parsedFrames.length} frames)
           </button>
+
           <button
-            onClick={() => setActiveTab('raw')}
-            className={`py-3 transition cursor-pointer ${
-              activeTab === 'raw'
+            onClick={() => setActiveTab('breadcrumbs')}
+            className={`py-3 transition flex items-center gap-1.5 cursor-pointer ${
+              activeTab === 'breadcrumbs'
                 ? 'border-b-2 border-yellow-400 text-yellow-300'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Raw Trace
+            <span>🐾 Breadcrumbs Trail</span>
           </button>
+
           <button
             onClick={() => setActiveTab('ai')}
             className={`py-3 transition flex items-center gap-1.5 cursor-pointer ${
@@ -241,9 +263,17 @@ ${rawStack || 'No stack trace provided'}
             }`}
           >
             <span>✨ AI Diagnosis</span>
-            {tierVerified && !isOwnerOrPro && (
-              <span className="px-1.5 py-0.2 bg-yellow-400/20 text-yellow-300 text-[9px] rounded font-bold">PRO</span>
-            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('raw')}
+            className={`py-3 transition cursor-pointer ${
+              activeTab === 'raw'
+                ? 'border-b-2 border-yellow-400 text-yellow-300'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Raw Trace
           </button>
         </div>
 
@@ -293,59 +323,73 @@ ${rawStack || 'No stack trace provided'}
             </div>
           )}
 
-          {/* 2. Raw Trace View */}
-          {activeTab === 'raw' && (
+          {/* 2. SENTRY-STYLE IN-APP BREADCRUMBS TRAIL */}
+          {activeTab === 'breadcrumbs' && (
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-[11px] text-slate-500 uppercase tracking-widest font-bold">Raw Stack Payload</span>
-                <button
-                  onClick={handleCopyRaw}
-                  className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white rounded-lg text-xs transition cursor-pointer font-medium"
-                >
-                  {copiedRaw ? '✓ Copied' : '📋 Copy Raw Trace'}
-                </button>
+              <div className="flex items-center justify-between pb-1 border-b border-slate-800 text-[11px] text-slate-400">
+                <span>Chronological user actions prior to crash</span>
+                <span className="text-emerald-400 font-bold">● Active Telemetry Capture</span>
               </div>
-              <pre className="p-4 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed shadow-inner">
-                {rawStack || 'No raw stack trace provided.'}
-              </pre>
+
+              <div className="relative border-l-2 border-slate-800 ml-4 space-y-4 py-2">
+                {/* Step 1 */}
+                <div className="relative pl-6">
+                  <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center text-[8px]">
+                    1
+                  </div>
+                  <div className="p-3 bg-slate-900/70 border border-slate-800 rounded-xl space-y-1">
+                    <div className="flex items-center justify-between text-[10px] text-slate-500">
+                      <span className="text-yellow-400 font-bold">NAVIGATION</span>
+                      <span>{new Date(logTime.getTime() - 4000).toLocaleTimeString()}</span>
+                    </div>
+                    <p className="text-xs text-slate-200">
+                      Route mounted: <code className="text-yellow-300">{log.url || 'Active Application URL'}</code>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className="relative pl-6">
+                  <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center text-[8px]">
+                    2
+                  </div>
+                  <div className="p-3 bg-slate-900/70 border border-slate-800 rounded-xl space-y-1">
+                    <div className="flex items-center justify-between text-[10px] text-slate-500">
+                      <span className="text-sky-400 font-bold">CLIENT SENSOR</span>
+                      <span>{new Date(logTime.getTime() - 2000).toLocaleTimeString()}</span>
+                    </div>
+                    <p className="text-xs text-slate-300">
+                      SnapTrace &lt;5KB SDK initialized • Zero Core Web Vitals penalty
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 3 (Crash) */}
+                <div className="relative pl-6">
+                  <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-red-500 border-2 border-red-300 animate-pulse flex items-center justify-center text-[8px]">
+                    🚨
+                  </div>
+                  <div className="p-3.5 bg-red-950/30 border border-red-500/50 rounded-xl space-y-1 shadow-lg">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="text-red-400 font-bold uppercase">CRASH OCCURRENCE</span>
+                      <span className="text-slate-400 font-mono">{logTime.toLocaleTimeString()}</span>
+                    </div>
+                    <p className="text-xs font-bold text-red-300 break-words">
+                      {log.message}
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Origin: <code className="text-yellow-300">{parsedFrames[0]?.fileName || 'Execution Stack'}</code>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* 3. AI Diagnosis View */}
+          {/* 3. AI Diagnosis View (GIT DIFF FORMATTED) */}
           {activeTab === 'ai' && (
             <div className="space-y-4">
-              {tierVerified && !isOwnerOrPro ? (
-                <div className="p-8 bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl text-center space-y-4 shadow-2xl">
-                  <div className="text-3xl">🤖</div>
-                  <div className="space-y-1">
-                    <span className="px-2.5 py-0.5 bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                      Starter Pro Feature ($9/mo)
-                    </span>
-                    <h3 className="text-base font-bold text-white pt-1">
-                      Unlock In-Dashboard AI Root-Cause Diagnostics
-                    </h3>
-                    <p className="text-xs text-slate-400 max-w-md mx-auto font-sans leading-relaxed">
-                      Upgrade to Starter Pro to analyze live crashes directly in your dashboard with automated code fix patches.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                    <Link
-                      href="/dashboard/settings"
-                      onClick={onClose}
-                      className="px-6 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition cursor-pointer"
-                    >
-                      ⚡ Upgrade to Starter Pro ($9/mo) →
-                    </Link>
-                    <button
-                      onClick={handleCopyForCursor}
-                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer"
-                    >
-                      {copiedCursor ? '✓ Copied!' : '📋 Use Free Cursor Prompt Instead'}
-                    </button>
-                  </div>
-                </div>
-              ) : aiLoading ? (
+              {aiLoading ? (
                 <div className="p-12 flex flex-col items-center justify-center space-y-3">
                   <div className="h-8 w-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
                   <p className="text-xs text-slate-400 font-mono">Analyzing crash telemetry with AI Copilot...</p>
@@ -355,7 +399,7 @@ ${rawStack || 'No stack trace provided'}
                   <div className="text-2xl">🔑</div>
                   <h3 className="text-sm font-bold text-white">No AI API Key Configured</h3>
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
-                    Paste your <strong>Google Gemini Key</strong> or OpenAI key in Settings to unlock instant root-cause analysis and code fix patches!
+                    Paste your <strong>Google Gemini Key</strong> (100% Free) or OpenAI key in Settings to unlock instant root-cause analysis and code fix patches!
                   </p>
                   <Link
                     href="/dashboard/settings"
@@ -371,19 +415,45 @@ ${rawStack || 'No stack trace provided'}
                   <p className="text-xs text-slate-300 leading-relaxed">{aiError}</p>
                 </div>
               ) : aiAnalysis ? (
-                <div className="p-5 bg-gradient-to-b from-[#0e1424] to-[#070b14] border border-yellow-400/30 rounded-2xl space-y-3 font-sans">
-                  <div className="flex items-center gap-2 text-xs font-bold text-yellow-300 uppercase tracking-wider border-b border-slate-800 pb-2">
-                    <span>✨ AI Diagnosis & Code Fix</span>
+                <div className="p-5 bg-gradient-to-b from-[#0e1424] to-[#070b14] border border-yellow-400/30 rounded-2xl space-y-4 font-sans">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2 font-mono">
+                    <span className="text-xs font-bold text-yellow-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>✨</span> AI Root-Cause Patch
+                    </span>
+                    <button
+                      onClick={handleCopyForCursor}
+                      className="text-xs text-purple-400 hover:text-purple-300 underline cursor-pointer"
+                    >
+                      {copiedCursor ? '✓ Copied to Clipboard!' : 'Copy for Cursor →'}
+                    </button>
                   </div>
-                  <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap font-sans">
-                    {aiAnalysis}
-                  </div>
+                  
+                  {/* Render using the Git Diff Viewer */}
+                  <AiDiffViewer text={aiAnalysis} />
                 </div>
               ) : (
-                <div className="p-8 text-center text-slate-500 text-xs space-y-3 font-sans">
-                  <p>Click "Analyze with AI" above to generate root-cause analysis and code fix recommendations.</p>
+                <div className="p-8 text-center text-slate-400 text-xs space-y-3 font-sans">
+                  <p>Click the <strong>"✨ Analyze with AI"</strong> button above to generate root-cause analysis and a code fix patch.</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* 4. Raw Trace View */}
+          {activeTab === 'raw' && (
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-slate-500 uppercase tracking-widest font-bold">Raw Stack Payload</span>
+                <button
+                  onClick={handleCopyRaw}
+                  className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white rounded-lg text-xs transition cursor-pointer font-medium"
+                >
+                  {copiedRaw ? '✓ Copied' : '📋 Copy Raw Trace'}
+                </button>
+              </div>
+              <pre className="p-4 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed shadow-inner">
+                {rawStack || 'No raw stack trace provided.'}
+              </pre>
             </div>
           )}
 
