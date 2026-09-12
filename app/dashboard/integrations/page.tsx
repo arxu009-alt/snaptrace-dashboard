@@ -29,7 +29,6 @@ interface IntegrationSnippet {
   code: (apiKey: string) => string;
 }
 
-// Zero-dependency VS Code Syntax Highlighting Renderer
 function CodeHighlighter({ code }: { code: string }) {
   const lines = code.split('\n');
 
@@ -52,7 +51,6 @@ function CodeHighlighter({ code }: { code: string }) {
                   .split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|\/\/.*|\#.*|\b(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|true|false|null|nil|None|if|else)\b|<\/?[a-zA-Z0-9_\-]+(?:\s|>|\/)|<\/?>)/g)
                   .map((part, partIdx) => {
                     if (!part) return null;
-
                     if (part.startsWith('//') || part.startsWith('#')) {
                       return <span key={partIdx} className="text-slate-500 italic">{part}</span>;
                     }
@@ -532,7 +530,6 @@ end`,
           <div className="lg:col-span-3 bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 space-y-6 shadow-2xl flex flex-col justify-between">
             <div className="space-y-5">
               
-              {/* Header with Title & Copy Snippet Button */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl p-2 bg-yellow-400/10 border border-yellow-400/20 rounded-xl text-yellow-400">
@@ -553,7 +550,6 @@ end`,
                 </button>
               </div>
 
-              {/* Install / Requirement Note */}
               {current.installCmd && (
                 <div className="space-y-1.5">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
@@ -565,7 +561,6 @@ end`,
                 </div>
               )}
 
-              {/* Step-by-step Setup Guide */}
               <div className="space-y-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
                   Setup Instructions
@@ -580,10 +575,46 @@ end`,
                 </ul>
               </div>
 
-              {/* Code Snippet Editor with VS Code Syntax Highlighting & Line Numbers */}
+              {/* Code Snippet Editor */}
               <div className="space-y-1.5 pt-1">
                 <div className="flex items-center justify-between px-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
                     Production Code Snippet
                   </span>
-                  <span className="text-[10px] font-mono tex
+                  <span className="text-[10px] font-mono text-slate-500">
+                    File: <span className="text-yellow-400">{current.filename}</span>
+                  </span>
+                </div>
+
+                <div className="bg-[#05070E] border border-slate-800/90 rounded-2xl overflow-hidden shadow-inner">
+                  <div className="px-4 py-2.5 bg-[#080C16] border-b border-slate-800/80 flex items-center justify-between">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+                      <span className="text-[11px] font-mono text-slate-400 ml-2 font-medium">{current.filename}</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-500 uppercase">UTF-8</span>
+                  </div>
+
+                  <div className="p-4 max-h-[380px] overflow-y-auto">
+                    <CodeHighlighter code={current.code(apiKey)} />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="pt-4 border-t border-slate-800/80 text-right">
+              <span className="text-[11px] text-slate-500 font-mono">
+                Ingestion Endpoint: <code className="text-yellow-400">POST /api/v1/log</code>
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  );
+}
