@@ -21,6 +21,7 @@ export default function DashboardLayout({ children }) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [activeErrorCount, setActiveErrorCount] = useState(0);
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -58,6 +59,22 @@ export default function DashboardLayout({ children }) {
           if (projects && projects.length > 0) {
             setUserPlanTier(projects[0].plan_tier || 'free');
           }
+        }
+
+        // Fetch unresolved error count for live sidebar badge
+        const { data: userProjects } = await supabase
+          .from('projects')
+          .select('id')
+          .eq('user_id', session.user.id);
+
+        if (userProjects && userProjects.length > 0) {
+          const projectIds = userProjects.map((p) => p.id);
+          const { count } = await supabase
+            .from('errors')
+            .select('*', { count: 'exact', head: true })
+            .in('project_id', projectIds);
+
+          setActiveErrorCount(count || 0);
         }
 
         setAuthChecking(false);
@@ -100,7 +117,7 @@ export default function DashboardLayout({ children }) {
 
   const navItems = [
     { id: 'tour-nav-overview', name: 'Overview', href: '/dashboard', icon: '📊' },
-    { id: 'tour-nav-errors', name: 'Exception Logs', href: '/dashboard/errors', icon: '🚨' },
+    { id: 'tour-nav-errors', name: 'Exception Logs', href: '/dashboard/errors', icon: '🚨', hasBadge: true },
     { id: 'tour-nav-projects', name: 'API Keys & Projects', href: '/dashboard/projects', icon: '🔑' },
     { id: 'tour-nav-integrations', name: 'Language Integrations', href: '/dashboard/integrations', icon: '⚡' },
     { id: 'tour-nav-settings', name: 'Alert & AI Settings', href: '/dashboard/settings', icon: '⚙️' },
@@ -136,7 +153,7 @@ export default function DashboardLayout({ children }) {
   const renderTierPill = () => {
     if (isOwner) {
       return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 uppercase tracking-wider shadow-sm flex items-center gap-1">
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 uppercase tracking-wider shadow-md shadow-yellow-500/20 flex items-center gap-1">
           <span>👑</span> OWNER
         </span>
       );
@@ -163,11 +180,11 @@ export default function DashboardLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-yellow-400 selection:text-slate-950">
       
       {/* 1. Left Sidebar Navigation */}
       <aside
-        className={`bg-[#090D16] border-r border-slate-800/80 flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out ${
+        className={`bg-[#090D16]/95 border-r border-slate-800/80 flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out backdrop-blur-xl ${
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
@@ -177,7 +194,7 @@ export default function DashboardLayout({ children }) {
             <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
           </Link>
           {!sidebarCollapsed && (
-            <span className="text-[10px] font-black bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+            <span className="text-[10px] font-black bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-md shadow-yellow-500/20 font-mono">
               BETA
             </span>
           )}
@@ -185,13 +202,13 @@ export default function DashboardLayout({ children }) {
 
         {/* Global Project Switcher */}
         {!sidebarCollapsed && (
-          <div id="tour-project-switcher" className="px-4 py-3 border-b border-slate-800/60 bg-[#060911] min-w-[240px]">
+          <div id="tour-project-switcher" className="px-4 py-3 border-b border-slate-800/60 bg-[#060911]/80 min-w-[240px]">
             <ProjectSwitcher />
           </div>
         )}
 
-        {/* Navigation Items */}
-        <nav className="flex-1 p-3 space-y-1 min-w-[240px]">
+        {/* Navigation Items with Sentry/Linear Active Accent Glow */}
+        <nav className="flex-1 p-3 space-y-1.5 min-w-[240px]">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -199,15 +216,24 @@ export default function DashboardLayout({ children }) {
                 key={item.href}
                 id={item.id}
                 href={item.href}
-                className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition group ${
                   isActive
-                    ? 'bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 shadow-sm shadow-yellow-400/5'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    ? 'border-l-4 border-l-yellow-400 bg-gradient-to-r from-yellow-400/15 via-yellow-400/5 to-transparent text-yellow-300 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border-l-4 border-l-transparent'
                 }`}
                 title={sidebarCollapsed ? item.name : undefined}
               >
-                <span className="text-base">{item.icon}</span>
-                {!sidebarCollapsed && <span>{item.name}</span>}
+                <div className="flex items-center space-x-3">
+                  <span className="text-base">{item.icon}</span>
+                  {!sidebarCollapsed && <span>{item.name}</span>}
+                </div>
+
+                {/* Sentry-Style Dynamic Error Counter Badge */}
+                {!sidebarCollapsed && item.hasBadge && activeErrorCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/30 group-hover:bg-red-500/25 transition">
+                    {activeErrorCount}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -215,9 +241,12 @@ export default function DashboardLayout({ children }) {
 
         {/* Sidebar Footer */}
         {!sidebarCollapsed && (
-          <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center justify-between min-w-[240px]">
+          <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center justify-between min-w-[240px] font-mono">
             <span>Featherweight APM</span>
-            <span className="text-emerald-400 font-mono text-[10px]">● Live</span>
+            <span className="text-emerald-400 text-[10px] flex items-center gap-1.5 font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Live
+            </span>
           </div>
         )}
       </aside>
@@ -226,7 +255,7 @@ export default function DashboardLayout({ children }) {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#05070E]">
         
         {/* Top Header Bar */}
-        <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/80 backdrop-blur-md px-6 flex items-center justify-between z-40">
+        <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-xl px-6 flex items-center justify-between z-40">
           
           {/* Left Area: Collapse Toggle + Breadcrumbs */}
           <div className="flex items-center space-x-3">
@@ -244,7 +273,7 @@ export default function DashboardLayout({ children }) {
               </svg>
             </button>
 
-            <div className="flex items-center space-x-2 text-xs">
+            <div className="flex items-center space-x-2 text-xs font-mono">
               <span className="text-slate-500">SnapTrace</span>
               <span className="text-slate-700">/</span>
               <span className="text-slate-200 font-bold">{getPageTitle()}</span>
@@ -257,7 +286,7 @@ export default function DashboardLayout({ children }) {
             {/* Feedback Button */}
             <button
               onClick={() => setFeedbackOpen(true)}
-              className="px-3 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="px-3.5 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-sm font-mono"
               title="Give beta feedback"
             >
               <span>💡</span>
@@ -265,23 +294,23 @@ export default function DashboardLayout({ children }) {
             </button>
 
             {/* Live Ingestion Indicator */}
-            <div className="hidden md:flex items-center gap-2 bg-[#05070E] border border-slate-800 px-3 py-1.5 rounded-full">
+            <div className="hidden md:flex items-center gap-2 bg-[#05070E] border border-slate-800 px-3.5 py-1.5 rounded-full">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <span className="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider font-mono">
+              <span className="text-[11px] text-emerald-400 font-bold uppercase tracking-wider font-mono">
                 Ingestion Active
               </span>
             </div>
 
             {/* Profile Button with Integrated Plan Tier Badge */}
-            <div className="relative">
+            <div className="relative font-sans">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2.5 p-1.5 bg-slate-900/60 border border-slate-800 rounded-2xl hover:border-yellow-400/40 transition cursor-pointer"
+                className="flex items-center space-x-2.5 p-1.5 bg-slate-900/60 border border-slate-800 rounded-2xl hover:border-yellow-400/40 transition cursor-pointer shadow-sm"
               >
-                <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-yellow-500 to-amber-300 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-yellow-500/20">
+                <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-yellow-500/20">
                   {userInitial}
                 </div>
                 
@@ -322,53 +351,4 @@ export default function DashboardLayout({ children }) {
                   <Link
                     href="/dashboard/settings"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
-                  >
-                    <span>⚙️</span>
-                    <span>Account & Subscription</span>
-                  </Link>
-
-                  <Link
-                    href="/dashboard/projects"
-                    onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
-                  >
-                    <span>🔑</span>
-                    <span>Manage Projects & Keys</span>
-                  </Link>
-
-                  <div className="border-t border-slate-800/80 my-1" />
-
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-red-400 hover:bg-red-950/30 transition cursor-pointer text-left"
-                  >
-                    <span>🚪</span>
-                    <span>Sign Out</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-          </div>
-
-        </header>
-
-        {/* Main Route Content */}
-        <main className="flex-1 overflow-y-auto">{children}</main>
-      </div>
-
-      {/* Global Modals: Feedback, Spotlight Tour, & Snappy AI */}
-      <FeedbackModal
-        isOpen={feedbackOpen}
-        onClose={() => setFeedbackOpen(false)}
-        userEmail={userEmail}
-      />
-
-      <DashboardOnboardingTour />
-
-      <SnappyAssistant />
-
-    </div>
-  );
-}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text
