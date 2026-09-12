@@ -66,6 +66,11 @@ export default function WelcomeLandingPage() {
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [copiedCursorPrompt, setCopiedCursorPrompt] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  
+  // Sentry-style Marketing Mode Toggle state
+  const [marketingMode, setMarketingMode] = useState(true);
+
+  // Mega-menu hover states
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
 
@@ -319,16 +324,16 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         <span className="hidden sm:inline">• Grandfathered lifetime beta pass for early builders</span>
       </div>
 
-      {/* 2. SENTRY-STYLE STICKY HEADER */}
-      <header className="border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-xl sticky top-0 z-50 transition-all">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+      {/* 2. SENTRY-STYLE STICKY HEADER WITH SENTRY "MARKETING MODE" SWITCH */}
+      <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-50 transition-all">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           
-          <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition">
+          <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition shrink-0">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Sentry-Style Clean Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6 text-xs font-semibold text-slate-300 font-mono">
+          {/* Sentry-Style Navigation (Visible on laptops via md:flex) */}
+          <nav className="hidden md:flex items-center space-x-5 text-xs font-semibold text-slate-300 font-mono">
             
             {/* Dropdown: Platform */}
             <div
@@ -341,7 +346,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               </button>
 
               {openDropdown === 'platform' && (
-                <div className="absolute top-12 left-0 w-80 bg-[#090D16] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-2 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute top-12 left-0 w-80 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-2 animate-in fade-in zoom-in-95 duration-100">
                   <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-2">Capabilities</div>
                   <a href="#features" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
                     <span className="text-base">🪶</span>
@@ -379,7 +384,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               </button>
 
               {openDropdown === 'ai' && (
-                <div className="absolute top-12 left-0 w-80 bg-[#090D16] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-2 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute top-12 left-0 w-80 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-2 animate-in fade-in zoom-in-95 duration-100">
                   <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-2">AI Diagnostics</div>
                   <a href="#ai-agent" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
                     <span className="text-base">🤖</span>
@@ -405,16 +410,34 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          <div className="flex items-center space-x-3 font-mono">
+          {/* Action CTAs + SENTRY MARKETING MODE TOGGLE */}
+          <div className="flex items-center space-x-3 font-mono shrink-0">
+            
+            {/* The Sentry Easter Egg Switch: Marketing Mode ON/OFF */}
+            <button
+              onClick={() => setMarketingMode(!marketingMode)}
+              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-mono font-bold transition cursor-pointer ${
+                marketingMode
+                  ? 'bg-slate-900 border-slate-700 text-slate-300 hover:border-yellow-400'
+                  : 'bg-yellow-400/15 border-yellow-400 text-yellow-300 shadow-sm'
+              }`}
+              title="Toggle between Marketing Pitch and Raw Developer Architecture Mode"
+            >
+              <span className="text-[9px]">⚡ Mode:</span>
+              <span className={marketingMode ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold'}>
+                {marketingMode ? 'Marketing ON' : 'Dev Mode (No Fluff)'}
+              </span>
+            </button>
+
             <Link
               href="/login"
-              className="text-xs font-semibold text-slate-300 hover:text-white px-3.5 py-2 rounded-lg hover:bg-slate-800/50 transition"
+              className="text-xs font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800/50 transition"
             >
               Sign In
             </Link>
             <Link
               href="/signup"
-              className="text-xs font-bold bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 px-4 py-2 rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
+              className="text-xs font-bold bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 px-3.5 py-2 rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
             >
               Claim Beta Pass →
             </Link>
@@ -422,27 +445,50 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 3. HERO SECTION (PROPORTIONAL, SENTRY-SIZED) */}
+      {/* 3. HERO SECTION (PROPORTIONAL, SENTRY-SIZED WITH MARKETING MODE DUAL-COPY) */}
       <section className="relative pt-16 pb-16 overflow-hidden">
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[130px] pointer-events-none rounded-full" />
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
           
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#090D16] border border-yellow-400/30 text-xs font-bold text-yellow-300 shadow-md font-mono">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B101D] border border-yellow-400/30 text-xs font-bold text-yellow-300 shadow-md font-mono">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>⚡ Sub-5KB SDK • Cascading Outage Collapse • 0ms Hydration Delay</span>
+            <span>
+              {marketingMode
+                ? '⚡ Sub-5KB SDK • Cascading Outage Collapse • 0ms Hydration Delay'
+                : '🛠️ Spec: navigator.sendBeacon Async Transport • SHA-256 Deduplication Engine'}
+            </span>
           </div>
 
-          {/* Sentry-proportioned elegant headline */}
+          {/* Sentry-proportioned elegant headline with dual-mode copy */}
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.15] max-w-3xl mx-auto">
-            Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>. Stop spending Sundays connecting the{' '}
-            <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
-              dots by hand.
-            </span>
+            {marketingMode ? (
+              <>
+                Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>. Stop spending Sundays connecting the{' '}
+                <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
+                  dots by hand.
+                </span>
+              </>
+            ) : (
+              <>
+                Lightweight crash monitoring. <br />
+                <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
+                  Zero 100KB SDK bloat.
+                </span>
+              </>
+            )}
           </h1>
 
-          <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed">
-            SnapTrace automatically collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes for VS Code & Cursor.
+          <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
+            {marketingMode ? (
+              <>
+                SnapTrace automatically collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes for VS Code & Cursor.
+              </>
+            ) : (
+              <>
+                Native window event listeners queue errors in background thread. Passwords and credit cards scrubbed via client regex AST before network send. Noise engine throttles infinite loops into 1 summary alert [x500].
+              </>
+            )}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 font-mono">
@@ -454,29 +500,29 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </Link>
             <Link
               href="/test"
-              className="w-full sm:w-auto px-7 py-3 bg-[#090D16] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs sm:text-sm font-semibold rounded-xl transition"
+              className="w-full sm:w-auto px-7 py-3 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm"
             >
               🧪 Try Live Test Playground (No Signup)
             </Link>
           </div>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-5 text-xs text-slate-400 font-mono">
-            <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Zero dependencies</span>
+            <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Zero dependencies (&lt;5KB)</span>
             <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> No credit card required</span>
             <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Drop-in 3 lines of code</span>
           </div>
         </div>
       </section>
 
-      {/* 4. SENTRY-STYLE INTERACTIVE ROOT-CAUSE SCANNER MOCKUP */}
+      {/* 4. SENTRY-STYLE INTERACTIVE ROOT-CAUSE SCANNER (ELEVATED GLASS CARD) */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={50}>
-        <div id="grouping" className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
+        <div id="grouping" className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-mono text-xs">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-              <span className="text-slate-400 font-bold ml-1">Live Production Incident Scanner</span>
+              <span className="text-slate-300 font-bold ml-1">Live Production Incident Scanner</span>
             </div>
             <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold uppercase text-[10px]">
               Active Root Cause Trace
@@ -485,15 +531,15 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
             <div className="md:col-span-7 space-y-2 text-xs font-mono">
-              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-[#070A12] rounded-xl border border-slate-800 flex items-center justify-between">
                 <span className="text-slate-300">1. User submits checkout form</span>
                 <span className="text-emerald-400 font-bold">✓ 200 OK</span>
               </div>
-              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-[#070A12] rounded-xl border border-slate-800 flex items-center justify-between">
                 <span className="text-slate-300">2. Frontend dispatches POST /v1/order</span>
                 <span className="text-emerald-400 font-bold">✓ 200 OK</span>
               </div>
-              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 flex items-center justify-between">
+              <div className="p-3 bg-[#070A12] rounded-xl border border-slate-800 flex items-center justify-between">
                 <span className="text-slate-300">3. Next.js Server Action executes</span>
                 <span className="text-emerald-400 font-bold">✓ 200 OK</span>
               </div>
@@ -503,7 +549,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               </div>
             </div>
 
-            <div className="md:col-span-5 p-5 bg-[#05070E] rounded-2xl border border-yellow-400/40 space-y-3 font-mono text-xs shadow-xl">
+            <div className="md:col-span-5 p-5 bg-[#070A12] rounded-2xl border border-yellow-400/40 space-y-3 font-mono text-xs shadow-xl">
               <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-400">
                 ⚡ SNAPTRACE COLLAPSE ENGINE
               </div>
@@ -524,7 +570,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
       {/* 5. DEVELOPER SOCIAL PROOF / WALL OF TRUST */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={100}>
-        <div className="p-6 rounded-3xl bg-[#090D16] border border-slate-800 shadow-xl space-y-3">
+        <div className="p-6 rounded-3xl bg-gradient-to-r from-[#0B101D] to-[#080d1a] border border-slate-800 shadow-xl space-y-3">
           <div className="flex items-center gap-2 text-yellow-400 text-xs font-mono font-bold uppercase tracking-widest">
             <span>💬</span> Validated by Senior Software Engineers
           </div>
@@ -566,7 +612,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                   className={`px-3 py-1.5 rounded-lg font-semibold transition cursor-pointer ${
                     activeIdeTab === ide
                       ? 'bg-purple-600 text-white shadow-md'
-                      : 'bg-[#090D16] text-slate-400 hover:text-white border border-slate-800'
+                      : 'bg-[#0B101D] text-slate-400 hover:text-white border border-slate-800'
                   }`}
                 >
                   {ide === 'cursor' && 'Cursor IDE'}
@@ -577,7 +623,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </div>
           </SmoothReveal>
 
-          <SmoothReveal className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-2xl max-w-4xl mx-auto space-y-4" delay={150}>
+          <SmoothReveal className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 shadow-2xl max-w-4xl mx-auto space-y-4" delay={150}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-3">
               <div>
                 <span className="text-xs font-bold text-red-400 font-mono block">CRASH: ReferenceError: Connection pool exhausted</span>
@@ -591,14 +637,14 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               </button>
             </div>
 
-            <div className="bg-[#05070E] border border-purple-500/30 rounded-2xl p-4 space-y-2 font-mono text-xs">
+            <div className="bg-[#070A12] border border-purple-500/30 rounded-2xl p-4 space-y-2 font-mono text-xs">
               <div className="flex items-center gap-2 text-purple-300 font-bold uppercase tracking-wider text-[10px]">
                 <span>✨</span> Instant AI Root-Cause Diagnosis
               </div>
               <p className="text-slate-300 leading-relaxed text-[11px]">
                 <strong>Plain English:</strong> The PostgreSQL client in <code className="text-yellow-300">database.js</code> is opening connections inside a tight loop without releasing them back to the pool.
               </p>
-              <pre className="p-3 bg-[#090D16] rounded-xl border border-slate-800 text-emerald-400 overflow-x-auto text-[11px]">
+              <pre className="p-3 bg-[#0B101D] rounded-xl border border-slate-800 text-emerald-400 overflow-x-auto text-[11px]">
 {`// Fix in database.js: Release connection back to pool
 const client = await pool.connect();
 try {
@@ -615,8 +661,8 @@ try {
 
       {/* 7. INTERACTIVE 12-LANGUAGE QUICKSTART TERMINAL */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={100}>
-        <div id="quickstart" className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-          <div className="bg-[#060911] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div id="quickstart" className="bg-[#0B101D] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+          <div className="bg-[#070A12] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center space-x-1.5 overflow-x-auto pb-2 md:pb-0">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mr-2 font-mono whitespace-nowrap">Stack:</span>
               {[
@@ -655,7 +701,7 @@ try {
             </button>
           </div>
 
-          <div className="p-6 bg-[#05070E] overflow-x-auto">
+          <div className="p-6 bg-[#070A12] overflow-x-auto">
             <pre className="font-mono text-xs text-yellow-300 leading-relaxed">
               <code>{snippets[activeQuickTab]}</code>
             </pre>
@@ -680,22 +726,22 @@ try {
               </p>
 
               <div className="space-y-2.5 pt-1 font-mono">
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs">
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0B101D] border border-slate-800 text-xs">
                   <span className="text-slate-300 font-semibold">SnapTrace JS Telemetry SDK</span>
                   <span className="text-emerald-400 font-bold">&lt; 5 KB</span>
                 </div>
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs opacity-70">
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0B101D] border border-slate-800 text-xs opacity-70">
                   <span className="text-slate-400">Honeybadger Client</span>
                   <span className="text-slate-400 font-bold">~35 KB</span>
                 </div>
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#090D16] border border-slate-800 text-xs opacity-50">
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0B101D] border border-slate-800 text-xs opacity-50">
                   <span className="text-slate-500">Sentry Browser SDK</span>
                   <span className="text-red-400 font-bold">100+ KB</span>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-6 bg-[#090D16] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
+            <div className="lg:col-span-6 bg-[#0B101D] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Google Lighthouse Impact</span>
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20 font-mono">
@@ -704,11 +750,11 @@ try {
               </div>
               
               <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-4 rounded-2xl bg-[#05070E] border border-slate-800 space-y-1">
+                <div className="p-4 rounded-2xl bg-[#070A12] border border-slate-800 space-y-1">
                   <div className="text-2xl font-black text-emerald-400 font-mono">0.0ms</div>
                   <p className="text-[10px] text-slate-400 font-mono">Main Thread Delay</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-[#05070E] border border-slate-800 space-y-1">
+                <div className="p-4 rounded-2xl bg-[#070A12] border border-slate-800 space-y-1">
                   <div className="text-2xl font-black text-emerald-400 font-mono">3.4 KB</div>
                   <p className="text-[10px] text-slate-400 font-mono">Total Gzipped Size</p>
                 </div>
@@ -732,10 +778,10 @@ try {
           </p>
         </SmoothReveal>
 
-        <SmoothReveal className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-x-auto shadow-2xl" delay={150}>
+        <SmoothReveal className="bg-[#0B101D] border border-slate-800 rounded-3xl overflow-x-auto shadow-2xl" delay={150}>
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-800 bg-[#060911] text-slate-400 font-semibold uppercase font-mono">
+              <tr className="border-b border-slate-800 bg-[#070A12] text-slate-400 font-semibold uppercase font-mono">
                 <th className="p-4">Feature</th>
                 <th className="p-4 text-yellow-400 font-bold">⚡ SnapTrace</th>
                 <th className="p-4">Sentry</th>
@@ -799,7 +845,7 @@ try {
         <SmoothReveal className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch" delay={150}>
           
           {/* Card 1: Developer Free */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+          <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
             <div className="space-y-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Developer Free</span>
@@ -857,7 +903,7 @@ try {
           </div>
 
           {/* Card 3: Team Scale */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+          <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
             <div className="space-y-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
@@ -895,22 +941,22 @@ try {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-xs font-mono">
-            <div className="p-4 bg-[#090D16] border border-slate-800 rounded-2xl space-y-1">
+            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
               <span className="text-xl">🛡️</span>
               <div className="text-white font-bold">GDPR Ready</div>
               <div className="text-[10px] text-slate-400">On-device PII masking</div>
             </div>
-            <div className="p-4 bg-[#090D16] border border-slate-800 rounded-2xl space-y-1">
+            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
               <span className="text-xl">🪶</span>
               <div className="text-white font-bold">&lt;5KB Footprint</div>
               <div className="text-[10px] text-slate-400">100/100 Core Web Vitals</div>
             </div>
-            <div className="p-4 bg-[#090D16] border border-slate-800 rounded-2xl space-y-1">
+            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
               <span className="text-xl">🔇</span>
               <div className="text-white font-bold">Anti-Noise Guard</div>
               <div className="text-[10px] text-slate-400">SHA-256 loop throttling</div>
             </div>
-            <div className="p-4 bg-[#090D16] border border-slate-800 rounded-2xl space-y-1">
+            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
               <span className="text-xl">🔓</span>
               <div className="text-white font-bold">No Vendor Lock-in</div>
               <div className="text-[10px] text-slate-400">Universal REST protocol</div>
@@ -932,7 +978,7 @@ try {
             return (
               <div
                 key={idx}
-                className="bg-[#090D16] border border-slate-800 rounded-2xl overflow-hidden transition"
+                className="bg-[#0B101D] border border-slate-800 rounded-2xl overflow-hidden transition"
               >
                 <button
                   onClick={() => setActiveFaq(isOpen ? null : idx)}
