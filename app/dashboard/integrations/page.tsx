@@ -581,7 +581,7 @@ end`,
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
                     Production Code Snippet
                   </span>
-                  <span className="text-[10px] font-mono text-slate-500">
+                  <span className="text-[10px] font-mono text-slate-400">
                     File: <span className="text-yellow-400">{current.filename}</span>
                   </span>
                 </div>

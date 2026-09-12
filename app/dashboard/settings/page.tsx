@@ -17,7 +17,6 @@ export default function SettingsPage() {
   const [slackWebhook, setSlackWebhook] = useState<string>('');
   const [apiKey, setApiKey] = useState<string>('');
   const [projectId, setProjectId] = useState<string>('');
-  const [currentTier, setCurrentTier] = useState<string>('free');
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
   // Feedback States
@@ -33,10 +32,6 @@ export default function SettingsPage() {
   
   const [purging, setPurging] = useState<boolean>(false);
   const [purgeMsg, setPurgeMsg] = useState<string | null>(null);
-
-  // Checkout URLs
-  const PRO_CHECKOUT_URL = 'https://snaptrace.lemonsqueezy.com/checkout/buy/b7355f43-3ece-4fa9-a91e-ba847f3cd52e';
-  const TEAM_CHECKOUT_URL = 'https://snaptrace.lemonsqueezy.com/checkout/buy/913b182d-9db4-41c3-9c93-ed68d83eaae0';
 
   useEffect(() => {
     async function loadSettings() {
@@ -63,7 +58,7 @@ export default function SettingsPage() {
         setAiKeySaved(true);
       }
 
-      // STRICT USER_ID FILTERING
+      // Query projects for this user
       const { data: userProjects } = await supabase
         .from('projects')
         .select('*')
@@ -79,22 +74,14 @@ export default function SettingsPage() {
         setEmail(p.recipient_email || p.alert_email || '');
         setDiscordWebhook(p.discord_webhook_url || p.discord_webhook || '');
         
-        // Load Slack Webhook from DB or local persistence
         const savedSlack = p.slack_webhook_url || (typeof window !== 'undefined' ? localStorage.getItem(`snaptrace_slack_${p.id}`) : '') || '';
         setSlackWebhook(savedSlack);
-        
-        if (ownerCheck) {
-          setCurrentTier('team_scale');
-        } else {
-          setCurrentTier(p.plan_tier || 'free');
-        }
       } else {
         setProjectId('');
         setApiKey('No project created yet');
         setEmail(uEmail);
         setDiscordWebhook('');
         setSlackWebhook('');
-        setCurrentTier(ownerCheck ? 'team_scale' : 'free');
       }
 
       setLoading(false);
@@ -106,7 +93,7 @@ export default function SettingsPage() {
   const handleSaveNotifications = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectId) {
-      alert('Please create a project first under "API Keys & Projects".');
+      alert('Please select or create a project first under "API Keys & Projects".');
       return;
     }
 
@@ -125,11 +112,10 @@ export default function SettingsPage() {
         discord_webhook: discordWebhook,
       };
 
-      // Safely attempt updating DB
       try {
         await supabase.from('projects').update(updatePayload).eq('id', projectId);
       } catch (dbErr) {
-        console.warn('DB update completed with local fallback:', dbErr);
+        console.warn('DB update fallback:', dbErr);
       }
 
       setNotifSavedMsg('✓ Notification Channels Saved!');
@@ -172,7 +158,7 @@ export default function SettingsPage() {
     setTestAlertMsg(null);
 
     try {
-      // If Slack webhook is configured, dispatch test directly to Slack
+      // If Slack webhook is set, test it directly
       if (slackWebhook.trim()) {
         fetch(slackWebhook.trim(), {
           method: 'POST',
@@ -231,13 +217,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleUpgradeCheckout = (checkoutUrl: string) => {
-    const finalUrl = `${checkoutUrl}?checkout[email]=${encodeURIComponent(userEmail)}&checkout[custom][project_id]=${encodeURIComponent(projectId)}`;
-    window.open(finalUrl, '_blank');
-  };
-
-  const isProActive = isOwner || currentTier === 'starter_pro' || currentTier === 'team_scale';
-
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -248,7 +227,7 @@ export default function SettingsPage() {
             <span>Project Settings & Subscription</span>
           </h1>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Manage your billing plan, notification webhooks, BYOK AI keys, and database maintenance.
+            Manage your notification webhooks, BYOK AI keys, and database maintenance.
           </p>
         </div>
 
@@ -262,7 +241,7 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-6">
 
-            {/* 1. Subscription & Billing Plan Card */}
+            {/* 1. Subscription & Plan Status: 100% UNLOCKED FOR PUBLIC BETA */}
             <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-5 relative">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
                 <div className="space-y-1">
@@ -275,19 +254,19 @@ export default function SettingsPage() {
                       </span>
                     ) : (
                       <span className="px-3 py-1 bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 rounded-full text-xs font-bold font-mono uppercase">
-                        ⚡ FOUNDER BETA PASS (ACTIVE)
+                        ⚡ FOUNDER BETA PASS (PRO UNLOCKED)
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-slate-400">
                     {isOwner
                       ? 'Owner account with full unlimited access to all features.'
-                      : 'You are enrolled in the exclusive First 50 Developers Public Beta program.'}
+                      : 'All Starter Pro features are 100% unlocked for early builders during Public Beta (Until Oct 31, 2026).'}
                   </p>
                 </div>
 
                 <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl font-bold self-start sm:self-auto">
-                  ✓ Pro Features Unlocked for Beta
+                  ✓ Free Pro Tier Active ($0/mo)
                 </span>
               </div>
 
@@ -302,7 +281,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">In-Dashboard AI</span>
-                  <span className="text-emerald-400 font-bold">✓ Unlimited Copilot Active</span>
+                  <span className="text-emerald-400 font-bold">✓ Unlimited Copilot Unlocked</span>
                 </div>
               </div>
             </div>
@@ -385,7 +364,6 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                {/* SLACK WEBHOOK URL */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold text-slate-300 block font-mono">SLACK WEBHOOK URL</label>
@@ -417,8 +395,8 @@ export default function SettingsPage() {
               </div>
             </form>
 
-            {/* 4. BYOK AI Copilot Card */}
-            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4 relative overflow-hidden">
+            {/* 4. BYOK AI Copilot: 100% UNLOCKED FOR ALL BETA USERS */}
+            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -428,87 +406,65 @@ export default function SettingsPage() {
                     Powers the "Analyze with AI" button inside the Exception Inspect Modal.
                   </p>
                 </div>
-                <span
-                  className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase font-mono ${
-                    isProActive
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                      : 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/30'
-                  }`}
-                >
-                  {isProActive ? '✓ AI Key Active' : '🔒 Starter Pro Feature'}
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  {aiKeySaved ? '✓ AI Key Active' : '● Beta Pass Unlocked'}
                 </span>
               </div>
 
-              {!isProActive ? (
-                <div className="p-6 bg-[#05070E] rounded-2xl border border-yellow-400/30 text-center space-y-3">
-                  <div className="text-2xl">🔒</div>
-                  <h3 className="text-sm font-bold text-white">In-Dashboard AI Copilot is Locked</h3>
-                  <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-                    Free accounts can export 1-click prompts for Cursor & Claude. To unlock direct in-dashboard AI root-cause diagnostics and code patches, upgrade to Starter Pro.
-                  </p>
-                  <button
-                    onClick={() => handleUpgradeCheckout(PRO_CHECKOUT_URL)}
-                    className="px-6 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition cursor-pointer font-mono"
+              <form onSubmit={handleSaveAiKey} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300 block font-mono">SELECT AI MODEL PROVIDER</label>
+                  <select
+                    value={aiProvider}
+                    onChange={(e) => setAiProvider(e.target.value as any)}
+                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-yellow-300 font-bold focus:outline-none focus:border-yellow-400 cursor-pointer font-mono"
                   >
-                    ⚡ Upgrade to Starter Pro ($9/mo) to Unlock →
-                  </button>
+                    <option value="gemini">Google Gemini (Gemini 2.5 Flash Lite - Free)</option>
+                    <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+                  </select>
                 </div>
-              ) : (
-                <form onSubmit={handleSaveAiKey} className="space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-300 block font-mono">SELECT AI MODEL PROVIDER</label>
-                    <select
-                      value={aiProvider}
-                      onChange={(e) => setAiProvider(e.target.value as any)}
-                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-yellow-300 font-bold focus:outline-none focus:border-yellow-400 cursor-pointer font-mono"
-                    >
-                      <option value="gemini">Google Gemini (Gemini 2.5 Flash Lite - Free)</option>
-                      <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
-                    </select>
-                  </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-300 block font-mono">
-                      {aiProvider === 'gemini' ? 'GOOGLE GEMINI API KEY (AQ... / AIza...)' : 'OPENAI API KEY (sk-...)'}
-                    </label>
-                    
-                    <div className="relative">
-                      <input
-                        type={showAiKey ? 'text' : 'password'}
-                        value={aiKey}
-                        onChange={(e) => setAiKey(e.target.value)}
-                        placeholder={aiProvider === 'gemini' ? 'Paste your Google Gemini Key here' : 'sk-proj-...'}
-                        className="w-full bg-[#05070E] border border-slate-800 rounded-xl pl-4 pr-12 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 font-mono transition"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowAiKey(!showAiKey)}
-                        className="absolute right-3.5 top-2.5 text-slate-400 hover:text-white text-xs cursor-pointer"
-                      >
-                        {showAiKey ? '🙈 Hide' : '👁️ Show'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-3 pt-1">
-                    {aiSavedMsg && (
-                      <span className="text-xs font-bold text-emerald-400 font-mono animate-in fade-in">
-                        {aiSavedMsg}
-                      </span>
-                    )}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-300 block font-mono">
+                    {aiProvider === 'gemini' ? 'GOOGLE GEMINI API KEY (AQ... / AIza...)' : 'OPENAI API KEY (sk-...)'}
+                  </label>
+                  
+                  <div className="relative">
+                    <input
+                      type={showAiKey ? 'text' : 'password'}
+                      value={aiKey}
+                      onChange={(e) => setAiKey(e.target.value)}
+                      placeholder={aiProvider === 'gemini' ? 'Paste your Google Gemini Key here' : 'sk-proj-...'}
+                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl pl-4 pr-12 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 font-mono transition"
+                    />
                     <button
-                      type="submit"
-                      disabled={savingAi}
-                      className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-lg shadow-purple-600/20 font-mono"
+                      type="button"
+                      onClick={() => setShowAiKey(!showAiKey)}
+                      className="absolute right-3.5 top-2.5 text-slate-400 hover:text-white text-xs cursor-pointer font-mono"
                     >
-                      {savingAi ? 'Saving...' : 'Save AI Configuration →'}
+                      {showAiKey ? '🙈 Hide' : '👁️ Show'}
                     </button>
                   </div>
-                </form>
-              )}
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-1">
+                  {aiSavedMsg && (
+                    <span className="text-xs font-bold text-emerald-400 font-mono animate-in fade-in">
+                      {aiSavedMsg}
+                    </span>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={savingAi}
+                    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-lg shadow-purple-600/20 font-mono"
+                  >
+                    {savingAi ? 'Saving...' : 'Save AI Configuration →'}
+                  </button>
+                </div>
+              </form>
             </div>
 
-            {/* 5. Database Purge */}
+            {/* 5. Database Maintenance & Purge */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-red-900/30 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="border-b border-slate-800/80 pb-3">
                 <h2 className="text-sm font-bold text-red-400 flex items-center gap-2">
