@@ -20,6 +20,36 @@ interface ErrorLog {
   occurrence_count?: number;
 }
 
+const MOCK_DEMO_ERRORS: ErrorLog[] = [
+  {
+    id: 99901,
+    message: 'ReferenceError: Connection pool exhausted at database.js:18:11',
+    stack_trace: 'ReferenceError: Connection pool exhausted\n    at pool.connect (C:\\app\\database.js:18:11)\n    at handleCheckout (C:\\app\\checkout.js:45:9)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)',
+    url: 'https://example.com/api/checkout',
+    environment: 'production',
+    status: 'unresolved',
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 99902,
+    message: 'UnhandledPromiseRejection: Stripe API 504 Gateway Timeout on /v1/charge',
+    stack_trace: 'Error: Gateway timeout 504\n    at fetchWithRetry (C:\\app\\stripe.js:102:15)\n    at processPayment (C:\\app\\billing.js:28:7)',
+    url: 'https://example.com/billing',
+    environment: 'production',
+    status: 'unresolved',
+    created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 99903,
+    message: 'RenderLoopError: Maximum update depth exceeded in UserProfile component',
+    stack_trace: 'Error: Maximum update depth exceeded\n    at setState (react-dom.js:312:12)\n    at useEffect (UserProfile.jsx:19:5)',
+    url: 'http://localhost:3000/profile',
+    environment: 'development',
+    status: 'unresolved',
+    created_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+  },
+];
+
 export default function ExceptionLogsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -38,6 +68,9 @@ export default function ExceptionLogsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'development'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unresolved' | 'resolved'>('unresolved');
+
+  // Demo Mode State
+  const [demoMode, setDemoMode] = useState(false);
 
   const loadLogs = useCallback(async () => {
     setLoading(true);
@@ -125,6 +158,16 @@ export default function ExceptionLogsPage() {
     };
   }, [loadLogs, urlProjectId]);
 
+  const toggleDemoMode = () => {
+    if (!demoMode) {
+      setDemoMode(true);
+      setLogs((prev) => [...MOCK_DEMO_ERRORS, ...prev]);
+    } else {
+      setDemoMode(false);
+      setLogs((prev) => prev.filter((log) => log.id < 99900));
+    }
+  };
+
   const handleClearUrlFilter = () => {
     router.push('/dashboard/errors');
   };
@@ -135,6 +178,9 @@ export default function ExceptionLogsPage() {
     setLogs((prev) =>
       prev.map((log) => (log.id === id ? { ...log, status: newStatus } : log))
     );
+
+    // If it's a client-side mock error, do not send to Supabase
+    if (id >= 99900) return;
 
     try {
       await supabase.from('errors').update({ status: newStatus }).eq('id', id);
@@ -157,20 +203,31 @@ export default function ExceptionLogsPage() {
       prev.map((l) => (unresolvedIds.includes(l.id) ? { ...l, status: 'resolved' } : l))
     );
 
-    try {
-      await supabase
-        .from('errors')
-        .update({ status: 'resolved' })
-        .in('id', unresolvedIds);
-    } catch (e) {
-      console.error('Bulk resolve failed:', e);
-    } finally {
-      setBulkResolving(false);
-      setShowBulkResolveModal(false);
+    // Only update real non-demo records in database
+    const realIds = unresolvedIds.filter((id) => id < 99900);
+    if (realIds.length > 0) {
+      try {
+        await supabase
+          .from('errors')
+          .update({ status: 'resolved' })
+          .in('id', realIds);
+      } catch (e) {
+        console.error('Bulk resolve failed:', e);
+      }
     }
+
+    setBulkResolving(false);
+    setShowBulkResolveModal(false);
   };
 
   const handleDeleteLog = async (id: number) => {
+    // If it's a client-side mock error, remove from memory
+    if (id >= 99900) {
+      setLogs((prev) => prev.filter((log) => log.id !== id));
+      if (selectedLog?.id === id) setSelectedLog(null);
+      return;
+    }
+
     const { error } = await supabase.from('errors').delete().eq('id', id);
     if (!error) {
       setLogs((prev) => prev.filter((log) => log.id !== id));
@@ -237,14 +294,28 @@ export default function ExceptionLogsPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-[#090D16] border border-slate-800 px-3.5 py-1.5 rounded-full self-start sm:self-auto shadow-sm">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-            </span>
-            <span className="text-xs text-emerald-400 font-bold tracking-wide uppercase font-mono">
-              Live Stream Active
-            </span>
+          <div className="flex items-center gap-3 flex-wrap self-start sm:self-auto">
+            {/* ⚡ LOAD DEMO CRASHES TOGGLE */}
+            <button
+              onClick={toggleDemoMode}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border ${
+                demoMode
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
+                  : 'bg-[#090D16] text-slate-300 border-slate-800 hover:border-yellow-400/40'
+              }`}
+            >
+              <span>{demoMode ? '✕ Clear Demo Crashes' : '⚡ Load Demo Crashes'}</span>
+            </button>
+
+            <div className="flex items-center gap-2 bg-[#090D16] border border-slate-800 px-3.5 py-1.5 rounded-full shadow-sm">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+              </span>
+              <span className="text-xs text-emerald-400 font-bold tracking-wide uppercase font-mono">
+                Live Stream Active
+              </span>
+            </div>
           </div>
         </div>
 
@@ -259,11 +330,11 @@ export default function ExceptionLogsPage() {
                 placeholder="Search error messages, URLs, or file paths..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#05070E] border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-yellow-400 transition"
+                className="w-full bg-[#05070E] border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-yellow-400 transition font-mono"
               />
             </div>
 
-            <div className="flex items-center space-x-1 bg-[#05070E] border border-slate-800 p-1 rounded-xl self-start md:self-auto">
+            <div className="flex items-center space-x-1 bg-[#05070E] border border-slate-800 p-1 rounded-xl self-start md:self-auto font-mono">
               {(['all', 'production', 'development'] as const).map((env) => (
                 <button
                   key={env}
@@ -351,6 +422,14 @@ export default function ExceptionLogsPage() {
                 {logs.length === 0 ? 'No exceptions captured yet.' : 'No matching issues found for this filter.'}
               </p>
               <p className="text-slate-500">Your application runtime is running smoothly.</p>
+              {logs.length === 0 && !demoMode && (
+                <button
+                  onClick={toggleDemoMode}
+                  className="mt-2 px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 rounded-xl text-xs font-bold shadow-md cursor-pointer"
+                >
+                  ⚡ Load Demo Crashes to Test UI
+                </button>
+              )}
               {isUrlFiltered && (
                 <button
                   onClick={handleClearUrlFilter}
@@ -402,7 +481,7 @@ export default function ExceptionLogsPage() {
 
                         <td className="py-4 px-4 font-mono font-medium truncate max-w-xs md:max-w-sm">
                           <span className={isResolved ? 'line-through text-slate-400' : 'text-slate-100 font-semibold'}>
-                            {log.message || log.stack || 'Unknown exception'}
+                            {log.message || log.stack || log.stack_trace || 'Unknown exception'}
                           </span>
                         </td>
 
@@ -441,13 +520,12 @@ export default function ExceptionLogsPage() {
           )}
         </div>
 
-        {/* Deep Inspection Modal */}
+        {/* Deep Inspection Modal (100% PRESERVED) */}
         {selectedLog && (
           <InspectErrorModal
             log={selectedLog}
             onClose={() => {
               setSelectedLog(null);
-              // Clean url query if errorId was present
               if (urlErrorId) {
                 router.replace('/dashboard/errors');
               }
@@ -456,7 +534,7 @@ export default function ExceptionLogsPage() {
           />
         )}
 
-        {/* Bulk Resolve Modal */}
+        {/* Bulk Resolve Modal (100% PRESERVED) */}
         {showBulkResolveModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
             <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl shadow-yellow-500/10">
