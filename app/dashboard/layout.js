@@ -45,7 +45,7 @@ export default function DashboardLayout({ children }) {
         setUserDisplayName(name || email.split('@')[0] || 'Developer');
         setUserEmail(email);
 
-        // Check owner email
+        // Check owner authorization
         if (email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com') {
           setIsOwner(true);
           setUserPlanTier('team_scale');
@@ -61,7 +61,7 @@ export default function DashboardLayout({ children }) {
           }
         }
 
-        // Fetch unresolved error count for live sidebar badge
+        // Fetch count for live sidebar badge
         const { data: userProjects } = await supabase
           .from('projects')
           .select('id')
@@ -149,7 +149,6 @@ export default function DashboardLayout({ children }) {
 
   const userInitial = userDisplayName ? userDisplayName.charAt(0).toUpperCase() : 'M';
 
-  // Render Plan Tier Pill Badge
   const renderTierPill = () => {
     if (isOwner) {
       return (
@@ -182,13 +181,12 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-yellow-400 selection:text-slate-950">
       
-      {/* 1. Left Sidebar Navigation */}
+      {/* Sidebar Navigation */}
       <aside
         className={`bg-[#090D16]/95 border-r border-slate-800/80 flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out backdrop-blur-xl ${
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
-        {/* Brand Header */}
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between min-w-[240px]">
           <Link href="/dashboard" className="transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
@@ -200,14 +198,12 @@ export default function DashboardLayout({ children }) {
           )}
         </div>
 
-        {/* Global Project Switcher */}
         {!sidebarCollapsed && (
           <div id="tour-project-switcher" className="px-4 py-3 border-b border-slate-800/60 bg-[#060911]/80 min-w-[240px]">
             <ProjectSwitcher />
           </div>
         )}
 
-        {/* Navigation Items with Sentry/Linear Active Accent Glow */}
         <nav className="flex-1 p-3 space-y-1.5 min-w-[240px]">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -228,7 +224,6 @@ export default function DashboardLayout({ children }) {
                   {!sidebarCollapsed && <span>{item.name}</span>}
                 </div>
 
-                {/* Sentry-Style Dynamic Error Counter Badge */}
                 {!sidebarCollapsed && item.hasBadge && activeErrorCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/30 group-hover:bg-red-500/25 transition">
                     {activeErrorCount}
@@ -239,7 +234,6 @@ export default function DashboardLayout({ children }) {
           })}
         </nav>
 
-        {/* Sidebar Footer */}
         {!sidebarCollapsed && (
           <div className="p-4 border-t border-slate-800/80 text-[11px] text-slate-500 flex items-center justify-between min-w-[240px] font-mono">
             <span>Featherweight APM</span>
@@ -251,13 +245,11 @@ export default function DashboardLayout({ children }) {
         )}
       </aside>
 
-      {/* 2. Main Content View with Top Bar */}
+      {/* Main Content View */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#05070E]">
         
-        {/* Top Header Bar */}
         <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-xl px-6 flex items-center justify-between z-40">
           
-          {/* Left Area: Collapse Toggle + Breadcrumbs */}
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -280,10 +272,8 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
 
-          {/* Right Area: Feedback + Live Badge + Plan Badge Attached to Profile */}
           <div id="tour-header-actions" className="flex items-center space-x-3 sm:space-x-4">
             
-            {/* Feedback Button */}
             <button
               onClick={() => setFeedbackOpen(true)}
               className="px-3.5 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-sm font-mono"
@@ -293,7 +283,6 @@ export default function DashboardLayout({ children }) {
               <span className="hidden sm:inline">Feedback</span>
             </button>
 
-            {/* Live Ingestion Indicator */}
             <div className="hidden md:flex items-center gap-2 bg-[#05070E] border border-slate-800 px-3.5 py-1.5 rounded-full">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -304,7 +293,6 @@ export default function DashboardLayout({ children }) {
               </span>
             </div>
 
-            {/* Profile Button with Integrated Plan Tier Badge */}
             <div className="relative font-sans">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
@@ -318,7 +306,6 @@ export default function DashboardLayout({ children }) {
                   {userDisplayName}
                 </span>
 
-                {/* Visible Tier Badge */}
                 <div>
                   {renderTierPill()}
                 </div>
@@ -326,7 +313,6 @@ export default function DashboardLayout({ children }) {
                 <span className="text-slate-500 text-[10px]">▾</span>
               </button>
 
-              {/* Profile Dropdown Menu */}
               {profileDropdownOpen && (
                 <div
                   className="absolute right-0 mt-2 w-60 bg-[#090D16] border border-slate-800 rounded-3xl shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-100 font-sans"
@@ -351,4 +337,51 @@ export default function DashboardLayout({ children }) {
                   <Link
                     href="/dashboard/settings"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text
+                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
+                  >
+                    <span>⚙️</span>
+                    <span>Account & Subscription</span>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/projects"
+                    onClick={() => setProfileDropdownOpen(false)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
+                  >
+                    <span>🔑</span>
+                    <span>Manage Projects & Keys</span>
+                  </Link>
+
+                  <div className="border-t border-slate-800/80 my-1" />
+
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-red-400 hover:bg-red-950/30 transition cursor-pointer text-left font-semibold"
+                  >
+                    <span>🚪</span>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
+
+        </header>
+
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
+
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        userEmail={userEmail}
+      />
+
+      <DashboardOnboardingTour />
+
+      <SnappyAssistant />
+
+    </div>
+  );
+}
