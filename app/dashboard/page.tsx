@@ -14,6 +14,8 @@ interface ErrorLog {
   occurrence_count?: number;
 }
 
+type TimeRange = '12h' | '24h' | '7d';
+
 export default function DashboardOverviewPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,10 @@ export default function DashboardOverviewPage() {
   const [recentErrors, setRecentErrors] = useState<ErrorLog[]>([]);
   const [projectKey, setProjectKey] = useState<string>('');
   const [selectedProjectLabel, setSelectedProjectLabel] = useState<string>('All Projects');
-  const [hourlyDistribution, setHourlyDistribution] = useState<number[]>(new Array(12).fill(0));
+  
+  // Timeframe selector state (12h, 24h, 7d)
+  const [timeRange, setTimeRange] = useState<TimeRange>('12h');
+  const [distribution, setDistribution] = useState<{ count: number; label: string }[]>([]);
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
@@ -42,7 +47,7 @@ export default function DashboardOverviewPage() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
-    // 3. If user has NO projects (brand new user), set everything to ZERO
+    // 3. If user has NO projects, reset to clean zero-state
     if (projErr || !userProjects || userProjects.length === 0) {
       setProjectKey('No Project Created Yet');
       setSelectedProjectLabel('No Projects');
@@ -50,7 +55,7 @@ export default function DashboardOverviewPage() {
       setProdErrors(0);
       setDevErrors(0);
       setRecentErrors([]);
-      setHourlyDistribution(new Array(12).fill(0));
+      setDistribution(new Array(12).fill({ count: 0, label: '' }));
       setLoading(false);
       return;
     }
@@ -58,11 +63,11 @@ export default function DashboardOverviewPage() {
     const userProjectIds = userProjects.map((p) => p.id);
     const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
 
-    // Validate that savedProjectId actually belongs to this user
+    // Validate savedProjectId
     const isValidProject = savedProjectId && savedProjectId !== 'all' && userProjectIds.includes(savedProjectId);
     const isAll = !isValidProject;
 
-    // 4. STRICT QUERY: Filter ONLY by this user's project IDs
+    // 4. Strict isolation query
     let errorQuery = supabase
       .from('errors')
       .select('*')
@@ -71,7 +76,6 @@ export default function DashboardOverviewPage() {
     if (isAll) {
       setSelectedProjectLabel('All Projects (Global Stream)');
       setProjectKey(userProjects[0].api_key);
-      // ONLY fetch errors matching this user's project IDs
       errorQuery = errorQuery.in('project_id', userProjectIds);
     } else {
       const activeProject = userProjects.find((p) => p.id === savedProjectId) || userProjects[0];
@@ -88,48 +92,71 @@ export default function DashboardOverviewPage() {
       setDevErrors(errors.filter((e) => e.environment === 'development').length);
       setRecentErrors(errors.slice(0, 6));
 
-      // Calculate 12-hour distribution
-      const buckets = new Array(12).fill(0);
+      // Compute Real-Time Clock Distribution
       const now = Date.now();
-      const oneHourMs = 60 * 60 * 1000;
-      const twelveHoursMs = 12 * oneHourMs;
+      let numBuckets = 12;
+      let bucketDurationMs = 60 * 60 * 1000; // 1 hr default
+
+      if (timeRange === '24h') {
+        numBuckets = 12;
+        bucketDurationMs = 2 * 60 * 60 * 1000; // 2 hrs per bucket (12 buckets)
+      } else if (timeRange === '7d') {
+        numBuckets = 7;
+        bucketDurationMs = 24 * 60 * 60 * 1000; // 1 day per bucket (7 buckets)
+      }
+
+      const rawBuckets = new Array(numBuckets).fill(0);
+      const totalWindowMs = numBuckets * bucketDurationMs;
 
       errors.forEach((err) => {
         const rawDate = err.created_at;
-        const errTime = rawDate ? new Date(rawDate).getTime() : now;
+        if (!rawDate) return;
+        const errTime = new Date(rawDate).getTime();
 
         if (!isNaN(errTime)) {
           const diff = now - errTime;
-          if (diff >= -15 * 60 * 1000 && diff <= twelveHoursMs) {
-            let bucketIndex = 11 - Math.floor(Math.max(0, diff) / oneHourMs);
+          // Only tally if within the selected timeframe
+          if (diff >= 0 && diff <= totalWindowMs) {
+            let bucketIndex = (numBuckets - 1) - Math.floor(diff / bucketDurationMs);
             if (bucketIndex < 0) bucketIndex = 0;
-            if (bucketIndex > 11) bucketIndex = 11;
-            buckets[bucketIndex] += 1;
+            if (bucketIndex >= numBuckets) bucketIndex = numBuckets - 1;
+            rawBuckets[bucketIndex] += 1;
           }
         }
       });
 
-      if (errors.length > 0 && buckets.every((b) => b === 0)) {
-        buckets[11] = Math.min(errors.length, 5);
-      }
+      // Format clean time labels for each bucket
+      const formatted = rawBuckets.map((count, idx) => {
+        let label = '';
+        if (timeRange === '12h') {
+          const hoursAgo = (numBuckets - 1 - idx);
+          label = hoursAgo === 0 ? 'Now' : `-${hoursAgo}h`;
+        } else if (timeRange === '24h') {
+          const hoursAgo = (numBuckets - 1 - idx) * 2;
+          label = hoursAgo === 0 ? 'Now' : `-${hoursAgo}h`;
+        } else if (timeRange === '7d') {
+          const daysAgo = (numBuckets - 1 - idx);
+          label = daysAgo === 0 ? 'Today' : `-${daysAgo}d`;
+        }
+        return { count, label };
+      });
 
-      setHourlyDistribution(buckets);
+      setDistribution(formatted);
     } else {
       setTotalErrors(0);
       setProdErrors(0);
       setDevErrors(0);
       setRecentErrors([]);
-      setHourlyDistribution(new Array(12).fill(0));
+      setDistribution(new Array(12).fill({ count: 0, label: '' }));
     }
 
     setLoading(false);
-  }, []);
+  }, [timeRange]);
 
   useEffect(() => {
     loadDashboardData();
     window.addEventListener('snaptrace_project_change', loadDashboardData);
 
-    // Secure Realtime Listener: re-queries via loadDashboardData to respect user_id
     const channel = supabase
       .channel('realtime-overview-feed')
       .on(
@@ -151,7 +178,7 @@ export default function DashboardOverviewPage() {
     };
   }, [loadDashboardData]);
 
-  const maxBucketVal = Math.max(...hourlyDistribution, 1);
+  const maxCount = Math.max(...distribution.map((d) => d.count), 1);
 
   const handleRecentErrorClick = (err: ErrorLog) => {
     router.push(`/dashboard/errors?errorId=${err.id}`);
@@ -236,52 +263,78 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
 
-            {/* 2. Visual 12-Hour Velocity Bar Chart */}
+            {/* 2. Visual Velocity Bar Chart with [ 12H | 24H | 7D ] Filter */}
             <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
                 <div>
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>📈</span> Incident Velocity Pulse (Last 12 Hours)
+                    <span>📈</span> Incident Velocity Pulse
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Real-time hourly frequency spikes</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Real-time frequency spikes across active window</p>
                 </div>
-                <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5 self-start sm:self-auto">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Live Stream Connected
-                </span>
+
+                <div className="flex items-center gap-3">
+                  {/* Sentry / Vercel-Style Timeframe Tabs */}
+                  <div className="flex items-center bg-[#05070E] p-1 rounded-xl border border-slate-800 font-mono text-xs">
+                    {(['12h', '24h', '7d'] as const).map((range) => (
+                      <button
+                        key={range}
+                        onClick={() => setTimeRange(range)}
+                        className={`px-3 py-1 rounded-lg font-bold transition uppercase cursor-pointer ${
+                          timeRange === range
+                            ? 'bg-yellow-400 text-slate-950 shadow-sm'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {range}
+                      </button>
+                    ))}
+                  </div>
+
+                  <span className="text-[11px] font-mono text-emerald-400 hidden sm:flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    Live
+                  </span>
+                </div>
               </div>
 
               <div className="pt-4 pb-2">
                 <div className="h-32 w-full flex items-end justify-between gap-2 sm:gap-3 px-2">
-                  {hourlyDistribution.map((count, idx) => {
-                    const heightPercent = maxBucketVal > 0 ? (count / maxBucketVal) * 100 : 0;
-                    const hasErrors = count > 0;
+                  {distribution.map((item, idx) => {
+                    const heightPercent = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
+                    const hasErrors = item.count > 0;
                     
                     return (
                       <div key={idx} className="flex-1 h-full flex flex-col justify-end items-center gap-2 group relative">
+                        {/* Hover Tooltip */}
                         <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-yellow-400/40 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-2xl z-20">
-                          {count} {count === 1 ? 'incident' : 'incidents'}
+                          {item.count} {item.count === 1 ? 'incident' : 'incidents'} ({item.label})
                         </div>
 
+                        {/* Bar */}
                         <div className="w-full bg-[#05070E] rounded-xl h-full flex items-end overflow-hidden p-1 border border-slate-800/80">
                           <div
-                            style={{ height: `${hasErrors ? Math.max(heightPercent, 35) : 6}%` }}
-                            className={`w-full rounded-lg transition-all duration-700 ${
+                            style={{ height: `${hasErrors ? Math.max(heightPercent, 25) : 4}%` }}
+                            className={`w-full rounded-lg transition-all duration-500 ${
                               hasErrors
                                 ? 'bg-gradient-to-t from-amber-500 via-yellow-400 to-yellow-300 shadow-lg shadow-yellow-500/40'
                                 : 'bg-slate-800/40'
                             }`}
                           />
                         </div>
+
+                        {/* Dynamic Sub-Label under each bar */}
+                        <span className="text-[9px] font-mono text-slate-500 select-none">
+                          {item.label}
+                        </span>
                       </div>
                     );
                   })}
                 </div>
 
                 <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-3 border-t border-slate-800/80 mt-2 px-2">
-                  <span>12 hrs ago</span>
-                  <span>6 hrs ago</span>
-                  <span className="text-yellow-400 font-bold">Current Hour (Now)</span>
+                  <span>Start of window ({timeRange.toUpperCase()} ago)</span>
+                  <span className="text-yellow-400 font-bold">Latest / Current Hour</span>
                 </div>
               </div>
             </div>
@@ -330,7 +383,7 @@ export default function DashboardOverviewPage() {
                             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
                               err.environment === 'production'
                                 ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                             }`}
                           >
                             {err.environment}
