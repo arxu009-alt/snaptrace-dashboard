@@ -18,8 +18,6 @@ export default function WelcomeLandingPage() {
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [copiedCursorPrompt, setCopiedCursorPrompt] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
-
-  // Mega-menu hover states
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
@@ -188,10 +186,10 @@ void captureSnapTrace(Object error, StackTrace stack) {
 }`,
     cloudflare: `// Cloudflare Workers / Serverless Edge
 export default {
-  async fetch(req, env, ctx) {
+  async fetch(req: Request, env: any, ctx: any) {
     try {
       return await handleRequest(req);
-    } catch (err) {
+    } catch (err: any) {
       ctx.waitUntil(fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -265,25 +263,22 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden">
       
-      {/* 1. Urgency Expiration Date Top Banner */}
+      {/* Urgency Top Banner */}
       <div className="bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950 px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2">
         <span>⏰ Limited Beta Launch Offer:</span>
         <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px]">Free Pro Tier Unlocked Until Oct 31, 2026</span>
         <span className="hidden sm:inline">• Claim your lifetime grandfathered spot today!</span>
       </div>
 
-      {/* 2. SENTRY-STYLE STICKY NAVIGATION BAR WITH INTERACTIVE MEGA MENUS */}
+      {/* Sentry-Style Header with Interactive Mega Menus */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Sentry-Style Dropdown Mega-Menu Navigation */}
           <nav className="hidden lg:flex items-center space-x-6 text-xs font-semibold text-slate-300 font-mono">
-            
-            {/* Dropdown 1: Platform */}
+            {/* Platform Dropdown */}
             <div
               className="relative"
               onMouseEnter={() => setOpenDropdown('platform')}
@@ -323,7 +318,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               )}
             </div>
 
-            {/* Dropdown 2: AI & Tools */}
+            {/* AI Copilot Dropdown */}
             <div
               className="relative"
               onMouseEnter={() => setOpenDropdown('ai')}
@@ -362,17 +357,16 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* Action CTAs */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 font-mono">
             <Link
               href="/login"
-              className="text-xs font-semibold text-slate-300 hover:text-white px-3.5 py-2 rounded-lg hover:bg-slate-800/50 transition font-mono"
+              className="text-xs font-semibold text-slate-300 hover:text-white px-3.5 py-2 rounded-lg hover:bg-slate-800/50 transition"
             >
               Sign In
             </Link>
             <Link
               href="/signup"
-              className="text-xs font-bold bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 px-4 py-2 rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5 font-mono"
+              className="text-xs font-bold bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 px-4 py-2 rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
             >
               Claim Beta Pass →
             </Link>
@@ -380,12 +374,11 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 3. Hero Section */}
+      {/* Hero Section */}
       <section className="relative pt-20 pb-20 overflow-hidden">
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[450px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none animate-pulse" />
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10 animate-in fade-in duration-500">
-          
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#090D16] border-2 border-yellow-400/40 text-xs font-bold text-yellow-300 shadow-xl shadow-yellow-500/10 font-mono">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>⚡ Sub-5KB SDK • Universal 14-Stack Support • Zero Alert Fatigue</span>
@@ -425,9 +418,9 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 4. SENTRY-STYLE INTERACTIVE ROOT-CAUSE SCANNER MOCKUP */}
+      {/* Interactive Root-Cause Scanner Mockup */}
       <RevealOnScroll className="max-w-5xl mx-auto px-6 pb-24" delay={100}>
-        <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div id="grouping" className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-mono text-xs">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
@@ -441,7 +434,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-            {/* Left: Execution Flow Path */}
             <div className="md:col-span-7 space-y-2.5 text-xs font-mono">
               <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 flex items-center justify-between">
                 <span className="text-slate-300">1. User submits checkout form</span>
@@ -461,7 +453,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               </div>
             </div>
 
-            {/* Right: AI Root Cause Isolated Box */}
             <div className="md:col-span-5 p-5 bg-[#05070E] rounded-2xl border border-yellow-400/40 space-y-3 font-mono text-xs shadow-xl">
               <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-400">
                 ⚡ SNAPTRACE ISOLATION ENGINE
@@ -470,7 +461,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 Root Cause: Connection Pool Exhaustion
               </div>
               <p className="text-slate-400 text-[11px] leading-relaxed">
-                4 downstream HTTP 500 crashes collapsed under <code className="text-yellow-300">database.js</code>. Client connection wasn't released.
+                4 downstream HTTP 500 crashes collapsed under <code className="text-yellow-300">database.js</code>. Client connection was not released.
               </p>
               <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-emerald-400 font-bold">
                 <span>Code Patch Generated</span>
@@ -479,9 +470,9 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </div>
           </div>
         </div>
-      </section>
+      </RevealOnScroll>
 
-      {/* 5. Interactive 12-Language Quickstart Terminal */}
+      {/* 12-Language Quickstart Terminal */}
       <RevealOnScroll className="max-w-5xl mx-auto px-6 pb-24" delay={100}>
         <div id="quickstart" className="bg-[#090D16] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#060911] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -531,11 +522,10 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </RevealOnScroll>
 
-      {/* 6. Sub-5KB SDK Section */}
+      {/* Sub-5KB SDK Feature Section */}
       <section id="features" className="py-24 border-t border-slate-800/80 bg-[#060911]/60">
         <div className="max-w-6xl mx-auto px-6">
           <RevealOnScroll className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12">
-            
             <div className="lg:col-span-6 space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
                 <span>🪶</span> Performance & Core Web Vitals
@@ -586,15 +576,13 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 "We dropped heavy tracking tools for SnapTrace and our Next.js bundle footprint dropped instantly."
               </p>
             </div>
-
           </RevealOnScroll>
         </div>
       </section>
 
-      {/* 7. BYOK AI Section */}
+      {/* BYOK AI Section */}
       <section id="ai-copilot" className="py-24 border-t border-slate-800/80 relative">
         <div className="max-w-6xl mx-auto px-6 space-y-12">
-          
           <RevealOnScroll className="text-center space-y-4 max-w-2xl mx-auto">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase font-mono">
               <span>🤖</span> BYOK AI Diagnostic Engine
@@ -605,25 +593,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <p className="text-sm text-slate-400 leading-relaxed">
               Connect your own Google Gemini (100% Free) or OpenAI API key for instant in-dashboard code patches, or use our <strong>1-Click Prompt Export</strong> directly into <strong>VS Code, Cursor, or Claude Code</strong>.
             </p>
-
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-2 font-mono">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#090D16] border border-purple-500/40 shadow-lg shadow-purple-500/10">
-                <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L2 19.5L12 15.5L22 19.5L12 2Z" />
-                </svg>
-                <span className="text-xs font-bold text-slate-200">Cursor / VS Code</span>
-              </div>
-
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#090D16] border border-amber-500/40 shadow-lg shadow-amber-500/10">
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-                <span className="text-xs font-bold text-slate-200">Claude Code</span>
-              </div>
-
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#090D16] border border-emerald-500/40 shadow-lg shadow-emerald-500/10">
-                <span className="text-emerald-400 text-xs font-bold">⚡</span>
-                <span className="text-xs font-bold text-slate-200">Google Gemini & GPT-4o</span>
-              </div>
-            </div>
           </RevealOnScroll>
 
           <RevealOnScroll className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-4xl mx-auto space-y-6" delay={150}>
@@ -658,11 +627,10 @@ try {
               </pre>
             </div>
           </RevealOnScroll>
-
         </div>
       </section>
 
-      {/* 8. Comparison Table */}
+      {/* Comparison Table */}
       <section id="comparison" className="max-w-5xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Why Developers Choose SnapTrace</h2>
@@ -723,7 +691,7 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 9. Pricing Section with Expiration Date */}
+      {/* Pricing Section */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-12">
         <RevealOnScroll className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
@@ -736,7 +704,6 @@ try {
         </RevealOnScroll>
 
         <RevealOnScroll className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch" delay={150}>
-          
           {/* Card 1: Developer Free */}
           <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
             <div className="space-y-4">
@@ -821,11 +788,10 @@ try {
               Join Beta Waitlist →
             </Link>
           </div>
-
         </RevealOnScroll>
       </section>
 
-      {/* 10. SENTRY-STYLE SECURITY & COMPLIANCE TRUST BADGES */}
+      {/* Security & Trust Badges */}
       <section className="py-20 border-t border-slate-800/80 bg-[#060911]/60">
         <div className="max-w-6xl mx-auto px-6 text-center space-y-8">
           <div className="space-y-2">
@@ -858,7 +824,7 @@ try {
         </div>
       </section>
 
-      {/* 11. FAQ Section */}
+      {/* FAQ Section */}
       <section id="faq" className="max-w-4xl mx-auto px-6 py-24 border-t border-slate-800/80 space-y-10">
         <RevealOnScroll className="text-center space-y-3">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
@@ -891,11 +857,9 @@ try {
         </RevealOnScroll>
       </section>
 
-      {/* 12. SENTRY-STYLE ENTERPRISE FOOTER */}
+      {/* Enterprise Footer */}
       <footer className="border-t border-slate-800/80 bg-[#060911] py-20 relative overflow-hidden font-sans">
         <div className="max-w-7xl mx-auto px-6 space-y-12">
-          
-          {/* Top CTA */}
           <div className="text-center space-y-4 max-w-xl mx-auto">
             <h2 className="text-2xl sm:text-4xl font-black text-white">
               Ready to catch bugs in a snap?
@@ -913,7 +877,6 @@ try {
             </div>
           </div>
 
-          {/* Sentry-Style 4-Column Footer Navigation */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 border-t border-slate-800/80 text-xs font-mono">
             <div className="space-y-3">
               <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Platform</span>
@@ -963,7 +926,6 @@ try {
               <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
             </div>
           </div>
-
         </div>
       </footer>
 
