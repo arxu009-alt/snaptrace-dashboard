@@ -59,6 +59,62 @@ function SmoothReveal({
   );
 }
 
+// Zero-dependency VS Code Syntax Highlighting Renderer
+function CodeHighlighter({ code }: { code: string }) {
+  const lines = code.split('\n');
+
+  return (
+    <div className="font-mono text-xs leading-relaxed overflow-x-auto select-text">
+      {lines.map((line, lineIdx) => {
+        const trimmed = line.trim();
+        const isComment = trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('<!--') || trimmed.startsWith('/*');
+
+        return (
+          <div key={lineIdx} className="table-row hover:bg-slate-800/20">
+            <span className="table-cell pr-4 text-right text-[11px] text-slate-600 select-none font-mono w-8">
+              {lineIdx + 1}
+            </span>
+            <span className="table-cell whitespace-pre">
+              {isComment ? (
+                <span className="text-slate-500 italic">{line}</span>
+              ) : (
+                line
+                  .split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|\/\/.*|\#.*|\b(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|true|false|null|nil|None|if|else)\b|<\/?[a-zA-Z0-9_\-]+(?:\s|>|\/)|<\/?>)/g)
+                  .map((part, partIdx) => {
+                    if (!part) return null;
+
+                    // Comments at end of line
+                    if (part.startsWith('//') || part.startsWith('#')) {
+                      return <span key={partIdx} className="text-slate-500 italic">{part}</span>;
+                    }
+                    // Strings
+                    if (part.startsWith('"') || part.startsWith("'") || part.startsWith('`')) {
+                      return <span key={partIdx} className="text-emerald-300 font-medium">{part}</span>;
+                    }
+                    // Keywords
+                    if (/^(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|if|else)$/.test(part)) {
+                      return <span key={partIdx} className="text-sky-400 font-bold">{part}</span>;
+                    }
+                    // Booleans / nulls
+                    if (/^(?:true|false|null|nil|None)$/.test(part)) {
+                      return <span key={partIdx} className="text-amber-300 font-bold">{part}</span>;
+                    }
+                    // HTML / JSX tags
+                    if (/^<\/?[a-zA-Z0-9_\-]+/.test(part) || part === '>' || part === '/>' || part === '</>') {
+                      return <span key={partIdx} className="text-rose-400 font-semibold">{part}</span>;
+                    }
+                    // Default code text
+                    return <span key={partIdx} className="text-slate-200">{part}</span>;
+                  })
+              )}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function WelcomeLandingPage() {
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -324,7 +380,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         <span className="hidden sm:inline">• Grandfathered lifetime beta pass for early builders</span>
       </div>
 
-      {/* 2. SENTRY-STYLE STICKY HEADER WITH SENTRY "MARKETING MODE" SWITCH */}
+      {/* 2. SENTRY-STYLE STICKY HEADER WITH MARKETING MODE SWITCH */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           
@@ -332,7 +388,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Sentry-Style Navigation (Visible on laptops via md:flex) */}
+          {/* Sentry-Style Navigation */}
           <nav className="hidden md:flex items-center space-x-5 text-xs font-semibold text-slate-300 font-mono">
             
             {/* Dropdown: Platform */}
@@ -412,8 +468,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
           {/* Action CTAs + SENTRY MARKETING MODE TOGGLE */}
           <div className="flex items-center space-x-3 font-mono shrink-0">
-            
-            {/* The Sentry Easter Egg Switch: Marketing Mode ON/OFF */}
             <button
               onClick={() => setMarketingMode(!marketingMode)}
               className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-mono font-bold transition cursor-pointer ${
@@ -445,7 +499,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 3. HERO SECTION (PROPORTIONAL, SENTRY-SIZED WITH MARKETING MODE DUAL-COPY) */}
+      {/* 3. HERO SECTION */}
       <section className="relative pt-16 pb-16 overflow-hidden">
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[130px] pointer-events-none rounded-full" />
 
@@ -460,7 +514,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </span>
           </div>
 
-          {/* Sentry-proportioned elegant headline with dual-mode copy */}
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.15] max-w-3xl mx-auto">
             {marketingMode ? (
               <>
@@ -514,7 +567,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 4. SENTRY-STYLE INTERACTIVE ROOT-CAUSE SCANNER (ELEVATED GLASS CARD) */}
+      {/* 4. SENTRY-STYLE INTERACTIVE ROOT-CAUSE SCANNER */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={50}>
         <div id="grouping" className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-mono text-xs">
@@ -659,7 +712,7 @@ try {
         </div>
       </section>
 
-      {/* 7. INTERACTIVE 12-LANGUAGE QUICKSTART TERMINAL */}
+      {/* 7. INTERACTIVE 12-LANGUAGE QUICKSTART TERMINAL WITH VS CODE SYNTAX HIGHLIGHTING */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={100}>
         <div id="quickstart" className="bg-[#0B101D] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#070A12] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -702,9 +755,7 @@ try {
           </div>
 
           <div className="p-6 bg-[#070A12] overflow-x-auto">
-            <pre className="font-mono text-xs text-yellow-300 leading-relaxed">
-              <code>{snippets[activeQuickTab]}</code>
-            </pre>
+            <CodeHighlighter code={snippets[activeQuickTab]} />
           </div>
         </div>
       </SmoothReveal>
