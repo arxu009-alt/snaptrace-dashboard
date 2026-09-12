@@ -23,9 +23,60 @@ interface IntegrationSnippet {
   name: string;
   icon: string;
   category: string;
+  filename: string;
   installCmd?: string;
   guide: string[];
   code: (apiKey: string) => string;
+}
+
+// Zero-dependency VS Code Syntax Highlighting Renderer
+function CodeHighlighter({ code }: { code: string }) {
+  const lines = code.split('\n');
+
+  return (
+    <div className="font-mono text-xs leading-relaxed overflow-x-auto select-text">
+      {lines.map((line, lineIdx) => {
+        const trimmed = line.trim();
+        const isComment = trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('<!--') || trimmed.startsWith('/*');
+
+        return (
+          <div key={lineIdx} className="table-row hover:bg-slate-800/20">
+            <span className="table-cell pr-4 text-right text-[11px] text-slate-600 select-none font-mono w-8">
+              {lineIdx + 1}
+            </span>
+            <span className="table-cell whitespace-pre">
+              {isComment ? (
+                <span className="text-slate-500 italic">{line}</span>
+              ) : (
+                line
+                  .split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|\/\/.*|\#.*|\b(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|true|false|null|nil|None|if|else)\b|<\/?[a-zA-Z0-9_\-]+(?:\s|>|\/)|<\/?>)/g)
+                  .map((part, partIdx) => {
+                    if (!part) return null;
+
+                    if (part.startsWith('//') || part.startsWith('#')) {
+                      return <span key={partIdx} className="text-slate-500 italic">{part}</span>;
+                    }
+                    if (part.startsWith('"') || part.startsWith("'") || part.startsWith('`')) {
+                      return <span key={partIdx} className="text-emerald-300 font-medium">{part}</span>;
+                    }
+                    if (/^(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|if|else)$/.test(part)) {
+                      return <span key={partIdx} className="text-sky-400 font-bold">{part}</span>;
+                    }
+                    if (/^(?:true|false|null|nil|None)$/.test(part)) {
+                      return <span key={partIdx} className="text-amber-300 font-bold">{part}</span>;
+                    }
+                    if (/^<\/?[a-zA-Z0-9_\-]+/.test(part) || part === '>' || part === '/>' || part === '</>') {
+                      return <span key={partIdx} className="text-rose-400 font-semibold">{part}</span>;
+                    }
+                    return <span key={partIdx} className="text-slate-200">{part}</span>;
+                  })
+              )}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function LanguageIntegrationsPage() {
@@ -70,6 +121,7 @@ export default function LanguageIntegrationsPage() {
       name: 'Next.js (App Router)',
       icon: '▲',
       category: 'Fullstack Framework',
+      filename: 'app/layout.tsx',
       installCmd: '// Zero dependencies. Drop into your root layout:',
       guide: [
         'Place this script tag inside your root `app/layout.tsx` file inside `<head>`.',
@@ -98,6 +150,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       name: 'JavaScript / React / Vue',
       icon: '🟨',
       category: 'Frontend Client',
+      filename: 'index.html',
       installCmd: '<!-- Paste into your HTML head before other scripts -->',
       guide: [
         'Works with React, Vue, Svelte, Angular, Vite, and Vanilla JavaScript.',
@@ -114,6 +167,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       name: 'Python (Django / FastAPI)',
       icon: '🐍',
       category: 'Backend Language',
+      filename: 'client.py',
       installCmd: 'pip install requests',
       guide: [
         'Wrap exception blocks in your FastAPI, Django, or Flask routes.',
@@ -139,6 +193,7 @@ def capture_snaptrace(exception, route="https://api.mycompany.com"):
       name: 'Node.js (Express / NestJS)',
       icon: '🟩',
       category: 'Backend Runtime',
+      filename: 'server.js',
       installCmd: '// Uses standard native fetch in Node 18+',
       guide: [
         'Hook into `process.on("uncaughtException")` or Express error middleware.',
@@ -162,6 +217,7 @@ process.on('uncaughtException', (err) => {
       name: 'Go (Golang)',
       icon: '🐹',
       category: 'Backend Language',
+      filename: 'main.go',
       installCmd: '// Uses standard library net/http and encoding/json',
       guide: [
         'Call `SendSnapTrace(err)` inside your recover() handlers or Gin error middleware.',
@@ -189,6 +245,7 @@ func SendSnapTrace(err error, route string) {
       name: 'Rust (Axum / Actix)',
       icon: '🦀',
       category: 'Systems Language',
+      filename: 'telemetry.rs',
       installCmd: 'cargo add reqwest serde_json',
       guide: [
         'Integrate into your Axum/Actix error responders or Tokio tasks.',
@@ -212,6 +269,7 @@ func SendSnapTrace(err error, route string) {
       name: 'C# / .NET Core',
       icon: '🔷',
       category: 'Backend / Enterprise',
+      filename: 'SnapTraceClient.cs',
       installCmd: '// Uses System.Net.Http.Json',
       guide: [
         'Add to your ASP.NET Core global exception filter middleware.',
@@ -232,6 +290,7 @@ func SendSnapTrace(err error, route string) {
       name: 'PHP (Laravel / WordPress)',
       icon: '🐘',
       category: 'Backend Language',
+      filename: 'handler.php',
       installCmd: '// Uses native PHP cURL extension',
       guide: [
         'Hook into `set_exception_handler()` or Laravel `Handler.php`.',
@@ -255,6 +314,7 @@ set_exception_handler(function ($e) {
       name: 'Ruby on Rails',
       icon: '💎',
       category: 'Backend Framework',
+      filename: 'snaptrace.rb',
       installCmd: '// Uses standard library Net::HTTP and JSON',
       guide: [
         'Add to `ApplicationController` rescue_from or Sinatra error block.',
@@ -274,6 +334,7 @@ end`,
       name: 'Kotlin / Android / Java',
       icon: '☕',
       category: 'Mobile & JVM',
+      filename: 'SnapTrace.kt',
       installCmd: 'implementation("com.squareup.okhttp3:okhttp:4.12.0")',
       guide: [
         'Hook into `Thread.setDefaultUncaughtExceptionHandler`.',
@@ -298,6 +359,7 @@ end`,
       name: 'Flutter / Dart',
       icon: '📱',
       category: 'Mobile Framework',
+      filename: 'main.dart',
       installCmd: 'flutter pub add http',
       guide: [
         'Hook into `FlutterError.onError` and `PlatformDispatcher.instance.onError`.',
@@ -320,6 +382,7 @@ end`,
       name: 'Cloudflare Workers / Edge',
       icon: '☁️',
       category: 'Serverless Edge',
+      filename: 'worker.js',
       installCmd: '// Uses standard Fetch & ExecutionContext.waitUntil',
       guide: [
         'Wrap your worker `fetch` handler in try/catch.',
@@ -349,6 +412,7 @@ end`,
       name: 'cURL / REST API',
       icon: '🌐',
       category: 'DevOps & CI/CD',
+      filename: 'terminal.sh',
       installCmd: 'curl -X POST ...',
       guide: [
         'Send raw JSON payloads directly via HTTP POST.',
@@ -368,6 +432,7 @@ end`,
       name: 'HTML5 Resource Catcher',
       icon: '🎨',
       category: 'Asset Monitoring',
+      filename: 'index.html',
       installCmd: '<!-- Paste in HTML head -->',
       guide: [
         'Intercepts broken images, failing CDN stylesheets, and missing scripts.',
@@ -416,8 +481,8 @@ end`,
           </p>
         </div>
 
-        {/* API Key Banner */}
-        <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+        {/* Active Ingestion Key Banner */}
+        <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl backdrop-blur-md">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest font-mono block">
               Active Ingestion Key
@@ -435,7 +500,7 @@ end`,
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           
           {/* Left: Language Tabs */}
-          <div className="lg:col-span-1 space-y-1.5 max-h-[600px] overflow-y-auto pr-1">
+          <div className="lg:col-span-1 space-y-1.5 max-h-[620px] overflow-y-auto pr-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2 px-1 font-mono">
               Supported Stacks ({Object.keys(integrations).length})
             </span>
@@ -449,8 +514,8 @@ end`,
                   onClick={() => setActiveTab(lang)}
                   className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition text-left cursor-pointer ${
                     isActive
-                      ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/40 shadow-sm font-bold'
-                      : 'bg-[#090D16] text-slate-400 border border-slate-800 hover:bg-slate-800/60 hover:text-slate-200'
+                      ? 'border-l-4 border-l-yellow-400 bg-gradient-to-r from-yellow-400/15 via-yellow-400/5 to-transparent text-yellow-300 font-bold shadow-sm'
+                      : 'bg-[#090D16] text-slate-400 border border-slate-800/80 hover:bg-slate-800/60 hover:text-slate-200 border-l-4 border-l-transparent'
                   }`}
                 >
                   <span className="text-base">{item.icon}</span>
@@ -467,10 +532,12 @@ end`,
           <div className="lg:col-span-3 bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 space-y-6 shadow-2xl flex flex-col justify-between">
             <div className="space-y-5">
               
-              {/* Header */}
+              {/* Header with Title & Copy Snippet Button */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl p-2 bg-yellow-400/10 border border-yellow-400/20 rounded-xl text-yellow-400">{current.icon}</span>
+                  <span className="text-2xl p-2 bg-yellow-400/10 border border-yellow-400/20 rounded-xl text-yellow-400">
+                    {current.icon}
+                  </span>
                   <div>
                     <h2 className="text-base font-bold text-white">
                       {current.name} Integration
@@ -486,7 +553,7 @@ end`,
                 </button>
               </div>
 
-              {/* Install / Requirement note */}
+              {/* Install / Requirement Note */}
               {current.installCmd && (
                 <div className="space-y-1.5">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
@@ -513,28 +580,10 @@ end`,
                 </ul>
               </div>
 
-              {/* Code Snippet Editor */}
+              {/* Code Snippet Editor with VS Code Syntax Highlighting & Line Numbers */}
               <div className="space-y-1.5 pt-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
-                  Production Code Snippet
-                </span>
-                <pre className="bg-[#05070E] border border-slate-800 p-4 rounded-2xl text-xs font-mono text-yellow-300 overflow-x-auto leading-relaxed max-h-[380px] shadow-inner">
-                  <code>{current.code(apiKey)}</code>
-                </pre>
-              </div>
-
-            </div>
-
-            <div className="pt-4 border-t border-slate-800/80 text-right">
-              <span className="text-[11px] text-slate-500 font-mono">
-                Ingestion Endpoint: <code className="text-yellow-400">POST /api/v1/log</code>
-              </span>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-  );
-}
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+                    Production Code Snippet
+                  </span>
+                  <span className="text-[10px] font-mono tex
