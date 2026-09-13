@@ -22,6 +22,7 @@ interface InspectModalProps {
   userTier?: string;
 }
 
+// GitHub-Style Git Diff & Markdown Code Block Formatter
 function AiDiffViewer({ text }: { text: string }) {
   const lines = text.split('\n');
 
@@ -73,6 +74,7 @@ export default function InspectErrorModal({ log, onClose, onDelete }: InspectMod
   const [aiError, setAiError] = useState<string | null>(null);
   const [copiedRaw, setCopiedRaw] = useState(false);
   const [copiedCursor, setCopiedCursor] = useState(false);
+
   const [currentRepo, setCurrentRepo] = useState<string>(() => {
     return typeof window !== 'undefined' ? localStorage.getItem('snaptrace_github_repo') || '' : '';
   });
@@ -111,12 +113,26 @@ ${rawStack || 'No stack trace provided'}
     setTimeout(() => setCopiedRaw(false), 2000);
   };
 
-  // Change or reset the saved GitHub repository name
+  const sanitizeRepoName = (input: string) => {
+    let cleaned = input.trim();
+    cleaned = cleaned.replace(/\/+$/, '');
+    cleaned = cleaned.replace(/^https?:\/\/github\.com\//i, '');
+    return cleaned;
+  };
+
+  // Change or reset GitHub Repository
   const handleEditRepo = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const newRepo = prompt('Enter your correct GitHub repository (e.g. yourname/yourproject):', currentRepo);
-    if (newRepo !== null) {
-      const cleaned = newRepo.trim().replace(/^https?:\/\/github\.com\//, '');
+    const userRepo = prompt(
+      'Enter your GitHub repository in the format "username/repository-name"\nExample: arxu009-alt/snaptrace-dashboard',
+      currentRepo || 'arxu009-alt/snaptrace-dashboard'
+    );
+    if (userRepo !== null) {
+      const cleaned = sanitizeRepoName(userRepo);
+      if (!cleaned.includes('/')) {
+        alert('Invalid format! You must include both your username and repository name separated by a slash (e.g. arxu009-alt/snaptrace-dashboard).');
+        return;
+      }
       localStorage.setItem('snaptrace_github_repo', cleaned);
       setCurrentRepo(cleaned);
     }
@@ -125,10 +141,16 @@ ${rawStack || 'No stack trace provided'}
   const handleOpenGitHubIssue = () => {
     let repo = currentRepo;
 
-    if (!repo) {
-      const userRepo = prompt('Enter your GitHub repository name (e.g. yourname/yourproject):');
+    if (!repo || !repo.includes('/')) {
+      const userRepo = prompt(
+        'Enter your GitHub repository in the format "username/repository-name"\nExample: arxu009-alt/snaptrace-dashboard'
+      );
       if (!userRepo || !userRepo.trim()) return;
-      repo = userRepo.trim().replace(/^https?:\/\/github\.com\//, '');
+      repo = sanitizeRepoName(userRepo);
+      if (!repo.includes('/')) {
+        alert('Invalid format! You must include both your username and repository name separated by a slash (e.g. arxu009-alt/snaptrace-dashboard).');
+        return;
+      }
       localStorage.setItem('snaptrace_github_repo', repo);
       setCurrentRepo(repo);
     }
@@ -197,7 +219,6 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
   };
 
   return (
-    /* Outer Backdrop with Click-to-Close */
     <div
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -228,47 +249,50 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
             </h2>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 flex-wrap font-mono">
-            {/* 1-Click GitHub Issue with Edit Repo Option */}
-            <div className="inline-flex items-center rounded-xl bg-[#05070E] border border-slate-700">
+          {/* All 3 Action Buttons with Clear, Descriptive Labels */}
+          <div className="flex items-center gap-2.5 flex-wrap font-mono shrink-0">
+            
+            {/* Button 1: GitHub Issue with Edit Repo Picker */}
+            <div className="inline-flex items-center rounded-xl bg-[#05070E] border border-slate-700 shadow-sm">
               <button
                 onClick={handleOpenGitHubIssue}
-                className="px-3 py-1.5 hover:bg-slate-800 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer rounded-l-xl"
-                title="Create GitHub Issue"
+                className="px-3 py-2 hover:bg-slate-800 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer rounded-l-xl active:scale-95"
+                title={`Create issue on: ${currentRepo || 'Click ✎ to set repo'}`}
               >
                 <span>🐙</span>
-                <span>Issue</span>
+                <span>GitHub Issue</span>
               </button>
               <button
                 onClick={handleEditRepo}
-                className="px-2 py-1.5 hover:bg-slate-800 text-slate-400 hover:text-yellow-400 border-l border-slate-800 text-[10px] font-mono transition rounded-r-xl"
-                title={`Current repo: ${currentRepo || 'Not configured'}. Click to edit.`}
+                className="px-2.5 py-2 hover:bg-slate-800 text-slate-400 hover:text-yellow-400 border-l border-slate-800 text-[11px] font-mono transition rounded-r-xl"
+                title={`Current repo: ${currentRepo || 'None'}. Click to edit.`}
               >
                 ✎
               </button>
             </div>
 
-            {/* 1-Click Cursor / Claude Prompt */}
+            {/* Button 2: Copy for Cursor / Claude */}
             <button
               onClick={handleCopyForCursor}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-400/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-400/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+              title="Copy formatted prompt for AI code editors"
             >
               <span>{copiedCursor ? '✓ Copied!' : '📋 Copy for Cursor'}</span>
             </button>
 
-            {/* AI Diagnosis */}
+            {/* Button 3: AI Diagnosis */}
             <button
               onClick={handleAnalyzeWithAI}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-yellow-500/20 cursor-pointer active:scale-95"
+              className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-yellow-500/20 cursor-pointer active:scale-95"
             >
               <span>✨</span>
-              <span>Analyze with AI</span>
+              <span>AI Diagnosis</span>
             </button>
 
+            {/* Close Button */}
             <button
               onClick={onClose}
-              className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl text-xs transition cursor-pointer"
+              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl text-xs transition cursor-pointer"
             >
               ✕
             </button>
@@ -495,7 +519,7 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
                 </div>
               ) : (
                 <div className="p-8 text-center text-slate-400 text-xs space-y-3 font-sans">
-                  <p>Click the <strong>"✨ Analyze with AI"</strong> button above to generate root-cause analysis and a code fix patch.</p>
+                  <p>Click the <strong>"✨ AI Diagnosis"</strong> button above to generate root-cause analysis and a code fix patch.</p>
                 </div>
               )}
             </div>
