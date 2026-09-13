@@ -15,6 +15,28 @@ interface ErrorLog {
 }
 
 type TimeRange = '12h' | '24h' | '7d';
+type QuickstartTab = 'curl' | 'nextjs' | 'js' | 'python';
+
+const MOCK_DEMO_ERRORS: ErrorLog[] = [
+  {
+    id: 99901,
+    message: 'ReferenceError: Connection pool exhausted at database.js:18',
+    environment: 'production',
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 99902,
+    message: 'UnhandledPromiseRejection: Stripe API 504 Gateway Timeout on /v1/charge',
+    environment: 'production',
+    created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 99903,
+    message: 'RenderLoopError: Maximum update depth exceeded in UserProfile',
+    environment: 'development',
+    created_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+  },
+];
 
 export default function DashboardOverviewPage() {
   const router = useRouter();
@@ -26,55 +48,75 @@ export default function DashboardOverviewPage() {
   const [projectKey, setProjectKey] = useState<string>('');
   const [selectedProjectLabel, setSelectedProjectLabel] = useState<string>('All Projects');
   
-  // Timeframe selector state (12h, 24h, 7d)
+  // Timeframe selector state
   const [timeRange, setTimeRange] = useState<TimeRange>('12h');
   const [distribution, setDistribution] = useState<{ count: number; label: string }[]>([]);
+
+  // Activation & Demo Mode States
+  const [demoMode, setDemoMode] = useState(false);
+  const [quickTab, setQuickTab] = useState<QuickstartTab>('curl');
+  const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedCurl, setCopiedCurl] = useState(false);
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
 
-    // 1. Identify currently authenticated user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
       setLoading(false);
       return;
     }
 
-    // 2. Fetch ONLY projects belonging to this user
-    const { data: userProjects, error: projErr } = await supabase
+    const userId = session.user.id;
+
+    // Fetch projects belonging to this user
+    let { data: userProjects } = await supabase
       .from('projects')
       .select('id, name, api_key')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    // 3. If user has NO projects, reset to clean zero-state
-    if (projErr || !userProjects || userProjects.length === 0) {
-      setProjectKey('No Project Created Yet');
-      setSelectedProjectLabel('No Projects');
-      setTotalErrors(0);
-      setProdErrors(0);
-      setDevErrors(0);
-      setRecentErrors([]);
-      setDistribution(new Array(12).fill({ count: 0, label: '' }));
+    // Auto-provision default project if user has 0 projects
+    if (!userProjects || userProjects.length === 0) {
+      const randomHex = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      const autoKey = `sk_live_${randomHex}`;
+
+      const { data: newProj } = await supabase
+        .from('projects')
+        .insert([
+          {
+            name: 'Default Project',
+            api_key: autoKey,
+            user_id: userId,
+          },
+        ])
+        .select()
+        .single();
+
+      if (newProj) {
+        userProjects = [newProj];
+      }
+    }
+
+    if (!userProjects || userProjects.length === 0) {
       setLoading(false);
       return;
     }
 
     const userProjectIds = userProjects.map((p) => p.id);
     const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
-
-    // Validate savedProjectId
     const isValidProject = savedProjectId && savedProjectId !== 'all' && userProjectIds.includes(savedProjectId);
     const isAll = !isValidProject;
 
-    // 4. Strict isolation query
     let errorQuery = supabase
       .from('errors')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (isAll) {
-      setSelectedProjectLabel('All Projects (Global Stream)');
+      setSelectedProjectLabel('All Projects');
       setProjectKey(userProjects[0].api_key);
       errorQuery = errorQuery.in('project_id', userProjectIds);
     } else {
@@ -92,17 +134,17 @@ export default function DashboardOverviewPage() {
       setDevErrors(errors.filter((e) => e.environment === 'development').length);
       setRecentErrors(errors.slice(0, 6));
 
-      // Compute Real-Time Clock Distribution
+      // Calculate Real-Time Clock Distribution
       const now = Date.now();
       let numBuckets = 12;
-      let bucketDurationMs = 60 * 60 * 1000; // 1 hr default
+      let bucketDurationMs = 60 * 60 * 1000;
 
       if (timeRange === '24h') {
         numBuckets = 12;
-        bucketDurationMs = 2 * 60 * 60 * 1000; // 2 hrs per bucket (12 buckets)
+        bucketDurationMs = 2 * 60 * 60 * 1000;
       } else if (timeRange === '7d') {
         numBuckets = 7;
-        bucketDurationMs = 24 * 60 * 60 * 1000; // 1 day per bucket (7 buckets)
+        bucketDurationMs = 24 * 60 * 60 * 1000;
       }
 
       const rawBuckets = new Array(numBuckets).fill(0);
@@ -115,7 +157,6 @@ export default function DashboardOverviewPage() {
 
         if (!isNaN(errTime)) {
           const diff = now - errTime;
-          // Only tally if within the selected timeframe
           if (diff >= 0 && diff <= totalWindowMs) {
             let bucketIndex = (numBuckets - 1) - Math.floor(diff / bucketDurationMs);
             if (bucketIndex < 0) bucketIndex = 0;
@@ -125,7 +166,6 @@ export default function DashboardOverviewPage() {
         }
       });
 
-      // Format clean time labels for each bucket
       const formatted = rawBuckets.map((count, idx) => {
         let label = '';
         if (timeRange === '12h') {
@@ -178,111 +218,289 @@ export default function DashboardOverviewPage() {
     };
   }, [loadDashboardData]);
 
+  const toggleDemoMode = () => {
+    if (!demoMode) {
+      setDemoMode(true);
+      setTotalErrors((prev) => prev + 3);
+      setProdErrors((prev) => prev + 2);
+      setDevErrors((prev) => prev + 1);
+      setRecentErrors(MOCK_DEMO_ERRORS);
+      setDistribution((prev) =>
+        prev.map((d, i) => (i === prev.length - 1 ? { ...d, count: d.count + 3 } : d))
+      );
+    } else {
+      setDemoMode(false);
+      loadDashboardData();
+    }
+  };
+
+  const handleCopyKey = () => {
+    navigator.clipboard.writeText(projectKey);
+    setCopiedKey(true);
+    setTimeout(() => setCopiedKey(false), 2000);
+  };
+
+  const curlCommand = `curl -X POST https://snaptrace-dashboard.vercel.app/api/v1/log -H "Content-Type: application/json" -d '{"apiKey":"${projectKey || 'YOUR_KEY'}","message":"Test ping from terminal","environment":"production"}'`;
+
+  const handleCopyCurl = () => {
+    navigator.clipboard.writeText(curlCommand);
+    setCopiedCurl(true);
+    setTimeout(() => setCopiedCurl(false), 2000);
+  };
+
   const maxCount = Math.max(...distribution.map((d) => d.count), 1);
 
   const handleRecentErrorClick = (err: ErrorLog) => {
     router.push(`/dashboard/errors?errorId=${err.id}`);
   };
 
+  const quickstartSnippets: Record<QuickstartTab, string> = {
+    curl: curlCommand,
+    nextjs: `// app/layout.tsx
+import Script from 'next/script';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <html>
+      <head>
+        <Script
+          src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
+          strategy="beforeInteractive"
+          data-api-key="${projectKey}"
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
+}`,
+    js: `<script 
+  src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
+  data-api-key="${projectKey}"
+  async
+></script>`,
+    python: `import requests
+requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
+    "apiKey": "${projectKey}",
+    "message": "Crash test",
+    "environment": "production"
+})`,
+  };
+
+  return (
+    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-150">
+      <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-5 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-4 gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
               <span>Telemetry Overview</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 font-mono font-bold">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 font-mono font-semibold">
                 {selectedProjectLabel}
               </span>
             </h1>
             <p className="text-xs text-slate-400 font-mono">
-              Live monitoring, error velocity metrics, and incident distribution.
+              Live monitoring, incident distribution, and telemetry throughput.
             </p>
           </div>
 
           <div className="flex items-center space-x-3">
+            <button
+              onClick={toggleDemoMode}
+              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition flex items-center gap-1.5 cursor-pointer border ${
+                demoMode
+                  ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                  : 'bg-[#0B0F19] text-slate-300 border-slate-800 hover:border-yellow-400/40'
+              }`}
+            >
+              <span>{demoMode ? '✕ Clear Demo' : '⚡ Load Demo Crashes'}</span>
+            </button>
+
             <Link
               href="/dashboard/errors"
-              className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5 cursor-pointer"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 cursor-pointer"
             >
-              View Live Feed →
+              View Live Stream →
             </Link>
           </div>
         </div>
 
+        {/* Onboarding Quickstart Card (Shown when 0 live errors exist) */}
+        {!loading && totalErrors === 0 && !demoMode && (
+          <div className="bg-gradient-to-b from-[#0B101D] to-[#070b14] border border-yellow-400/40 rounded-2xl p-6 shadow-xl space-y-5 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div className="space-y-0.5">
+                <div className="inline-flex items-center gap-2 text-yellow-400 text-xs font-mono font-bold uppercase tracking-wider">
+                  <span>🚀</span> Quickstart Setup (Step 1 of 2)
+                </div>
+                <h2 className="text-base font-bold text-white">Connect your application in 30 seconds</h2>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-300 text-xs font-mono">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Listening for first event...</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div className="lg:col-span-5 space-y-3 font-mono">
+                <div className="space-y-1">
+                  <span className="text-[11px] text-slate-400 font-bold uppercase">1. Active Project API Key</span>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 p-2 bg-[#05070E] border border-slate-800 rounded-lg text-xs text-yellow-300 truncate font-mono">
+                      {projectKey}
+                    </code>
+                    <button
+                      onClick={handleCopyKey}
+                      className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold transition shrink-0"
+                    >
+                      {copiedKey ? '✓ Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1 pt-1">
+                  <span className="text-[11px] text-slate-400 font-bold uppercase">2. Test ping right now</span>
+                  <p className="text-[11px] text-slate-500">Run this in your terminal to see live ingestion:</p>
+                  <button
+                    onClick={handleCopyCurl}
+                    className="w-full py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-lg shadow transition flex items-center justify-center gap-1.5"
+                  >
+                    <span>{copiedCurl ? '✓ cURL Command Copied!' : '📋 Copy Terminal Command'}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="lg:col-span-7 bg-[#05070E] border border-slate-800 rounded-xl p-3.5 space-y-2.5 font-mono">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div className="flex items-center space-x-2">
+                    {(['curl', 'nextjs', 'js', 'python'] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setQuickTab(tab)}
+                        className={`px-2 py-0.5 rounded text-xs font-semibold transition uppercase ${
+                          quickTab === tab
+                            ? 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/30'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {tab === 'nextjs' ? 'Next.js' : tab === 'js' ? 'HTML / JS' : tab}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <pre className="text-xs text-yellow-300 overflow-x-auto leading-relaxed p-1">
+                  <code>{quickstartSnippets[quickTab]}</code>
+                </pre>
+              </div>
+            </div>
+          </div>
+        )}
+
         {loading ? (
-          <div className="space-y-6 animate-pulse">
+          <div className="space-y-4 animate-pulse">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-28 bg-[#090D16] border border-slate-800/60 rounded-2xl p-5" />
+                <div key={i} className="h-24 bg-[#0B0F19] border border-slate-800 rounded-2xl" />
               ))}
             </div>
-            <div className="h-64 bg-[#090D16] border border-slate-800/60 rounded-3xl" />
+            <div className="h-48 bg-[#0B0F19] border border-slate-800 rounded-2xl" />
           </div>
         ) : (
           <>
-            {/* 1. Stat Cards Grid */}
+            {/* 1. SENTRY-TIER DESATURATED STAT CARDS (Crisp White Tabular Numbers + Subtle Accents) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               
-              <div className="bg-[#090D16] border border-slate-800/90 hover:border-yellow-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
+              {/* Card 1: Total Ingested */}
+              <div className="bg-[#0B0F19]/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 space-y-1.5 shadow-sm transition group backdrop-blur-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">Total Ingested</span>
-                  <span className="text-base p-1.5 bg-yellow-400/10 rounded-lg text-yellow-400 border border-yellow-400/20">⚡</span>
+                  <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
+                    Total Ingested
+                  </span>
+                  <span className="w-6 h-6 rounded-lg bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 flex items-center justify-center text-xs">
+                    ⚡
+                  </span>
                 </div>
-                <div className="text-3xl font-black text-white group-hover:text-yellow-400 transition">{totalErrors}</div>
-                <p className="text-[11px] text-slate-500">All-time captured exceptions</p>
+                <div className="text-3xl font-bold font-mono tracking-tight text-white tabular-nums">
+                  {totalErrors}
+                </div>
+                <p className="text-[11px] text-slate-500 font-sans">All-time captured exceptions</p>
               </div>
 
-              <div className="bg-[#090D16] border border-slate-800/90 hover:border-red-500/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
+              {/* Card 2: Production Issues */}
+              <div className="bg-[#0B0F19]/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 space-y-1.5 shadow-sm transition group backdrop-blur-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-red-400 uppercase tracking-wider font-mono">Production Issues</span>
-                  <span className="text-base p-1.5 bg-red-500/10 rounded-lg text-red-400 border border-red-500/20">🚨</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                    <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
+                      Production Issues
+                    </span>
+                  </div>
+                  <span className="w-6 h-6 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center text-xs">
+                    🚨
+                  </span>
                 </div>
-                <div className="text-3xl font-black text-red-400">{prodErrors}</div>
-                <p className="text-[11px] text-slate-500">Live runtime exceptions</p>
+                <div className="text-3xl font-bold font-mono tracking-tight text-white tabular-nums">
+                  {prodErrors}
+                </div>
+                <p className="text-[11px] text-slate-500 font-sans">Active live exceptions</p>
               </div>
 
-              <div className="bg-[#090D16] border border-slate-800/90 hover:border-amber-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
+              {/* Card 3: Development Logs */}
+              <div className="bg-[#0B0F19]/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 space-y-1.5 shadow-sm transition group backdrop-blur-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">Development Logs</span>
-                  <span className="text-base p-1.5 bg-amber-400/10 rounded-lg text-amber-400 border border-amber-400/20">💻</span>
+                  <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
+                    Development Logs
+                  </span>
+                  <span className="w-6 h-6 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center text-xs">
+                    💻
+                  </span>
                 </div>
-                <div className="text-3xl font-black text-amber-400">{devErrors}</div>
-                <p className="text-[11px] text-slate-500">Local & staging events</p>
+                <div className="text-3xl font-bold font-mono tracking-tight text-white tabular-nums">
+                  {devErrors}
+                </div>
+                <p className="text-[11px] text-slate-500 font-sans">Staging & local events</p>
               </div>
 
-              <div className="bg-[#090D16] border border-slate-800/90 hover:border-emerald-400/40 rounded-2xl p-5 space-y-2 shadow-xl transition group">
+              {/* Card 4: Noise Firewall */}
+              <div className="bg-[#0B0F19]/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 space-y-1.5 shadow-sm transition group backdrop-blur-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-mono">Noise Firewall</span>
-                  <span className="text-base p-1.5 bg-emerald-400/10 rounded-lg text-emerald-400 border border-emerald-400/20">🔇</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
+                      Noise Firewall
+                    </span>
+                  </div>
+                  <span className="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
+                    🔇
+                  </span>
                 </div>
-                <div className="text-3xl font-black text-emerald-400">Active</div>
-                <p className="text-[11px] text-slate-500">60s loop throttling active</p>
+                <div className="text-3xl font-bold font-mono tracking-tight text-white flex items-center gap-2">
+                  <span>Active</span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-sans">60s loop throttling active</p>
               </div>
             </div>
 
-            {/* 2. Visual Velocity Bar Chart with [ 12H | 24H | 7D ] Filter */}
-            <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+            {/* 2. REFINED VELOCITY PULSE CHART */}
+            <div className="bg-[#0B0F19]/80 border border-slate-800/80 rounded-2xl p-5 shadow-sm space-y-3 backdrop-blur-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
                 <div>
-                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-white flex items-center gap-2 font-mono">
                     <span>📈</span> Incident Velocity Pulse
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Real-time frequency spikes across active window</p>
+                  <p className="text-[11px] text-slate-500">Real-time frequency spikes across active window</p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {/* Sentry / Vercel-Style Timeframe Tabs */}
-                  <div className="flex items-center bg-[#05070E] p-1 rounded-xl border border-slate-800 font-mono text-xs">
+                  <div className="flex items-center bg-[#05070E] p-0.5 rounded-lg border border-slate-800 font-mono text-xs">
                     {(['12h', '24h', '7d'] as const).map((range) => (
                       <button
                         key={range}
                         onClick={() => setTimeRange(range)}
-                        className={`px-3 py-1 rounded-lg font-bold transition uppercase cursor-pointer ${
+                        className={`px-2.5 py-1 rounded text-[11px] font-semibold transition uppercase cursor-pointer ${
                           timeRange === range
-                            ? 'bg-yellow-400 text-slate-950 shadow-sm'
+                            ? 'bg-slate-800 text-yellow-300 font-bold border border-slate-700'
                             : 'text-slate-400 hover:text-white'
                         }`}
                       >
@@ -292,38 +510,35 @@ export default function DashboardOverviewPage() {
                   </div>
 
                   <span className="text-[11px] font-mono text-emerald-400 hidden sm:flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     Live
                   </span>
                 </div>
               </div>
 
-              <div className="pt-4 pb-2">
-                <div className="h-32 w-full flex items-end justify-between gap-2 sm:gap-3 px-2">
+              <div className="pt-2 pb-1">
+                <div className="h-28 w-full flex items-end justify-between gap-1.5 sm:gap-2 px-1">
                   {distribution.map((item, idx) => {
                     const heightPercent = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
                     const hasErrors = item.count > 0;
                     
                     return (
-                      <div key={idx} className="flex-1 h-full flex flex-col justify-end items-center gap-2 group relative">
-                        {/* Hover Tooltip */}
-                        <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-yellow-400/40 px-2 py-1 rounded text-[10px] font-mono text-yellow-300 whitespace-nowrap shadow-2xl z-20">
+                      <div key={idx} className="flex-1 h-full flex flex-col justify-end items-center gap-1.5 group relative">
+                        <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-slate-900 border border-slate-700 px-2 py-0.5 rounded text-[10px] font-mono text-slate-200 whitespace-nowrap shadow-xl z-20">
                           {item.count} {item.count === 1 ? 'incident' : 'incidents'} ({item.label})
                         </div>
 
-                        {/* Bar */}
-                        <div className="w-full bg-[#05070E] rounded-xl h-full flex items-end overflow-hidden p-1 border border-slate-800/80">
+                        <div className="w-full bg-[#05070E] rounded-md h-full flex items-end overflow-hidden p-0.5 border border-slate-800/60">
                           <div
-                            style={{ height: `${hasErrors ? Math.max(heightPercent, 25) : 4}%` }}
-                            className={`w-full rounded-lg transition-all duration-500 ${
+                            style={{ height: `${hasErrors ? Math.max(heightPercent, 20) : 4}%` }}
+                            className={`w-full rounded-sm transition-all duration-300 ${
                               hasErrors
-                                ? 'bg-gradient-to-t from-amber-500 via-yellow-400 to-yellow-300 shadow-lg shadow-yellow-500/40'
+                                ? 'bg-gradient-to-t from-amber-500 to-yellow-400 shadow-sm shadow-yellow-500/20'
                                 : 'bg-slate-800/40'
                             }`}
                           />
                         </div>
 
-                        {/* Dynamic Sub-Label under each bar */}
                         <span className="text-[9px] font-mono text-slate-500 select-none">
                           {item.label}
                         </span>
@@ -332,29 +547,30 @@ export default function DashboardOverviewPage() {
                   })}
                 </div>
 
-                <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-3 border-t border-slate-800/80 mt-2 px-2">
-                  <span>Start of window ({timeRange.toUpperCase()} ago)</span>
-                  <span className="text-yellow-400 font-bold">Latest / Current Hour</span>
+                <div className="flex justify-between text-[10px] font-mono text-slate-500 pt-2 border-t border-slate-800/60 mt-2 px-1">
+                  <span>Start ({timeRange.toUpperCase()} ago)</span>
+                  <span className="text-slate-400 font-semibold">Latest (Now)</span>
                 </div>
               </div>
             </div>
 
-            {/* 3. Bottom Grid: Clickable Recent Exceptions */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* 3. RECENT CRASHES & SHORTCUTS GRID */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
-              <div className="lg:col-span-2 bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
-                <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
+              {/* Recent Exceptions List */}
+              <div className="lg:col-span-2 bg-[#0B0F19]/80 border border-slate-800/80 rounded-2xl p-5 space-y-3 shadow-sm backdrop-blur-sm">
+                <div className="flex justify-between items-center border-b border-slate-800/80 pb-2.5">
                   <div>
-                    <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                    <h2 className="text-sm font-semibold text-white flex items-center gap-2 font-mono">
                       <span>🚨</span> Recent Captured Crashes
                     </h2>
                     <p className="text-[11px] text-slate-500 font-mono">Click any exception row to inspect full trace & AI fixes</p>
                   </div>
                   <Link
                     href="/dashboard/errors"
-                    className="text-xs text-yellow-400 hover:underline font-semibold transition"
+                    className="text-xs text-yellow-300 hover:text-yellow-200 font-semibold transition font-mono"
                   >
-                    View All Stream →
+                    View All →
                   </Link>
                 </div>
 
@@ -363,15 +579,15 @@ export default function DashboardOverviewPage() {
                     No exceptions logged for this account yet.
                   </div>
                 ) : (
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {recentErrors.map((err) => (
                       <button
                         key={err.id}
                         onClick={() => handleRecentErrorClick(err)}
-                        className="w-full text-left flex items-center justify-between p-3.5 bg-[#05070E] border border-slate-800/80 hover:border-yellow-400/50 hover:bg-[#080d1a] rounded-2xl text-xs transition cursor-pointer group"
+                        className="w-full text-left flex items-center justify-between p-3 bg-[#05070E] border border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/50 rounded-xl text-xs transition cursor-pointer group"
                       >
-                        <div className="space-y-1 truncate max-w-md">
-                          <p className="font-semibold text-slate-200 group-hover:text-yellow-300 truncate font-mono text-[12px] transition">
+                        <div className="space-y-0.5 truncate max-w-md">
+                          <p className="font-medium text-slate-200 group-hover:text-yellow-300 truncate font-mono text-[12px] transition">
                             {err.message}
                           </p>
                           <p className="text-slate-500 font-mono text-[10px]">
@@ -380,15 +596,15 @@ export default function DashboardOverviewPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${
+                            className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider ${
                               err.environment === 'production'
                                 ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                             }`}
                           >
                             {err.environment}
                           </span>
-                          <span className="text-slate-600 group-hover:text-yellow-400 transition font-mono text-xs">
+                          <span className="text-slate-600 group-hover:text-yellow-300 transition font-mono text-xs">
                             →
                           </span>
                         </div>
@@ -398,55 +614,55 @@ export default function DashboardOverviewPage() {
                 )}
               </div>
 
-              {/* Quick Shortcuts */}
-              <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl flex flex-col justify-between">
-                <div className="space-y-4">
-                  <div className="border-b border-slate-800/80 pb-3">
-                    <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              {/* Quick Actions Card */}
+              <div className="bg-[#0B0F19]/80 border border-slate-800/80 rounded-2xl p-5 space-y-4 shadow-sm flex flex-col justify-between backdrop-blur-sm">
+                <div className="space-y-3">
+                  <div className="border-b border-slate-800/80 pb-2">
+                    <h2 className="text-sm font-semibold text-white flex items-center gap-2 font-mono">
                       <span>⚡</span> Quick Actions
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Direct shortcuts to developer tools</p>
+                    <p className="text-[11px] text-slate-500 font-mono">Direct developer shortcuts</p>
                   </div>
 
                   <div className="space-y-2">
                     <Link
                       href="/test"
-                      className="block p-3 bg-gradient-to-r from-yellow-400/10 to-amber-500/10 hover:from-yellow-400/20 hover:to-amber-500/20 border border-yellow-400/30 rounded-xl text-xs font-bold text-yellow-300 transition flex items-center justify-between"
+                      className="block p-2.5 bg-[#05070E] hover:bg-slate-900 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-yellow-300 transition flex items-center justify-between"
                     >
                       <span>🧪 Open Test Playground</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-400/20 text-yellow-300">
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-yellow-400/10 text-yellow-300">
                         Live Demo →
                       </span>
                     </Link>
 
                     <Link
                       href="/dashboard/integrations"
-                      className="block p-3 bg-[#05070E] hover:bg-slate-800/50 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-200 transition"
+                      className="block p-2.5 bg-[#05070E] hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-medium text-slate-200 transition"
                     >
                       ⚡ Multi-Language SDK Snippets
                     </Link>
 
                     <Link
                       href="/dashboard/settings"
-                      className="block p-3 bg-[#05070E] hover:bg-slate-800/50 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-200 transition"
+                      className="block p-2.5 bg-[#05070E] hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-medium text-slate-200 transition"
                     >
                       🤖 Configure BYOK AI Copilot
                     </Link>
 
                     <Link
                       href="/dashboard/projects"
-                      className="block p-3 bg-[#05070E] hover:bg-slate-800/50 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-200 transition"
+                      className="block p-2.5 bg-[#05070E] hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl text-xs font-medium text-slate-200 transition"
                     >
                       🔑 Rotate & Manage Project Keys
                     </Link>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800/80 space-y-1.5">
+                <div className="pt-2 border-t border-slate-800/80 space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono block">
                     ACTIVE INGESTION TOKEN
                   </span>
-                  <code className="text-[11px] font-mono text-yellow-300 block truncate bg-[#05070E] p-2.5 rounded-xl border border-slate-800">
+                  <code className="text-[11px] font-mono text-yellow-300 block truncate bg-[#05070E] p-2 rounded-lg border border-slate-800">
                     {projectKey || 'Loading...'}
                   </code>
                 </div>
