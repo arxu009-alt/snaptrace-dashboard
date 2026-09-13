@@ -22,7 +22,6 @@ interface InspectModalProps {
   userTier?: string;
 }
 
-// GitHub-Style Git Diff & Markdown Code Block Formatter
 function AiDiffViewer({ text }: { text: string }) {
   const lines = text.split('\n');
 
@@ -67,17 +66,20 @@ function AiDiffViewer({ text }: { text: string }) {
   );
 }
 
-export default function InspectErrorModal({ log, onClose, onDelete, userTier = 'free' }: InspectModalProps) {
+export default function InspectErrorModal({ log, onClose, onDelete }: InspectModalProps) {
   const [activeTab, setActiveTab] = useState<'stack' | 'breadcrumbs' | 'ai' | 'raw'>('stack');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   const [copiedRaw, setCopiedRaw] = useState(false);
   const [copiedCursor, setCopiedCursor] = useState(false);
+  const [currentRepo, setCurrentRepo] = useState<string>(() => {
+    return typeof window !== 'undefined' ? localStorage.getItem('snaptrace_github_repo') || '' : '';
+  });
 
   const rawStack = log.stack_trace || log.stack || '';
   const parsedFrames: ParsedFrame[] = parseStackTrace(rawStack);
-  const logTime = new Date(log.created_at);
+  const logTime = new Date(log.created_at || Date.now());
 
   const handleCopyForCursor = () => {
     const cursorPrompt = `Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:
@@ -109,15 +111,26 @@ ${rawStack || 'No stack trace provided'}
     setTimeout(() => setCopiedRaw(false), 2000);
   };
 
-  // 1-Click Automated GitHub Issue Creator
+  // Change or reset the saved GitHub repository name
+  const handleEditRepo = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newRepo = prompt('Enter your correct GitHub repository (e.g. yourname/yourproject):', currentRepo);
+    if (newRepo !== null) {
+      const cleaned = newRepo.trim().replace(/^https?:\/\/github\.com\//, '');
+      localStorage.setItem('snaptrace_github_repo', cleaned);
+      setCurrentRepo(cleaned);
+    }
+  };
+
   const handleOpenGitHubIssue = () => {
-    let repo = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_github_repo') : null;
+    let repo = currentRepo;
 
     if (!repo) {
-      const userRepo = prompt('Enter your GitHub repository name (e.g. username/repo-name):');
+      const userRepo = prompt('Enter your GitHub repository name (e.g. yourname/yourproject):');
       if (!userRepo || !userRepo.trim()) return;
       repo = userRepo.trim().replace(/^https?:\/\/github\.com\//, '');
       localStorage.setItem('snaptrace_github_repo', repo);
+      setCurrentRepo(repo);
     }
 
     const title = `[Crash] ${log.message.slice(0, 80)}`;
@@ -184,8 +197,14 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
-      <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    /* Outer Backdrop with Click-to-Close */
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-150 font-sans"
+    >
+      <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden relative z-10">
         
         {/* Modal Header */}
         <div className="p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-start justify-between bg-slate-950/70 gap-4">
@@ -201,7 +220,7 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
                 {log.environment || 'production'}
               </span>
               <span className="text-xs text-slate-400 font-mono">
-                Event #{log.id} • {logTime.toLocaleString()}
+                Event #{log.id} • {logTime.toLocaleTimeString()}
               </span>
             </div>
             <h2 className="text-base font-bold text-red-400 font-mono break-words">
@@ -211,21 +230,29 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 flex-wrap font-mono">
-            {/* 1-Click GitHub Issue Button */}
-            <button
-              onClick={handleOpenGitHubIssue}
-              className="px-3 py-1.5 bg-[#05070E] hover:bg-slate-800 border border-slate-700 text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-              title="Open pre-formatted GitHub Issue"
-            >
-              <span>🐙</span>
-              <span>Create GitHub Issue</span>
-            </button>
+            {/* 1-Click GitHub Issue with Edit Repo Option */}
+            <div className="inline-flex items-center rounded-xl bg-[#05070E] border border-slate-700">
+              <button
+                onClick={handleOpenGitHubIssue}
+                className="px-3 py-1.5 hover:bg-slate-800 text-slate-200 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer rounded-l-xl"
+                title="Create GitHub Issue"
+              >
+                <span>🐙</span>
+                <span>Issue</span>
+              </button>
+              <button
+                onClick={handleEditRepo}
+                className="px-2 py-1.5 hover:bg-slate-800 text-slate-400 hover:text-yellow-400 border-l border-slate-800 text-[10px] font-mono transition rounded-r-xl"
+                title={`Current repo: ${currentRepo || 'Not configured'}. Click to edit.`}
+              >
+                ✎
+              </button>
+            </div>
 
             {/* 1-Click Cursor / Claude Prompt */}
             <button
               onClick={handleCopyForCursor}
               className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-400/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-              title="Copy formatted prompt for Cursor / Claude"
             >
               <span>{copiedCursor ? '✓ Copied!' : '📋 Copy for Cursor'}</span>
             </button>
@@ -263,7 +290,7 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
             </span>
           </div>
           <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80 col-span-2 sm:col-span-1">
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Captured Timestamp</span>
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Captured At</span>
             <span className="text-slate-200 block mt-0.5">
               {logTime.toLocaleTimeString()}
             </span>
@@ -280,7 +307,7 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Formatted Stack ({parsedFrames.length} frames)
+            Formatted Stack ({parsedFrames.length})
           </button>
 
           <button
@@ -291,7 +318,7 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span>🐾 Breadcrumbs Trail</span>
+            <span>🐾 Breadcrumbs</span>
           </button>
 
           <button
@@ -423,7 +450,7 @@ ${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1
             </div>
           )}
 
-          {/* 3. AI Diagnosis with GitHub Diff */}
+          {/* 3. AI Diagnosis */}
           {activeTab === 'ai' && (
             <div className="space-y-4">
               {aiLoading ? (

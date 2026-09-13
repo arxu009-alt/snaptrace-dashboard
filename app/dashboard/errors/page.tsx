@@ -68,15 +68,14 @@ export default function ExceptionLogsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'development'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unresolved' | 'resolved'>('unresolved');
-
-  // Demo Mode State
   const [demoMode, setDemoMode] = useState(false);
 
+  // Fast-load data fetcher using local session
   const loadLogs = useCallback(async () => {
     setLoading(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
       setLoading(false);
       return;
     }
@@ -84,7 +83,7 @@ export default function ExceptionLogsPage() {
     const { data: userProjects } = await supabase
       .from('projects')
       .select('id, name')
-      .eq('user_id', user.id);
+      .eq('user_id', session.user.id);
 
     if (!userProjects || userProjects.length === 0) {
       setLogs([]);
@@ -114,12 +113,9 @@ export default function ExceptionLogsPage() {
 
     const { data, error } = await query;
 
-    if (error) {
-      console.error('Error fetching logs:', error.message);
-    } else if (data) {
+    if (!error && data) {
       setLogs(data);
 
-      // Auto-open Inspect Modal if errorId was passed from Overview click!
       if (urlErrorId) {
         const matched = data.find((l) => String(l.id) === String(urlErrorId));
         if (matched) {
@@ -179,7 +175,6 @@ export default function ExceptionLogsPage() {
       prev.map((log) => (log.id === id ? { ...log, status: newStatus } : log))
     );
 
-    // If it's a client-side mock error, do not send to Supabase
     if (id >= 99900) return;
 
     try {
@@ -203,7 +198,6 @@ export default function ExceptionLogsPage() {
       prev.map((l) => (unresolvedIds.includes(l.id) ? { ...l, status: 'resolved' } : l))
     );
 
-    // Only update real non-demo records in database
     const realIds = unresolvedIds.filter((id) => id < 99900);
     if (realIds.length > 0) {
       try {
@@ -221,7 +215,6 @@ export default function ExceptionLogsPage() {
   };
 
   const handleDeleteLog = async (id: number) => {
-    // If it's a client-side mock error, remove from memory
     if (id >= 99900) {
       setLogs((prev) => prev.filter((log) => log.id !== id));
       if (selectedLog?.id === id) setSelectedLog(null);
@@ -273,12 +266,12 @@ export default function ExceptionLogsPage() {
               <span>Exception Logs Stream</span>
 
               {isUrlFiltered ? (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 text-xs font-mono font-bold animate-in zoom-in-95">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 text-xs font-mono font-bold">
                   <span>📁 {currentProjectName}</span>
                   <button
                     onClick={handleClearUrlFilter}
                     className="ml-1 hover:text-white bg-yellow-400/20 rounded-full w-4 h-4 flex items-center justify-center text-[10px] cursor-pointer"
-                    title="Clear filter and view all projects"
+                    title="Clear filter"
                   >
                     ✕
                   </button>
@@ -295,7 +288,6 @@ export default function ExceptionLogsPage() {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap self-start sm:self-auto">
-            {/* ⚡ LOAD DEMO CRASHES TOGGLE */}
             <button
               onClick={toggleDemoMode}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border ${
@@ -409,11 +401,11 @@ export default function ExceptionLogsPage() {
         {/* Exception Table */}
         <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           {loading ? (
-            <div className="p-20 flex flex-col items-center justify-center space-y-4 animate-in fade-in">
+            <div className="p-16 flex flex-col items-center justify-center space-y-3 animate-in fade-in">
               <div className="relative animate-pulse">
-                <SnapTraceLogo size="lg" showText={false} />
+                <SnapTraceLogo size="md" showText={false} />
               </div>
-              <p className="text-xs font-mono text-slate-500 tracking-widest uppercase">Streaming Exceptions...</p>
+              <p className="text-xs font-mono text-slate-500 tracking-widest uppercase">Loading stream...</p>
             </div>
           ) : filteredLogs.length === 0 ? (
             <div className="p-16 text-center text-slate-500 text-xs font-mono space-y-3">
@@ -428,14 +420,6 @@ export default function ExceptionLogsPage() {
                   className="mt-2 px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 rounded-xl text-xs font-bold shadow-md cursor-pointer"
                 >
                   ⚡ Load Demo Crashes to Test UI
-                </button>
-              )}
-              {isUrlFiltered && (
-                <button
-                  onClick={handleClearUrlFilter}
-                  className="mt-2 px-4 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 rounded-xl text-xs font-bold transition cursor-pointer"
-                >
-                  View All Projects Instead →
                 </button>
               )}
             </div>
@@ -520,7 +504,7 @@ export default function ExceptionLogsPage() {
           )}
         </div>
 
-        {/* Deep Inspection Modal (100% PRESERVED) */}
+        {/* Deep Inspection Modal */}
         {selectedLog && (
           <InspectErrorModal
             log={selectedLog}
@@ -534,10 +518,15 @@ export default function ExceptionLogsPage() {
           />
         )}
 
-        {/* Bulk Resolve Modal (100% PRESERVED) */}
+        {/* Bulk Resolve Modal */}
         {showBulkResolveModal && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
-            <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl shadow-yellow-500/10">
+          <div 
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowBulkResolveModal(false);
+            }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans"
+          >
+            <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
               <div className="flex items-start gap-3">
                 <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-xl">
                   ✓

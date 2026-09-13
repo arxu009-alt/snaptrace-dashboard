@@ -34,6 +34,7 @@ export default function DashboardLayout({ children }) {
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+    // Fast local session verification (0ms network delay)
     async function verifySession() {
       const { data: { session } } = await supabase.auth.getSession();
 
@@ -48,34 +49,27 @@ export default function DashboardLayout({ children }) {
         if (email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com') {
           setIsOwner(true);
           setUserPlanTier('team_scale');
-        } else {
-          const { data: projects } = await supabase
-            .from('projects')
-            .select('plan_tier')
-            .eq('user_id', session.user.id)
-            .limit(1);
-
-          if (projects && projects.length > 0) {
-            setUserPlanTier(projects[0].plan_tier || 'free');
-          }
-        }
-
-        const { data: userProjects } = await supabase
-          .from('projects')
-          .select('id')
-          .eq('user_id', session.user.id);
-
-        if (userProjects && userProjects.length > 0) {
-          const projectIds = userProjects.map((p) => p.id);
-          const { count } = await supabase
-            .from('errors')
-            .select('*', { count: 'exact', head: true })
-            .in('project_id', projectIds);
-
-          setActiveErrorCount(count || 0);
         }
 
         setAuthChecking(false);
+
+        // Fetch count in background without blocking UI render
+        supabase
+          .from('projects')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .then(({ data: userProjects }) => {
+            if (userProjects && userProjects.length > 0) {
+              const projectIds = userProjects.map((p) => p.id);
+              supabase
+                .from('errors')
+                .select('*', { count: 'exact', head: true })
+                .in('project_id', projectIds)
+                .then(({ count }) => {
+                  setActiveErrorCount(count || 0);
+                });
+            }
+          });
       }
     }
 
@@ -84,16 +78,6 @@ export default function DashboardLayout({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         router.replace('/login');
-      } else if (session?.user) {
-        const name = session.user.user_metadata?.full_name;
-        const email = session.user.email || '';
-        setUserDisplayName(name || email.split('@')[0] || 'Developer');
-        setUserEmail(email);
-
-        if (email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com') {
-          setIsOwner(true);
-          setUserPlanTier('team_scale');
-        }
       }
     });
 
@@ -133,12 +117,12 @@ export default function DashboardLayout({ children }) {
   if (authChecking) {
     return (
       <div className="min-h-screen bg-[#05070E] text-slate-100 flex items-center justify-center font-sans">
-        <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-300">
+        <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-200">
           <div className="relative animate-pulse">
             <SnapTraceLogo size="lg" showText={false} />
           </div>
           <p className="text-xs text-slate-400 font-mono tracking-widest uppercase">
-            Verifying Session Authorization...
+            Loading Dashboard...
           </p>
         </div>
       </div>
@@ -147,34 +131,12 @@ export default function DashboardLayout({ children }) {
 
   const userInitial = userDisplayName ? userDisplayName.charAt(0).toUpperCase() : 'M';
 
-  const renderTierPill = () => {
-    if (isOwner) {
-      return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 uppercase tracking-wider shadow-md shadow-yellow-500/20 flex items-center gap-1">
-          <span>👑</span> OWNER
-        </span>
-      );
-    }
-    if (userPlanTier === 'team_scale') {
-      return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 uppercase tracking-wider shadow-sm">
-          TEAM
-        </span>
-      );
-    }
-    return (
-      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 uppercase tracking-wider shadow-sm">
-        BETA PRO
-      </span>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-yellow-400 selection:text-slate-950">
       
       {/* 1. Left Sidebar Navigation */}
       <aside
-        className={`bg-[#090D16]/95 border-r border-slate-800/80 flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out backdrop-blur-xl ${
+        className={`bg-[#090D16]/95 border-r border-slate-800/80 flex-shrink-0 flex flex-col transition-all duration-200 ${
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
@@ -183,7 +145,7 @@ export default function DashboardLayout({ children }) {
             <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
           </Link>
           {!sidebarCollapsed && (
-            <span className="text-[10px] font-black bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-md shadow-yellow-500/20 font-mono">
+            <span className="text-[10px] font-black bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm font-mono">
               BETA
             </span>
           )}
@@ -195,7 +157,6 @@ export default function DashboardLayout({ children }) {
           </div>
         )}
 
-        {/* Navigation Items with Bouncy Spring Scale on Click */}
         <nav className="flex-1 p-3 space-y-1.5 min-w-[240px]">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -204,20 +165,19 @@ export default function DashboardLayout({ children }) {
                 key={item.href}
                 id={item.id}
                 href={item.href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 transform-gpu active:scale-95 ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 active:scale-95 ${
                   isActive
-                    ? 'border-l-4 border-l-yellow-400 bg-gradient-to-r from-yellow-400/15 via-yellow-400/5 to-transparent text-yellow-300 shadow-sm translate-x-1'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border-l-4 border-l-transparent hover:translate-x-0.5'
+                    ? 'border-l-4 border-l-yellow-400 bg-gradient-to-r from-yellow-400/15 via-yellow-400/5 to-transparent text-yellow-300 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border-l-4 border-l-transparent'
                 }`}
-                title={sidebarCollapsed ? item.name : undefined}
               >
                 <div className="flex items-center space-x-3">
-                  <span className="text-base transition-transform group-hover:scale-110">{item.icon}</span>
+                  <span className="text-base">{item.icon}</span>
                   {!sidebarCollapsed && <span>{item.name}</span>}
                 </div>
 
                 {!sidebarCollapsed && item.hasBadge && activeErrorCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/30 animate-pulse">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/30">
                     {activeErrorCount}
                   </span>
                 )}
@@ -237,15 +197,14 @@ export default function DashboardLayout({ children }) {
         )}
       </aside>
 
-      {/* 2. Main Content View with Smooth Hardware-Accelerated Page Transitions */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#05070E]">
+      {/* 2. Main Content View (Clean container without transform-gpu trap) */}
+      <div className="flex-1 flex flex-col min-w-0 bg-[#05070E]">
         
-        <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-xl px-6 flex items-center justify-between z-40">
+        <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-md px-6 flex items-center justify-between z-40">
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-yellow-400 hover:border-yellow-400/40 transition-all duration-150 active:scale-90 cursor-pointer"
-              title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-yellow-400 hover:border-yellow-400/40 transition cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {sidebarCollapsed ? (
@@ -266,7 +225,7 @@ export default function DashboardLayout({ children }) {
           <div id="tour-header-actions" className="flex items-center space-x-3 sm:space-x-4">
             <button
               onClick={() => setFeedbackOpen(true)}
-              className="px-3.5 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-xs font-bold rounded-xl transition-all duration-150 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-sm font-mono"
+              className="px-3.5 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-sm font-mono"
             >
               <span>💡</span>
               <span className="hidden sm:inline">Feedback</span>
@@ -285,9 +244,9 @@ export default function DashboardLayout({ children }) {
             <div className="relative font-sans">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2.5 p-1.5 bg-slate-900/60 border border-slate-800 rounded-2xl hover:border-yellow-400/40 transition-all duration-150 active:scale-95 cursor-pointer shadow-sm"
+                className="flex items-center space-x-2.5 p-1.5 bg-slate-900/60 border border-slate-800 rounded-2xl hover:border-yellow-400/40 transition cursor-pointer shadow-sm"
               >
-                <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-yellow-500/20">
+                <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md">
                   {userInitial}
                 </div>
                 
@@ -295,29 +254,26 @@ export default function DashboardLayout({ children }) {
                   {userDisplayName}
                 </span>
 
-                <div>
-                  {renderTierPill()}
-                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 uppercase tracking-wider">
+                  {isOwner ? '👑 OWNER' : '⚡ BETA PRO'}
+                </span>
 
                 <span className="text-slate-500 text-[10px]">▾</span>
               </button>
 
               {profileDropdownOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-60 bg-[#090D16] border border-slate-800 rounded-3xl shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150 font-sans"
+                  className="absolute right-0 mt-2 w-60 bg-[#090D16] border border-slate-800 rounded-3xl shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-100 font-sans"
                   onMouseLeave={() => setProfileDropdownOpen(false)}
                 >
                   <div className="px-3 py-2.5 border-b border-slate-800/80 mb-1 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-white font-bold truncate">{userDisplayName}</p>
-                      {renderTierPill()}
-                    </div>
+                    <p className="text-xs text-white font-bold truncate">{userDisplayName}</p>
                     <p className="text-[10px] text-slate-400 font-mono truncate">{userEmail}</p>
                   </div>
 
                   <button
                     onClick={handleTriggerTour}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-yellow-300 hover:bg-yellow-400/10 transition cursor-pointer text-left font-semibold active:scale-95"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-yellow-300 hover:bg-yellow-400/10 transition cursor-pointer text-left font-semibold"
                   >
                     <span>🎓</span>
                     <span>Replay Setup Tour</span>
@@ -356,8 +312,8 @@ export default function DashboardLayout({ children }) {
           </div>
         </header>
 
-        {/* Jitter-Free Content Container with GPU-accelerated transition */}
-        <main className="flex-1 overflow-y-auto transform-gpu transition-all duration-300 ease-out animate-in fade-in-50">
+        {/* Clean Viewport Content (No transform traps) */}
+        <main className="flex-1 overflow-y-auto p-0">
           {children}
         </main>
       </div>
