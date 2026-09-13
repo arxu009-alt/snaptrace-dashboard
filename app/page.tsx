@@ -10,7 +10,6 @@ export const dynamic = 'force-dynamic';
 
 type StackKey = 'nextjs' | 'js' | 'python' | 'node' | 'go' | 'rust' | 'csharp' | 'php' | 'ruby' | 'kotlin' | 'flutter' | 'cloudflare';
 
-// 60FPS Hardware-Accelerated Smooth Scroll Reveal
 function SmoothReveal({
   children,
   className = '',
@@ -59,7 +58,6 @@ function SmoothReveal({
   );
 }
 
-// Zero-dependency VS Code Syntax Highlighting Renderer
 function CodeHighlighter({ code }: { code: string }) {
   const lines = code.split('\n');
 
@@ -82,28 +80,21 @@ function CodeHighlighter({ code }: { code: string }) {
                   .split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|\/\/.*|\#.*|\b(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|true|false|null|nil|None|if|else)\b|<\/?[a-zA-Z0-9_\-]+(?:\s|>|\/)|<\/?>)/g)
                   .map((part, partIdx) => {
                     if (!part) return null;
-
-                    // Comments at end of line
                     if (part.startsWith('//') || part.startsWith('#')) {
                       return <span key={partIdx} className="text-slate-500 italic">{part}</span>;
                     }
-                    // Strings
                     if (part.startsWith('"') || part.startsWith("'") || part.startsWith('`')) {
                       return <span key={partIdx} className="text-emerald-300 font-medium">{part}</span>;
                     }
-                    // Keywords
                     if (/^(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|if|else)$/.test(part)) {
                       return <span key={partIdx} className="text-sky-400 font-bold">{part}</span>;
                     }
-                    // Booleans / nulls
                     if (/^(?:true|false|null|nil|None)$/.test(part)) {
                       return <span key={partIdx} className="text-amber-300 font-bold">{part}</span>;
                     }
-                    // HTML / JSX tags
                     if (/^<\/?[a-zA-Z0-9_\-]+/.test(part) || part === '>' || part === '/>' || part === '</>') {
                       return <span key={partIdx} className="text-rose-400 font-semibold">{part}</span>;
                     }
-                    // Default code text
                     return <span key={partIdx} className="text-slate-200">{part}</span>;
                   })
               )}
@@ -121,12 +112,10 @@ export default function WelcomeLandingPage() {
   const [activeQuickTab, setActiveQuickTab] = useState<StackKey>('nextjs');
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [copiedCursorPrompt, setCopiedCursorPrompt] = useState(false);
+  const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
-  // Sentry-style Marketing Mode Toggle state
   const [marketingMode, setMarketingMode] = useState(true);
-
-  // Mega-menu hover states
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
 
@@ -151,6 +140,14 @@ export default function WelcomeLandingPage() {
   const scrollToTop = (e: React.MouseEvent) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const heroScriptSnippet = `<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="sk_live_your_project_key" async></script>`;
+
+  const handleCopyHeroScript = () => {
+    navigator.clipboard.writeText(heroScriptSnippet);
+    setCopiedHeroScript(true);
+    setTimeout(() => setCopiedHeroScript(false), 2000);
   };
 
   const snippets: Record<StackKey, string> = {
@@ -339,15 +336,15 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
     },
     {
       q: 'Do I need to keep the SnapTrace website open to receive alerts?',
-      a: 'No! The SnapTrace SDK runs silently inside your live application. When an unhandled crash happens in production, SnapTrace automatically pings your configured Discord channel and Gmail inbox with the exact error details and stack trace in milliseconds.'
+      a: 'No! The SnapTrace SDK runs silently inside your live application. When an unhandled crash happens in production, SnapTrace automatically pings your configured Discord channel, Slack room, and Gmail inbox in milliseconds.'
     },
     {
       q: 'How does SnapTrace integrate with VS Code, Cursor, and AI IDEs?',
-      a: 'When an exception occurs, SnapTrace provides a 1-click "Copy for Cursor / AI" button inside the Inspect modal. It generates an AI-optimized prompt containing the runtime environment, error message, and stack frames, ready to paste into Cursor, VS Code Copilot, or Claude Code for instant local code fixes.'
+      a: 'When an exception occurs, SnapTrace provides a 1-click "Copy for Cursor" button inside the Inspect modal. It generates an AI-optimized prompt containing the runtime environment, error message, and stack frames, ready to paste into Cursor, VS Code Copilot, or Claude Code for instant local code fixes.'
     },
     {
       q: 'What languages and frameworks does SnapTrace support?',
-      a: 'SnapTrace uses a universal REST telemetry endpoint. We provide drop-in snippets for Next.js (App Router & Pages Router), JavaScript, React, Vue, Svelte, Node.js, Python, Go, Rust, C# (.NET), PHP (Laravel, WordPress), Ruby, Kotlin, Java, Flutter, Cloudflare Workers, and raw cURL/Bash.'
+      a: 'SnapTrace uses a universal REST telemetry endpoint. We provide drop-in snippets for Next.js, JavaScript, React, Vue, Node.js, Python, Go, Rust, C# (.NET), PHP, Ruby, Kotlin, Flutter, Cloudflare Workers, and cURL.'
     },
     {
       q: 'How does SnapTrace maintain a <5KB bundle size with 0ms delay?',
@@ -371,13 +368,15 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
   }
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden pb-16">
       
-      {/* 1. Urgency Top Expiration Banner */}
+      {/* 1. HIGH-CONVERTING BETA SCARCITY TOP BANNER */}
       <div className="bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950 px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2">
-        <span>⏰ Limited Public Beta:</span>
-        <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px] font-mono">Free Pro Tier Unlocked Until Oct 31, 2026</span>
-        <span className="hidden sm:inline">• Grandfathered lifetime beta pass for early builders</span>
+        <span>🔥 Early Adopter Launch:</span>
+        <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px] font-mono">
+          38 / 50 Free Lifetime Pro Passes Claimed
+        </span>
+        <span className="hidden sm:inline">• 12 spots left before Beta closes (No credit card needed)</span>
       </div>
 
       {/* 2. SENTRY-STYLE STICKY HEADER WITH MARKETING MODE SWITCH */}
@@ -499,8 +498,8 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 3. HERO SECTION */}
-      <section className="relative pt-16 pb-16 overflow-hidden">
+      {/* 3. HERO SECTION WITH 1-LINE CODE DROP-IN SNIPPET (MAX CONVERSION) */}
+      <section className="relative pt-16 pb-12 overflow-hidden">
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[130px] pointer-events-none rounded-full" />
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
@@ -514,6 +513,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </span>
           </div>
 
+          {/* Sentry-proportioned elegant headline */}
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.15] max-w-3xl mx-auto">
             {marketingMode ? (
               <>
@@ -544,26 +544,45 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             )}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 font-mono">
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 font-mono">
             <Link
               href="/signup"
-              className="w-full sm:w-auto px-7 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black rounded-xl shadow-lg shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
             >
-              Claim Free Lifetime Pro Pass (Before Oct 31) →
+              Claim Free Lifetime Pro Pass (12 Spots Left) →
             </Link>
             <Link
               href="/test"
-              className="w-full sm:w-auto px-7 py-3 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm"
+              className="w-full sm:w-auto px-7 py-3.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm"
             >
               🧪 Try Live Test Playground (No Signup)
             </Link>
           </div>
 
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-5 text-xs text-slate-400 font-mono">
-            <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Zero dependencies (&lt;5KB)</span>
-            <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> No credit card required</span>
-            <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Drop-in 3 lines of code</span>
+          {/* 🌟 1-CLICK INSTANT SCRIPT TAG DROP-IN (SENTRY HERO STYLE) */}
+          <div className="pt-2 max-w-xl mx-auto">
+            <div className="bg-[#0B101D] border border-slate-800/90 rounded-2xl p-2.5 flex items-center justify-between gap-3 shadow-xl font-mono text-xs">
+              <div className="flex items-center gap-2 truncate text-slate-400 pl-2">
+                <span className="text-yellow-400 font-bold select-none">&lt;/&gt;</span>
+                <span className="truncate text-slate-300 text-[11px]">
+                  &lt;script src=&quot;https://snaptrace.../snaptrace.js&quot; data-api-key=&quot;<span className="text-yellow-300 font-bold">YOUR_KEY</span>&quot; async&gt;&lt;/script&gt;
+                </span>
+              </div>
+              <button
+                onClick={handleCopyHeroScript}
+                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer shadow-sm active:scale-95"
+              >
+                {copiedHeroScript ? '✓ Copied!' : '📋 Copy'}
+              </button>
+            </div>
+            <div className="flex items-center justify-center gap-4 text-[10px] text-slate-500 font-mono pt-2">
+              <span>✓ Drop into HTML head</span>
+              <span>✓ 0ms main thread delay</span>
+              <span>✓ &lt;5KB featherweight</span>
+            </div>
           </div>
+
         </div>
       </section>
 
@@ -628,7 +647,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <span>💬</span> Validated by Senior Software Engineers
           </div>
           <blockquote className="text-xs sm:text-sm text-slate-300 italic leading-relaxed font-sans">
-            "5KB and no inbox flood is a great pair to lead with. The errors that cost me the most time on my own app were not loud at all. Four separate reports, one cause underneath, and I only worked that out by reading all four by hand on a Sunday. If SnapTrace collapses those itself, say it louder than the bundle size. Nobody knows they want that until week two."
+            &quot;5KB and no inbox flood is a great pair to lead with. The errors that cost me the most time on my own app were not loud at all. Four separate reports, one cause underneath, and I only worked that out by reading all four by hand on a Sunday. If SnapTrace collapses those itself, say it louder than the bundle size. Nobody knows they want that until week two.&quot;
           </blockquote>
           <div className="flex items-center gap-3 pt-1 text-xs font-mono">
             <div className="w-7 h-7 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center font-bold text-yellow-300 text-xs">
@@ -812,7 +831,7 @@ try {
               </div>
 
               <p className="text-xs text-slate-400 leading-relaxed italic border-t border-slate-800/80 pt-3 font-mono">
-                "We dropped heavy tracking tools for SnapTrace and our Next.js bundle footprint dropped instantly."
+                &quot;We dropped heavy tracking tools for SnapTrace and our Next.js bundle footprint dropped instantly.&quot;
               </p>
             </div>
 
@@ -910,7 +929,7 @@ try {
                 <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Up to 2 Projects</li>
                 <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Sub-5KB Featherweight SDK</li>
                 <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1-Click Cursor / Claude Export</li>
-                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Discord & Gmail Alert Channels</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Discord, Slack & Email Alert Channels</li>
               </ul>
             </div>
 
@@ -925,7 +944,7 @@ try {
           {/* Card 2: Starter Pro */}
           <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
             <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
-              ★ Free Until Oct 31
+              ★ 12 Spots Remaining
             </span>
 
             <div className="space-y-4">
@@ -966,7 +985,7 @@ try {
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
-                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord & Email Delivery</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord, Slack & Email Delivery</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Team Invites & Multi-Seat Access</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
               </ul>
@@ -1122,6 +1141,25 @@ try {
 
         </div>
       </footer>
+
+      {/* 14. 🌟 HIGH-CONVERTING STICKY FLOATING BOTTOM BAR */}
+      <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-300 font-mono">
+        <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 truncate">
+            <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping shrink-0" />
+            <span className="text-xs text-slate-200 font-bold truncate">
+              Beta Offer: <span className="text-yellow-300">12 Lifetime Pro Passes Left</span>
+            </span>
+          </div>
+
+          <Link
+            href="/signup"
+            className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 shrink-0"
+          >
+            Claim Free Pass →
+          </Link>
+        </div>
+      </div>
 
     </div>
   );
