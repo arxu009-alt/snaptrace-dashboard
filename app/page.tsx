@@ -106,6 +106,14 @@ function CodeHighlighter({ code }: { code: string }) {
   );
 }
 
+// Dev Mode Interactive Chat Responses
+const DEV_KNOWLEDGE_BASE: Record<string, string> = {
+  collapse: "Traditional loggers treat each symptom as a separate alarm (4 crashes for 1 DB drop). SnapTrace hashes normalized stack traces via deterministic 32-bit fingerprints, collapses the entire cascade into 1 thread tagged [xN], and points directly to the failing line (e.g. database.js:18).",
+  bundle: "SnapTrace is under 3.4KB gzipped because it eliminates heavy DOM profilers, session canvas serializers, and bloated tracing engines. It uses native window event listeners and dispatches asynchronously via navigator.sendBeacon with 0.0ms main-thread delay.",
+  pii: "Unlike APMs that ship raw customer data to third-party servers and sanitize later, SnapTrace runs client-side regex AST masking directly in the user's browser before payloads touch the network. Passwords, authorization tokens, and credit cards are scrubbed to [REDACTED].",
+  cursor: "When an exception occurs, click 'Copy for Cursor' to copy an AI-optimized prompt containing the error message, environment, runtime URL, and formatted stack frames ready to paste into Cursor, Claude Code, or VS Code Copilot for an instant 2-line patch.",
+};
+
 export default function WelcomeLandingPage() {
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -119,6 +127,15 @@ export default function WelcomeLandingPage() {
   const [marketingMode, setMarketingMode] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
+
+  // Interactive Dev Terminal State
+  const [cliInput, setCliInput] = useState('');
+  const [cliMessages, setCliMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
+    {
+      role: 'assistant',
+      text: "Dev Mode active. Ask any technical question about our <5KB SDK, cascading error collapse, or client PII masking.",
+    },
+  ]);
 
   useEffect(() => {
     async function checkUserSession() {
@@ -149,6 +166,28 @@ export default function WelcomeLandingPage() {
     navigator.clipboard.writeText(heroScriptSnippet);
     setCopiedHeroScript(true);
     setTimeout(() => setCopiedHeroScript(false), 2000);
+  };
+
+  const handleAskCli = (question: string) => {
+    const q = question.toLowerCase();
+    let response = "Universal REST telemetry: POST /api/v1/log with apiKey, message, and stackTrace. Dispatches to Discord, Slack, and Email in <1s.";
+
+    if (q.includes('collapse') || q.includes('sunday') || q.includes('outage') || q.includes('noise')) {
+      response = DEV_KNOWLEDGE_BASE.collapse;
+    } else if (q.includes('bundle') || q.includes('5kb') || q.includes('size') || q.includes('speed')) {
+      response = DEV_KNOWLEDGE_BASE.bundle;
+    } else if (q.includes('pii') || q.includes('privacy') || q.includes('password') || q.includes('mask')) {
+      response = DEV_KNOWLEDGE_BASE.pii;
+    } else if (q.includes('cursor') || q.includes('ai') || q.includes('claude') || q.includes('copilot')) {
+      response = DEV_KNOWLEDGE_BASE.cursor;
+    }
+
+    setCliMessages((prev) => [
+      ...prev,
+      { role: 'user', text: question },
+      { role: 'assistant', text: response },
+    ]);
+    setCliInput('');
   };
 
   const snippets: Record<StackKey, string> = {
@@ -250,7 +289,7 @@ public static async Task CaptureSnapTrace(Exception ex, string url = "API Servic
 set_exception_handler(function ($e) {
     $ch = curl_init('https://snaptrace-dashboard.vercel.app/api/v1/log');
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        'apiKey' => 'sk_live_your_project_key',
+        'apiKey' => '${key}',
         'message' => $e->getMessage(),
         'stackTrace' => $e->getTraceAsString(),
         'environment' => 'production'
@@ -371,7 +410,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden pb-16">
       
-      {/* 1. TOP BANNER (Dynamically changes based on Mode) */}
+      {/* 1. TOP BANNER */}
       <div className={`px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2 transition-colors ${
         marketingMode
           ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950'
@@ -386,7 +425,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </span>
       </div>
 
-      {/* 2. SENTRY-STYLE STICKY HEADER WITH LIVE MODE TOGGLE */}
+      {/* 2. STICKY HEADER WITH SENTRY-STYLE MARKETING MODE TOGGLE */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           
@@ -469,7 +508,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* SENTRY MARKETING MODE TOGGLE (Actual Transformation Trigger) */}
+          {/* Sentry-Style Marketing Mode Switch */}
           <div className="flex items-center space-x-3 font-mono shrink-0">
             <button
               onClick={() => setMarketingMode(!marketingMode)}
@@ -478,11 +517,11 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                   ? 'bg-slate-900 border-slate-700 text-slate-300 hover:border-yellow-400'
                   : 'bg-emerald-500/15 border-emerald-400 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
               }`}
-              title="Toggle between Marketing Pitch and Raw Developer Architecture Mode"
+              title="Toggle between Marketing Mode and Dev Spec Mode"
             >
-              <span className="text-[10px] select-none">Mode:</span>
+              <span className="text-[10px] select-none">Marketing Mode:</span>
               <span className={`text-[11px] font-extrabold ${marketingMode ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {marketingMode ? 'Marketing [ON]' : 'Dev Spec [RAW]'}
+                {marketingMode ? 'ON' : 'OFF'}
               </span>
               <span className={`w-2 h-2 rounded-full ${marketingMode ? 'bg-amber-400' : 'bg-emerald-400 animate-pulse'}`} />
             </button>
@@ -503,103 +542,212 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 3. HERO SECTION (Dramatically Transforms in Dev Mode!) */}
-      <section className="relative pt-16 pb-12 overflow-hidden">
+      {/* 3. HERO SECTION (Dramatically Transforms into Developer Manifesto + /chat CLI when OFF) */}
+      <section className="relative pt-14 pb-12 overflow-hidden">
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[130px] pointer-events-none rounded-full" />
 
-        <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
+        <div className="max-w-5xl mx-auto px-6 relative z-10">
           
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B101D] border border-yellow-400/30 text-xs font-bold text-yellow-300 shadow-md font-mono">
-            <span className={`flex h-2 w-2 rounded-full ${marketingMode ? 'bg-emerald-400 animate-pulse' : 'bg-yellow-400'}`} />
-            <span>
-              {marketingMode
-                ? '⚡ Sub-5KB SDK • Cascading Outage Collapse • 0ms Hydration Delay'
-                : '🛠️ ARCHITECTURE: Non-blocking navigator.sendBeacon Daemon • On-Device Regex AST'}
-            </span>
-          </div>
+          {/* MARKETING MODE [ON] (Human Story & Benefits) */}
+          {marketingMode ? (
+            <div className="text-center space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B101D] border border-yellow-400/30 text-xs font-bold text-yellow-300 shadow-md font-mono">
+                <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>⚡ Sub-5KB SDK • Cascading Outage Collapse • 0ms Hydration Delay</span>
+              </div>
 
-          {/* Dynamic Headline */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.15] max-w-3xl mx-auto">
-            {marketingMode ? (
-              <>
+              <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.15] max-w-3xl mx-auto">
                 Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>. Stop spending Sundays connecting the{' '}
                 <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
                   dots by hand.
                 </span>
-              </>
-            ) : (
-              <>
-                High-throughput crash telemetry. <br />
-                <span className="bg-gradient-to-r from-emerald-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
-                  Zero 100KB SDK bloat.
-                </span>
-              </>
-            )}
-          </h1>
+              </h1>
 
-          {/* Dynamic Subtitle / Technical Specs */}
-          {marketingMode ? (
-            <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
-              SnapTrace automatically collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes for VS Code & Cursor.
-            </p>
+              <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
+                SnapTrace automatically collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes for VS Code & Cursor.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 font-mono">
+                <Link
+                  href="/signup"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black rounded-xl shadow-lg shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
+                >
+                  Claim Free Lifetime Pro Pass (12 Spots Left) →
+                </Link>
+                <Link
+                  href="/test"
+                  className="w-full sm:w-auto px-7 py-3.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm"
+                >
+                  🧪 Try Live Test Playground (No Signup)
+                </Link>
+              </div>
+
+              {/* 1-Click Drop-in Hero Code Snippet */}
+              <div className="pt-2 max-w-xl mx-auto">
+                <div className="bg-[#0B101D] border border-slate-800/90 rounded-2xl p-2.5 flex items-center justify-between gap-3 shadow-xl font-mono text-xs">
+                  <div className="flex items-center gap-2 truncate text-slate-400 pl-2">
+                    <span className="text-yellow-400 font-bold select-none">&lt;/&gt;</span>
+                    <span className="truncate text-slate-300 text-[11px]">
+                      &lt;script src=&quot;https://snaptrace.../snaptrace.js&quot; data-api-key=&quot;<span className="text-yellow-300 font-bold">YOUR_KEY</span>&quot; async&gt;&lt;/script&gt;
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleCopyHeroScript}
+                    className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer shadow-sm active:scale-95"
+                  >
+                    {copiedHeroScript ? '✓ Copied!' : '📋 Copy'}
+                  </button>
+                </div>
+                <div className="flex items-center justify-center gap-4 text-[10px] text-slate-500 font-mono pt-2">
+                  <span>✓ Drop into HTML head</span>
+                  <span>✓ 0ms main thread delay</span>
+                  <span>✓ &lt;5KB featherweight</span>
+                </div>
+              </div>
+            </div>
           ) : (
-            <div className="max-w-2xl mx-auto p-4 bg-[#0B101D] border border-emerald-500/30 rounded-2xl text-left font-mono text-xs space-y-1.5 shadow-xl">
-              <div className="flex items-center justify-between text-[10px] text-slate-500 pb-1 border-b border-slate-800">
-                <span className="text-emerald-400 font-bold">CLIENT INGESTION BENCHMARK SPEC</span>
-                <span>PAYLOAD: 1.2 KB</span>
+            /* MARKETING MODE [OFF] (Developer Manifesto + Interactive /chat CLI) */
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-in fade-in zoom-in-[0.99] duration-200">
+              
+              {/* Left Column: The Developer Manifesto */}
+              <div className="lg:col-span-6 space-y-5 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-white leading-tight">
+                      NO 100KB BUNDLES.<br />
+                      NO 2 AM ALERT FLOODS.<br />
+                      <span className="text-yellow-400">NO SUNDAY LOG HUNTING.</span>
+                    </div>
+                    <p className="text-xs font-mono text-emerald-400 pt-2 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>• marketing.js terminated (0.0ms main thread delay)</span>
+                    </p>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-300 font-mono leading-relaxed">
+                    Why did we build this? Because traditional error loggers got bloated, noisy, and complex. One broken database pool drops, and standard tools spam your inbox with 4 separate alerts that you have to piece together by hand on a Sunday.
+                  </p>
+
+                  <div className="p-3.5 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-2 text-xs font-mono">
+                    <div className="text-slate-400 text-[11px] uppercase font-bold text-yellow-400">
+                      ⚡ THE REALITY CHECK:
+                    </div>
+                    <ul className="space-y-1.5 text-slate-300 text-[11px]">
+                      <li>• <strong>Cascading Collapse:</strong> 4 downstream crashes condensed into 1 incident.</li>
+                      <li>• <strong>Featherweight SDK:</strong> &lt;3.4KB gzipped via <code>navigator.sendBeacon</code>.</li>
+                      <li>• <strong>Privacy Firewall:</strong> Passwords and cards masked on-device.</li>
+                      <li>• <strong>2026 AI Native:</strong> 1-click prompt exports for Cursor & Claude Code.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-2 font-mono">
+                  <Link
+                    href="/signup"
+                    className="px-6 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
+                  >
+                    Get Free API Key in 30s →
+                  </Link>
+                  <Link
+                    href="/test"
+                    className="px-5 py-2.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs font-semibold rounded-xl transition"
+                  >
+                    Test Sandbox
+                  </Link>
+                </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px]">
-                <div><span className="text-slate-500 block">Transport:</span> <strong className="text-slate-200">sendBeacon</strong></div>
-                <div><span className="text-slate-500 block">Main Thread:</span> <strong className="text-emerald-400 font-bold">0.0 ms delay</strong></div>
-                <div><span className="text-slate-500 block">Deduplication:</span> <strong className="text-yellow-300">60s SHA-256</strong></div>
-                <div><span className="text-slate-500 block">PII Redaction:</span> <strong className="text-emerald-400">On-Device</strong></div>
+
+              {/* Right Column: Interactive /snappy-cli Assistant */}
+              <div className="lg:col-span-6 bg-[#090D16] border-2 border-emerald-500/40 rounded-3xl p-5 shadow-2xl flex flex-col justify-between font-mono space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <div className="flex items-center gap-2 text-xs font-bold text-white">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>/snappy-cli <span className="text-[10px] text-slate-500 font-normal">v1.0-beta</span></span>
+                  </div>
+                  <span className="text-[10px] text-slate-500">Ask technical questions</span>
+                </div>
+
+                {/* Messages Box */}
+                <div className="flex-1 space-y-3 overflow-y-auto max-h-60 pr-1 text-xs">
+                  {cliMessages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-3 rounded-2xl ${
+                        msg.role === 'user'
+                          ? 'bg-[#0B101D] border border-slate-800 text-yellow-300 ml-6'
+                          : 'bg-[#05070E] border border-emerald-500/30 text-slate-200 mr-4'
+                      }`}
+                    >
+                      <span className="text-[10px] block font-bold text-slate-500 mb-1">
+                        {msg.role === 'user' ? '> YOU' : '⚡ SNAPPY (ENGINE)'}
+                      </span>
+                      <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Quick Prompts */}
+                <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      onClick={() => handleAskCli("Why is SnapTrace under 5KB?")}
+                      className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
+                    >
+                      ⚡ Why &lt;5KB?
+                    </button>
+                    <button
+                      onClick={() => handleAskCli("How does cascading error collapse work?")}
+                      className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
+                    >
+                      🎯 Cascading Collapse?
+                    </button>
+                    <button
+                      onClick={() => handleAskCli("How does on-device PII masking work?")}
+                      className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
+                    >
+                      🔒 PII Masking?
+                    </button>
+                    <button
+                      onClick={() => handleAskCli("How does 1-click Cursor export work?")}
+                      className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
+                    >
+                      🤖 Cursor Export?
+                    </button>
+                  </div>
+
+                  {/* Input form */}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (cliInput.trim()) handleAskCli(cliInput.trim());
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Ask technical question..."
+                      value={cliInput}
+                      onChange={(e) => setCliInput(e.target.value)}
+                      className="flex-1 bg-[#05070E] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-400 font-mono"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
+                    >
+                      Ask →
+                    </button>
+                  </form>
+                </div>
+
               </div>
+
             </div>
           )}
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 font-mono">
-            <Link
-              href="/signup"
-              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black rounded-xl shadow-lg shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
-            >
-              Claim Free Lifetime Pro Pass (12 Spots Left) →
-            </Link>
-            <Link
-              href="/test"
-              className="w-full sm:w-auto px-7 py-3.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm"
-            >
-              🧪 Try Live Test Playground (No Signup)
-            </Link>
-          </div>
-
-          {/* 1-Click Drop-in Hero Code Snippet */}
-          <div className="pt-2 max-w-xl mx-auto">
-            <div className="bg-[#0B101D] border border-slate-800/90 rounded-2xl p-2.5 flex items-center justify-between gap-3 shadow-xl font-mono text-xs">
-              <div className="flex items-center gap-2 truncate text-slate-400 pl-2">
-                <span className="text-yellow-400 font-bold select-none">&lt;/&gt;</span>
-                <span className="truncate text-slate-300 text-[11px]">
-                  &lt;script src=&quot;https://snaptrace.../snaptrace.js&quot; data-api-key=&quot;<span className="text-yellow-300 font-bold">YOUR_KEY</span>&quot; async&gt;&lt;/script&gt;
-                </span>
-              </div>
-              <button
-                onClick={handleCopyHeroScript}
-                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer shadow-sm active:scale-95"
-              >
-                {copiedHeroScript ? '✓ Copied!' : '📋 Copy'}
-              </button>
-            </div>
-            <div className="flex items-center justify-center gap-4 text-[10px] text-slate-500 font-mono pt-2">
-              <span>✓ Drop into HTML head</span>
-              <span>✓ 0ms main thread delay</span>
-              <span>✓ &lt;5KB featherweight</span>
-            </div>
-          </div>
 
         </div>
       </section>
 
-      {/* 4. SENTRY-STYLE INCIDENT SCANNER (Transforms in Dev Mode) */}
+      {/* 4. SENTRY-STYLE INTERACTIVE ROOT-CAUSE SCANNER */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={50}>
         <div id="grouping" className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-mono text-xs">
@@ -607,12 +755,10 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-              <span className="text-slate-300 font-bold ml-1">
-                {marketingMode ? 'Live Production Incident Scanner' : 'AST Execution Frame Disassembler'}
-              </span>
+              <span className="text-slate-300 font-bold ml-1">Live Production Incident Scanner</span>
             </div>
             <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold uppercase text-[10px]">
-              {marketingMode ? 'Active Root Cause Trace' : 'Deterministic 32-bit Hash OK'}
+              Active Root Cause Trace
             </span>
           </div>
 
@@ -999,7 +1145,6 @@ try {
               <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
-                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord, Slack & Email Delivery</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Team Invites & Multi-Seat Access</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
