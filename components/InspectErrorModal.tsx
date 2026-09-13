@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { parseStackTrace, ParsedFrame } from '@/lib/stackParser';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
 
 interface ErrorLog {
   id: number;
@@ -78,6 +77,7 @@ export default function InspectErrorModal({ log, onClose, onDelete, userTier = '
 
   const rawStack = log.stack_trace || log.stack || '';
   const parsedFrames: ParsedFrame[] = parseStackTrace(rawStack);
+  const logTime = new Date(log.created_at);
 
   const handleCopyForCursor = () => {
     const cursorPrompt = `Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:
@@ -109,7 +109,38 @@ ${rawStack || 'No stack trace provided'}
     setTimeout(() => setCopiedRaw(false), 2000);
   };
 
-  // 100% UNLOCKED FOR PUBLIC BETA: Any user can analyze with their Gemini / OpenAI key
+  // 1-Click Automated GitHub Issue Creator
+  const handleOpenGitHubIssue = () => {
+    let repo = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_github_repo') : null;
+
+    if (!repo) {
+      const userRepo = prompt('Enter your GitHub repository name (e.g. username/repo-name):');
+      if (!userRepo || !userRepo.trim()) return;
+      repo = userRepo.trim().replace(/^https?:\/\/github\.com\//, '');
+      localStorage.setItem('snaptrace_github_repo', repo);
+    }
+
+    const title = `[Crash] ${log.message.slice(0, 80)}`;
+    const issueBody = `### 🚨 Exception Overview
+- **Message:** \`${log.message}\`
+- **Environment:** \`${log.environment}\`
+- **Route:** ${log.url || 'N/A'}
+- **Logged At:** ${logTime.toLocaleString()}
+
+### 📜 Stack Trace
+\`\`\`javascript
+${(rawStack || 'No stack trace available').slice(0, 1500)}
+\`\`\`
+
+${aiAnalysis ? `### 🤖 SnapTrace AI Diagnosis & Patch\n${aiAnalysis.slice(0, 1000)}\n` : ''}
+
+---
+*Captured automatically by [SnapTrace Telemetry](https://snaptrace-dashboard.vercel.app)*`;
+
+    const githubUrl = `https://github.com/${repo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(issueBody)}`;
+    window.open(githubUrl, '_blank');
+  };
+
   const handleAnalyzeWithAI = async () => {
     setActiveTab('ai');
     setAiLoading(true);
@@ -152,8 +183,6 @@ ${rawStack || 'No stack trace provided'}
     }
   };
 
-  const logTime = new Date(log.created_at);
-
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
       <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -182,21 +211,32 @@ ${rawStack || 'No stack trace provided'}
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2 flex-wrap font-mono">
+            {/* 1-Click GitHub Issue Button */}
             <button
-              onClick={handleCopyForCursor}
-              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-400/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-              title="Copy formatted prompt for Cursor / Claude"
+              onClick={handleOpenGitHubIssue}
+              className="px-3 py-1.5 bg-[#05070E] hover:bg-slate-800 border border-slate-700 text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+              title="Open pre-formatted GitHub Issue"
             >
-              <span>{copiedCursor ? '✓ Prompt Copied!' : '📋 Copy for Cursor / AI'}</span>
+              <span>🐙</span>
+              <span>Create GitHub Issue</span>
             </button>
 
+            {/* 1-Click Cursor / Claude Prompt */}
+            <button
+              onClick={handleCopyForCursor}
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-300 border border-yellow-400/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+              title="Copy formatted prompt for Cursor / Claude"
+            >
+              <span>{copiedCursor ? '✓ Copied!' : '📋 Copy for Cursor'}</span>
+            </button>
+
+            {/* AI Diagnosis */}
             <button
               onClick={handleAnalyzeWithAI}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-yellow-500/20 cursor-pointer"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-black transition flex items-center gap-1.5 shadow-lg shadow-yellow-500/20 cursor-pointer active:scale-95"
             >
               <span>✨</span>
               <span>Analyze with AI</span>
-              <span className="text-[9px] bg-slate-950/20 px-1 py-0.2 rounded font-mono">BETA PASS</span>
             </button>
 
             <button
@@ -230,7 +270,7 @@ ${rawStack || 'No stack trace provided'}
           </div>
         </div>
 
-        {/* Tab Navigation with SENTRY-STYLE BREADCRUMBS */}
+        {/* Tab Navigation */}
         <div className="flex border-b border-slate-800 bg-slate-950/40 px-6 gap-6 text-xs font-mono font-semibold">
           <button
             onClick={() => setActiveTab('stack')}
@@ -323,7 +363,7 @@ ${rawStack || 'No stack trace provided'}
             </div>
           )}
 
-          {/* 2. SENTRY-STYLE IN-APP BREADCRUMBS TRAIL */}
+          {/* 2. Sentry-Style Breadcrumbs */}
           {activeTab === 'breadcrumbs' && (
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-1 border-b border-slate-800 text-[11px] text-slate-400">
@@ -332,7 +372,6 @@ ${rawStack || 'No stack trace provided'}
               </div>
 
               <div className="relative border-l-2 border-slate-800 ml-4 space-y-4 py-2">
-                {/* Step 1 */}
                 <div className="relative pl-6">
                   <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center text-[8px]">
                     1
@@ -348,7 +387,6 @@ ${rawStack || 'No stack trace provided'}
                   </div>
                 </div>
 
-                {/* Step 2 */}
                 <div className="relative pl-6">
                   <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-slate-800 border-2 border-slate-600 flex items-center justify-center text-[8px]">
                     2
@@ -364,7 +402,6 @@ ${rawStack || 'No stack trace provided'}
                   </div>
                 </div>
 
-                {/* Step 3 (Crash) */}
                 <div className="relative pl-6">
                   <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-red-500 border-2 border-red-300 animate-pulse flex items-center justify-center text-[8px]">
                     🚨
@@ -386,7 +423,7 @@ ${rawStack || 'No stack trace provided'}
             </div>
           )}
 
-          {/* 3. AI Diagnosis View (GIT DIFF FORMATTED) */}
+          {/* 3. AI Diagnosis with GitHub Diff */}
           {activeTab === 'ai' && (
             <div className="space-y-4">
               {aiLoading ? (
@@ -427,8 +464,6 @@ ${rawStack || 'No stack trace provided'}
                       {copiedCursor ? '✓ Copied to Clipboard!' : 'Copy for Cursor →'}
                     </button>
                   </div>
-                  
-                  {/* Render using the Git Diff Viewer */}
                   <AiDiffViewer text={aiAnalysis} />
                 </div>
               ) : (
