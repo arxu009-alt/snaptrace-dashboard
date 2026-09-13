@@ -45,7 +45,6 @@ export default function DashboardLayout({ children }) {
         setUserDisplayName(name || email.split('@')[0] || 'Developer');
         setUserEmail(email);
 
-        // Check owner authorization
         if (email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com') {
           setIsOwner(true);
           setUserPlanTier('team_scale');
@@ -61,7 +60,6 @@ export default function DashboardLayout({ children }) {
           }
         }
 
-        // Fetch count for live sidebar badge
         const { data: userProjects } = await supabase
           .from('projects')
           .select('id')
@@ -135,7 +133,7 @@ export default function DashboardLayout({ children }) {
   if (authChecking) {
     return (
       <div className="min-h-screen bg-[#05070E] text-slate-100 flex items-center justify-center font-sans">
-        <div className="flex flex-col items-center space-y-4 animate-in fade-in">
+        <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-300">
           <div className="relative animate-pulse">
             <SnapTraceLogo size="lg" showText={false} />
           </div>
@@ -164,16 +162,9 @@ export default function DashboardLayout({ children }) {
         </span>
       );
     }
-    if (userPlanTier === 'starter_pro') {
-      return (
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 uppercase tracking-wider shadow-sm">
-          PRO
-        </span>
-      );
-    }
     return (
-      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700 uppercase tracking-wider">
-        FREE
+      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 uppercase tracking-wider shadow-sm">
+        BETA PRO
       </span>
     );
   };
@@ -181,14 +172,14 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col md:flex-row font-sans selection:bg-yellow-400 selection:text-slate-950">
       
-      {/* Sidebar Navigation */}
+      {/* 1. Left Sidebar Navigation */}
       <aside
         className={`bg-[#090D16]/95 border-r border-slate-800/80 flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out backdrop-blur-xl ${
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
         <div className="p-5 border-b border-slate-800/80 flex items-center justify-between min-w-[240px]">
-          <Link href="/dashboard" className="transition hover:opacity-90">
+          <Link href="/dashboard" className="transition hover:opacity-90 active:scale-95">
             <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
           </Link>
           {!sidebarCollapsed && (
@@ -204,6 +195,7 @@ export default function DashboardLayout({ children }) {
           </div>
         )}
 
+        {/* Navigation Items with Bouncy Spring Scale on Click */}
         <nav className="flex-1 p-3 space-y-1.5 min-w-[240px]">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -212,20 +204,20 @@ export default function DashboardLayout({ children }) {
                 key={item.href}
                 id={item.id}
                 href={item.href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition group ${
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 transform-gpu active:scale-95 ${
                   isActive
-                    ? 'border-l-4 border-l-yellow-400 bg-gradient-to-r from-yellow-400/15 via-yellow-400/5 to-transparent text-yellow-300 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border-l-4 border-l-transparent'
+                    ? 'border-l-4 border-l-yellow-400 bg-gradient-to-r from-yellow-400/15 via-yellow-400/5 to-transparent text-yellow-300 shadow-sm translate-x-1'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border-l-4 border-l-transparent hover:translate-x-0.5'
                 }`}
                 title={sidebarCollapsed ? item.name : undefined}
               >
                 <div className="flex items-center space-x-3">
-                  <span className="text-base">{item.icon}</span>
+                  <span className="text-base transition-transform group-hover:scale-110">{item.icon}</span>
                   {!sidebarCollapsed && <span>{item.name}</span>}
                 </div>
 
                 {!sidebarCollapsed && item.hasBadge && activeErrorCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/30 group-hover:bg-red-500/25 transition">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/30 animate-pulse">
                     {activeErrorCount}
                   </span>
                 )}
@@ -245,15 +237,14 @@ export default function DashboardLayout({ children }) {
         )}
       </aside>
 
-      {/* Main Content View */}
+      {/* 2. Main Content View with Smooth Hardware-Accelerated Page Transitions */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#05070E]">
         
         <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-xl px-6 flex items-center justify-between z-40">
-          
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-yellow-400 hover:border-yellow-400/40 transition cursor-pointer"
+              className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-yellow-400 hover:border-yellow-400/40 transition-all duration-150 active:scale-90 cursor-pointer"
               title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -273,11 +264,9 @@ export default function DashboardLayout({ children }) {
           </div>
 
           <div id="tour-header-actions" className="flex items-center space-x-3 sm:space-x-4">
-            
             <button
               onClick={() => setFeedbackOpen(true)}
-              className="px-3.5 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-sm font-mono"
-              title="Give beta feedback"
+              className="px-3.5 py-1.5 bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-xs font-bold rounded-xl transition-all duration-150 active:scale-95 flex items-center gap-1.5 cursor-pointer shadow-sm font-mono"
             >
               <span>💡</span>
               <span className="hidden sm:inline">Feedback</span>
@@ -296,7 +285,7 @@ export default function DashboardLayout({ children }) {
             <div className="relative font-sans">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center space-x-2.5 p-1.5 bg-slate-900/60 border border-slate-800 rounded-2xl hover:border-yellow-400/40 transition cursor-pointer shadow-sm"
+                className="flex items-center space-x-2.5 p-1.5 bg-slate-900/60 border border-slate-800 rounded-2xl hover:border-yellow-400/40 transition-all duration-150 active:scale-95 cursor-pointer shadow-sm"
               >
                 <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md shadow-yellow-500/20">
                   {userInitial}
@@ -315,7 +304,7 @@ export default function DashboardLayout({ children }) {
 
               {profileDropdownOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-60 bg-[#090D16] border border-slate-800 rounded-3xl shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-100 font-sans"
+                  className="absolute right-0 mt-2 w-60 bg-[#090D16] border border-slate-800 rounded-3xl shadow-2xl p-2.5 z-50 animate-in fade-in zoom-in-95 duration-150 font-sans"
                   onMouseLeave={() => setProfileDropdownOpen(false)}
                 >
                   <div className="px-3 py-2.5 border-b border-slate-800/80 mb-1 space-y-1">
@@ -328,7 +317,7 @@ export default function DashboardLayout({ children }) {
 
                   <button
                     onClick={handleTriggerTour}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-yellow-300 hover:bg-yellow-400/10 transition cursor-pointer text-left font-semibold"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-yellow-300 hover:bg-yellow-400/10 transition cursor-pointer text-left font-semibold active:scale-95"
                   >
                     <span>🎓</span>
                     <span>Replay Setup Tour</span>
@@ -340,7 +329,7 @@ export default function DashboardLayout({ children }) {
                     className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-slate-800/60 transition"
                   >
                     <span>⚙️</span>
-                    <span>Account & Subscription</span>
+                    <span>Account & Alert Settings</span>
                   </Link>
 
                   <Link
@@ -364,12 +353,13 @@ export default function DashboardLayout({ children }) {
                 </div>
               )}
             </div>
-
           </div>
-
         </header>
 
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        {/* Jitter-Free Content Container with GPU-accelerated transition */}
+        <main className="flex-1 overflow-y-auto transform-gpu transition-all duration-300 ease-out animate-in fade-in-50">
+          {children}
+        </main>
       </div>
 
       <FeedbackModal
@@ -379,9 +369,7 @@ export default function DashboardLayout({ children }) {
       />
 
       <DashboardOnboardingTour />
-
       <SnappyAssistant />
-
     </div>
   );
 }
