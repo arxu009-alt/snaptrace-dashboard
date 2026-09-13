@@ -106,7 +106,6 @@ function CodeHighlighter({ code }: { code: string }) {
   );
 }
 
-// Dev Mode Interactive Chat Responses
 const DEV_KNOWLEDGE_BASE: Record<string, string> = {
   collapse: "Traditional loggers treat each symptom as a separate alarm (4 crashes for 1 DB drop). SnapTrace hashes normalized stack traces via deterministic 32-bit fingerprints, collapses the entire cascade into 1 thread tagged [xN], and points directly to the failing line (e.g. database.js:18).",
   bundle: "SnapTrace is under 3.4KB gzipped because it eliminates heavy DOM profilers, session canvas serializers, and bloated tracing engines. It uses native window event listeners and dispatches asynchronously via navigator.sendBeacon with 0.0ms main-thread delay.",
@@ -123,12 +122,10 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
-  // Real Sentry-Style Dual Mode: Marketing Pitch vs Raw Dev Spec
   const [marketingMode, setMarketingMode] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
 
-  // Interactive Dev Terminal State
   const [cliInput, setCliInput] = useState('');
   const [cliMessages, setCliMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
     {
@@ -289,7 +286,7 @@ public static async Task CaptureSnapTrace(Exception ex, string url = "API Servic
 set_exception_handler(function ($e) {
     $ch = curl_init('https://snaptrace-dashboard.vercel.app/api/v1/log');
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        'apiKey' => '${key}',
+        'apiKey' => 'sk_live_your_project_key',
         'message' => $e->getMessage(),
         'stackTrace' => $e->getTraceAsString(),
         'environment' => 'production'
@@ -425,7 +422,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </span>
       </div>
 
-      {/* 2. STICKY HEADER WITH SENTRY-STYLE MARKETING MODE TOGGLE */}
+      {/* 2. SENTRY-STYLE STICKY HEADER WITH MARKETING MODE SWITCH */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           
@@ -542,13 +539,12 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 3. HERO SECTION (Dramatically Transforms into Developer Manifesto + /chat CLI when OFF) */}
+      {/* 3. HERO SECTION */}
       <section className="relative pt-14 pb-12 overflow-hidden">
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[130px] pointer-events-none rounded-full" />
 
         <div className="max-w-5xl mx-auto px-6 relative z-10">
           
-          {/* MARKETING MODE [ON] (Human Story & Benefits) */}
           {marketingMode ? (
             <div className="text-center space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B101D] border border-yellow-400/30 text-xs font-bold text-yellow-300 shadow-md font-mono">
@@ -606,10 +602,9 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               </div>
             </div>
           ) : (
-            /* MARKETING MODE [OFF] (Developer Manifesto + Interactive /chat CLI) */
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-in fade-in zoom-in-[0.99] duration-200">
               
-              {/* Left Column: The Developer Manifesto */}
+              {/* Left Column: Developer Manifesto */}
               <div className="lg:col-span-6 space-y-5 flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -667,7 +662,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                   <span className="text-[10px] text-slate-500">Ask technical questions</span>
                 </div>
 
-                {/* Messages Box */}
                 <div className="flex-1 space-y-3 overflow-y-auto max-h-60 pr-1 text-xs">
                   {cliMessages.map((msg, idx) => (
                     <div
@@ -686,7 +680,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                   ))}
                 </div>
 
-                {/* Quick Prompts */}
                 <div className="space-y-2 pt-2 border-t border-slate-800/80">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <button
@@ -715,7 +708,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                     </button>
                   </div>
 
-                  {/* Input form */}
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -801,7 +793,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </SmoothReveal>
 
-      {/* 5. DEVELOPER SOCIAL PROOF / WALL OF TRUST */}
+      {/* 5. DEVELOPER SOCIAL PROOF */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={100}>
         <div className="p-6 rounded-3xl bg-gradient-to-r from-[#0B101D] to-[#080d1a] border border-slate-800 shadow-xl space-y-3">
           <div className="flex items-center gap-2 text-yellow-400 text-xs font-mono font-bold uppercase tracking-widest">
@@ -892,7 +884,7 @@ try {
         </div>
       </section>
 
-      {/* 7. INTERACTIVE 12-LANGUAGE QUICKSTART TERMINAL WITH VS CODE SYNTAX HIGHLIGHTING */}
+      {/* 7. INTERACTIVE 12-LANGUAGE TERMINAL */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={100}>
         <div id="quickstart" className="bg-[#0B101D] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#070A12] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1145,6 +1137,7 @@ try {
               <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord, Slack & Email Delivery</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Team Invites & Multi-Seat Access</li>
                 <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
@@ -1281,7 +1274,7 @@ try {
 
             <div className="space-y-2.5">
               <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
-              <ul className="space-y-1.5 text-slate-400">
+              <ul className="space-y-2.5 text-slate-400">
                 <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
                 <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
