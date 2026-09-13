@@ -115,6 +115,7 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
+  // Real Sentry-Style Dual Mode: Marketing Pitch vs Raw Dev Spec
   const [marketingMode, setMarketingMode] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
@@ -370,16 +371,22 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden pb-16">
       
-      {/* 1. HIGH-CONVERTING BETA SCARCITY TOP BANNER */}
-      <div className="bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950 px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2">
-        <span>🔥 Early Adopter Launch:</span>
-        <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px] font-mono">
-          38 / 50 Free Lifetime Pro Passes Claimed
+      {/* 1. TOP BANNER (Dynamically changes based on Mode) */}
+      <div className={`px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2 transition-colors ${
+        marketingMode
+          ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950'
+          : 'bg-[#0B101D] border-b border-yellow-400/30 text-yellow-300'
+      }`}>
+        <span>{marketingMode ? '🔥 Early Adopter Launch:' : '⚡ ARCHITECTURE SPEC:'}</span>
+        <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px] font-mono border border-yellow-400/20">
+          {marketingMode ? '38 / 50 Free Lifetime Pro Passes Claimed' : 'RFC-9110 Asynchronous Ingestion Engine Active'}
         </span>
-        <span className="hidden sm:inline">• 12 spots left before Beta closes (No credit card needed)</span>
+        <span className="hidden sm:inline">
+          {marketingMode ? '• 12 spots left before Beta closes (No credit card needed)' : '• 0ms Hydration Penalty • <3.4KB Gzipped'}
+        </span>
       </div>
 
-      {/* 2. SENTRY-STYLE STICKY HEADER WITH MARKETING MODE SWITCH */}
+      {/* 2. SENTRY-STYLE STICKY HEADER WITH LIVE MODE TOGGLE */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           
@@ -387,10 +394,8 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Sentry-Style Navigation */}
+          {/* Navigation Links */}
           <nav className="hidden md:flex items-center space-x-5 text-xs font-semibold text-slate-300 font-mono">
-            
-            {/* Dropdown: Platform */}
             <div
               className="relative"
               onMouseEnter={() => setOpenDropdown('platform')}
@@ -428,7 +433,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               )}
             </div>
 
-            {/* Dropdown: AI Copilot */}
             <div
               className="relative"
               onMouseEnter={() => setOpenDropdown('ai')}
@@ -465,21 +469,22 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* Action CTAs + SENTRY MARKETING MODE TOGGLE */}
+          {/* SENTRY MARKETING MODE TOGGLE (Actual Transformation Trigger) */}
           <div className="flex items-center space-x-3 font-mono shrink-0">
             <button
               onClick={() => setMarketingMode(!marketingMode)}
-              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-mono font-bold transition cursor-pointer ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono font-bold transition cursor-pointer shadow-sm active:scale-95 ${
                 marketingMode
                   ? 'bg-slate-900 border-slate-700 text-slate-300 hover:border-yellow-400'
-                  : 'bg-yellow-400/15 border-yellow-400 text-yellow-300 shadow-sm'
+                  : 'bg-emerald-500/15 border-emerald-400 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
               }`}
               title="Toggle between Marketing Pitch and Raw Developer Architecture Mode"
             >
-              <span className="text-[9px]">⚡ Mode:</span>
-              <span className={marketingMode ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold'}>
-                {marketingMode ? 'Marketing ON' : 'Dev Mode (No Fluff)'}
+              <span className="text-[10px] select-none">Mode:</span>
+              <span className={`text-[11px] font-extrabold ${marketingMode ? 'text-amber-400' : 'text-emerald-400'}`}>
+                {marketingMode ? 'Marketing [ON]' : 'Dev Spec [RAW]'}
               </span>
+              <span className={`w-2 h-2 rounded-full ${marketingMode ? 'bg-amber-400' : 'bg-emerald-400 animate-pulse'}`} />
             </button>
 
             <Link
@@ -498,22 +503,22 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 3. HERO SECTION WITH 1-LINE CODE DROP-IN SNIPPET (MAX CONVERSION) */}
+      {/* 3. HERO SECTION (Dramatically Transforms in Dev Mode!) */}
       <section className="relative pt-16 pb-12 overflow-hidden">
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[130px] pointer-events-none rounded-full" />
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B101D] border border-yellow-400/30 text-xs font-bold text-yellow-300 shadow-md font-mono">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className={`flex h-2 w-2 rounded-full ${marketingMode ? 'bg-emerald-400 animate-pulse' : 'bg-yellow-400'}`} />
             <span>
               {marketingMode
                 ? '⚡ Sub-5KB SDK • Cascading Outage Collapse • 0ms Hydration Delay'
-                : '🛠️ Spec: navigator.sendBeacon Async Transport • SHA-256 Deduplication Engine'}
+                : '🛠️ ARCHITECTURE: Non-blocking navigator.sendBeacon Daemon • On-Device Regex AST'}
             </span>
           </div>
 
-          {/* Sentry-proportioned elegant headline */}
+          {/* Dynamic Headline */}
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.15] max-w-3xl mx-auto">
             {marketingMode ? (
               <>
@@ -524,25 +529,33 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               </>
             ) : (
               <>
-                Lightweight crash monitoring. <br />
-                <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
+                High-throughput crash telemetry. <br />
+                <span className="bg-gradient-to-r from-emerald-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
                   Zero 100KB SDK bloat.
                 </span>
               </>
             )}
           </h1>
 
-          <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
-            {marketingMode ? (
-              <>
-                SnapTrace automatically collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes for VS Code & Cursor.
-              </>
-            ) : (
-              <>
-                Native window event listeners queue errors in background thread. Passwords and credit cards scrubbed via client regex AST before network send. Noise engine throttles infinite loops into 1 summary alert [x500].
-              </>
-            )}
-          </p>
+          {/* Dynamic Subtitle / Technical Specs */}
+          {marketingMode ? (
+            <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
+              SnapTrace automatically collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes for VS Code & Cursor.
+            </p>
+          ) : (
+            <div className="max-w-2xl mx-auto p-4 bg-[#0B101D] border border-emerald-500/30 rounded-2xl text-left font-mono text-xs space-y-1.5 shadow-xl">
+              <div className="flex items-center justify-between text-[10px] text-slate-500 pb-1 border-b border-slate-800">
+                <span className="text-emerald-400 font-bold">CLIENT INGESTION BENCHMARK SPEC</span>
+                <span>PAYLOAD: 1.2 KB</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px]">
+                <div><span className="text-slate-500 block">Transport:</span> <strong className="text-slate-200">sendBeacon</strong></div>
+                <div><span className="text-slate-500 block">Main Thread:</span> <strong className="text-emerald-400 font-bold">0.0 ms delay</strong></div>
+                <div><span className="text-slate-500 block">Deduplication:</span> <strong className="text-yellow-300">60s SHA-256</strong></div>
+                <div><span className="text-slate-500 block">PII Redaction:</span> <strong className="text-emerald-400">On-Device</strong></div>
+              </div>
+            </div>
+          )}
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 font-mono">
@@ -560,7 +573,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </Link>
           </div>
 
-          {/* 🌟 1-CLICK INSTANT SCRIPT TAG DROP-IN (SENTRY HERO STYLE) */}
+          {/* 1-Click Drop-in Hero Code Snippet */}
           <div className="pt-2 max-w-xl mx-auto">
             <div className="bg-[#0B101D] border border-slate-800/90 rounded-2xl p-2.5 flex items-center justify-between gap-3 shadow-xl font-mono text-xs">
               <div className="flex items-center gap-2 truncate text-slate-400 pl-2">
@@ -586,7 +599,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </section>
 
-      {/* 4. SENTRY-STYLE INTERACTIVE ROOT-CAUSE SCANNER */}
+      {/* 4. SENTRY-STYLE INCIDENT SCANNER (Transforms in Dev Mode) */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={50}>
         <div id="grouping" className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-mono text-xs">
@@ -594,10 +607,12 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-              <span className="text-slate-300 font-bold ml-1">Live Production Incident Scanner</span>
+              <span className="text-slate-300 font-bold ml-1">
+                {marketingMode ? 'Live Production Incident Scanner' : 'AST Execution Frame Disassembler'}
+              </span>
             </div>
             <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold uppercase text-[10px]">
-              Active Root Cause Trace
+              {marketingMode ? 'Active Root Cause Trace' : 'Deterministic 32-bit Hash OK'}
             </span>
           </div>
 
@@ -1142,7 +1157,7 @@ try {
         </div>
       </footer>
 
-      {/* 14. 🌟 HIGH-CONVERTING STICKY FLOATING BOTTOM BAR */}
+      {/* 14. HIGH-CONVERTING STICKY FLOATING BOTTOM BAR */}
       <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-300 font-mono">
         <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 truncate">
