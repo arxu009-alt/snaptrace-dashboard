@@ -262,7 +262,7 @@ export default function TestPlaygroundPage() {
 
         </div>
 
-        {/* 🌟 LIVE IN-PAGE TELEMETRY INSPECTOR CONSOLE */}
+        {/* 🌟 LIVE IN-PAGE TELEMETRY INSPECTOR CONSOLE WITH HIGH-CONVERSION CTA */}
         <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-4 font-mono">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
             <div className="flex items-center gap-2">
@@ -310,17 +310,22 @@ export default function TestPlaygroundPage() {
             </div>
           )}
 
-          {/* Direct CTA Box inside console */}
-          <div className="p-4 bg-gradient-to-r from-[#0e1424] to-[#070b14] border border-yellow-400/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4">
-            <div className="space-y-0.5">
-              <p className="text-xs font-bold text-white">Want this live crash tracking in your own app?</p>
-              <p className="text-[11px] text-slate-400">Get instant Discord & email alerts in under 60 seconds.</p>
+          {/* HIGH-CONVERTING CONVERSION CARD (Marketer Spec) */}
+          <div className="p-5 bg-gradient-to-r from-[#0e1424] to-[#070b14] border border-yellow-400/40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4">
+            <div className="space-y-1">
+              <p className="text-sm font-bold text-white">Want this live crash tracking in your own app?</p>
+              <p className="text-xs text-yellow-300 font-semibold">
+                ⚡ Free Pro Beta Pass Unlocked Until Oct 31, 2026 (No credit card required).
+              </p>
+              <p className="text-[11px] text-slate-400">
+                Sub-5KB SDK • On-device PII masking • 1-click AI fix for Cursor & Claude.
+              </p>
             </div>
             <Link
               href="/signup"
-              className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5 whitespace-nowrap self-start sm:self-auto"
+              className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5 whitespace-nowrap self-start sm:self-auto"
             >
-              Start Free Beta Now →
+              Claim Free Pro Account →
             </Link>
           </div>
 
