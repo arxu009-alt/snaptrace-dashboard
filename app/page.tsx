@@ -122,6 +122,7 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
+  // Real Sentry-Style Dual Mode: Marketing Pitch vs Raw Dev Spec
   const [marketingMode, setMarketingMode] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
@@ -422,7 +423,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </span>
       </div>
 
-      {/* 2. SENTRY-STYLE STICKY HEADER WITH MARKETING MODE SWITCH */}
+      {/* 2. SENTRY-STYLE STICKY HEADER WITH LIVE DEMO LINK & MARKETING MODE SWITCH */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-50 transition-all">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           
@@ -499,6 +500,14 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               )}
             </div>
 
+            {/* 🌟 LIVE DEMO LINK RIGHT IN THE NAVBAR */}
+            <Link 
+              href="/demo" 
+              className="text-yellow-300 hover:text-yellow-200 transition flex items-center gap-1 font-bold"
+            >
+              <span>⚡</span> Live Demo
+            </Link>
+
             <a href="#quickstart" className="hover:text-yellow-400 transition">SDK Setup</a>
             <a href="#comparison" className="hover:text-yellow-400 transition">Why SnapTrace</a>
             <a href="#pricing" className="hover:text-yellow-400 transition font-bold text-yellow-400">Pricing</a>
@@ -571,10 +580,10 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                   Claim Free Lifetime Pro Pass (12 Spots Left) →
                 </Link>
                 <Link
-                  href="/test"
+                  href="/demo"
                   className="w-full sm:w-auto px-7 py-3.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm"
                 >
-                  🧪 Try Live Test Playground (No Signup)
+                  ⚡ Explore Live Demo (No Signup)
                 </Link>
               </div>
 
@@ -644,10 +653,10 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                     Get Free API Key in 30s →
                   </Link>
                   <Link
-                    href="/test"
+                    href="/demo"
                     className="px-5 py-2.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs font-semibold rounded-xl transition"
                   >
-                    Test Sandbox
+                    ⚡ Open Live Demo
                   </Link>
                 </div>
               </div>
@@ -884,7 +893,7 @@ try {
         </div>
       </section>
 
-      {/* 7. INTERACTIVE 12-LANGUAGE TERMINAL */}
+      {/* 7. INTERACTIVE 12-LANGUAGE QUICKSTART TERMINAL */}
       <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={100}>
         <div id="quickstart" className="bg-[#0B101D] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           <div className="bg-[#070A12] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1274,9 +1283,10 @@ try {
 
             <div className="space-y-2.5">
               <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
-              <ul className="space-y-2.5 text-slate-400">
+              <ul className="space-y-1.5 text-slate-400">
                 <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
+                <li><Link href="/demo" className="hover:text-yellow-400 transition font-bold">Public Demo</Link></li>
                 <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
                 <li><span className="text-emerald-400">● Systems Operational</span></li>
               </ul>
@@ -1288,6 +1298,7 @@ try {
             <div className="flex items-center space-x-4 text-slate-400">
               <Link href="/privacy" className="hover:text-yellow-400">Privacy</Link>
               <Link href="/terms" className="hover:text-yellow-400">Terms</Link>
+              <Link href="/demo" className="hover:text-yellow-400">Demo</Link>
               <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
             </div>
           </div>
