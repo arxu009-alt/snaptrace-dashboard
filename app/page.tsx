@@ -106,43 +106,156 @@ function CodeHighlighter({ code }: { code: string }) {
   );
 }
 
-// Deep Technical Knowledge Engine for Dev Mode Chat
+// Deep Prioritized Knowledge Engine for Dev Mode Chat
 function getDevBotAnswer(query: string): string {
-  const q = query.toLowerCase();
+  const q = query.toLowerCase().trim();
 
-  if (q.includes('language') || q.includes('stack') || q.includes('framework') || q.includes('support')) {
-    return `We support 100% of languages through our open REST ingestion protocol. Pre-configured drop-in snippets ready for:\n• Frontend: Next.js (App & Pages), React, Vue, Svelte, Vite, Vanilla JS\n• Backend: Node.js (Express/Nest), Python (FastAPI/Django), Go, Rust (Axum/Actix), PHP (Laravel/WordPress), C# (.NET), Ruby on Rails\n• Mobile & Cloud: Flutter (Dart), Kotlin/Android, Cloudflare Workers, and raw cURL.`;
+  // 1. AI Models & Coding Agents (Highest Priority)
+  if (
+    q.includes('ai') ||
+    q.includes('model') ||
+    q.includes('gemini') ||
+    q.includes('openai') ||
+    q.includes('gpt') ||
+    q.includes('claude') ||
+    q.includes('cursor') ||
+    q.includes('copilot') ||
+    q.includes('llm')
+  ) {
+    return `SnapTrace features a dual AI architecture:\n\n1. In-Dashboard BYOK Diagnostics:\nConnect your own Google Gemini (100% Free via Gemini 2.5 Flash Lite) or OpenAI (GPT-4o / GPT-4o-mini) key in Settings. When an exception occurs, clicking "Analyze with AI" outputs a plain English root-cause diagnosis and an automated Git-style code patch diff.\n\n2. 1-Click IDE Coding Agent Export:\nClicking "Copy for Cursor" generates an AI-optimized prompt pre-formatted with the runtime environment, error message, and stack frames—ready to paste directly into Cursor, Claude Code, or VS Code Copilot for an instant 2-line code fix.`;
   }
 
-  if (q.includes('collapse') || q.includes('cascade') || q.includes('sunday') || q.includes('group') || q.includes('noise')) {
-    return `When an outage happens (like a DB pool drop), legacy loggers spam 5 separate alerts for the downstream errors (auth fails, queries fail, UI render breaks). \n\nSnapTrace hashes the error origin via deterministic SHA-256 fingerprints, collapses the entire cascade into 1 consolidated thread tagged with the occurrence count (e.g. [x500]), and isolates the exact root cause in database.js with a 2-line AI fix.`;
+  // 2. Cascading Outage Collapse (Eusebiu's Problem)
+  if (
+    q.includes('collapse') ||
+    q.includes('cascade') ||
+    q.includes('sunday') ||
+    q.includes('outage') ||
+    q.includes('root cause') ||
+    q.includes('group')
+  ) {
+    return `When a database connection drops or a microservice times out, standard loggers spam your inbox with 4 or 5 separate noisy alerts (auth fails, queries fail, UI render breaks).\n\nSnapTrace hashes the error origin with deterministic SHA-256 fingerprints, collapses the entire outage cascade into 1 consolidated thread tagged with the occurrence count (e.g. [x500]), and points directly to the single root cause line (database.js:18 pool exhaustion) with an AI patch ready in 2 seconds.`;
   }
 
-  if (q.includes('bundle') || q.includes('5kb') || q.includes('size') || q.includes('speed') || q.includes('lighthouse')) {
-    return `SnapTrace is strictly <3.4KB gzipped (Sentry is ~100KB+). We eliminated heavy DOM serializers and session canvas polyfills. We use native browser event listeners and transmit telemetry asynchronously via navigator.sendBeacon. Zero blocking time on page hydration; 100/100 Google Core Web Vitals score.`;
+  // 3. Bundle Size, Speed & Web Vitals
+  if (
+    q.includes('bundle') ||
+    q.includes('size') ||
+    q.includes('speed') ||
+    q.includes('fast') ||
+    q.includes('lightweight') ||
+    q.includes('5kb') ||
+    q.includes('performance') ||
+    q.includes('beacon') ||
+    q.includes('sendbeacon') ||
+    q.includes('lighthouse') ||
+    q.includes('vitals')
+  ) {
+    return `SnapTrace is strictly <3.4KB gzipped (compared to Sentry's ~100KB+ SDK). \n\nWe stripped out heavy DOM serializers, canvas polyfills, and complex tracing queues. We use native browser event listeners and dispatch telemetry asynchronously via navigator.sendBeacon. It causes 0.0ms main-thread delay during hydration and guarantees 100/100 Google Core Web Vitals scores.`;
   }
 
-  if (q.includes('pii') || q.includes('privacy') || q.includes('password') || q.includes('mask') || q.includes('gdpr')) {
-    return `Zero-Trust On-Device Sanitization. Passwords, authorization bearer tokens, emails, and credit cards are scrubbed with regex AST directly in the user's browser before payloads touch the network. Sensitive customer credentials never hit third-party servers.`;
+  // 4. Privacy & PII Scrubbing
+  if (
+    q.includes('pii') ||
+    q.includes('privacy') ||
+    q.includes('password') ||
+    q.includes('mask') ||
+    q.includes('credit card') ||
+    q.includes('card') ||
+    q.includes('token') ||
+    q.includes('gdpr') ||
+    q.includes('sanitize')
+  ) {
+    return `Client-Side Zero-Trust Sanitization.\n\nUnlike APMs that ship raw customer memory dumps to third-party servers and scrub them later, SnapTrace runs client-side regex AST masking directly in the user's browser before payloads touch the network. Passwords, authorization bearer tokens, emails, and credit cards are scrubbed to [REDACTED] on-device. Sensitive customer data never touches our servers or notification webhooks.`;
   }
 
-  if (q.includes('price') || q.includes('cost') || q.includes('beta') || q.includes('free') || q.includes('tier')) {
-    return `Public Beta is 100% Free until October 31, 2026. All developers who sign up receive grandfathered Lifetime Starter Pro ($9/mo value) with 150,000 monthly events, 30-day retention, unlimited projects, and in-dashboard AI diagnostics for $0. No credit card required.`;
+  // 5. Pricing, Beta Pass & Free Tier
+  if (
+    q.includes('price') ||
+    q.includes('cost') ||
+    q.includes('beta') ||
+    q.includes('free') ||
+    q.includes('tier') ||
+    q.includes('pay') ||
+    q.includes('subscription')
+  ) {
+    return `Public Beta is 100% Free until October 31, 2026.\n\nAll developers who sign up receive grandfathered Lifetime Starter Pro ($9/mo value) with 150,000 monthly events, 30-day retention, unlimited projects, and in-dashboard AI diagnostics for $0 forever. No credit card required.`;
   }
 
-  if (q.includes('cursor') || q.includes('claude') || q.includes('ai') || q.includes('copilot') || q.includes('fix')) {
-    return `Whenever a crash is captured, 1 click exports a structured prompt pre-formatted with the runtime environment, error message, and stack frames. Paste it into Cursor, Claude Code, or VS Code Copilot to generate an instant 2-line patch. You can also bring your own free Google Gemini or OpenAI key for in-dashboard diagnosis.`;
+  // 6. Programming Languages & Frameworks
+  if (
+    q.includes('language') ||
+    q.includes('stack') ||
+    q.includes('framework') ||
+    q.includes('python') ||
+    q.includes('node') ||
+    q.includes('rust') ||
+    q.includes('go') ||
+    q.includes('golang') ||
+    q.includes('php') ||
+    q.includes('csharp') ||
+    q.includes('ruby') ||
+    q.includes('flutter') ||
+    q.includes('kotlin') ||
+    q.includes('cloudflare') ||
+    q.includes('curl') ||
+    q.includes('support')
+  ) {
+    return `We support 100% of languages through our open REST ingestion protocol. Pre-configured drop-in snippets are ready in the dashboard for:\n• Frontend: Next.js (App & Pages Router), React, Vue, Svelte, Vite, Vanilla JS\n• Backend: Node.js (Express/Nest), Python (FastAPI/Django), Go (Golang), Rust (Axum/Actix), PHP (Laravel/WordPress), C# (.NET), Ruby on Rails\n• Mobile & Edge: Flutter (Dart), Kotlin/Android, Cloudflare Workers, and raw cURL/Bash.`;
   }
 
-  if (q.includes('setup') || q.includes('install') || q.includes('how to')) {
-    return `30-second drop-in:\n1. Add this to your HTML head or Next.js app/layout.tsx:\n<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="YOUR_KEY" async></script>\n2. Trigger any test crash on your app. It intercepts uncaught errors automatically.`;
+  // 7. Setup & Installation
+  if (
+    q.includes('setup') ||
+    q.includes('install') ||
+    q.includes('how to') ||
+    q.includes('start') ||
+    q.includes('quickstart')
+  ) {
+    return `30-second setup:\n1. Place this 1-line script inside your HTML head or Next.js app/layout.tsx:\n<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="YOUR_KEY" async></script>\n2. When any uncaught exception occurs, SnapTrace automatically intercepts it, scrubs PII, throttles repeat loops, and pings your Discord/Slack/Email in milliseconds.`;
   }
 
-  if (q.includes('slack') || q.includes('discord') || q.includes('alert') || q.includes('notification') || q.includes('email')) {
-    return `Instant real-time dispatch in <1s to your Discord channels, Slack incoming webhooks, and Gmail inbox with rich embeds and deduplication counters.`;
+  // 8. Alerts, Discord & Slack
+  if (
+    q.includes('slack') ||
+    q.includes('discord') ||
+    q.includes('alert') ||
+    q.includes('notification') ||
+    q.includes('email') ||
+    q.includes('webhook')
+  ) {
+    return `Instant real-time alert dispatch in <1 second to your Discord channels (rich embeds), Slack incoming webhooks, and Gmail inbox with occurrence counters ([x500]). Configure your webhook URLs under Settings in 10 seconds.`;
   }
 
-  return `SnapTrace is a featherweight (<5KB) error monitoring platform built to eliminate alert fatigue and 100KB SDK bloat. Try asking about:\n• "which languages does this support?"\n• "how does cascading error collapse work?"\n• "why is the SDK under 5KB?"\n• "how does client PII masking work?"`;
+  // 9. Loop Throttling & Spam Prevention
+  if (
+    q.includes('loop') ||
+    q.includes('throttle') ||
+    q.includes('spam') ||
+    q.includes('storm') ||
+    q.includes('flood') ||
+    q.includes('duplicate') ||
+    q.includes('2 am') ||
+    q.includes('x500')
+  ) {
+    return `60-Second Loop Throttling Engine.\n\nIf a React component gets trapped in an infinite re-render loop or a failing API poll throws 500 times in 10 seconds, SnapTrace sends the 1st crash immediately, silences duplicate alerts over a 60-second window, and delivers 1 clean summary notification tagged with the occurrence count [x500].`;
+  }
+
+  // 10. Competitor Comparison (Sentry, Datadog)
+  if (
+    q.includes('sentry') ||
+    q.includes('datadog') ||
+    q.includes('glitchtip') ||
+    q.includes('honeybadger') ||
+    q.includes('why snaptrace') ||
+    q.includes('versus') ||
+    q.includes('vs')
+  ) {
+    return `Why developers switch to SnapTrace:\n1. Featherweight SDK: <3.4KB vs Sentry's 100KB+ bundle penalty.\n2. Zero Alert Fatigue: 60s noise throttling groups cascade crashes into 1 alert tagged [xN].\n3. On-Device PII Masking: Passwords and cards scrubbed before transmission.\n4. Free BYOK AI: In-dashboard Gemini & OpenAI diagnostics without expensive enterprise add-ons.`;
+  }
+
+  // Fallback
+  return `SnapTrace is a featherweight (<5KB) error monitoring platform built to eliminate alert fatigue and 100KB SDK bloat. Try asking about:\n• "which ai does it support?"\n• "how does cascading error collapse work?"\n• "why is the SDK under 5KB?"\n• "which languages are supported?"\n• "how does client PII masking work?"`;
 }
 
 export default function WelcomeLandingPage() {
@@ -159,14 +272,23 @@ export default function WelcomeLandingPage() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
 
-  // Interactive Dev Terminal Chat State
+  // Interactive Dev Terminal Chat State with Auto-Scroll Ref
   const [cliInput, setCliInput] = useState('');
   const [cliMessages, setCliMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
     {
       role: 'assistant',
-      text: "Dev Mode active. Ask any technical question about our <5KB SDK, cascading error collapse, or client PII masking.",
+      text: "Dev Mode active. Ask any technical question about our <5KB SDK, AI model support, cascading error collapse, or client PII masking.",
     },
   ]);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll chat to bottom smoothly on message change
+  useEffect(() => {
+    if (!marketingMode) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [cliMessages, marketingMode]);
 
   useEffect(() => {
     async function checkUserSession() {
@@ -429,7 +551,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
   }
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden pb-16">
       
       {/* 1. TOP BANNER */}
       <div className={`px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2 transition-colors ${
@@ -536,7 +658,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* SENTRY MARKETING MODE TOGGLE BUTTON */}
+          {/* Sentry-Style Marketing Mode Switch */}
           <div className="flex items-center space-x-3 font-mono shrink-0">
             <button
               onClick={() => setMarketingMode(!marketingMode)}
@@ -575,7 +697,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         <section className="min-h-[calc(100vh-6.5rem)] flex items-center justify-center p-6 bg-[#05070E] relative overflow-hidden animate-in fade-in duration-150">
           <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* Left Column: Bold Developer Truth (Speaking LOUDER About Superpowers) */}
+            {/* Left Column: Developer Manifesto */}
             <div className="lg:col-span-6 space-y-6">
               <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-mono tracking-tight text-white leading-none">
@@ -627,7 +749,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               </div>
             </div>
 
-            {/* Right Column: Intelligent /snappy-cli Terminal */}
+            {/* Right Column: Intelligent /snappy-cli Terminal with AUTO-SCROLL */}
             <div className="lg:col-span-6 bg-[#090D16] border-2 border-emerald-500/40 rounded-3xl p-5 shadow-2xl flex flex-col justify-between font-mono space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div className="flex items-center gap-2 text-xs font-bold text-white">
@@ -637,7 +759,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 <span className="text-[10px] text-slate-500">Ask any technical question</span>
               </div>
 
-              {/* Chat Message Stream */}
+              {/* Chat Message Stream (Auto-Scrolls to bottom) */}
               <div className="space-y-3 overflow-y-auto max-h-[300px] pr-1 text-xs">
                 {cliMessages.map((msg, idx) => (
                   <div
@@ -654,11 +776,19 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                     <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                   </div>
                 ))}
+                {/* Auto-scroll target */}
+                <div ref={messagesEndRef} />
               </div>
 
-              {/* Quick Knowledge Prompts */}
+              {/* Quick Knowledge Prompts (Intelligent Keyword Triggers) */}
               <div className="space-y-2.5 pt-2 border-t border-slate-800/80">
                 <div className="flex items-center gap-1.5 flex-wrap">
+                  <button
+                    onClick={() => handleAskCli("which ai models does this support?")}
+                    className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
+                  >
+                    🤖 Which AI Models?
+                  </button>
                   <button
                     onClick={() => handleAskCli("which languages does this support?")}
                     className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
@@ -682,12 +812,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                     className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
                   >
                     🔒 PII Masking?
-                  </button>
-                  <button
-                    onClick={() => handleAskCli("how does 1-click Cursor export work?")}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
-                  >
-                    🤖 Cursor Export?
                   </button>
                   <button
                     onClick={() => handleAskCli("how does the free beta pass work?")}
@@ -1112,260 +1236,260 @@ try {
               </div>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Simple, transparent developer tiers</h2>
               <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto font-mono">
-                Zero surprise overage bills. Full Pro access unlocked during public beta.
-              </p>
-            </SmoothReveal>
+            Zero surprise overage bills. Full Pro access unlocked during public beta.
+          </p>
+        </SmoothReveal>
 
-            <SmoothReveal className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch" delay={150}>
-              
-              {/* Card 1: Developer Free */}
-              <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Developer Free</span>
-                    <div className="text-3xl font-black text-white">$0 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
-                    <p className="text-xs text-slate-400 pt-1">Essential crash monitoring for side projects and hobby apps.</p>
-                  </div>
-
-                  <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>10,000</strong> Events / Month</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 14-Day Data Retention</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Up to 2 Projects</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Sub-5KB Featherweight SDK</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1-Click Cursor / Claude Export</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Discord, Slack & Email Alert Channels</li>
-                  </ul>
-                </div>
-
-                <Link
-                  href="/signup"
-                  className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
-                >
-                  Start Free Forever →
-                </Link>
-              </div>
-
-              {/* Card 2: Starter Pro */}
-              <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
-                <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
-                  ★ 12 Spots Remaining
-                </span>
-
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Starter Pro (Beta Pass)</span>
-                    <div className="text-3xl font-black text-white">$0 <span className="text-xs text-yellow-300 font-mono font-bold line-through ml-1">$9/mo</span></div>
-                    <p className="text-xs text-slate-400 pt-1">Free full Pro features unlocked for all early beta developers.</p>
-                  </div>
-
-                  <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5 font-mono">
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>150,000</strong> Events / Month</li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 30-Day Data Retention</li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>Unlimited Projects</strong></li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>In-Dashboard BYOK AI Copilot</strong></li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Noise Deduplication Throttling</li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Database Purge Tools</li>
-                  </ul>
-                </div>
-
-                <Link
-                  href="/signup"
-                  className="block w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl transition shadow-xl shadow-yellow-500/20 cursor-pointer font-mono"
-                >
-                  Claim Free Pro Beta Pass →
-                </Link>
-              </div>
-
-              {/* Card 3: Team Scale */}
-              <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
-                    <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
-                    <p className="text-xs text-slate-400 pt-1">For high-traffic production workloads and growing teams.</p>
-                  </div>
-
-                  <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord, Slack & Email Delivery</li>
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Team Invites & Multi-Seat Access</li>
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
-                  </ul>
-                </div>
-
-                <Link
-                  href="/signup"
-                  className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
-                >
-                  Join Beta Waitlist →
-                </Link>
-              </div>
-
-            </SmoothReveal>
-          </section>
-
-          {/* 11. SECURITY & COMPLIANCE BADGES */}
-          <section className="py-16 border-t border-slate-800/80 bg-[#060911]/60">
-            <div className="max-w-5xl mx-auto px-6 text-center space-y-6">
+        <SmoothReveal className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch" delay={150}>
+          
+          {/* Card 1: Developer Free */}
+          <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+            <div className="space-y-4">
               <div className="space-y-1">
-                <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-yellow-400">Security by Default</h3>
-                <h2 className="text-2xl sm:text-3xl font-black text-white">Built for Developer Privacy & Performance</h2>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Developer Free</span>
+                <div className="text-3xl font-black text-white">$0 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
+                <p className="text-xs text-slate-400 pt-1">Essential crash monitoring for side projects and hobby apps.</p>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-xs font-mono">
-                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
-                  <span className="text-xl">🛡️</span>
-                  <div className="text-white font-bold">GDPR Ready</div>
-                  <div className="text-[10px] text-slate-400">On-device PII masking</div>
-                </div>
-                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
-                  <span className="text-xl">🪶</span>
-                  <div className="text-white font-bold">&lt;5KB Footprint</div>
-                  <div className="text-[10px] text-slate-400">100/100 Core Web Vitals</div>
-                </div>
-                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
-                  <span className="text-xl">🔇</span>
-                  <div className="text-white font-bold">Anti-Noise Guard</div>
-                  <div className="text-[10px] text-slate-400">SHA-256 loop throttling</div>
-                </div>
-                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
-                  <span className="text-xl">🔓</span>
-                  <div className="text-white font-bold">No Vendor Lock-in</div>
-                  <div className="text-[10px] text-slate-400">Universal REST protocol</div>
-                </div>
-              </div>
+              <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>10,000</strong> Events / Month</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 14-Day Data Retention</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Up to 2 Projects</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Sub-5KB Featherweight SDK</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1-Click Cursor / Claude Export</li>
+                <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Discord, Slack & Email Alert Channels</li>
+              </ul>
             </div>
-          </section>
 
-          {/* 12. FAQ SECTION */}
-          <section id="faq" className="max-w-4xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-8">
-            <SmoothReveal className="text-center space-y-2">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
-              <p className="text-xs sm:text-sm text-slate-400 font-mono">Real technical answers for developers evaluating SnapTrace.</p>
-            </SmoothReveal>
+            <Link
+              href="/signup"
+              className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
+            >
+              Start Free Forever →
+            </Link>
+          </div>
 
-            <SmoothReveal className="space-y-3" delay={150}>
-              {faqs.map((faq, idx) => {
-                const isOpen = activeFaq === idx;
-                return (
-                  <div
-                    key={idx}
-                    className="bg-[#0B101D] border border-slate-800 rounded-2xl overflow-hidden transition"
-                  >
-                    <button
-                      onClick={() => setActiveFaq(isOpen ? null : idx)}
-                      className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:text-yellow-400 transition"
-                    >
-                      <span className="font-bold text-xs sm:text-sm text-white">{faq.q}</span>
-                      <span className="text-slate-500 font-mono text-base">{isOpen ? '−' : '+'}</span>
-                    </button>
-                    {isOpen && (
-                      <div className="px-4 sm:px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3 font-sans">
-                        {faq.a}
-                      </div>
-                    )}
+          {/* Card 2: Starter Pro */}
+          <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
+            <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
+              ★ 12 Spots Remaining
+            </span>
+
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Starter Pro (Beta Pass)</span>
+                <div className="text-3xl font-black text-white">$0 <span className="text-xs text-yellow-300 font-mono font-bold line-through ml-1">$9/mo</span></div>
+                <p className="text-xs text-slate-400 pt-1">Free full Pro features unlocked for all early beta developers.</p>
+              </div>
+
+              <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5 font-mono">
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>150,000</strong> Events / Month</li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 30-Day Data Retention</li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>Unlimited Projects</strong></li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>In-Dashboard BYOK AI Copilot</strong></li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Noise Deduplication Throttling</li>
+                <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Database Purge Tools</li>
+              </ul>
+            </div>
+
+            <Link
+              href="/signup"
+              className="block w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl transition shadow-xl shadow-yellow-500/20 cursor-pointer font-mono"
+            >
+              Claim Free Pro Beta Pass →
+            </Link>
+          </div>
+
+          {/* Card 3: Team Scale */}
+          <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
+                <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
+                <p className="text-xs text-slate-400 pt-1">For high-traffic production workloads and growing teams.</p>
+              </div>
+
+              <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord, Slack & Email Delivery</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Team Invites & Multi-Seat Access</li>
+                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
+              </ul>
+            </div>
+
+            <Link
+              href="/signup"
+              className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
+            >
+              Join Beta Waitlist →
+            </Link>
+          </div>
+
+        </SmoothReveal>
+      </section>
+
+      {/* 11. SECURITY & COMPLIANCE BADGES */}
+      <section className="py-16 border-t border-slate-800/80 bg-[#060911]/60">
+        <div className="max-w-5xl mx-auto px-6 text-center space-y-6">
+          <div className="space-y-1">
+            <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-yellow-400">Security by Default</h3>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Built for Developer Privacy & Performance</h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-xs font-mono">
+            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
+              <span className="text-xl">🛡️</span>
+              <div className="text-white font-bold">GDPR Ready</div>
+              <div className="text-[10px] text-slate-400">On-device PII masking</div>
+            </div>
+            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
+              <span className="text-xl">🪶</span>
+              <div className="text-white font-bold">&lt;5KB Footprint</div>
+              <div className="text-[10px] text-slate-400">100/100 Core Web Vitals</div>
+            </div>
+            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
+              <span className="text-xl">🔇</span>
+              <div className="text-white font-bold">Anti-Noise Guard</div>
+              <div className="text-[10px] text-slate-400">SHA-256 loop throttling</div>
+            </div>
+            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
+              <span className="text-xl">🔓</span>
+              <div className="text-white font-bold">No Vendor Lock-in</div>
+              <div className="text-[10px] text-slate-400">Universal REST protocol</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 12. FAQ SECTION */}
+      <section id="faq" className="max-w-4xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-8">
+        <SmoothReveal className="text-center space-y-2">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
+          <p className="text-xs sm:text-sm text-slate-400 font-mono">Real technical answers for developers evaluating SnapTrace.</p>
+        </SmoothReveal>
+
+        <SmoothReveal className="space-y-3" delay={150}>
+          {faqs.map((faq, idx) => {
+            const isOpen = activeFaq === idx;
+            return (
+              <div
+                key={idx}
+                className="bg-[#0B101D] border border-slate-800 rounded-2xl overflow-hidden transition"
+              >
+                <button
+                  onClick={() => setActiveFaq(isOpen ? null : idx)}
+                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:text-yellow-400 transition"
+                >
+                  <span className="font-bold text-xs sm:text-sm text-white">{faq.q}</span>
+                  <span className="text-slate-500 font-mono text-base">{isOpen ? '−' : '+'}</span>
+                </button>
+                {isOpen && (
+                  <div className="px-4 sm:px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3 font-sans">
+                    {faq.a}
                   </div>
-                );
-              })}
-            </SmoothReveal>
-          </section>
-
-          {/* 13. SENTRY-STYLE ENTERPRISE FOOTER */}
-          <footer className="border-t border-slate-800/80 bg-[#060911] py-16 relative overflow-hidden font-sans">
-            <div className="max-w-5xl mx-auto px-6 space-y-10">
-              
-              <div className="text-center space-y-3 max-w-xl mx-auto">
-                <h2 className="text-2xl sm:text-3xl font-black text-white">
-                  Ready to catch bugs in a snap?
-                </h2>
-                <p className="text-xs text-slate-400 leading-relaxed font-mono">
-                  Join developers catching crashes in real time with zero noise and instant AI diagnoses.
-                </p>
-                <div className="pt-1 font-mono">
-                  <Link
-                    href="/signup"
-                    className="inline-block px-8 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
-                  >
-                    Claim Your Free Beta Pass in 60s →
-                  </Link>
-                </div>
+                )}
               </div>
+            );
+          })}
+        </SmoothReveal>
+      </section>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-slate-800/80 text-xs font-mono">
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Platform</span>
-                  <ul className="space-y-1.5 text-slate-400">
-                    <li><a href="#features" className="hover:text-white transition">Telemetry Ingestion</a></li>
-                    <li><a href="#features" className="hover:text-white transition">&lt;5KB Client SDK</a></li>
-                    <li><a href="#ai-agent" className="hover:text-white transition">AI Root Cause Engine</a></li>
-                    <li><a href="#features" className="hover:text-white transition">Client-Side PII Firewall</a></li>
-                  </ul>
-                </div>
-
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Stacks & SDKs</span>
-                  <ul className="space-y-1.5 text-slate-400">
-                    <li><a href="#quickstart" className="hover:text-white transition">Next.js App Router</a></li>
-                    <li><a href="#quickstart" className="hover:text-white transition">Python & FastAPI</a></li>
-                    <li><a href="#quickstart" className="hover:text-white transition">Node.js / Express</a></li>
-                    <li><a href="#quickstart" className="hover:text-white transition">Go, Rust & PHP</a></li>
-                  </ul>
-                </div>
-
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Compare</span>
-                  <ul className="space-y-1.5 text-slate-400">
-                    <li><Link href="/vs/sentry" className="hover:text-white transition">SnapTrace vs. Sentry</Link></li>
-                    <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. GlitchTip</a></li>
-                    <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. Honeybadger</a></li>
-                  </ul>
-                </div>
-
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
-                  <ul className="space-y-1.5 text-slate-400">
-                    <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
-                    <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
-                    <li><Link href="/demo" className="hover:text-yellow-400 transition font-bold">Public Demo</Link></li>
-                    <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
-                    <li><span className="text-emerald-400">● Systems Operational</span></li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-mono gap-3">
-                <span>© {new Date().getFullYear()} SnapTrace. All rights reserved. The Independent Developer Telemetry Platform.</span>
-                <div className="flex items-center space-x-4 text-slate-400">
-                  <Link href="/privacy" className="hover:text-yellow-400">Privacy</Link>
-                  <Link href="/terms" className="hover:text-yellow-400">Terms</Link>
-                  <Link href="/demo" className="hover:text-yellow-400">Demo</Link>
-                  <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
-                </div>
-              </div>
-
-            </div>
-          </footer>
-
-          {/* 14. STICKY BOTTOM BAR (Shown ONLY in Marketing Mode to prevent overlap) */}
-          <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-300 font-mono">
-            <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 truncate">
-                <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping shrink-0" />
-                <span className="text-xs text-slate-200 font-bold truncate">
-                  Beta Offer: <span className="text-yellow-300">12 Lifetime Pro Passes Left</span>
-                </span>
-              </div>
-
+      {/* 13. SENTRY-STYLE ENTERPRISE FOOTER */}
+      <footer className="border-t border-slate-800/80 bg-[#060911] py-16 relative overflow-hidden font-sans">
+        <div className="max-w-5xl mx-auto px-6 space-y-10">
+          
+          <div className="text-center space-y-3 max-w-xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-black text-white">
+              Ready to catch bugs in a snap?
+            </h2>
+            <p className="text-xs text-slate-400 leading-relaxed font-mono">
+              Join developers catching crashes in real time with zero noise and instant AI diagnoses.
+            </p>
+            <div className="pt-1 font-mono">
               <Link
                 href="/signup"
-                className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 shrink-0"
+                className="inline-block px-8 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
               >
-                Claim Free Pass →
+                Claim Your Free Beta Pass in 60s →
               </Link>
             </div>
           </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-slate-800/80 text-xs font-mono">
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Platform</span>
+              <ul className="space-y-1.5 text-slate-400">
+                <li><a href="#features" className="hover:text-white transition">Telemetry Ingestion</a></li>
+                <li><a href="#features" className="hover:text-white transition">&lt;5KB Client SDK</a></li>
+                <li><a href="#ai-agent" className="hover:text-white transition">AI Root Cause Engine</a></li>
+                <li><a href="#features" className="hover:text-white transition">Client-Side PII Firewall</a></li>
+              </ul>
+            </div>
+
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Stacks & SDKs</span>
+              <ul className="space-y-1.5 text-slate-400">
+                <li><a href="#quickstart" className="hover:text-white transition">Next.js App Router</a></li>
+                <li><a href="#quickstart" className="hover:text-white transition">Python & FastAPI</a></li>
+                <li><a href="#quickstart" className="hover:text-white transition">Node.js / Express</a></li>
+                <li><a href="#quickstart" className="hover:text-white transition">Go, Rust & PHP</a></li>
+              </ul>
+            </div>
+
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Compare</span>
+              <ul className="space-y-1.5 text-slate-400">
+                <li><Link href="/vs/sentry" className="hover:text-white transition">SnapTrace vs. Sentry</Link></li>
+                <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. GlitchTip</a></li>
+                <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. Honeybadger</a></li>
+              </ul>
+            </div>
+
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
+              <ul className="space-y-2.5 text-slate-400">
+                <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
+                <li><Link href="/demo" className="hover:text-yellow-400 transition font-bold">Public Demo</Link></li>
+                <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
+                <li><span className="text-emerald-400">● Systems Operational</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-mono gap-3">
+            <span>© {new Date().getFullYear()} SnapTrace. All rights reserved. The Independent Developer Telemetry Platform.</span>
+            <div className="flex items-center space-x-4 text-slate-400">
+              <Link href="/privacy" className="hover:text-yellow-400">Privacy</Link>
+              <Link href="/terms" className="hover:text-yellow-400">Terms</Link>
+              <Link href="/demo" className="hover:text-yellow-400">Demo</Link>
+              <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
+            </div>
+          </div>
+
+        </div>
+      </footer>
+
+      {/* 14. HIGH-CONVERTING STICKY FLOATING BOTTOM BAR */}
+      <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-300 font-mono">
+        <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 truncate">
+            <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping shrink-0" />
+            <span className="text-xs text-slate-200 font-bold truncate">
+              Beta Offer: <span className="text-yellow-300">12 Lifetime Pro Passes Left</span>
+            </span>
+          </div>
+
+          <Link
+            href="/signup"
+            className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 shrink-0"
+          >
+            Claim Free Pass →
+          </Link>
+        </div>
+      </div>
         </>
       )}
 
