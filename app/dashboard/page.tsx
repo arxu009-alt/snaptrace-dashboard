@@ -210,6 +210,7 @@ export default function DashboardOverviewPage() {
         },
         () => {
           loadDashboardData();
+          window.dispatchEvent(new Event('snaptrace_error_updated'));
         }
       )
       .subscribe();
@@ -220,7 +221,7 @@ export default function DashboardOverviewPage() {
     };
   }, [loadDashboardData]);
 
-  // 1-Click Instant Live Test Crash Trigger
+  // 1-Click Instant Live Test Crash Trigger with Realtime Broadcast to Sidebar
   const handleSendTestPing = async () => {
     if (!projectKey || projectKey.startsWith('No Project')) {
       alert('Please wait for your active project key to initialize.');
@@ -247,6 +248,10 @@ export default function DashboardOverviewPage() {
       if (res.ok && data.success) {
         setPingSuccessMsg('✓ Live test crash ingested! Real-time stream updated.');
         loadDashboardData();
+        
+        // 🌟 Instantly update the sidebar badge without page reload
+        window.dispatchEvent(new Event('snaptrace_error_updated'));
+        
         setTimeout(() => setPingSuccessMsg(null), 4000);
       } else {
         throw new Error(data.error || 'Failed to dispatch test ping');
@@ -344,10 +349,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
             </p>
           </div>
 
-          {/* Action Buttons with 1-Click Test Ping */}
           <div className="flex items-center space-x-2.5 flex-wrap">
-            
-            {/* ⚡ NEW 1-CLICK INSTANT LIVE TEST PING BUTTON */}
             <button
               onClick={handleSendTestPing}
               disabled={firingPing || !projectKey}
@@ -377,7 +379,6 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
           </div>
         </div>
 
-        {/* Live Ping Success Notification Toast */}
         {pingSuccessMsg && (
           <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs font-mono text-emerald-300 flex items-center justify-between animate-in fade-in duration-150">
             <span>🎉 {pingSuccessMsg}</span>
@@ -385,7 +386,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
           </div>
         )}
 
-        {/* Onboarding Quickstart Card (Shown when 0 live errors exist) */}
+        {/* Onboarding Quickstart Card */}
         {!loading && totalErrors === 0 && !demoMode && (
           <div className="bg-gradient-to-b from-[#0B101D] to-[#070b14] border border-yellow-400/40 rounded-2xl p-6 shadow-xl space-y-5 animate-in fade-in duration-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
@@ -420,8 +421,6 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
                 <div className="space-y-2 pt-1">
                   <span className="text-[11px] text-slate-400 font-bold uppercase block">2. Experience Live Telemetry Right Now</span>
-                  
-                  {/* 1-Click Instant Send Button */}
                   <button
                     onClick={handleSendTestPing}
                     disabled={firingPing}
@@ -477,7 +476,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
           </div>
         ) : (
           <>
-            {/* 1. Stat Cards Grid */}
+            {/* Stat Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-[#0B0F19]/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 space-y-1.5 shadow-sm transition group backdrop-blur-sm">
                 <div className="flex items-center justify-between">
@@ -512,7 +511,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                 <p className="text-[11px] text-slate-500 font-sans">Active live exceptions</p>
               </div>
 
-              <div className="bg-[#0B0F19]/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 space-y-1.5 shadow-sm transition group backdrop-blur-sm">
+              <div className="bg-[#0B101D]/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 space-y-1.5 shadow-sm transition group backdrop-blur-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
                     Development Logs
@@ -527,7 +526,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                 <p className="text-[11px] text-slate-500 font-sans">Staging & local events</p>
               </div>
 
-              <div className="bg-[#0B0F19]/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 space-y-1.5 shadow-sm transition group backdrop-blur-sm">
+              <div className="bg-[#0B101D]/80 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 space-y-1.5 shadow-sm transition group backdrop-blur-sm">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -546,7 +545,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
               </div>
             </div>
 
-            {/* 2. Velocity Pulse Chart */}
+            {/* Velocity Pulse Chart */}
             <div className="bg-[#0B101D]/80 border border-slate-800/80 rounded-2xl p-5 shadow-sm space-y-3 backdrop-blur-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
                 <div>
@@ -618,7 +617,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
               </div>
             </div>
 
-            {/* 3. Recent Crashes & Shortcuts Grid */}
+            {/* Recent Crashes & Shortcuts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
               {/* Recent Captured Crashes */}

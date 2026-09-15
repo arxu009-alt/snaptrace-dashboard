@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
@@ -26,6 +26,30 @@ export default function DashboardLayout({ children }) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
+  // Real-time Badge Count Fetcher
+  const fetchBadgeCount = useCallback(async () => {
+    if (!supabaseUrl || !supabaseAnonKey) return;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
+    const { data: userProjects } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('user_id', session.user.id);
+
+    if (userProjects && userProjects.length > 0) {
+      const projectIds = userProjects.map((p) => p.id);
+      const { count } = await supabase
+        .from('errors')
+        .select('*', { count: 'exact', head: true })
+        .in('project_id', projectIds);
+
+      setActiveErrorCount(count || 0);
+    }
+  }, [supabaseUrl, supabaseAnonKey]);
+
   useEffect(() => {
     if (!supabaseUrl || !supabaseAnonKey) {
       router.replace('/login');
@@ -34,7 +58,6 @@ export default function DashboardLayout({ children }) {
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Fast local session verification (0ms network delay)
     async function verifySession() {
       const { data: { session } } = await supabase.auth.getSession();
 
@@ -52,28 +75,31 @@ export default function DashboardLayout({ children }) {
         }
 
         setAuthChecking(false);
-
-        // Fetch count in background without blocking UI render
-        supabase
-          .from('projects')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .then(({ data: userProjects }) => {
-            if (userProjects && userProjects.length > 0) {
-              const projectIds = userProjects.map((p) => p.id);
-              supabase
-                .from('errors')
-                .select('*', { count: 'exact', head: true })
-                .in('project_id', projectIds)
-                .then(({ count }) => {
-                  setActiveErrorCount(count || 0);
-                });
-            }
-          });
+        fetchBadgeCount();
       }
     }
 
     verifySession();
+
+    // 1. Listen to Realtime WebSocket for live error count updates
+    const channel = supabase
+      .channel('realtime-sidebar-badge')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'errors',
+        },
+        () => {
+          fetchBadgeCount();
+        }
+      )
+      .subscribe();
+
+    // 2. Listen to custom window events from page actions
+    window.addEventListener('snaptrace_error_updated', fetchBadgeCount);
+    window.addEventListener('snaptrace_project_change', fetchBadgeCount);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
@@ -83,8 +109,11 @@ export default function DashboardLayout({ children }) {
 
     return () => {
       subscription.unsubscribe();
+      window.removeEventListener('snaptrace_error_updated', fetchBadgeCount);
+      window.removeEventListener('snaptrace_project_change', fetchBadgeCount);
+      supabase.removeChannel(channel);
     };
-  }, [router, supabaseUrl, supabaseAnonKey]);
+  }, [router, supabaseUrl, supabaseAnonKey, fetchBadgeCount]);
 
   const handleSignOut = async () => {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -176,6 +205,7 @@ export default function DashboardLayout({ children }) {
                   {!sidebarCollapsed && <span>{item.name}</span>}
                 </div>
 
+                {/* Live Realtime Error Count Badge */}
                 {!sidebarCollapsed && item.hasBadge && activeErrorCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-500/15 text-red-400 border border-red-500/30">
                     {activeErrorCount}
@@ -197,10 +227,10 @@ export default function DashboardLayout({ children }) {
         )}
       </aside>
 
-      {/* 2. Main Content View (Clean container without transform-gpu trap) */}
+      {/* 2. Main Content View */}
       <div className="flex-1 flex flex-col min-w-0 bg-[#05070E]">
         
-        <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-md px-6 flex items-center justify-between z-40">
+        <header className="h-16 border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-xl px-6 flex items-center justify-between z-40">
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -312,7 +342,6 @@ export default function DashboardLayout({ children }) {
           </div>
         </header>
 
-        {/* Clean Viewport Content (No transform traps) */}
         <main className="flex-1 overflow-y-auto p-0">
           {children}
         </main>
