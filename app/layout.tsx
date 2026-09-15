@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ['400', '500', '600', '700', '800'],
 });
 
-// Comprehensive Pro SEO & Social Share Meta Tags
+// Comprehensive Pro SEO, Search Engine Favicons & Social Share Meta Tags
 export const metadata: Metadata = {
   metadataBase: new URL('https://snaptrace-dashboard.vercel.app'),
   title: {
@@ -54,6 +54,15 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon', type: 'image/png', sizes: '192x192' },
+    ],
+    apple: [
+      { url: '/icon', sizes: '192x192', type: 'image/png' },
+    ],
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -78,9 +87,6 @@ export const metadata: Metadata = {
       'Catch crashes in real time with <5KB SDK overhead, client-side PII scrubbing, and BYOK AI root-cause fixes.',
     creator: '@snaptrace',
   },
-  icons: {
-    icon: '/favicon.ico',
-  },
   verification: {
     other: {
       'msvalidate.01': ['EC1C00F550C23BCFCF6A5FB131492203'],
@@ -93,7 +99,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // JSON-LD Structured Data Schema for Google Search Rich Results
+  // JSON-LD Structured Data Schema for Google Search Rich Snippets
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
