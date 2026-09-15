@@ -47,7 +47,7 @@ function SmoothReveal({
     <div
       ref={domRef}
       style={{ transitionDelay: `${delay}ms` }}
-      className={`transform-gpu transition-all duration-700 ease-out ${
+      className={`transform-gpu transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isVisible
           ? 'opacity-100 translate-y-0 filter blur-0'
           : 'opacity-0 translate-y-6 filter blur-[1px]'
@@ -168,11 +168,16 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
+  // Sentry-Style Dual Mode State
   const [marketingMode, setMarketingMode] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
   const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
+  
+  // Mobile Navigation Drawer State
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Chat State
   const [cliInput, setCliInput] = useState('');
   const [cliMessages, setCliMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
     {
@@ -467,14 +472,14 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden relative">
       
-      {/* 1. COMPACT TOP BANNER (Slimmed to save vertical viewport space) */}
+      {/* 1. TOP BANNER */}
       <div className={`px-4 py-1.5 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2 transition-colors ${
         marketingMode
           ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950'
           : 'bg-[#0B101D] border-b border-yellow-400/30 text-yellow-300'
       }`}>
         <span>{marketingMode ? '🔥 Early Adopter Launch:' : '⚡ ARCHITECTURE SPEC:'}</span>
-        <span className="bg-slate-950 text-yellow-300 px-2 py-0.5 rounded text-[11px] font-mono border border-yellow-400/20">
+        <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px] font-mono border border-yellow-400/20">
           {marketingMode ? '38 / 50 Free Lifetime Pro Passes Claimed' : 'RFC-9110 Asynchronous Ingestion Engine Active'}
         </span>
         <span className="hidden sm:inline">
@@ -482,19 +487,16 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </span>
       </div>
 
-      {/* 2. SENTRY-STYLE STREAMLINED HEADER (h-16 to preserve fold height) */}
+      {/* 2. SENTRY-STYLE STREAMLINED HEADER */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-40 transition-all">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           
-          {/* Logo */}
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition shrink-0">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Clean Center Navigation with VISIBLE CHEVRON ICONS */}
+          {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300 font-mono">
-            
-            {/* Dropdown 1: Platform */}
             <div
               className="relative group"
               onMouseEnter={() => setOpenDropdown('platform')}
@@ -541,7 +543,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               )}
             </div>
 
-            {/* Dropdown 2: AI Copilot */}
             <div
               className="relative group"
               onMouseEnter={() => setOpenDropdown('ai')}
@@ -587,8 +588,8 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* Sentry-Grade Clean Action Buttons */}
-          <div className="flex items-center space-x-3 font-mono shrink-0">
+          {/* Desktop Right Action Buttons */}
+          <div className="hidden sm:flex items-center space-x-3 font-mono shrink-0">
             <Link
               href="/login"
               className="text-xs font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800/50 transition"
@@ -610,10 +611,106 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               GET STARTED
             </Link>
           </div>
+
+          {/* Mobile Hamburger Toggle Button */}
+          <div className="flex sm:hidden items-center gap-2">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl bg-[#0B101D] border border-slate-800 text-slate-300 hover:text-yellow-400 transition"
+              aria-label="Toggle Mobile Menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+
         </div>
+
+        {/* 🌟 RESPONSIVE MOBILE NAVIGATION DRAWER */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-[#070A12]/98 border-b border-slate-800 p-6 space-y-4 animate-in slide-in-from-top-4 duration-200 font-mono">
+            <div className="space-y-2 text-xs">
+              <a 
+                href="#features" 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
+              >
+                Platform & Capabilities →
+              </a>
+              <a 
+                href="#ai-agent" 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="block py-2 text-yellow-300 border-b border-slate-800/60"
+              >
+                ✨ AI Copilot & IDE Agents →
+              </a>
+              <a 
+                href="#quickstart" 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
+              >
+                SDK Setup (12 Stacks) →
+              </a>
+              <a 
+                href="#comparison" 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
+              >
+                Why SnapTrace vs Sentry →
+              </a>
+              <a 
+                href="#pricing" 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
+              >
+                Pricing & Beta Pass →
+              </a>
+              <a 
+                href="#faq" 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
+              >
+                FAQ →
+              </a>
+            </div>
+
+            {/* Mobile Mode Switch */}
+            <div className="flex items-center justify-between p-3 bg-[#0B101D] border border-slate-800 rounded-xl">
+              <span className="text-xs text-slate-300 font-bold">Marketing Mode:</span>
+              <button
+                onClick={toggleMarketingMode}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+                  marketingMode ? 'bg-amber-500 text-slate-950' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                }`}
+              >
+                {marketingMode ? 'ON (Story)' : 'OFF (Raw Dev)'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Link
+                href="/demo"
+                className="py-2.5 text-center rounded-xl border border-yellow-400/50 text-yellow-300 text-xs font-bold"
+              >
+                GET DEMO
+              </Link>
+              <Link
+                href="/signup"
+                className="py-2.5 text-center bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-xs font-black rounded-xl"
+              >
+                GET STARTED
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* SENTRY'S VERTICAL MARKETING MODE TOGGLE CARD (Generous Space, Never Overlaps Content) */}
+      {/* 🌟 SENTRY'S EXACT VERTICAL MARKETING MODE CARD (Desktop Canvas Right Alignment) */}
       <div className="max-w-7xl mx-auto px-6 relative">
         <div className="absolute top-4 right-6 z-30 hidden sm:block">
           <div className="bg-[#181326]/90 border border-purple-500/30 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1 font-mono">
@@ -790,7 +887,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       ) : (
         /* VIEW 2: WHEN MARKETING MODE IS ON (PERFECT ABOVE-THE-FOLD FIT) */
         <>
-          {/* 3. HERO SECTION (TIGHTENED VERTICAL RHYTHM SO BUTTONS ARE FULLY VISIBLE) */}
+          {/* 3. HERO SECTION */}
           <section className="relative pt-6 sm:pt-8 pb-12 overflow-hidden">
             <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[130px] pointer-events-none rounded-full" />
 
@@ -807,7 +904,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 </a>
               </div>
 
-              {/* MASSIVE, CONFIDENT SENTRY-TIER HEADLINE (FITS BEAUTIFULLY) */}
+              {/* MASSIVE, CONFIDENT SENTRY-TIER HEADLINE */}
               <h1 className="text-4xl sm:text-6xl lg:text-[70px] font-black tracking-tight text-white leading-[1.08] max-w-5xl mx-auto">
                 Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>, fix it in a{' '}
                 <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
@@ -819,7 +916,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 Stop spending Sundays connecting the dots by hand. SnapTrace collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes.
               </p>
 
-              {/* BOTH HERO BUTTONS: 100% VISIBLE ABOVE THE FOLD (ZERO CLIPPING!) */}
+              {/* BOTH HERO BUTTONS: 100% VISIBLE ABOVE THE FOLD */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 font-mono">
                 <Link
                   href="/signup"
