@@ -6,6 +6,10 @@ import SnapTraceLogo from '@/components/SnapTraceLogo';
 
 export default function SettingsPage() {
   const [userEmail, setUserEmail] = useState<string>('');
+  const [displayName, setDisplayName] = useState<string>('');
+  const [savingName, setSavingName] = useState<boolean>(false);
+  const [nameSavedMsg, setNameSavedMsg] = useState<string | null>(null);
+
   const [aiProvider, setAiProvider] = useState<'gemini' | 'openai'>('gemini');
   const [aiKey, setAiKey] = useState<string>('');
   const [showAiKey, setShowAiKey] = useState<boolean>(false);
@@ -17,6 +21,8 @@ export default function SettingsPage() {
   const [slackWebhook, setSlackWebhook] = useState<string>('');
   const [apiKey, setApiKey] = useState<string>('');
   const [projectId, setProjectId] = useState<string>('');
+  const [showApiKey, setShowApiKey] = useState<boolean>(false);
+  const [copiedKey, setCopiedKey] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
   // Feedback States
@@ -37,14 +43,19 @@ export default function SettingsPage() {
     async function loadSettings() {
       setLoading(true);
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         setLoading(false);
         return;
       }
 
+      const user = session.user;
       const uEmail = user.email || '';
       setUserEmail(uEmail);
+
+      // Load Display Name from Supabase User Metadata
+      const currentName = user.user_metadata?.full_name || user.user_metadata?.name || uEmail.split('@')[0] || '';
+      setDisplayName(currentName);
 
       const ownerCheck = uEmail.toLowerCase() === 'arxu1045@gmail.com' || uEmail.toLowerCase() === 'arxu009@gmail.com';
       setIsOwner(ownerCheck);
@@ -90,10 +101,41 @@ export default function SettingsPage() {
     loadSettings();
   }, []);
 
+  // Save Custom Developer Display Name to Supabase Auth
+  const handleSaveDisplayName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!displayName.trim()) return;
+
+    setSavingName(true);
+    setNameSavedMsg(null);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: displayName.trim() },
+      });
+
+      if (error) throw error;
+
+      setNameSavedMsg('✓ Display name updated!');
+      setTimeout(() => setNameSavedMsg(null), 3000);
+    } catch (err: any) {
+      alert(`Failed to update display name: ${err.message}`);
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const handleCopyKey = () => {
+    if (!apiKey) return;
+    navigator.clipboard.writeText(apiKey);
+    setCopiedKey(true);
+    setTimeout(() => setCopiedKey(false), 2000);
+  };
+
   const handleSaveNotifications = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!projectId) {
-      alert('Please select or create a project first under "API Keys & Projects".');
+      alert('Please create or select a project first under "API Keys & Projects".');
       return;
     }
 
@@ -158,7 +200,6 @@ export default function SettingsPage() {
     setTestAlertMsg(null);
 
     try {
-      // If Slack webhook is set, test it directly
       if (slackWebhook.trim()) {
         fetch(slackWebhook.trim(), {
           method: 'POST',
@@ -217,6 +258,11 @@ export default function SettingsPage() {
     }
   };
 
+  const userInitial = displayName ? displayName.charAt(0).toUpperCase() : 'M';
+  const displayToken = showApiKey
+    ? apiKey
+    : `${apiKey.slice(0, 10)}••••••••••••••••${apiKey.slice(-8)}`;
+
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -224,10 +270,10 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="border-b border-slate-800/80 pb-5">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
-            <span>Project Settings & Subscription</span>
+            <span>Project Settings & Developer Profile</span>
           </h1>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Manage your notification webhooks, BYOK AI keys, and database maintenance.
+            Manage your developer identity, notification webhooks, BYOK AI keys, and database maintenance.
           </p>
         </div>
 
@@ -241,7 +287,7 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-6">
 
-            {/* 1. Subscription & Plan Status: 100% UNLOCKED FOR PUBLIC BETA */}
+            {/* 1. Subscription & Plan Status */}
             <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-5 relative">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
                 <div className="space-y-1">
@@ -286,33 +332,108 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* 2. Developer Account Profile */}
-            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
+            {/* 2. DEVELOPER ACCOUNT PROFILE (WITH EDITABLE DISPLAY NAME & MASKED KEY) */}
+            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-                <div>
-                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>👤</span> Developer Account Profile
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Your authenticated credentials</p>
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-sm flex items-center justify-center shadow-md font-mono">
+                    {userInitial}
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                      Developer Account Profile
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Your authenticated developer identity & credentials</p>
+                  </div>
                 </div>
+
                 <span className="px-2.5 py-1 bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 rounded-full text-[10px] font-bold uppercase font-mono">
                   Active Session
                 </span>
               </div>
 
+              {/* Editable Name & Email Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">Account Email</span>
-                  <span className="text-slate-200 font-mono block font-semibold">{userEmail}</span>
+                
+                {/* 1. Custom Developer Display Name Form */}
+                <form onSubmit={handleSaveDisplayName} className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">
+                      Developer Display Name
+                    </span>
+                    {nameSavedMsg && (
+                      <span className="text-[10px] text-emerald-400 font-bold font-mono animate-in fade-in">
+                        {nameSavedMsg}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      required
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="e.g. Muhammad Arslan"
+                      className="flex-1 bg-[#090D16] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 font-mono transition"
+                    />
+                    <button
+                      type="submit"
+                      disabled={savingName}
+                      className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-yellow-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer font-mono shadow-sm disabled:opacity-50"
+                    >
+                      {savingName ? 'Saving...' : 'Save Name'}
+                    </button>
+                  </div>
+                </form>
+
+                {/* 2. Account Email (Verified) */}
+                <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1 flex flex-col justify-center">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">
+                    Account Email Address
+                  </span>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-slate-200 font-mono font-semibold truncate">{userEmail}</span>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      Verified
+                    </span>
+                  </div>
                 </div>
-                <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">Project API Key</span>
-                  <span className="text-yellow-300 font-mono block truncate">{apiKey || 'No key generated'}</span>
+
+              </div>
+
+              {/* 3. Masked API Key (No more scribbling on screenshots!) */}
+              <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">
+                    Active Project API Key
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="text-[10px] font-mono text-slate-400 hover:text-yellow-300 transition cursor-pointer"
+                  >
+                    {showApiKey ? '🙈 Hide Token' : '👁️ Reveal Full Token'}
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-[#090D16] border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-yellow-300 font-mono truncate">
+                    {displayToken}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyKey}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition shrink-0 cursor-pointer font-mono shadow-sm"
+                  >
+                    {copiedKey ? '✓ Copied' : 'Copy Key'}
+                  </button>
                 </div>
               </div>
+
             </div>
 
-            {/* 3. Notification Channels Form (Discord, Slack & Email) */}
+            {/* 3. Notification Channels Form */}
             <form onSubmit={handleSaveNotifications} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-3">
                 <div>
@@ -395,7 +516,7 @@ export default function SettingsPage() {
               </div>
             </form>
 
-            {/* 4. BYOK AI Copilot: 100% UNLOCKED FOR ALL BETA USERS */}
+            {/* 4. BYOK AI Copilot */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
