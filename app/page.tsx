@@ -185,23 +185,21 @@ export default function WelcomeLandingPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll chat to bottom
   useEffect(() => {
     if (!marketingMode) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [cliMessages, marketingMode]);
 
-  // Show floating bottom bar ONLY when user scrolls down past the hero
+  // Delayed trigger: Bottom bar appears ONLY when user scrolls deep past the hero
   useEffect(() => {
     const handleScroll = () => {
-      setShowStickyBottomBar(window.scrollY > 450);
+      setShowStickyBottomBar(window.scrollY > 750);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Mode Toggle with Instant Top-Scroll Reset
   const toggleMarketingMode = () => {
     setMarketingMode((prev) => !prev);
     if (typeof window !== 'undefined') {
@@ -571,7 +569,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* Sentry-Grade Clean Action Buttons */}
+          {/* Sentry's Exact 2-Button Pattern on the Right */}
           <div className="flex items-center space-x-3 font-mono shrink-0">
             <Link
               href="/login"
@@ -580,43 +578,49 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               Sign In
             </Link>
 
+            {/* Sentry GET DEMO Equivalent: Outline Button */}
             <Link
               href="/demo"
-              className="px-4 py-2 rounded-xl border border-yellow-400/40 hover:border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 font-bold text-xs transition shadow-sm"
+              className="px-4 py-2 rounded-xl border border-yellow-400/50 hover:border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 font-bold text-xs transition shadow-sm"
             >
-              Live Demo ⚡
+              GET DEMO
             </Link>
 
+            {/* Sentry GET STARTED Equivalent: Filled Button */}
             <Link
               href="/signup"
               className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
             >
-              Claim Beta Pass →
+              GET STARTED
             </Link>
           </div>
         </div>
       </header>
 
-      {/* 🌟 ULTRA-COMPACT SENTRY-STYLE MARKETING MODE PILL (Screenshot 1 Style - Zero Overlap!) */}
-      <div className="fixed top-24 right-6 z-40 hidden sm:block">
-        <div className="bg-[#0B101D]/90 border border-slate-700/80 rounded-xl p-1.5 px-2.5 shadow-2xl backdrop-blur-xl flex items-center gap-2 font-mono">
-          <span className="text-[10px] font-bold text-slate-300 select-none">Marketing Mode</span>
-          <button
-            onClick={toggleMarketingMode}
-            className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
-              marketingMode ? 'bg-amber-500' : 'bg-slate-700'
-            }`}
-            title="Toggle between Marketing Mode and Dev Spec Mode"
-          >
-            <div
-              className={`w-3.5 h-3.5 rounded-full bg-slate-950 absolute top-[3px] transition-transform ${
-                marketingMode ? 'right-[3px]' : 'left-[3px]'
+      {/* 🌟 SENTRY'S EXACT VERTICAL MARKETING MODE CARD (Screenshot 1 Match: Inside Hero Canvas, Top-Right with Generous Margin) */}
+      <div className="max-w-7xl mx-auto px-6 relative">
+        <div className="absolute top-6 right-6 z-30 hidden sm:block">
+          <div className="bg-[#181326]/90 border border-purple-500/30 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1.5 font-mono">
+            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider select-none">
+              Marketing Mode
+            </span>
+            <button
+              onClick={toggleMarketingMode}
+              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
+                marketingMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-slate-700'
               }`}
-            />
-          </button>
-          <span className={`text-[9px] font-bold ${marketingMode ? 'text-amber-400' : 'text-slate-400'}`}>
-            {marketingMode ? 'ON' : 'OFF'}
-          </span>
+              title="Toggle between Marketing Mode and Dev Spec Mode"
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-slate-950 absolute top-1 transition-all ${
+                  marketingMode ? 'right-1' : 'left-1'
+                }`}
+              />
+            </button>
+            <span className={`text-[9px] font-bold font-mono ${marketingMode ? 'text-yellow-300' : 'text-slate-400'}`}>
+              {marketingMode ? 'ON' : 'OFF'}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -761,11 +765,11 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                     placeholder="Ask any technical question..."
                     value={cliInput}
                     onChange={(e) => setCliInput(e.target.value)}
-                    className="flex-1 bg-[#05070E] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-400 font-mono"
+                    className="flex-1 bg-[#05070E] border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-400 font-mono"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
+                    className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
                   >
                     Send →
                   </button>
@@ -779,9 +783,9 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       ) : (
         /* 🌟 VIEW 2: WHEN MARKETING MODE IS ON (FULL SCROLLING LANDING PAGE) */
         <>
-          {/* 3. HERO SECTION */}
-          <section className="relative pt-12 pb-12 overflow-hidden">
-            <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[130px] pointer-events-none rounded-full" />
+          {/* 3. HERO SECTION (EXPANSIVE & PROMINENT LIKE SENTRY) */}
+          <section className="relative pt-12 pb-14 overflow-hidden">
+            <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[380px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
 
             <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
               
@@ -789,35 +793,35 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               <div>
                 <a
                   href="#ai-agent"
-                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-xs font-mono font-bold text-purple-300 transition shadow-lg hover:border-purple-400 group cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-xs font-mono font-bold text-purple-300 transition shadow-lg hover:border-purple-400 group cursor-pointer"
                 >
                   <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
                   <span>✨ SnapTrace AI Protocol: Fix production crashes right inside Cursor & Claude Code →</span>
                 </a>
               </div>
 
-              {/* BOLD, AUTHORITATIVE SENTRY-TIER HEADLINE */}
-              <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.08] max-w-4xl mx-auto">
-                Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>. Stop spending Sundays connecting the{' '}
+              {/* MASSIVE, CONFIDENT SENTRY-TIER HEADLINE (WIDE & PROMINENT) */}
+              <h1 className="text-5xl sm:text-7xl md:text-[76px] font-black tracking-tight text-white leading-[1.05] max-w-5xl mx-auto">
+                Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>, fix it in a{' '}
                 <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
-                  dots by hand.
+                  snap.
                 </span>
               </h1>
 
-              <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
-                SnapTrace automatically collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes for VS Code & Cursor.
+              <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed font-sans">
+                Stop spending Sundays connecting the dots by hand. SnapTrace collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 font-mono">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 font-mono">
                 <Link
                   href="/signup"
-                  className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black rounded-xl shadow-lg shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
+                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-sm font-black rounded-xl shadow-xl shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
                 >
                   Claim Free Lifetime Pro Pass (12 Spots Left) →
                 </Link>
                 <Link
                   href="/demo"
-                  className="w-full sm:w-auto px-7 py-3.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs sm:text-sm font-semibold rounded-xl transition shadow-sm"
+                  className="w-full sm:w-auto px-8 py-4 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-sm font-bold rounded-xl transition shadow-md"
                 >
                   ⚡ Open Demo Workspace (No Signup)
                 </Link>
@@ -1374,7 +1378,7 @@ try {
 
                 <div className="space-y-2.5">
                   <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Compare</span>
-                  <ul className="space-y-1.5 text-slate-400">
+                  <ul className="space-y-2.5 text-slate-400">
                     <li><Link href="/vs/sentry" className="hover:text-white transition">SnapTrace vs. Sentry</Link></li>
                     <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. GlitchTip</a></li>
                     <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. Honeybadger</a></li>
@@ -1406,7 +1410,7 @@ try {
             </div>
           </footer>
 
-          {/* 14. STICKY BOTTOM BAR (Appears ONLY after scrolling past hero!) */}
+          {/* 14. HIGH-CONVERTING STICKY FLOATING BOTTOM BAR (Appears ONLY after scrolling past hero!) */}
           {showStickyBottomBar && (
             <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-200 font-mono">
               <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
