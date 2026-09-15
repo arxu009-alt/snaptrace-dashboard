@@ -81,6 +81,11 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
   },
+  verification: {
+    other: {
+      'msvalidate.01': ['EC1C00F550C23BCFCF6A5FB131492203'],
+    },
+  },
 };
 
 export default function RootLayout({
@@ -108,6 +113,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} dark scroll-smooth`}>
       <head>
+        <meta name="msvalidate.01" content="EC1C00F550C23BCFCF6A5FB131492203" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
