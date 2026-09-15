@@ -19,7 +19,6 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ['400', '500', '600', '700', '800'],
 });
 
-// Comprehensive Pro SEO, Search Engine Favicons & Social Share Meta Tags
 export const metadata: Metadata = {
   metadataBase: new URL('https://snaptrace-dashboard.vercel.app'),
   title: {
@@ -99,22 +98,31 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // JSON-LD Structured Data Schema for Google Search Rich Snippets
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'SnapTrace',
-    operatingSystem: 'Any',
-    applicationCategory: 'DeveloperApplication',
-    offers: {
-      '@type': 'Offer',
-      price: '0.00',
-      priceCurrency: 'USD',
+  // Official Google Search Site Name & Software Application Schemas
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'SnapTrace',
+      alternateName: ['SnapTrace Telemetry', 'SnapTrace APM'],
+      url: 'https://snaptrace-dashboard.vercel.app',
     },
-    description:
-      'Featherweight error tracking and crash telemetry platform with noise deduplication and BYOK AI diagnostics.',
-    url: 'https://snaptrace-dashboard.vercel.app',
-  };
+    {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'SnapTrace',
+      operatingSystem: 'Any',
+      applicationCategory: 'DeveloperApplication',
+      offers: {
+        '@type': 'Offer',
+        price: '0.00',
+        priceCurrency: 'USD',
+      },
+      description:
+        'Featherweight error tracking and crash telemetry platform with noise deduplication and BYOK AI diagnostics.',
+      url: 'https://snaptrace-dashboard.vercel.app',
+    },
+  ];
 
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} dark scroll-smooth`}>
@@ -122,7 +130,7 @@ export default function RootLayout({
         <meta name="msvalidate.01" content="EC1C00F550C23BCFCF6A5FB131492203" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </head>
       <body className="min-h-screen bg-[#05070E] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-slate-950">
