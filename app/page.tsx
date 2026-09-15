@@ -168,12 +168,13 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
-  // Sentry-Style Dual Mode
+  // Sentry-Style Dual Mode State
   const [marketingMode, setMarketingMode] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
+  const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
 
-  // Interactive Dev Terminal Chat State with Auto-Scroll Ref
+  // Chat State
   const [cliInput, setCliInput] = useState('');
   const [cliMessages, setCliMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
     {
@@ -184,11 +185,29 @@ export default function WelcomeLandingPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Auto-scroll chat to bottom
   useEffect(() => {
     if (!marketingMode) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [cliMessages, marketingMode]);
+
+  // Show floating bottom bar ONLY when user scrolls down past the hero
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowStickyBottomBar(window.scrollY > 450);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Mode Toggle with Instant Top-Scroll Reset
+  const toggleMarketingMode = () => {
+    setMarketingMode((prev) => !prev);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  };
 
   useEffect(() => {
     async function checkUserSession() {
@@ -451,7 +470,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
   }
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden pb-16 relative">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden relative">
       
       {/* 1. TOP BANNER */}
       <div className={`px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2 transition-colors ${
@@ -477,7 +496,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Clean, Uncrowded Center Navigation */}
+          {/* Clean Center Navigation */}
           <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300 font-mono">
             <div
               className="relative"
@@ -552,7 +571,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* Sentry-Grade Clean Action Buttons on the Right */}
+          {/* Sentry-Grade Clean Action Buttons */}
           <div className="flex items-center space-x-3 font-mono shrink-0">
             <Link
               href="/login"
@@ -561,7 +580,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               Sign In
             </Link>
 
-            {/* Distinct Outline Button (Matches Sentry's GET DEMO) */}
             <Link
               href="/demo"
               className="px-4 py-2 rounded-xl border border-yellow-400/40 hover:border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 font-bold text-xs transition shadow-sm"
@@ -569,7 +587,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               Live Demo ⚡
             </Link>
 
-            {/* High-Contrast Filled Button (Matches Sentry's GET STARTED) */}
             <Link
               href="/signup"
               className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
@@ -580,33 +597,33 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </header>
 
-      {/* 🌟 FLOATING SENTRY-STYLE "MARKETING MODE" WIDGET (Docked on Right Screen Edge) */}
-      <div className="fixed top-28 right-4 z-40 hidden sm:block animate-in fade-in slide-in-from-right-3 duration-300">
-        <div className="bg-[#0B101D]/90 border border-slate-700/80 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex items-center gap-2.5 font-mono">
-          <span className="text-[11px] font-bold text-slate-300">Marketing Mode</span>
+      {/* 🌟 ULTRA-COMPACT SENTRY-STYLE MARKETING MODE PILL (Screenshot 1 Style - Zero Overlap!) */}
+      <div className="fixed top-24 right-6 z-40 hidden sm:block">
+        <div className="bg-[#0B101D]/90 border border-slate-700/80 rounded-xl p-1.5 px-2.5 shadow-2xl backdrop-blur-xl flex items-center gap-2 font-mono">
+          <span className="text-[10px] font-bold text-slate-300 select-none">Marketing Mode</span>
           <button
-            onClick={() => setMarketingMode(!marketingMode)}
-            className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+            onClick={toggleMarketingMode}
+            className={`w-9 h-5 rounded-full transition-colors relative cursor-pointer ${
               marketingMode ? 'bg-amber-500' : 'bg-slate-700'
             }`}
             title="Toggle between Marketing Mode and Dev Spec Mode"
           >
             <div
-              className={`w-4 h-4 rounded-full bg-slate-950 absolute top-1 transition-transform ${
-                marketingMode ? 'right-1' : 'left-1'
+              className={`w-3.5 h-3.5 rounded-full bg-slate-950 absolute top-[3px] transition-transform ${
+                marketingMode ? 'right-[3px]' : 'left-[3px]'
               }`}
             />
           </button>
-          <span className={`text-[10px] font-bold ${marketingMode ? 'text-amber-400' : 'text-slate-400'}`}>
+          <span className={`text-[9px] font-bold ${marketingMode ? 'text-amber-400' : 'text-slate-400'}`}>
             {marketingMode ? 'ON' : 'OFF'}
           </span>
         </div>
       </div>
 
-      {/* 🌟 VIEW 1: WHEN MARKETING MODE IS OFF (SENTRY DEDICATED DEV TERMINAL STATION - NO SCROLL CLUTTER) */}
+      {/* 🌟 VIEW 1: WHEN MARKETING MODE IS OFF (SENTRY DEDICATED DEV TERMINAL - ZERO SCROLL CLUTTER) */}
       {!marketingMode ? (
         <section className="min-h-[calc(100vh-7rem)] flex items-center justify-center p-6 bg-[#05070E] relative overflow-hidden animate-in fade-in duration-150">
-          <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
             
             {/* Left Column: Developer Manifesto */}
             <div className="lg:col-span-6 space-y-6">
@@ -744,11 +761,11 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                     placeholder="Ask any technical question..."
                     value={cliInput}
                     onChange={(e) => setCliInput(e.target.value)}
-                    className="flex-1 bg-[#05070E] border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-400 font-mono"
+                    className="flex-1 bg-[#05070E] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-400 font-mono"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
+                    className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
                   >
                     Send →
                   </button>
@@ -760,7 +777,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           </div>
         </section>
       ) : (
-        /* 🌟 VIEW 2: WHEN MARKETING MODE IS ON (FULL HIGH-CONVERTING SCROLLING LANDING PAGE) */
+        /* 🌟 VIEW 2: WHEN MARKETING MODE IS ON (FULL SCROLLING LANDING PAGE) */
         <>
           {/* 3. HERO SECTION */}
           <section className="relative pt-12 pb-12 overflow-hidden">
@@ -768,7 +785,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
             <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
               
-              {/* SENTRY-STYLE MCP EQUIVALENT ANNOUNCEMENT PILL */}
+              {/* SENTRY MCP EQUIVALENT ANNOUNCEMENT PILL */}
               <div>
                 <a
                   href="#ai-agent"
@@ -779,14 +796,15 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 </a>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.15] max-w-3xl mx-auto">
+              {/* BOLD, AUTHORITATIVE SENTRY-TIER HEADLINE */}
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.08] max-w-4xl mx-auto">
                 Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>. Stop spending Sundays connecting the{' '}
                 <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
                   dots by hand.
                 </span>
               </h1>
 
-              <p className="max-w-xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
+              <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
                 SnapTrace automatically collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes for VS Code & Cursor.
               </p>
 
@@ -1220,192 +1238,194 @@ try {
               <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
                 <div className="space-y-4">
                   <div className="space-y-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
-                <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
-                <p className="text-xs text-slate-400 pt-1">For high-traffic production workloads and growing teams.</p>
-              </div>
-
-              <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
-                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
-                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
-                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
-                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord, Slack & Email Delivery</li>
-                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Team Invites & Multi-Seat Access</li>
-                <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
-              </ul>
-            </div>
-
-            <Link
-              href="/signup"
-              className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
-            >
-              Join Beta Waitlist →
-            </Link>
-          </div>
-
-        </SmoothReveal>
-      </section>
-
-      {/* 11. SECURITY & COMPLIANCE BADGES */}
-      <section className="py-16 border-t border-slate-800/80 bg-[#060911]/60">
-        <div className="max-w-5xl mx-auto px-6 text-center space-y-6">
-          <div className="space-y-1">
-            <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-yellow-400">Security by Default</h3>
-            <h2 className="text-2xl sm:text-3xl font-black text-white">Built for Developer Privacy & Performance</h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-xs font-mono">
-            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
-              <span className="text-xl">🛡️</span>
-              <div className="text-white font-bold">GDPR Ready</div>
-              <div className="text-[10px] text-slate-400">On-device PII masking</div>
-            </div>
-            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
-              <span className="text-xl">🪶</span>
-              <div className="text-white font-bold">&lt;5KB Footprint</div>
-              <div className="text-[10px] text-slate-400">100/100 Core Web Vitals</div>
-            </div>
-            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
-              <span className="text-xl">🔇</span>
-              <div className="text-white font-bold">Anti-Noise Guard</div>
-              <div className="text-[10px] text-slate-400">SHA-256 loop throttling</div>
-            </div>
-            <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
-              <span className="text-xl">🔓</span>
-              <div className="text-white font-bold">No Vendor Lock-in</div>
-              <div className="text-[10px] text-slate-400">Universal REST protocol</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 12. FAQ SECTION */}
-      <section id="faq" className="max-w-4xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-8">
-        <SmoothReveal className="text-center space-y-2">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
-          <p className="text-xs sm:text-sm text-slate-400 font-mono">Real technical answers for developers evaluating SnapTrace.</p>
-        </SmoothReveal>
-
-        <SmoothReveal className="space-y-3" delay={150}>
-          {faqs.map((faq, idx) => {
-            const isOpen = activeFaq === idx;
-            return (
-              <div
-                key={idx}
-                className="bg-[#0B101D] border border-slate-800 rounded-2xl overflow-hidden transition"
-              >
-                <button
-                  onClick={() => setActiveFaq(isOpen ? null : idx)}
-                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:text-yellow-400 transition"
-                >
-                  <span className="font-bold text-xs sm:text-sm text-white">{faq.q}</span>
-                  <span className="text-slate-500 font-mono text-base">{isOpen ? '−' : '+'}</span>
-                </button>
-                {isOpen && (
-                  <div className="px-4 sm:px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3 font-sans">
-                    {faq.a}
+                    <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
+                    <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
+                    <p className="text-xs text-slate-400 pt-1">For high-traffic production workloads and growing teams.</p>
                   </div>
-                )}
+
+                  <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord, Slack & Email Delivery</li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Team Invites & Multi-Seat Access</li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
+                  </ul>
+                </div>
+
+                <Link
+                  href="/signup"
+                  className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
+                >
+                  Join Beta Waitlist →
+                </Link>
               </div>
-            );
-          })}
-        </SmoothReveal>
-      </section>
 
-      {/* 13. SENTRY-STYLE ENTERPRISE FOOTER */}
-      <footer className="border-t border-slate-800/80 bg-[#060911] py-16 relative overflow-hidden font-sans">
-        <div className="max-w-5xl mx-auto px-6 space-y-10">
-          
-          <div className="text-center space-y-3 max-w-xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-black text-white">
-              Ready to catch bugs in a snap?
-            </h2>
-            <p className="text-xs text-slate-400 leading-relaxed font-mono">
-              Join developers catching crashes in real time with zero noise and instant AI diagnoses.
-            </p>
-            <div className="pt-1 font-mono">
-              <Link
-                href="/signup"
-                className="inline-block px-8 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
-              >
-                Claim Your Free Beta Pass in 60s →
-              </Link>
+            </SmoothReveal>
+          </section>
+
+          {/* 11. SECURITY & COMPLIANCE BADGES */}
+          <section className="py-16 border-t border-slate-800/80 bg-[#060911]/60">
+            <div className="max-w-5xl mx-auto px-6 text-center space-y-6">
+              <div className="space-y-1">
+                <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-yellow-400">Security by Default</h3>
+                <h2 className="text-2xl sm:text-3xl font-black text-white">Built for Developer Privacy & Performance</h2>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-xs font-mono">
+                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
+                  <span className="text-xl">🛡️</span>
+                  <div className="text-white font-bold">GDPR Ready</div>
+                  <div className="text-[10px] text-slate-400">On-device PII masking</div>
+                </div>
+                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
+                  <span className="text-xl">🪶</span>
+                  <div className="text-white font-bold">&lt;5KB Footprint</div>
+                  <div className="text-[10px] text-slate-400">100/100 Core Web Vitals</div>
+                </div>
+                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
+                  <span className="text-xl">🔇</span>
+                  <div className="text-white font-bold">Anti-Noise Guard</div>
+                  <div className="text-[10px] text-slate-400">SHA-256 loop throttling</div>
+                </div>
+                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1">
+                  <span className="text-xl">🔓</span>
+                  <div className="text-white font-bold">No Vendor Lock-in</div>
+                  <div className="text-[10px] text-slate-400">Universal REST protocol</div>
+                </div>
+              </div>
             </div>
-          </div>
+          </section>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-slate-800/80 text-xs font-mono">
-            <div className="space-y-2.5">
-              <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Platform</span>
-              <ul className="space-y-1.5 text-slate-400">
-                <li><a href="#features" className="hover:text-white transition">Telemetry Ingestion</a></li>
-                <li><a href="#features" className="hover:text-white transition">&lt;5KB Client SDK</a></li>
-                <li><a href="#ai-agent" className="hover:text-white transition">AI Root Cause Engine</a></li>
-                <li><a href="#features" className="hover:text-white transition">Client-Side PII Firewall</a></li>
-              </ul>
+          {/* 12. FAQ SECTION */}
+          <section id="faq" className="max-w-4xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-8">
+            <SmoothReveal className="text-center space-y-2">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
+              <p className="text-xs sm:text-sm text-slate-400 font-mono">Real technical answers for developers evaluating SnapTrace.</p>
+            </SmoothReveal>
+
+            <SmoothReveal className="space-y-3" delay={150}>
+              {faqs.map((faq, idx) => {
+                const isOpen = activeFaq === idx;
+                return (
+                  <div
+                    key={idx}
+                    className="bg-[#0B101D] border border-slate-800 rounded-2xl overflow-hidden transition"
+                  >
+                    <button
+                      onClick={() => setActiveFaq(isOpen ? null : idx)}
+                      className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:text-yellow-400 transition"
+                    >
+                      <span className="font-bold text-xs sm:text-sm text-white">{faq.q}</span>
+                      <span className="text-slate-500 font-mono text-base">{isOpen ? '−' : '+'}</span>
+                    </button>
+                    {isOpen && (
+                      <div className="px-4 sm:px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3 font-sans">
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </SmoothReveal>
+          </section>
+
+          {/* 13. SENTRY-STYLE ENTERPRISE FOOTER */}
+          <footer className="border-t border-slate-800/80 bg-[#060911] py-16 relative overflow-hidden font-sans">
+            <div className="max-w-5xl mx-auto px-6 space-y-10">
+              
+              <div className="text-center space-y-3 max-w-xl mx-auto">
+                <h2 className="text-2xl sm:text-3xl font-black text-white">
+                  Ready to catch bugs in a snap?
+                </h2>
+                <p className="text-xs text-slate-400 leading-relaxed font-mono">
+                  Join developers catching crashes in real time with zero noise and instant AI diagnoses.
+                </p>
+                <div className="pt-1 font-mono">
+                  <Link
+                    href="/signup"
+                    className="inline-block px-8 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
+                  >
+                    Claim Your Free Beta Pass in 60s →
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-slate-800/80 text-xs font-mono">
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Platform</span>
+                  <ul className="space-y-1.5 text-slate-400">
+                    <li><a href="#features" className="hover:text-white transition">Telemetry Ingestion</a></li>
+                    <li><a href="#features" className="hover:text-white transition">&lt;5KB Client SDK</a></li>
+                    <li><a href="#ai-agent" className="hover:text-white transition">AI Root Cause Engine</a></li>
+                    <li><a href="#features" className="hover:text-white transition">Client-Side PII Firewall</a></li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Stacks & SDKs</span>
+                  <ul className="space-y-1.5 text-slate-400">
+                    <li><a href="#quickstart" className="hover:text-white transition">Next.js App Router</a></li>
+                    <li><a href="#quickstart" className="hover:text-white transition">Python & FastAPI</a></li>
+                    <li><a href="#quickstart" className="hover:text-white transition">Node.js / Express</a></li>
+                    <li><a href="#quickstart" className="hover:text-white transition">Go, Rust & PHP</a></li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Compare</span>
+                  <ul className="space-y-1.5 text-slate-400">
+                    <li><Link href="/vs/sentry" className="hover:text-white transition">SnapTrace vs. Sentry</Link></li>
+                    <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. GlitchTip</a></li>
+                    <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. Honeybadger</a></li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
+                  <ul className="space-y-1.5 text-slate-400">
+                    <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
+                    <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
+                    <li><Link href="/demo" className="hover:text-yellow-400 transition font-bold">Public Demo</Link></li>
+                    <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
+                    <li><span className="text-emerald-400">● Systems Operational</span></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-mono gap-3">
+                <span>© {new Date().getFullYear()} SnapTrace. All rights reserved. The Independent Developer Telemetry Platform.</span>
+                <div className="flex items-center space-x-4 text-slate-400">
+                  <Link href="/privacy" className="hover:text-yellow-400">Privacy</Link>
+                  <Link href="/terms" className="hover:text-yellow-400">Terms</Link>
+                  <Link href="/demo" className="hover:text-yellow-400">Demo</Link>
+                  <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
+                </div>
+              </div>
+
             </div>
+          </footer>
 
-            <div className="space-y-2.5">
-              <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Stacks & SDKs</span>
-              <ul className="space-y-1.5 text-slate-400">
-                <li><a href="#quickstart" className="hover:text-white transition">Next.js App Router</a></li>
-                <li><a href="#quickstart" className="hover:text-white transition">Python & FastAPI</a></li>
-                <li><a href="#quickstart" className="hover:text-white transition">Node.js / Express</a></li>
-                <li><a href="#quickstart" className="hover:text-white transition">Go, Rust & PHP</a></li>
-              </ul>
+          {/* 14. STICKY BOTTOM BAR (Appears ONLY after scrolling past hero!) */}
+          {showStickyBottomBar && (
+            <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-200 font-mono">
+              <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping shrink-0" />
+                  <span className="text-xs text-slate-200 font-bold truncate">
+                    Beta Offer: <span className="text-yellow-300">12 Lifetime Pro Passes Left</span>
+                  </span>
+                </div>
+
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 shrink-0"
+                >
+                  Claim Free Pass →
+                </Link>
+              </div>
             </div>
-
-            <div className="space-y-2.5">
-              <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Compare</span>
-              <ul className="space-y-1.5 text-slate-400">
-                <li><Link href="/vs/sentry" className="hover:text-white transition">SnapTrace vs. Sentry</Link></li>
-                <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. GlitchTip</a></li>
-                <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. Honeybadger</a></li>
-              </ul>
-            </div>
-
-            <div className="space-y-2.5">
-              <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
-              <ul className="space-y-1.5 text-slate-400">
-                <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
-                <li><Link href="/demo" className="hover:text-yellow-400 transition font-bold">Public Demo</Link></li>
-                <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
-                <li><span className="text-emerald-400">● Systems Operational</span></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-mono gap-3">
-            <span>© {new Date().getFullYear()} SnapTrace. All rights reserved. The Independent Developer Telemetry Platform.</span>
-            <div className="flex items-center space-x-4 text-slate-400">
-              <Link href="/privacy" className="hover:text-yellow-400">Privacy</Link>
-              <Link href="/terms" className="hover:text-yellow-400">Terms</Link>
-              <Link href="/demo" className="hover:text-yellow-400">Demo</Link>
-              <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
-            </div>
-          </div>
-
-        </div>
-      </footer>
-
-      {/* 14. HIGH-CONVERTING STICKY FLOATING BOTTOM BAR */}
-      <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-300 font-mono">
-        <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 truncate">
-            <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping shrink-0" />
-            <span className="text-xs text-slate-200 font-bold truncate">
-              Beta Offer: <span className="text-yellow-300">12 Lifetime Pro Passes Left</span>
-            </span>
-          </div>
-
-          <Link
-            href="/signup"
-            className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 shrink-0"
-          >
-            Claim Free Pass →
-          </Link>
-        </div>
-      </div>
+          )}
         </>
       )}
 
