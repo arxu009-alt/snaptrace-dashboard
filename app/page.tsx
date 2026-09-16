@@ -9,6 +9,7 @@ import SnapTraceLogo from '@/components/SnapTraceLogo';
 export const dynamic = 'force-dynamic';
 
 type StackKey = 'nextjs' | 'js' | 'python' | 'node' | 'go' | 'rust' | 'csharp' | 'php' | 'ruby' | 'kotlin' | 'flutter' | 'cloudflare';
+type BillingInterval = 'monthly' | 'annual';
 
 function SmoothReveal({
   children,
@@ -122,7 +123,9 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
+  // Sentry-Style Dual Mode & Billing Toggle
   const [marketingMode, setMarketingMode] = useState(true);
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
   const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
@@ -205,9 +208,9 @@ export default function WelcomeLandingPage() {
     nextjs: '// app/layout.tsx (Next.js App Router)\nimport Script from \'next/script\';\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang="en">\n      <head>\n        <Script\n          src="https://snaptrace-dashboard.vercel.app/snaptrace.js"\n          strategy="beforeInteractive"\n          data-api-key="sk_live_your_project_key"\n        />\n      </head>\n      <body>{children}</body>\n    </html>\n  );\n}',
     js: '<!-- React, Vue, Svelte, or Vanilla JavaScript -->\n<script \n  src="https://snaptrace-dashboard.vercel.app/snaptrace.js"\n  data-api-key="sk_live_your_project_key"\n  async\n></script>',
     python: '# Python / Django / FastAPI / Flask\nimport traceback, requests\n\ndef log_to_snaptrace(exception, url="https://api.mycompany.com"):\n    try:\n        requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={\n            "apiKey": "sk_live_your_project_key",\n            "message": str(exception),\n            "stackTrace": traceback.format_exc(),\n            "url": url,\n            "environment": "production"\n        }, timeout=2)\n    except Exception:\n        pass',
-    node: '// Node.js / Express / NestJS\nprocess.on(\'uncaughtException\', (err) => {\n  fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n    method: \'POST\',\n    headers: { \'Content-Type\': \'application/json\' },\n    body: JSON.stringify({\n      apiKey: \'sk_live_your_project_key\',\n      message: err.message,\n      stackTrace: err.stack,\n      environment: process.env.NODE_ENV || \'production\'\n    })\n  }).catch(() => {});\n});',
-    go: '// Go (Golang) Crash Reporter\npackage main\n\nimport (\n  "bytes"\n  "encoding/json"\n  "net/http"\n)\n\nfunc SendSnapTrace(err error, route string) {\n  payload, _ := json.Marshal(map[string]string{\n    "apiKey":      "sk_live_your_project_key",\n    "message":     err.Error(),\n    "environment": "production",\n    "url":         route,\n  })\n  http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))\n}',
-    rust: '// Rust / Axum / Actix-web\nasync fn capture_snaptrace(err: &str, route: &str) {\n    let payload = serde_json::json!({\n        "apiKey": "sk_live_your_project_key",\n        "message": err,\n        "url": route,\n        "environment": "production"\n    });\n    let _ = reqwest::Client::new()\n        .post("https://snaptrace-dashboard.vercel.app/api/v1/log")\n        .json(&payload)\n        .send()\n        .await;\n}',
+    node: '// Node.js / Express / NestJS\nprocess.on(\'uncaughtException\', (err) => {\n  fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n    method: \'POST\',\n    headers: { \'Content-Type\': \'application/json\' },\n    body: JSON.stringify({ apiKey: \'sk_live_your_project_key\', message: err.message, stackTrace: err.stack, environment: process.env.NODE_ENV || \'production\' })\n  }).catch(() => {});\n});',
+    go: '// Go (Golang) Crash Reporter\npackage main\n\nimport (\n  "bytes"\n  "encoding/json"\n  "net/http"\n)\n\nfunc SendSnapTrace(err error, route string) {\n  payload, _ := json.Marshal(map[string]string{ "apiKey": "sk_live_your_project_key", "message": err.Error(), "environment": "production", "url": route })\n  http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))\n}',
+    rust: '// Rust / Axum / Actix-web\nasync fn capture_snaptrace(err: &str, route: &str) {\n    let payload = serde_json::json!({ "apiKey": "sk_live_your_project_key", "message": err, "url": route, "environment": "production" });\n    let _ = reqwest::Client::new().post("https://snaptrace-dashboard.vercel.app/api/v1/log").json(&payload).send().await;\n}',
     csharp: '// C# / ASP.NET Core\npublic static async Task CaptureSnapTrace(Exception ex, string url = "API Service") {\n    var payload = new { apiKey = "sk_live_your_project_key", message = ex.Message, stackTrace = ex.StackTrace, url = url, environment = "production" };\n    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);\n}',
     php: '<?php\n// PHP / Laravel / WordPress\nset_exception_handler(function ($e) {\n    $ch = curl_init(\'https://snaptrace-dashboard.vercel.app/api/v1/log\');\n    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([\'apiKey\' => \'sk_live_your_project_key\', \'message\' => $e->getMessage(), \'stackTrace\' => $e->getTraceAsString(), \'environment\' => \'production\']));\n    curl_setopt($ch, CURLOPT_HTTPHEADER, [\'Content-Type: application/json\']);\n    curl_exec($ch);\n});\n?>',
     ruby: '# Ruby on Rails / Sinatra\ndef send_snaptrace_alert(exception)\n  uri = URI(\'https://snaptrace-dashboard.vercel.app/api/v1/log\')\n  Net::HTTP.post(uri, { apiKey: \'sk_live_your_project_key\', message: exception.message, stackTrace: exception.backtrace&.join("\\n"), environment: \'production\' }.to_json, "Content-Type" => "application/json") rescue nil\nend',
@@ -637,7 +640,7 @@ export default function WelcomeLandingPage() {
             </div>
           </section>
 
-          {/* 4. SENTRY-STYLE INTERACTIVE ROOT-CAUSE SCANNER */}
+          {/* 4. ROOT-CAUSE SCANNER */}
           <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={50}>
             <div id="grouping" className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 backdrop-blur-md">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-mono text-xs">
@@ -772,7 +775,6 @@ export default function WelcomeLandingPage() {
                   </pre>
                 </div>
               </SmoothReveal>
-
             </div>
           </section>
 
@@ -831,7 +833,6 @@ export default function WelcomeLandingPage() {
           <section id="features" className="py-20 border-t border-slate-800/80 bg-[#060911]/60">
             <div className="max-w-5xl mx-auto px-6">
               <SmoothReveal className="grid grid-cols-1 lg:grid-cols-12 items-center gap-10">
-                
                 <div className="lg:col-span-6 space-y-5">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
                     <span>🪶</span> Performance & Core Web Vitals
@@ -882,7 +883,6 @@ export default function WelcomeLandingPage() {
                     &quot;We dropped heavy tracking tools for SnapTrace and our Next.js bundle footprint dropped instantly.&quot;
                   </p>
                 </div>
-
               </SmoothReveal>
             </div>
           </section>
@@ -921,7 +921,7 @@ export default function WelcomeLandingPage() {
                   </tr>
                   <tr>
                     <td className="p-4 font-semibold text-white">Free Tier Events</td>
-                    <td className="p-4 text-emerald-400 font-bold">10,000 / month</td>
+                    <td className="p-4 text-emerald-400 font-bold">5,000 / month</td>
                     <td className="p-4 text-slate-500">5,000 / month</td>
                     <td className="p-4 text-slate-500">1,000 / month</td>
                   </tr>
@@ -933,7 +933,7 @@ export default function WelcomeLandingPage() {
                   </tr>
                   <tr>
                     <td className="p-4 font-semibold text-white">In-Dashboard AI Diagnosis (BYOK)</td>
-                    <td className="p-4 text-emerald-400 font-bold">✓ Included in Beta Pass</td>
+                    <td className="p-4 text-emerald-400 font-bold">✓ Included in Pro</td>
                     <td className="p-4 text-slate-500">$$$ Expensive addon</td>
                     <td className="p-4 text-slate-500">✕ None</td>
                   </tr>
@@ -948,34 +948,74 @@ export default function WelcomeLandingPage() {
             </SmoothReveal>
           </section>
 
-          {/* 10. PRICING TIERS */}
-          <section id="pricing" className="max-w-5xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-10">
-            <SmoothReveal className="text-center space-y-2">
+          {/* 🌟 10. RE-ENGINEERED 4-TIER PRICING SECTION WITH MONTHLY / ANNUAL TOGGLE */}
+          <section id="pricing" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-10">
+            <SmoothReveal className="text-center space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
-                <span>⏰</span> Limited Beta Window
+                <span>💎</span> Predictable APM Pricing
               </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Simple, transparent developer tiers</h2>
+              <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Simple, developer-first plans</h2>
               <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto font-mono">
-                Zero surprise overage bills. Full Pro access unlocked during public beta.
+                Zero surprise overage bills. Generous headroom for micro-SaaS, agencies, and teams.
               </p>
+
+              {/* Segmented Monthly / Annual Toggle */}
+              <div className="pt-2 flex items-center justify-center">
+                <div className="bg-[#0B101D] p-1 rounded-2xl border border-slate-800 inline-flex items-center gap-1 font-mono text-xs shadow-xl">
+                  <button
+                    onClick={() => setBillingInterval('monthly')}
+                    className={
+                      'px-4 py-2 rounded-xl font-bold transition cursor-pointer ' +
+                      (billingInterval === 'monthly'
+                        ? 'bg-slate-800 text-white shadow-sm'
+                        : 'text-slate-400 hover:text-white')
+                    }
+                  >
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setBillingInterval('annual')}
+                    className={
+                      'px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 cursor-pointer ' +
+                      (billingInterval === 'annual'
+                        ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 shadow-md font-black'
+                        : 'text-slate-400 hover:text-yellow-300')
+                    }
+                  >
+                    <span>Annual</span>
+                    <span className="px-1.5 py-0.5 rounded-md bg-slate-950 text-yellow-300 text-[10px] font-bold">
+                      Save 20% ⚡
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {billingInterval === 'annual' && (
+                <p className="text-[11px] text-emerald-400 font-mono animate-in fade-in">
+                  ✓ Billed annually (Includes 2 months completely free)
+                </p>
+              )}
             </SmoothReveal>
 
-            <SmoothReveal className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch" delay={150}>
-              <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+            {/* The 4 Tiers Grid */}
+            <SmoothReveal className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch" delay={150}>
+              
+              {/* Tier 1: Developer Free */}
+              <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Developer Free</span>
                     <div className="text-3xl font-black text-white">$0 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
-                    <p className="text-xs text-slate-400 pt-1">Essential crash monitoring for side projects and hobby apps.</p>
+                    <p className="text-xs text-slate-400 pt-1">For side projects and personal experiments.</p>
                   </div>
 
                   <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>10,000</strong> Events / Month</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 14-Day Data Retention</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Up to 2 Projects</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Sub-5KB Featherweight SDK</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1-Click Cursor / Claude Export</li>
-                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Discord, Slack & Email Alert Channels</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>5,000</strong> Events / Month</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 7-Day Data Retention</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1 Active Project</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Sub-5KB Featherweight Telemetry</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> In-Dashboard Error Inspection</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Client-Side Regex PII Firewall</li>
                   </ul>
                 </div>
 
@@ -987,25 +1027,30 @@ export default function WelcomeLandingPage() {
                 </Link>
               </div>
 
-              <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
+              {/* Tier 2: Indie Pro (Popular for Builders) */}
+              <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-6 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
                 <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
-                  ★ Only 10 Spots Remaining
+                  POPULAR FOR BUILDERS
                 </span>
 
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Starter Pro (Beta Pass)</span>
-                    <div className="text-3xl font-black text-white">$0 <span className="text-xs text-yellow-300 font-mono font-bold line-through ml-1">$9/mo</span></div>
-                    <p className="text-xs text-slate-400 pt-1">Grandfathered lifetime access for our first 50 early developers.</p>
+                    <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Indie Pro</span>
+                    <div className="text-3xl font-black text-white">
+                      {billingInterval === 'annual' ? '$10' : '$14'}
+                      <span className="text-xs text-slate-400 font-normal font-mono"> / month</span>
+                    </div>
+                    <p className="text-xs text-slate-400 pt-1">For solo developers, freelancers & micro-SaaS.</p>
                   </div>
 
                   <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5 font-mono">
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>150,000</strong> Events / Month</li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 30-Day Data Retention</li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>Unlimited Projects</strong></li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>In-Dashboard BYOK AI Copilot</strong></li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Noise Deduplication Throttling</li>
-                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Database Purge Tools</li>
+                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>100,000</strong> Events / Month</li>
+                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 30-Day Telemetry Retention</li>
+                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Up to 5 Projects</li>
+                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Discord, Telegram & Slack Webhooks</li>
+                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Cursor & Claude AI Fix Prompts</li>
+                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 60s Sliding Loop Throttling ([x50])</li>
+                    <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Log Purge Tools</li>
                   </ul>
                 </div>
 
@@ -1013,25 +1058,29 @@ export default function WelcomeLandingPage() {
                   href="/signup"
                   className="block w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl transition shadow-xl shadow-yellow-500/20 cursor-pointer font-mono"
                 >
-                  Claim Free Pro Beta Pass →
+                  Claim Pro Beta Pass →
                 </Link>
               </div>
 
-              <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+              {/* Tier 3: Team & Studio */}
+              <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team Scale</span>
-                    <div className="text-3xl font-black text-white">$29 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
-                    <p className="text-xs text-slate-400 pt-1">For high-traffic production workloads and growing teams.</p>
+                    <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team & Studio</span>
+                    <div className="text-3xl font-black text-white">
+                      {billingInterval === 'annual' ? '$29' : '$39'}
+                      <span className="text-xs text-slate-500 font-normal font-mono"> / month</span>
+                    </div>
+                    <p className="text-xs text-slate-400 pt-1">For web agencies, studios & growing production apps.</p>
                   </div>
 
                   <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>1,000,000</strong> Events / Month</li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>500,000</strong> Events / Month</li>
                     <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Unlimited Projects & API Keys</li>
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Discord, Slack & Email Delivery</li>
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Team Invites & Multi-Seat Access</li>
-                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>UNLIMITED Projects & API Keys</strong></li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Multi-Seat Team Access</li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Edge Ingestion</li>
+                    <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Cascading Multi-Error Collapse</li>
                   </ul>
                 </div>
 
@@ -1039,9 +1088,40 @@ export default function WelcomeLandingPage() {
                   href="/signup"
                   className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
                 >
-                  Join Beta Waitlist →
+                  Join Team Beta →
                 </Link>
               </div>
+
+              {/* Tier 4: Business Scale */}
+              <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">Business Scale</span>
+                    <div className="text-3xl font-black text-white">
+                      {billingInterval === 'annual' ? '$79' : '$99'}
+                      <span className="text-xs text-slate-500 font-normal font-mono"> / month</span>
+                    </div>
+                    <p className="text-xs text-slate-400 pt-1">For high-traffic applications & regulated workloads.</p>
+                  </div>
+
+                  <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>2,000,000</strong> Events / Month</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 180-Day Telemetry Retention</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Custom Client Regex PII Masking</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Raw Log CSV / JSON Data Exports</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Dedicated Ingestion Gateways</li>
+                    <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Priority Founder SLA Support</li>
+                  </ul>
+                </div>
+
+                <a
+                  href="mailto:hello@snaptrace.dev?subject=Business%20Scale%20Inquiry"
+                  className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
+                >
+                  Contact for Scale →
+                </a>
+              </div>
+
             </SmoothReveal>
           </section>
 
