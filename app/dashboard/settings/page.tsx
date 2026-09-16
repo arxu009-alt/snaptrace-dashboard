@@ -1,5 +1,4 @@
-```tsx
-'use client';
+]'use client';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -30,13 +29,13 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [savingNotif, setSavingNotif] = useState<boolean>(false);
   const [notifSavedMsg, setNotifSavedMsg] = useState<string | null>(null);
-  
+
   const [savingAi, setSavingAi] = useState<boolean>(false);
   const [aiSavedMsg, setAiSavedMsg] = useState<string | null>(null);
 
   const [testingAlert, setTestingAlert] = useState<boolean>(false);
   const [testAlertMsg, setTestAlertMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  
+
   const [purging, setPurging] = useState<boolean>(false);
   const [purgeMsg, setPurgeMsg] = useState<string | null>(null);
 
@@ -62,7 +61,7 @@ export default function SettingsPage() {
 
       const savedProvider = (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_ai_provider') : 'gemini') as any;
       const savedKey = typeof window !== 'undefined' ? (localStorage.getItem('snaptrace_ai_key') || localStorage.getItem('snaptrace_openai_key')) : '';
-      
+
       if (savedProvider) setAiProvider(savedProvider);
       if (savedKey) {
         setAiKey(savedKey);
@@ -83,7 +82,7 @@ export default function SettingsPage() {
         setApiKey(p.api_key || '');
         setEmail(p.recipient_email || p.alert_email || '');
         setDiscordWebhook(p.discord_webhook_url || p.discord_webhook || '');
-        
+
         const storageSlackKey = 'snaptrace_slack_' + p.id;
         const savedSlack = p.slack_webhook_url || (typeof window !== 'undefined' ? localStorage.getItem(storageSlackKey) : '') || '';
         setSlackWebhook(savedSlack);
@@ -627,4 +626,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-```
