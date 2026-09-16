@@ -1,4 +1,3 @@
-```tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -61,66 +60,18 @@ function SmoothReveal({
   );
 }
 
-function CodeHighlighter({ code }: { code: string }) {
-  const lines = code.split('\n');
-
-  return (
-    <div className="font-mono text-xs leading-relaxed overflow-x-auto select-text">
-      {lines.map((line, lineIdx) => {
-        const trimmed = line.trim();
-        const isComment = trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('<!--') || trimmed.startsWith('/*');
-
-        return (
-          <div key={lineIdx} className="table-row hover:bg-slate-800/20">
-            <span className="table-cell pr-4 text-right text-[11px] text-slate-600 select-none font-mono w-8">
-              {lineIdx + 1}
-            </span>
-            <span className="table-cell whitespace-pre">
-              {isComment ? (
-                <span className="text-slate-500 italic">{line}</span>
-              ) : (
-                line
-                  .split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|\/\/.*|\#.*|\b(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|true|false|null|nil|None|if|else)\b|<\/?[a-zA-Z0-9_\-]+(?:\s|>|\/)|<\/?>)/g)
-                  .map((part, partIdx) => {
-                    if (!part) return null;
-                    if (part.startsWith('//') || part.startsWith('#')) {
-                      return <span key={partIdx} className="text-slate-500 italic">{part}</span>;
-                    }
-                    if (part.startsWith('"') || part.startsWith("'") || part.startsWith('`')) {
-                      return <span key={partIdx} className="text-emerald-300 font-medium">{part}</span>;
-                    }
-                    if (/^(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|if|else)$/.test(part)) {
-                      return <span key={partIdx} className="text-sky-400 font-bold">{part}</span>;
-                    }
-                    if (/^(?:true|false|null|nil|None)$/.test(part)) {
-                      return <span key={partIdx} className="text-amber-300 font-bold">{part}</span>;
-                    }
-                    if (/^<\/?[a-zA-Z0-9_\-]+/.test(part) || part === '>' || part === '/>' || part === '</>') {
-                      return <span key={partIdx} className="text-rose-400 font-semibold">{part}</span>;
-                    }
-                    return <span key={partIdx} className="text-slate-200">{part}</span>;
-                  })
-              )}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 const DEV_KNOWLEDGE_BASE: Record<string, string> = {
-  collapse: "When an outage happens (like a DB pool drop), legacy loggers spam 5 separate alerts for downstream errors. SnapTrace hashes the error origin via deterministic SHA-256 fingerprints, collapses the entire cascade into 1 consolidated thread tagged [xN], and points directly to the failing line (database.js:18) with an AI fix.",
-  bundle: "SnapTrace is strictly <3.4KB gzipped (Sentry is ~100KB+). We use native browser listeners and dispatch asynchronously via navigator.sendBeacon. Zero blocking time on page hydration; 100/100 Google Core Web Vitals score.",
-  pii: "Zero-Trust On-Device Sanitization. Passwords, bearer tokens, emails, and credit cards are scrubbed with regex AST directly in the browser before payloads touch the network. Sensitive credentials never hit third-party servers.",
-  cursor: "When an exception occurs, 1 click exports an AI-optimized prompt pre-formatted with the runtime environment, error message, and stack frames ready to paste into Cursor, Claude Code, or VS Code Copilot for an instant 2-line patch.",
+  collapse: 'When an outage happens (like a DB pool drop), legacy loggers spam 5 separate alerts for downstream errors. SnapTrace hashes the error origin via deterministic SHA-256 fingerprints, collapses the entire cascade into 1 consolidated thread tagged [xN], and points directly to the failing line (database.js:18) with an AI fix.',
+  bundle: 'SnapTrace is strictly <3.4KB gzipped (Sentry is ~100KB+). We use native browser listeners and dispatch asynchronously via navigator.sendBeacon. Zero blocking time on page hydration; 100/100 Google Core Web Vitals score.',
+  pii: 'Zero-Trust On-Device Sanitization. Passwords, bearer tokens, emails, and credit cards are scrubbed with regex AST directly in the browser before payloads touch the network. Sensitive credentials never hit third-party servers.',
+  cursor: 'When an exception occurs, 1 click exports an AI-optimized prompt pre-formatted with the runtime environment, error message, and stack frames ready to paste into Cursor, Claude Code, or VS Code Copilot for an instant 2-line patch.',
 };
 
 function getDevBotAnswer(query: string): string {
   const q = query.toLowerCase().trim();
 
   if (q.includes('ai') || q.includes('model') || q.includes('gemini') || q.includes('openai') || q.includes('gpt') || q.includes('claude') || q.includes('cursor') || q.includes('copilot') || q.includes('llm')) {
-    return "SnapTrace features a dual AI architecture:\n\n1. In-Dashboard BYOK Diagnostics:\nConnect your Google Gemini (100% Free via Gemini 2.5 Flash Lite) or OpenAI (GPT-4o) key in Settings for automated root-cause analysis and code patch diffs.\n\n2. 1-Click IDE Coding Agent Export:\nClicking 'Copy for Cursor' generates an AI-optimized prompt pre-formatted with the environment, error message, and stack frames—ready for Cursor, Claude Code, or VS Code Copilot.";
+    return 'SnapTrace features a dual AI architecture:\n\n1. In-Dashboard BYOK Diagnostics:\nConnect your Google Gemini (100% Free via Gemini 2.5 Flash Lite) or OpenAI (GPT-4o) key in Settings for automated root-cause analysis and code patch diffs.\n\n2. 1-Click IDE Coding Agent Export:\nClicking "Copy for Cursor" generates an AI-optimized prompt pre-formatted with the environment, error message, and stack frames—ready for Cursor, Claude Code, or VS Code Copilot.';
   }
 
   if (q.includes('collapse') || q.includes('cascade') || q.includes('sunday') || q.includes('outage') || q.includes('root cause') || q.includes('group')) {
@@ -136,30 +87,30 @@ function getDevBotAnswer(query: string): string {
   }
 
   if (q.includes('price') || q.includes('cost') || q.includes('beta') || q.includes('free') || q.includes('tier') || q.includes('pay') || q.includes('subscription')) {
-    return "Public Beta is currently active. The first 50 developers claim grandfathered Lifetime Starter Pro ($9/mo value forever) with 150,000 monthly events, 30-day retention, unlimited projects, and in-dashboard AI diagnostics for $0 forever. No credit card required.";
+    return 'Public Beta is currently active. The first 50 developers claim grandfathered Lifetime Starter Pro ($9/mo value forever) with 150,000 monthly events, 30-day retention, unlimited projects, and in-dashboard AI diagnostics for $0 forever. No credit card required.';
   }
 
   if (q.includes('language') || q.includes('stack') || q.includes('framework') || q.includes('python') || q.includes('node') || q.includes('rust') || q.includes('go') || q.includes('golang') || q.includes('php') || q.includes('csharp') || q.includes('ruby') || q.includes('flutter') || q.includes('kotlin') || q.includes('cloudflare') || q.includes('curl') || q.includes('support')) {
-    return "We support 100% of languages through our open REST ingestion protocol. Pre-configured drop-in snippets are ready in the dashboard for:\n• Frontend: Next.js (App & Pages Router), React, Vue, Svelte, Vite, Vanilla JS\n• Backend: Node.js (Express/Nest), Python (FastAPI/Django), Go (Golang), Rust (Axum/Actix), PHP (Laravel/WordPress), C# (.NET), Ruby on Rails\n• Mobile & Edge: Flutter (Dart), Kotlin/Android, Cloudflare Workers, and raw cURL/Bash.";
+    return 'We support 100% of languages through our open REST ingestion protocol. Pre-configured drop-in snippets are ready in the dashboard for:\n• Frontend: Next.js (App & Pages Router), React, Vue, Svelte, Vite, Vanilla JS\n• Backend: Node.js (Express/Nest), Python (FastAPI/Django), Go (Golang), Rust (Axum/Actix), PHP (Laravel/WordPress), C# (.NET), Ruby on Rails\n• Mobile & Edge: Flutter (Dart), Kotlin/Android, Cloudflare Workers, and raw cURL/Bash.';
   }
 
   if (q.includes('setup') || q.includes('install') || q.includes('how to') || q.includes('start') || q.includes('quickstart')) {
-    return "30-second setup:\n1. Place this 1-line script inside your HTML head or Next.js app/layout.tsx:\n<script src=\"https://snaptrace-dashboard.vercel.app/snaptrace.js\" data-api-key=\"YOUR_KEY\" async></script>\n2. When any uncaught exception occurs, SnapTrace automatically intercepts it, scrubs PII, throttles repeat loops, and pings your Discord/Slack/Email in milliseconds.";
+    return '30-second setup:\n1. Place this 1-line script inside your HTML head or Next.js app/layout.tsx:\n<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="YOUR_KEY" async></script>\n2. When any uncaught exception occurs, SnapTrace automatically intercepts it, scrubs PII, throttles repeat loops, and pings your Discord/Slack/Email in milliseconds.';
   }
 
   if (q.includes('slack') || q.includes('discord') || q.includes('alert') || q.includes('notification') || q.includes('email') || q.includes('webhook')) {
-    return "Instant real-time alert dispatch in <1 second to your Discord channels (rich embeds), Slack incoming webhooks, and Gmail inbox with occurrence counters ([x500]). Configure your webhook URLs under Settings in 10 seconds.";
+    return 'Instant real-time alert dispatch in <1 second to your Discord channels (rich embeds), Slack incoming webhooks, and Gmail inbox with occurrence counters ([x500]). Configure your webhook URLs under Settings in 10 seconds.';
   }
 
   if (q.includes('loop') || q.includes('throttle') || q.includes('spam') || q.includes('storm') || q.includes('flood') || q.includes('duplicate') || q.includes('2 am') || q.includes('x500')) {
-    return "60-Second Loop Throttling Engine.\n\nIf an infinite re-render loop or failing API poll throws 500 times in 10 seconds, SnapTrace sends the 1st crash immediately, silences duplicate alerts over a 60-second window, and delivers 1 clean summary alert tagged [x500].";
+    return '60-Second Loop Throttling Engine.\n\nIf an infinite re-render loop or failing API poll throws 500 times in 10 seconds, SnapTrace sends the 1st crash immediately, silences duplicate alerts over a 60-second window, and delivers 1 clean summary alert tagged [x500].';
   }
 
   if (q.includes('sentry') || q.includes('datadog') || q.includes('glitchtip') || q.includes('honeybadger') || q.includes('why snaptrace') || q.includes('versus') || q.includes('vs')) {
-    return "Why developers switch to SnapTrace:\n1. Featherweight SDK: <3.4KB vs Sentry's 100KB+ bundle penalty.\n2. Zero Alert Fatigue: 60s noise throttling groups cascade crashes into 1 alert tagged [xN].\n3. On-Device PII Masking: Passwords and cards scrubbed before transmission.\n4. Free BYOK AI: In-dashboard Gemini & OpenAI diagnostics without expensive enterprise add-ons.";
+    return 'Why developers switch to SnapTrace:\n1. Featherweight SDK: <3.4KB vs Sentry\'s 100KB+ bundle penalty.\n2. Zero Alert Fatigue: 60s noise throttling groups cascade crashes into 1 alert tagged [xN].\n3. On-Device PII Masking: Passwords and cards scrubbed before transmission.\n4. Free BYOK AI: In-dashboard Gemini & OpenAI diagnostics without expensive enterprise add-ons.';
   }
 
-  return "SnapTrace is a featherweight (<5KB) error monitoring platform built to eliminate alert fatigue and 100KB SDK bloat. Try asking about:\n• \"which ai models does this support?\"\n• \"how does cascading error collapse work?\"\n• \"why is the SDK under 5KB?\"\n• \"which languages are supported?\"\n• \"how does client PII masking work?\"";
+  return 'SnapTrace is a featherweight (<5KB) error monitoring platform built to eliminate alert fatigue and 100KB SDK bloat. Try asking about:\n• "which ai models does this support?"\n• "how does cascading error collapse work?"\n• "why is the SDK under 5KB?"\n• "which languages are supported?"\n• "how does client PII masking work?"';
 }
 
 export default function WelcomeLandingPage() {
@@ -171,18 +122,16 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
-  // Sentry-Style Dual Mode State
   const [marketingMode, setMarketingMode] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
   const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
 
-  // Chat State
   const [cliInput, setCliInput] = useState('');
   const [cliMessages, setCliMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
     {
       role: 'assistant',
-      text: "Dev Mode active. Ask any technical question about our <5KB SDK, AI model support, cascading error collapse, or client PII masking.",
+      text: 'Dev Mode active. Ask any technical question about our <5KB SDK, AI model support, cascading error collapse, or client PII masking.',
     },
   ]);
 
@@ -274,7 +223,7 @@ export default function WelcomeLandingPage() {
   };
 
   const handleCopyCursorDemo = () => {
-    const promptText = "Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:\nError: ReferenceError: Connection pool exhausted at 10:00:00 PM\nFile: database.js:18:11\nProvide a plain English diagnosis and the exact corrected code patch.";
+    const promptText = 'Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:\nError: ReferenceError: Connection pool exhausted at 10:00:00 PM\nFile: database.js:18:11\nProvide a plain English diagnosis and the exact corrected code patch.';
     navigator.clipboard.writeText(promptText);
     setCopiedCursorPrompt(true);
     setTimeout(() => setCopiedCursorPrompt(false), 2500);
@@ -283,28 +232,28 @@ export default function WelcomeLandingPage() {
   const faqs = [
     {
       q: 'How does SnapTrace collapse cascading multi-error outages?',
-      a: 'During an outage, a single database connection drop often triggers 4 or 5 different downstream errors (auth fails, queries fail, UI renders fail). Instead of sending 5 separate noisy alerts that you have to piece together manually on a Sunday, SnapTrace groups cascading failures and isolates the single root cause with an instant AI fix.'
+      a: 'During an outage, a single database connection drop often triggers 4 or 5 different downstream errors (auth fails, queries fail, UI renders fail). Instead of sending 5 separate noisy alerts that you have to piece together manually on a Sunday, SnapTrace groups cascading failures and isolates the single root cause with an instant AI fix.',
     },
     {
       q: 'Do I need to keep the SnapTrace website open to receive alerts?',
-      a: 'No! The SnapTrace SDK runs silently inside your live application. When an unhandled crash happens in production, SnapTrace automatically pings your configured Discord channel, Slack room, and Gmail inbox in milliseconds.'
+      a: 'No! The SnapTrace SDK runs silently inside your live application. When an unhandled crash happens in production, SnapTrace automatically pings your configured Discord channel, Slack room, and Gmail inbox in milliseconds.',
     },
     {
       q: 'How does SnapTrace integrate with VS Code, Cursor, and AI IDEs?',
-      a: 'When an exception occurs, SnapTrace provides a 1-click "Copy for Cursor" button inside the Inspect modal. It generates an AI-optimized prompt containing the runtime environment, error message, and stack frames, ready to paste into Cursor, VS Code Copilot, or Claude Code for instant local code fixes.'
+      a: 'When an exception occurs, SnapTrace provides a 1-click "Copy for Cursor" button inside the Inspect modal. It generates an AI-optimized prompt containing the runtime environment, error message, and stack frames, ready to paste into Cursor, VS Code Copilot, or Claude Code for instant local code fixes.',
     },
     {
       q: 'What languages and frameworks does SnapTrace support?',
-      a: 'SnapTrace uses a universal REST telemetry endpoint. We provide drop-in snippets for Next.js, JavaScript, React, Vue, Node.js, Python, Go, Rust, C# (.NET), PHP, Ruby, Kotlin, Flutter, Cloudflare Workers, and cURL.'
+      a: 'SnapTrace uses a universal REST telemetry endpoint. We provide drop-in snippets for Next.js, JavaScript, React, Vue, Node.js, Python, Go, Rust, C# (.NET), PHP, Ruby, Kotlin, Flutter, Cloudflare Workers, and cURL.',
     },
     {
       q: 'How does SnapTrace maintain a <5KB bundle size with 0ms delay?',
-      a: 'Unlike legacy APMs that bundle 100KB+ of heavy performance profilers and session serializers, SnapTrace is focused strictly on crash telemetry, client-side PII regex scrubbing, and asynchronous beacon delivery via navigator.sendBeacon. It never delays page hydration or blocks Google Core Web Vitals.'
+      a: 'Unlike legacy APMs that bundle 100KB+ of heavy performance profilers and session serializers, SnapTrace is focused strictly on crash telemetry, client-side PII regex scrubbing, and asynchronous beacon delivery via navigator.sendBeacon. It never delays page hydration or blocks Google Core Web Vitals.',
     },
     {
       q: 'How does the limited-time Beta promotion work?',
-      a: 'The first 50 developers claim grandfathered Lifetime Starter Pro ($9/mo value forever) with 150,000 monthly events, 30-day retention, and full in-dashboard AI diagnostics for $0 forever. No credit card required.'
-    }
+      a: 'The first 50 developers claim grandfathered Lifetime Starter Pro ($9/mo value forever) with 150,000 monthly events, 30-day retention, and full in-dashboard AI diagnostics for $0 forever. No credit card required.',
+    },
   ];
 
   if (checkingAuth) {
@@ -341,12 +290,10 @@ export default function WelcomeLandingPage() {
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-40 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
           
-          {/* Logo */}
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition shrink-0">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Clean Center Navigation */}
           <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300 font-mono">
             <div
               className="relative"
@@ -421,7 +368,6 @@ export default function WelcomeLandingPage() {
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* Action Buttons */}
           <div className="flex items-center space-x-3 font-mono shrink-0">
             <Link
               href="/login"
@@ -476,7 +422,7 @@ export default function WelcomeLandingPage() {
         </div>
       </div>
 
-      {/* VIEW 1: DEV TERMINAL */}
+      {/* VIEW 1: WHEN MARKETING MODE IS OFF */}
       {!marketingMode ? (
         <section className="min-h-[calc(100vh-7rem)] flex items-center justify-center p-6 bg-[#05070E] relative overflow-hidden animate-in fade-in duration-150">
           <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
@@ -564,37 +510,37 @@ export default function WelcomeLandingPage() {
               <div className="space-y-2.5 pt-2 border-t border-slate-800/80">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <button
-                    onClick={() => handleAskCli("which ai models does this support?")}
+                    onClick={() => handleAskCli('which ai models does this support?')}
                     className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
                   >
                     🤖 Which AI Models?
                   </button>
                   <button
-                    onClick={() => handleAskCli("which languages does this support?")}
+                    onClick={() => handleAskCli('which languages does this support?')}
                     className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
                   >
                     🌍 Supported Languages?
                   </button>
                   <button
-                    onClick={() => handleAskCli("how does cascading error collapse work?")}
+                    onClick={() => handleAskCli('how does cascading error collapse work?')}
                     className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
                   >
                     🎯 Cascading Collapse?
                   </button>
                   <button
-                    onClick={() => handleAskCli("why is the SDK under 5KB?")}
+                    onClick={() => handleAskCli('why is the SDK under 5KB?')}
                     className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
                   >
                     ⚡ Why &lt;5KB?
                   </button>
                   <button
-                    onClick={() => handleAskCli("how does client PII masking work?")}
+                    onClick={() => handleAskCli('how does client PII masking work?')}
                     className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
                   >
                     🔒 PII Masking?
                   </button>
                   <button
-                    onClick={() => handleAskCli("how does the free beta pass work?")}
+                    onClick={() => handleAskCli('how does the free beta pass work?')}
                     className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
                   >
                     💰 Pricing / Beta?
@@ -629,12 +575,14 @@ export default function WelcomeLandingPage() {
           </div>
         </section>
       ) : (
-        /* VIEW 2: MARKETING HERO */
+        /* VIEW 2: WHEN MARKETING MODE IS ON */
         <>
+          {/* 3. HERO SECTION */}
           <section className="relative pt-12 pb-14 overflow-hidden">
             <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[380px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
 
             <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
+              
               <div>
                 <a
                   href="#ai-agent"
@@ -826,7 +774,7 @@ export default function WelcomeLandingPage() {
                     <strong>Plain English:</strong> The PostgreSQL client in <code className="text-yellow-300">database.js</code> is opening connections inside a tight loop without releasing them back to the pool.
                   </p>
                   <pre className="p-3 bg-[#0B101D] rounded-xl border border-slate-800 text-emerald-400 overflow-x-auto text-[11px]">
-                    {"// Fix in database.js: Release connection back to pool\nconst client = await pool.connect();\ntry {\n  await client.query('SELECT * FROM users WHERE id = $1', [userId]);\n} finally {\n  client.release(); // Releases connection\n}"}
+                    {'// Fix in database.js: Release connection back to pool\nconst client = await pool.connect();\ntry {\n  await client.query(\'SELECT * FROM users WHERE id = $1\', [userId]);\n} finally {\n  client.release(); // Releases connection\n}'}
                   </pre>
                 </div>
               </SmoothReveal>
@@ -878,7 +826,9 @@ export default function WelcomeLandingPage() {
               </div>
 
               <div className="p-6 bg-[#070A12] overflow-x-auto">
-                <CodeHighlighter code={snippets[activeQuickTab]} />
+                <pre className="font-mono text-xs text-yellow-300 leading-relaxed p-1 overflow-x-auto select-text">
+                  <code>{snippets[activeQuickTab]}</code>
+                </pre>
               </div>
             </div>
           </SmoothReveal>
@@ -1185,93 +1135,4 @@ export default function WelcomeLandingPage() {
                 <div className="pt-1 font-mono">
                   <Link
                     href="/signup"
-                    className="inline-block px-8 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
-                  >
-                    Claim Your Free Beta Pass in 60s →
-                  </Link>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-slate-800/80 text-xs font-mono">
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Platform</span>
-                  <ul className="space-y-1.5 text-slate-400">
-                    <li><a href="#features" className="hover:text-white transition">Telemetry Ingestion</a></li>
-                    <li><a href="#features" className="hover:text-white transition">&lt;5KB Client SDK</a></li>
-                    <li><a href="#ai-agent" className="hover:text-white transition">AI Root Cause Engine</a></li>
-                    <li><a href="#features" className="hover:text-white transition">Client-Side PII Firewall</a></li>
-                  </ul>
-                </div>
-
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Stacks & SDKs</span>
-                  <ul className="space-y-1.5 text-slate-400">
-                    <li><a href="#quickstart" className="hover:text-white transition">Next.js App Router</a></li>
-                    <li><a href="#quickstart" className="hover:text-white transition">Python & FastAPI</a></li>
-                    <li><a href="#quickstart" className="hover:text-white transition">Node.js / Express</a></li>
-                    <li><a href="#quickstart" className="hover:text-white transition">Go, Rust & PHP</a></li>
-                  </ul>
-                </div>
-
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Compare</span>
-                  <ul className="space-y-1.5 text-slate-400">
-                    <li><Link href="/vs/sentry" className="hover:text-white transition">SnapTrace vs. Sentry</Link></li>
-                    <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. GlitchTip</a></li>
-                    <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. Honeybadger</a></li>
-                  </ul>
-                </div>
-
-                <div className="space-y-2.5">
-                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
-                  <ul className="space-y-1.5 text-slate-400">
-                    <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
-                    <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
-                    <li><Link href="/demo" className="hover:text-yellow-400 transition font-bold">Public Demo</Link></li>
-                    <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
-                    <li><span className="text-emerald-400">● Systems Operational</span></li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-mono gap-3">
-                <span>© {new Date().getFullYear()} SnapTrace. All rights reserved. The Independent Developer Telemetry Platform.</span>
-                <div className="flex items-center space-x-4 text-slate-400">
-                  <Link href="/privacy" className="hover:text-yellow-400">Privacy</Link>
-                  <Link href="/terms" className="hover:text-yellow-400">Terms</Link>
-                  <Link href="/demo" className="hover:text-yellow-400">Demo</Link>
-                  <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
-                </div>
-              </div>
-            </div>
-          </footer>
-
-          {/* 14. STICKY BOTTOM BAR */}
-          {showStickyBottomBar && (
-            <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-200 font-mono">
-              <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 truncate">
-                  <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping shrink-0" />
-                  <span className="text-xs text-slate-200 font-bold truncate">
-                    Beta Offer: <span className="text-yellow-300">Only 10 Lifetime Pro Passes Left</span>
-                  </span>
-                </div>
-
-                <Link
-                  href="/signup"
-                  className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 shrink-0"
-                >
-                  Claim Free Pass →
-                </Link>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-    </div>
-  );
-}
-```
-
----
+                    className="inline-block px-8 py-3 bg-gradient-to-r f
