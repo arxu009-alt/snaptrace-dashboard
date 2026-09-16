@@ -1,3 +1,4 @@
+```tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -287,7 +288,7 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-6">
 
-            {/* 1. Subscription & Plan Status */}
+            {/* 1. Subscription & Plan Status (TRUST-PRESERVED: NO EXPIRATION DATE FOR CURRENT USERS) */}
             <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-5 relative">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
                 <div className="space-y-1">
@@ -307,7 +308,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-slate-400">
                     {isOwner
                       ? 'Owner account with full unlimited access to all features.'
-                      : 'All Starter Pro features are 100% unlocked for early builders during Public Beta (Until Oct 31, 2026).'}
+                      : 'All Starter Pro features are 100% unlocked for early builders with full access to AI diagnostics and high-capacity monitoring.'}
                   </p>
                 </div>
 
@@ -332,7 +333,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* 2. DEVELOPER ACCOUNT PROFILE (WITH EDITABLE DISPLAY NAME & MASKED KEY) */}
+            {/* 2. Developer Account Profile */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div className="flex items-center gap-3">
@@ -355,7 +356,7 @@ export default function SettingsPage() {
               {/* Editable Name & Email Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 
-                {/* 1. Custom Developer Display Name Form */}
+                {/* Custom Developer Display Name Form */}
                 <form onSubmit={handleSaveDisplayName} className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">
@@ -387,7 +388,7 @@ export default function SettingsPage() {
                   </div>
                 </form>
 
-                {/* 2. Account Email (Verified) */}
+                {/* Account Email (Verified) */}
                 <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1 flex flex-col justify-center">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">
                     Account Email Address
@@ -402,7 +403,7 @@ export default function SettingsPage() {
 
               </div>
 
-              {/* 3. Masked API Key (No more scribbling on screenshots!) */}
+              {/* Masked API Key */}
               <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">
@@ -528,7 +529,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  {aiKeySaved ? '✓ AI Key Active' : '● Beta Pass Unlocked'}
+                  {aiKeySaved ? '✓ AI Key Active' : '● Pro Unlocked'}
                 </span>
               </div>
 
@@ -628,3 +629,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+```

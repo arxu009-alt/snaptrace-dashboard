@@ -1,3 +1,4 @@
+```tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -47,7 +48,7 @@ function SmoothReveal({
     <div
       ref={domRef}
       style={{ transitionDelay: `${delay}ms` }}
-      className={`transform-gpu transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`transform-gpu transition-all duration-700 ease-out ${
         isVisible
           ? 'opacity-100 translate-y-0 filter blur-0'
           : 'opacity-0 translate-y-6 filter blur-[1px]'
@@ -133,7 +134,7 @@ function getDevBotAnswer(query: string): string {
   }
 
   if (q.includes('price') || q.includes('cost') || q.includes('beta') || q.includes('free') || q.includes('tier') || q.includes('pay') || q.includes('subscription')) {
-    return `Public Beta is 100% Free until October 31, 2026.\n\nAll developers who sign up receive grandfathered Lifetime Starter Pro ($9/mo value) with 150,000 monthly events, 30-day retention, unlimited projects, and in-dashboard AI diagnostics for $0 forever. No credit card required.`;
+    return `Public Beta is currently active. The first 50 developers claim grandfathered Lifetime Starter Pro ($9/mo value forever) with 150,000 monthly events, 30-day retention, unlimited projects, and in-dashboard AI diagnostics for $0 forever. No credit card required.`;
   }
 
   if (q.includes('language') || q.includes('stack') || q.includes('framework') || q.includes('python') || q.includes('node') || q.includes('rust') || q.includes('go') || q.includes('golang') || q.includes('php') || q.includes('csharp') || q.includes('ruby') || q.includes('flutter') || q.includes('kotlin') || q.includes('cloudflare') || q.includes('curl') || q.includes('support')) {
@@ -168,16 +169,11 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
-  // Sentry-Style Dual Mode State
   const [marketingMode, setMarketingMode] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
   const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
-  
-  // Mobile Navigation Drawer State
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Chat State
   const [cliInput, setCliInput] = useState('');
   const [cliMessages, setCliMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
     {
@@ -454,7 +450,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
     },
     {
       q: 'How does the limited-time Beta promotion work?',
-      a: 'All developers who sign up during our Public Beta receive automatic, grandfathered Lifetime Pro access with 150,000 monthly events and full in-dashboard AI diagnostics for $0. No credit card required.'
+      a: 'The first 50 developers claim grandfathered Lifetime Starter Pro ($9/mo value forever) with 150,000 monthly events, 30-day retention, and full in-dashboard AI diagnostics for $0 forever. No credit card required.'
     }
   ];
 
@@ -473,70 +469,60 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
     <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden relative">
       
       {/* 1. TOP BANNER */}
-      <div className={`px-4 py-1.5 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2 transition-colors ${
+      <div className={`px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2 transition-colors ${
         marketingMode
           ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950'
           : 'bg-[#0B101D] border-b border-yellow-400/30 text-yellow-300'
       }`}>
         <span>{marketingMode ? '🔥 Early Adopter Launch:' : '⚡ ARCHITECTURE SPEC:'}</span>
         <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px] font-mono border border-yellow-400/20">
-          {marketingMode ? '38 / 50 Free Lifetime Pro Passes Claimed' : 'RFC-9110 Asynchronous Ingestion Engine Active'}
+          {marketingMode ? '40 / 50 Free Lifetime Pro Passes Claimed' : 'RFC-9110 Asynchronous Ingestion Engine Active'}
         </span>
         <span className="hidden sm:inline">
-          {marketingMode ? '• 12 spots left before Beta closes (No credit card needed)' : '• 0ms Hydration Penalty • <3.4KB Gzipped'}
+          {marketingMode ? '• Only 10 seats left before Lifetime Access closes (No credit card needed)' : '• 0ms Hydration Penalty • <3.4KB Gzipped'}
         </span>
       </div>
 
-      {/* 2. SENTRY-STYLE STREAMLINED HEADER */}
+      {/* 2. SENTRY-STYLE EXPANSIVE CLEAN HEADER */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-40 transition-all">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
           
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition shrink-0">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300 font-mono">
             <div
-              className="relative group"
+              className="relative"
               onMouseEnter={() => setOpenDropdown('platform')}
               onMouseLeave={() => setOpenDropdown(null)}
             >
-              <button className="hover:text-yellow-400 transition flex items-center gap-1.5 py-4 cursor-pointer">
-                <span>Platform</span>
-                <svg
-                  className="w-3.5 h-3.5 text-slate-400 group-hover:text-yellow-400 transition-transform duration-200 group-hover:rotate-180"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                </svg>
+              <button className="hover:text-yellow-400 transition flex items-center gap-1 py-4">
+                Platform <span className="text-[10px] text-slate-500">▾</span>
               </button>
 
               {openDropdown === 'platform' && (
-                <div className="absolute top-12 left-0 w-84 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-2.5 animate-in fade-in zoom-in-95 duration-100 font-sans">
-                  <div className="text-[11px] uppercase tracking-widest text-yellow-400 font-bold px-2">
-                    CORE CAPABILITIES
-                  </div>
-                  <a href="#features" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/60 transition group">
-                    <span className="text-lg">🪶</span>
+                <div className="absolute top-12 left-0 w-80 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-2 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-2">Capabilities</div>
+                  <a href="#features" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                    <span className="text-base">🪶</span>
                     <div>
-                      <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">&lt;5KB Telemetry SDK</div>
-                      <div className="text-[11px] text-slate-400">Zero Core Web Vitals penalty</div>
+                      <div className="text-white font-bold text-xs">&lt;5KB Telemetry SDK</div>
+                      <div className="text-[10px] text-slate-400">Zero Core Web Vitals penalty</div>
                     </div>
                   </a>
-                  <a href="#grouping" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/60 transition group">
-                    <span className="text-lg">🎯</span>
+                  <a href="#grouping" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                    <span className="text-base">🎯</span>
                     <div>
-                      <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">Root-Cause Collapse</div>
-                      <div className="text-[11px] text-slate-400">Multi-crash incident grouping</div>
+                      <div className="text-white font-bold text-xs">Root-Cause Collapse</div>
+                      <div className="text-[10px] text-slate-400">Multi-crash incident grouping</div>
                     </div>
                   </a>
-                  <a href="#features" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/60 transition group">
-                    <span className="text-lg">🔒</span>
+                  <a href="#features" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                    <span className="text-base">🔒</span>
                     <div>
-                      <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">Client-Side PII Firewall</div>
-                      <div className="text-[11px] text-slate-400">On-device password & card masking</div>
+                      <div className="text-white font-bold text-xs">Client-Side PII Firewall</div>
+                      <div className="text-[10px] text-slate-400">On-device password & card masking</div>
                     </div>
                   </a>
                 </div>
@@ -544,38 +530,29 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </div>
 
             <div
-              className="relative group"
+              className="relative"
               onMouseEnter={() => setOpenDropdown('ai')}
               onMouseLeave={() => setOpenDropdown(null)}
             >
-              <button className="hover:text-yellow-400 transition flex items-center gap-1.5 py-4 text-yellow-300 cursor-pointer">
-                <span>✨ AI Copilot</span>
-                <svg
-                  className="w-3.5 h-3.5 text-yellow-400 transition-transform duration-200 group-hover:rotate-180"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                </svg>
+              <button className="hover:text-yellow-400 transition flex items-center gap-1 py-4 text-yellow-300">
+                <span>✨</span> AI Copilot <span className="text-[10px] text-slate-500">▾</span>
               </button>
 
               {openDropdown === 'ai' && (
-                <div className="absolute top-12 left-0 w-84 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-2.5 animate-in fade-in zoom-in-95 duration-100 font-sans">
-                  <div className="text-[11px] uppercase tracking-widest text-yellow-400 font-bold px-2">
-                    AI AGENTS & DEBUGGING
-                  </div>
-                  <a href="#ai-agent" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/60 transition group">
-                    <span className="text-lg">🤖</span>
+                <div className="absolute top-12 left-0 w-80 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-4 space-y-2 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-2">AI Diagnostics</div>
+                  <a href="#ai-agent" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                    <span className="text-base">🤖</span>
                     <div>
-                      <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">Cursor & Claude 1-Click Export</div>
-                      <div className="text-[11px] text-slate-400">Pre-formatted prompt for your IDE</div>
+                      <div className="text-white font-bold text-xs">Cursor & Claude 1-Click Export</div>
+                      <div className="text-[10px] text-slate-400">Pre-formatted prompt for your IDE</div>
                     </div>
                   </a>
-                  <a href="#ai-agent" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/60 transition group">
-                    <span className="text-lg">⚡</span>
+                  <a href="#ai-agent" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                    <span className="text-base">⚡</span>
                     <div>
-                      <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">BYOK AI Diagnosis</div>
-                      <div className="text-[11px] text-slate-400">Free Gemini & OpenAI integration</div>
+                      <div className="text-white font-bold text-xs">BYOK AI Diagnosis</div>
+                      <div className="text-[10px] text-slate-400">Free Gemini & OpenAI integration</div>
                     </div>
                   </a>
                 </div>
@@ -588,8 +565,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
-          {/* Desktop Right Action Buttons */}
-          <div className="hidden sm:flex items-center space-x-3 font-mono shrink-0">
+          <div className="flex items-center space-x-3 font-mono shrink-0">
             <Link
               href="/login"
               className="text-xs font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800/50 transition"
@@ -611,121 +587,25 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               GET STARTED
             </Link>
           </div>
-
-          {/* Mobile Hamburger Toggle Button */}
-          <div className="flex sm:hidden items-center gap-2">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl bg-[#0B101D] border border-slate-800 text-slate-300 hover:text-yellow-400 transition"
-              aria-label="Toggle Mobile Menu"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
-
         </div>
-
-        {/* 🌟 RESPONSIVE MOBILE NAVIGATION DRAWER */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#070A12]/98 border-b border-slate-800 p-6 space-y-4 animate-in slide-in-from-top-4 duration-200 font-mono">
-            <div className="space-y-2 text-xs">
-              <a 
-                href="#features" 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
-              >
-                Platform & Capabilities →
-              </a>
-              <a 
-                href="#ai-agent" 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block py-2 text-yellow-300 border-b border-slate-800/60"
-              >
-                ✨ AI Copilot & IDE Agents →
-              </a>
-              <a 
-                href="#quickstart" 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
-              >
-                SDK Setup (12 Stacks) →
-              </a>
-              <a 
-                href="#comparison" 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
-              >
-                Why SnapTrace vs Sentry →
-              </a>
-              <a 
-                href="#pricing" 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
-              >
-                Pricing & Beta Pass →
-              </a>
-              <a 
-                href="#faq" 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block py-2 text-slate-300 hover:text-yellow-400 border-b border-slate-800/60"
-              >
-                FAQ →
-              </a>
-            </div>
-
-            {/* Mobile Mode Switch */}
-            <div className="flex items-center justify-between p-3 bg-[#0B101D] border border-slate-800 rounded-xl">
-              <span className="text-xs text-slate-300 font-bold">Marketing Mode:</span>
-              <button
-                onClick={toggleMarketingMode}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
-                  marketingMode ? 'bg-amber-500 text-slate-950' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                }`}
-              >
-                {marketingMode ? 'ON (Story)' : 'OFF (Raw Dev)'}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <Link
-                href="/demo"
-                className="py-2.5 text-center rounded-xl border border-yellow-400/50 text-yellow-300 text-xs font-bold"
-              >
-                GET DEMO
-              </Link>
-              <Link
-                href="/signup"
-                className="py-2.5 text-center bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-xs font-black rounded-xl"
-              >
-                GET STARTED
-              </Link>
-            </div>
-          </div>
-        )}
       </header>
 
-      {/* 🌟 SENTRY'S EXACT VERTICAL MARKETING MODE CARD (Desktop Canvas Right Alignment) */}
+      {/* SENTRY'S VERTICAL MARKETING MODE CARD */}
       <div className="max-w-7xl mx-auto px-6 relative">
-        <div className="absolute top-4 right-6 z-30 hidden sm:block">
-          <div className="bg-[#181326]/90 border border-purple-500/30 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1 font-mono">
+        <div className="absolute top-6 right-6 z-30 hidden sm:block">
+          <div className="bg-[#181326]/90 border border-purple-500/30 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1.5 font-mono">
             <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider select-none">
               Marketing Mode
             </span>
             <button
               onClick={toggleMarketingMode}
-              className={`w-11 h-5.5 rounded-full transition-colors relative cursor-pointer ${
+              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
                 marketingMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-slate-700'
               }`}
               title="Toggle between Marketing Mode and Dev Spec Mode"
             >
               <div
-                className={`w-3.5 h-3.5 rounded-full bg-slate-950 absolute top-1 transition-all ${
+                className={`w-4 h-4 rounded-full bg-slate-950 absolute top-1 transition-all ${
                   marketingMode ? 'right-1' : 'left-1'
                 }`}
               />
@@ -737,14 +617,13 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
         </div>
       </div>
 
-      {/* VIEW 1: WHEN MARKETING MODE IS OFF (SENTRY DEDICATED DEV TERMINAL) */}
+      {/* VIEW 1: WHEN MARKETING MODE IS OFF */}
       {!marketingMode ? (
-        <section className="min-h-[calc(100vh-6rem)] flex items-center justify-center p-6 bg-[#05070E] relative overflow-hidden animate-in fade-in duration-150">
+        <section className="min-h-[calc(100vh-7rem)] flex items-center justify-center p-6 bg-[#05070E] relative overflow-hidden animate-in fade-in duration-150">
           <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
             
-            {/* Left Column: Developer Manifesto */}
-            <div className="lg:col-span-6 space-y-5">
-              <div className="space-y-2">
+            <div className="lg:col-span-6 space-y-6">
+              <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-mono tracking-tight text-white leading-none">
                   NO 100KB BUNDLES.<br />
                   NO 2 AM SPAM ALERTS.<br />
@@ -781,20 +660,19 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
               <div className="flex items-center gap-3 pt-1 font-mono">
                 <Link
                   href="/signup"
-                  className="px-6 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
+                  className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
                 >
                   Get Free Beta Key in 30s →
                 </Link>
                 <Link
                   href="/demo"
-                  className="px-5 py-2.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs font-bold rounded-xl transition"
+                  className="px-5 py-3 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs font-bold rounded-xl transition"
                 >
                   ⚡ Open Demo Workspace
                 </Link>
               </div>
             </div>
 
-            {/* Right Column: Intelligent /snappy-cli Terminal */}
             <div className="lg:col-span-6 bg-[#090D16] border-2 border-emerald-500/40 rounded-3xl p-5 shadow-2xl flex flex-col justify-between font-mono space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div className="flex items-center gap-2 text-xs font-bold text-white">
@@ -804,7 +682,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 <span className="text-[10px] text-slate-500">Ask any technical question</span>
               </div>
 
-              <div className="space-y-3 overflow-y-auto max-h-[280px] pr-1 text-xs">
+              <div className="space-y-3 overflow-y-auto max-h-[300px] pr-1 text-xs">
                 {cliMessages.map((msg, idx) => (
                   <div
                     key={idx}
@@ -823,7 +701,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-slate-800/80">
+              <div className="space-y-2.5 pt-2 border-t border-slate-800/80">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <button
                     onClick={() => handleAskCli("which ai models does this support?")}
@@ -855,6 +733,12 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                   >
                     🔒 PII Masking?
                   </button>
+                  <button
+                    onClick={() => handleAskCli("how does the free beta pass work?")}
+                    className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
+                  >
+                    💰 Pricing / Beta?
+                  </button>
                 </div>
 
                 <form
@@ -885,55 +769,53 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           </div>
         </section>
       ) : (
-        /* VIEW 2: WHEN MARKETING MODE IS ON (PERFECT ABOVE-THE-FOLD FIT) */
+        /* VIEW 2: WHEN MARKETING MODE IS ON */
         <>
           {/* 3. HERO SECTION */}
-          <section className="relative pt-6 sm:pt-8 pb-12 overflow-hidden">
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[130px] pointer-events-none rounded-full" />
+          <section className="relative pt-12 pb-14 overflow-hidden">
+            <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[380px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
 
-            <div className="max-w-5xl mx-auto px-6 text-center space-y-4 sm:space-y-5 relative z-10">
+            <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
               
-              {/* SENTRY MCP EQUIVALENT ANNOUNCEMENT PILL */}
               <div>
                 <a
                   href="#ai-agent"
-                  className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-xs font-mono font-bold text-purple-300 transition shadow-lg hover:border-purple-400 group cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-xs font-mono font-bold text-purple-300 transition shadow-lg hover:border-purple-400 group cursor-pointer"
                 >
                   <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
                   <span>✨ SnapTrace AI Protocol: Fix production crashes right inside Cursor & Claude Code →</span>
                 </a>
               </div>
 
-              {/* MASSIVE, CONFIDENT SENTRY-TIER HEADLINE */}
-              <h1 className="text-4xl sm:text-6xl lg:text-[70px] font-black tracking-tight text-white leading-[1.08] max-w-5xl mx-auto">
+              <h1 className="text-5xl sm:text-7xl md:text-[76px] font-black tracking-tight text-white leading-[1.05] max-w-5xl mx-auto">
                 Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>, fix it in a{' '}
                 <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
                   snap.
                 </span>
               </h1>
 
-              <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
+              <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed font-sans">
                 Stop spending Sundays connecting the dots by hand. SnapTrace collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes.
               </p>
 
-              {/* BOTH HERO BUTTONS: 100% VISIBLE ABOVE THE FOLD */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 font-mono">
+              {/* 🌟 HERO BUTTON (10 SEATS LEFT) */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 font-mono">
                 <Link
                   href="/signup"
-                  className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black rounded-xl shadow-lg shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
+                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-sm font-black rounded-xl shadow-xl shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
                 >
-                  Claim Free Lifetime Pro Pass (12 Spots Left) →
+                  Claim Free Lifetime Pro Pass (Only 10 Left) →
                 </Link>
                 <Link
                   href="/demo"
-                  className="w-full sm:w-auto px-7 py-3.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs sm:text-sm font-bold rounded-xl transition shadow-md"
+                  className="w-full sm:w-auto px-8 py-4 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-sm font-bold rounded-xl transition shadow-md"
                 >
                   ⚡ Open Demo Workspace (No Signup)
                 </Link>
               </div>
 
               {/* 1-Click Drop-in Hero Code Snippet */}
-              <div className="pt-1 max-w-xl mx-auto">
+              <div className="pt-2 max-w-xl mx-auto">
                 <div className="bg-[#0B101D] border border-slate-800/90 rounded-2xl p-2.5 flex items-center justify-between gap-3 shadow-xl font-mono text-xs">
                   <div className="flex items-center gap-2 truncate text-slate-400 pl-2">
                     <span className="text-yellow-400 font-bold select-none">&lt;/&gt;</span>
@@ -948,7 +830,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                     {copiedHeroScript ? '✓ Copied!' : '📋 Copy'}
                   </button>
                 </div>
-                <div className="flex items-center justify-center gap-4 text-[10px] text-slate-500 font-mono pt-1.5">
+                <div className="flex items-center justify-center gap-4 text-[10px] text-slate-500 font-mono pt-2">
                   <span>✓ Drop into HTML head</span>
                   <span>✓ 0ms main thread delay</span>
                   <span>✓ &lt;5KB featherweight</span>
@@ -1013,7 +895,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
 
           {/* 5. DEVELOPER SOCIAL PROOF */}
           <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={100}>
-            <div className="p-6 rounded-3xl bg-gradient-to-r from-[#0B101D] to-[#080d1a] border border-slate-800 shadow-xl space-y-3">
+            <div id="social-proof" className="p-6 rounded-3xl bg-gradient-to-r from-[#0B101D] to-[#080d1a] border border-slate-800 shadow-xl space-y-3">
               <div className="flex items-center gap-2 text-yellow-400 text-xs font-mono font-bold uppercase tracking-widest">
                 <span>💬</span> Validated by Senior Software Engineers
               </div>
@@ -1271,11 +1153,11 @@ try {
             </SmoothReveal>
           </section>
 
-          {/* 10. PRICING TIERS */}
+          {/* 10. PRICING TIERS (UPDATED: 10 SPOTS REMAINING) */}
           <section id="pricing" className="max-w-5xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-10">
             <SmoothReveal className="text-center space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
-                <span>⏰</span> Limited Beta Window (Until Oct 31, 2026)
+                <span>⏰</span> Limited Beta Window
               </div>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Simple, transparent developer tiers</h2>
               <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto font-mono">
@@ -1312,17 +1194,17 @@ try {
                 </Link>
               </div>
 
-              {/* Card 2: Starter Pro */}
+              {/* Card 2: Starter Pro (UPDATED: ONLY 10 SPOTS REMAINING) */}
               <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
                 <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
-                  ★ 12 Spots Remaining
+                  ★ Only 10 Spots Remaining
                 </span>
 
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Starter Pro (Beta Pass)</span>
                     <div className="text-3xl font-black text-white">$0 <span className="text-xs text-yellow-300 font-mono font-bold line-through ml-1">$9/mo</span></div>
-                    <p className="text-xs text-slate-400 pt-1">Free full Pro features unlocked for all early beta developers.</p>
+                    <p className="text-xs text-slate-400 pt-1">Grandfathered lifetime access for our first 50 early developers.</p>
                   </div>
 
                   <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5 font-mono">
@@ -1515,14 +1397,14 @@ try {
             </div>
           </footer>
 
-          {/* 14. STICKY BOTTOM BAR (Appears ONLY after scrolling past hero!) */}
+          {/* 14. STICKY BOTTOM BAR */}
           {showStickyBottomBar && (
             <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-200 font-mono">
               <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 truncate">
                   <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping shrink-0" />
                   <span className="text-xs text-slate-200 font-bold truncate">
-                    Beta Offer: <span className="text-yellow-300">12 Lifetime Pro Passes Left</span>
+                    Beta Offer: <span className="text-yellow-300">Only 10 Lifetime Pro Passes Left</span>
                   </span>
                 </div>
 
@@ -1541,3 +1423,6 @@ try {
     </div>
   );
 }
+```
+
+---
