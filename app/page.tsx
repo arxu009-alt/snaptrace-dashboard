@@ -208,12 +208,12 @@ export default function WelcomeLandingPage() {
     node: '// Node.js / Express / NestJS\nprocess.on(\'uncaughtException\', (err) => {\n  fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n    method: \'POST\',\n    headers: { \'Content-Type\': \'application/json\' },\n    body: JSON.stringify({\n      apiKey: \'sk_live_your_project_key\',\n      message: err.message,\n      stackTrace: err.stack,\n      environment: process.env.NODE_ENV || \'production\'\n    })\n  }).catch(() => {});\n});',
     go: '// Go (Golang) Crash Reporter\npackage main\n\nimport (\n  "bytes"\n  "encoding/json"\n  "net/http"\n)\n\nfunc SendSnapTrace(err error, route string) {\n  payload, _ := json.Marshal(map[string]string{\n    "apiKey":      "sk_live_your_project_key",\n    "message":     err.Error(),\n    "environment": "production",\n    "url":         route,\n  })\n  http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))\n}',
     rust: '// Rust / Axum / Actix-web\nasync fn capture_snaptrace(err: &str, route: &str) {\n    let payload = serde_json::json!({\n        "apiKey": "sk_live_your_project_key",\n        "message": err,\n        "url": route,\n        "environment": "production"\n    });\n    let _ = reqwest::Client::new()\n        .post("https://snaptrace-dashboard.vercel.app/api/v1/log")\n        .json(&payload)\n        .send()\n        .await;\n}',
-    csharp: '// C# / ASP.NET Core\npublic static async Task CaptureSnapTrace(Exception ex, string url = "API Service") {\n    var payload = new {\n        apiKey = "sk_live_your_project_key",\n        message = ex.Message,\n        stackTrace = ex.StackTrace,\n        url = url,\n        environment = "production"\n    };\n    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);\n}',
-    php: '<?php\n// PHP / Laravel / WordPress\nset_exception_handler(function ($e) {\n    $ch = curl_init(\'https://snaptrace-dashboard.vercel.app/api/v1/log\');\n    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([\n        \'apiKey\' => \'sk_live_your_project_key\',\n        \'message\' => $e->getMessage(),\n        \'stackTrace\' => $e->getTraceAsString(),\n        \'environment\' => \'production\'\n    ]));\n    curl_setopt($ch, CURLOPT_HTTPHEADER, [\'Content-Type: application/json\']);\n    curl_exec($ch);\n});\n?>',
-    ruby: '# Ruby on Rails / Sinatra\ndef send_snaptrace_alert(exception)\n  uri = URI(\'https://snaptrace-dashboard.vercel.app/api/v1/log\')\n  Net::HTTP.post(uri, {\n    apiKey: \'sk_live_your_project_key\',\n    message: exception.message,\n    stackTrace: exception.backtrace&.join("\\n"),\n    environment: \'production\'\n  }.to_json, "Content-Type" => "application/json") rescue nil\nend',
-    kotlin: '// Kotlin / Android / Java (OkHttp)\nfun sendSnapTrace(e: Throwable, context: String = "Android App") {\n    val json = JSONObject().apply {\n        put("apiKey", "sk_live_your_project_key")\n        put("message", e.localizedMessage ?: "Unknown Error")\n        put("environment", "production")\n        put("url", context)\n    }\n    // Asynchronous POST dispatch to https://snaptrace-dashboard.vercel.app/api/v1/log\n}',
-    flutter: '// Flutter / Dart Crash Handler\nvoid captureSnapTrace(Object error, StackTrace stack) {\n  http.post(\n    Uri.parse(\'https://snaptrace-dashboard.vercel.app/api/v1/log\'),\n    headers: {\'Content-Type\': \'application/json\'},\n    body: jsonEncode({\n      \'apiKey\': \'sk_live_your_project_key\',\n      \'message\': error.toString(),\n      \'stackTrace\': stack.toString(),\n      \'environment\': \'production\'\n    }),\n  );\n}',
-    cloudflare: '// Cloudflare Workers / Serverless Edge\nexport default {\n  async fetch(req: Request, env: any, ctx: any) {\n    try {\n      return await handleRequest(req);\n    } catch (err: any) {\n      ctx.waitUntil(fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n        method: \'POST\',\n        headers: { \'Content-Type\': \'application/json\' },\n        body: JSON.stringify({\n          apiKey: \'sk_live_your_project_key\',\n          message: err.message,\n          stackTrace: err.stack,\n          environment: \'production\'\n        })\n      }));\n      return new Response(\'Edge Execution Error\', { status: 500 });\n    }\n  }\n};'
+    csharp: '// C# / ASP.NET Core\npublic static async Task CaptureSnapTrace(Exception ex, string url = "API Service") {\n    var payload = new { apiKey = "sk_live_your_project_key", message = ex.Message, stackTrace = ex.StackTrace, url = url, environment = "production" };\n    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);\n}',
+    php: '<?php\n// PHP / Laravel / WordPress\nset_exception_handler(function ($e) {\n    $ch = curl_init(\'https://snaptrace-dashboard.vercel.app/api/v1/log\');\n    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([\'apiKey\' => \'sk_live_your_project_key\', \'message\' => $e->getMessage(), \'stackTrace\' => $e->getTraceAsString(), \'environment\' => \'production\']));\n    curl_setopt($ch, CURLOPT_HTTPHEADER, [\'Content-Type: application/json\']);\n    curl_exec($ch);\n});\n?>',
+    ruby: '# Ruby on Rails / Sinatra\ndef send_snaptrace_alert(exception)\n  uri = URI(\'https://snaptrace-dashboard.vercel.app/api/v1/log\')\n  Net::HTTP.post(uri, { apiKey: \'sk_live_your_project_key\', message: exception.message, stackTrace: exception.backtrace&.join("\\n"), environment: \'production\' }.to_json, "Content-Type" => "application/json") rescue nil\nend',
+    kotlin: '// Kotlin / Android / Java (OkHttp)\nfun sendSnapTrace(e: Throwable, context: String = "Android App") {\n    val json = JSONObject().apply {\n        put("apiKey", "sk_live_your_project_key")\n        put("message", e.localizedMessage ?: "Unknown Error")\n        put("environment", "production")\n        put("url", context)\n    }\n}',
+    flutter: '// Flutter / Dart Crash Handler\nvoid captureSnapTrace(Object error, StackTrace stack) {\n  http.post(Uri.parse(\'https://snaptrace-dashboard.vercel.app/api/v1/log\'), headers: {\'Content-Type\': \'application/json\'}, body: jsonEncode({\'apiKey\': \'sk_live_your_project_key\', \'message\': error.toString(), \'stackTrace\': stack.toString(), \'environment\': \'production\'}));\n}',
+    cloudflare: '// Cloudflare Workers / Serverless Edge\nexport default {\n  async fetch(req: Request, env: any, ctx: any) {\n    try {\n      return await handleRequest(req);\n    } catch (err: any) {\n      ctx.waitUntil(fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n        method: \'POST\',\n        headers: { \'Content-Type\': \'application/json\' },\n        body: JSON.stringify({ apiKey: \'sk_live_your_project_key\', message: err.message, stackTrace: err.stack, environment: \'production\' })\n      }));\n      return new Response(\'Edge Execution Error\', { status: 500 });\n    }\n  }\n};'
   };
 
   const handleCopyCode = () => {
@@ -286,10 +286,9 @@ export default function WelcomeLandingPage() {
         </span>
       </div>
 
-      {/* 2. SENTRY-STYLE EXPANSIVE CLEAN HEADER */}
+      {/* 2. HEADER */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-40 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
-          
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition shrink-0">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
@@ -422,11 +421,10 @@ export default function WelcomeLandingPage() {
         </div>
       </div>
 
-      {/* VIEW 1: WHEN MARKETING MODE IS OFF */}
+      {/* VIEW 1: DEV TERMINAL */}
       {!marketingMode ? (
         <section className="min-h-[calc(100vh-7rem)] flex items-center justify-center p-6 bg-[#05070E] relative overflow-hidden animate-in fade-in duration-150">
           <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
-            
             <div className="lg:col-span-6 space-y-6">
               <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-mono tracking-tight text-white leading-none">
@@ -569,20 +567,16 @@ export default function WelcomeLandingPage() {
                   </button>
                 </form>
               </div>
-
             </div>
-
           </div>
         </section>
       ) : (
-        /* VIEW 2: WHEN MARKETING MODE IS ON */
+        /* VIEW 2: MARKETING HERO */
         <>
-          {/* 3. HERO SECTION */}
           <section className="relative pt-12 pb-14 overflow-hidden">
             <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[380px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
 
             <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
-              
               <div>
                 <a
                   href="#ai-agent"
@@ -967,8 +961,6 @@ export default function WelcomeLandingPage() {
             </SmoothReveal>
 
             <SmoothReveal className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch" delay={150}>
-              
-              {/* Card 1: Developer Free */}
               <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -995,7 +987,6 @@ export default function WelcomeLandingPage() {
                 </Link>
               </div>
 
-              {/* Card 2: Starter Pro */}
               <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
                 <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
                   ★ Only 10 Spots Remaining
@@ -1026,7 +1017,6 @@ export default function WelcomeLandingPage() {
                 </Link>
               </div>
 
-              {/* Card 3: Team Scale */}
               <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -1052,7 +1042,6 @@ export default function WelcomeLandingPage() {
                   Join Beta Waitlist →
                 </Link>
               </div>
-
             </SmoothReveal>
           </section>
 
@@ -1135,4 +1124,90 @@ export default function WelcomeLandingPage() {
                 <div className="pt-1 font-mono">
                   <Link
                     href="/signup"
-                    className="inline-block px-8 py-3 bg-gradient-to-r f
+                    className="inline-block px-8 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
+                  >
+                    Claim Your Free Beta Pass in 60s →
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8 border-t border-slate-800/80 text-xs font-mono">
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Platform</span>
+                  <ul className="space-y-1.5 text-slate-400">
+                    <li><a href="#features" className="hover:text-white transition">Telemetry Ingestion</a></li>
+                    <li><a href="#features" className="hover:text-white transition">&lt;5KB Client SDK</a></li>
+                    <li><a href="#ai-agent" className="hover:text-white transition">AI Root Cause Engine</a></li>
+                    <li><a href="#features" className="hover:text-white transition">Client-Side PII Firewall</a></li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Stacks & SDKs</span>
+                  <ul className="space-y-1.5 text-slate-400">
+                    <li><a href="#quickstart" className="hover:text-white transition">Next.js App Router</a></li>
+                    <li><a href="#quickstart" className="hover:text-white transition">Python & FastAPI</a></li>
+                    <li><a href="#quickstart" className="hover:text-white transition">Node.js / Express</a></li>
+                    <li><a href="#quickstart" className="hover:text-white transition">Go, Rust & PHP</a></li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Compare</span>
+                  <ul className="space-y-1.5 text-slate-400">
+                    <li><Link href="/vs/sentry" className="hover:text-white transition">SnapTrace vs. Sentry</Link></li>
+                    <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. GlitchTip</a></li>
+                    <li><a href="#comparison" className="hover:text-white transition">SnapTrace vs. Honeybadger</a></li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2.5">
+                  <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
+                  <ul className="space-y-1.5 text-slate-400">
+                    <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
+                    <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
+                    <li><Link href="/demo" className="hover:text-yellow-400 transition font-bold">Public Demo</Link></li>
+                    <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
+                    <li><span className="text-emerald-400">● Systems Operational</span></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-mono gap-3">
+                <span>© {new Date().getFullYear()} SnapTrace. All rights reserved. The Independent Developer Telemetry Platform.</span>
+                <div className="flex items-center space-x-4 text-slate-400">
+                  <Link href="/privacy" className="hover:text-yellow-400">Privacy</Link>
+                  <Link href="/terms" className="hover:text-yellow-400">Terms</Link>
+                  <Link href="/demo" className="hover:text-yellow-400">Demo</Link>
+                  <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
+                </div>
+              </div>
+            </div>
+          </footer>
+
+          {/* 14. STICKY BOTTOM BAR */}
+          {showStickyBottomBar && (
+            <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-200 font-mono">
+              <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping shrink-0" />
+                  <span className="text-xs text-slate-200 font-bold truncate">
+                    Beta Offer: <span className="text-yellow-300">Only 10 Lifetime Pro Passes Left</span>
+                  </span>
+                </div>
+
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 shrink-0"
+                >
+                  Claim Free Pass →
+                </Link>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+    </div>
+  );
+}
