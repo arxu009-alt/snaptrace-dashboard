@@ -47,12 +47,14 @@ function SmoothReveal({
   return (
     <div
       ref={domRef}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transform-gpu transition-all duration-700 ease-out ${
-        isVisible
+      style={{ transitionDelay: String(delay) + 'ms' }}
+      className={
+        'transform-gpu transition-all duration-700 ease-out ' +
+        (isVisible
           ? 'opacity-100 translate-y-0 filter blur-0'
-          : 'opacity-0 translate-y-6 filter blur-[1px]'
-      } ${className}`}
+          : 'opacity-0 translate-y-6 filter blur-[1px]') +
+        (className ? ' ' + className : '')
+      }
     >
       {children}
     </div>
@@ -118,7 +120,7 @@ function getDevBotAnswer(query: string): string {
   const q = query.toLowerCase().trim();
 
   if (q.includes('ai') || q.includes('model') || q.includes('gemini') || q.includes('openai') || q.includes('gpt') || q.includes('claude') || q.includes('cursor') || q.includes('copilot') || q.includes('llm')) {
-    return `SnapTrace features a dual AI architecture:\n\n1. In-Dashboard BYOK Diagnostics:\nConnect your Google Gemini (100% Free via Gemini 2.5 Flash Lite) or OpenAI (GPT-4o) key in Settings for automated root-cause analysis and code patch diffs.\n\n2. 1-Click IDE Coding Agent Export:\nClicking "Copy for Cursor" generates an AI-optimized prompt pre-formatted with the environment, error message, and stack frames—ready for Cursor, Claude Code, or VS Code Copilot.`;
+    return "SnapTrace features a dual AI architecture:\n\n1. In-Dashboard BYOK Diagnostics:\nConnect your Google Gemini (100% Free via Gemini 2.5 Flash Lite) or OpenAI (GPT-4o) key in Settings for automated root-cause analysis and code patch diffs.\n\n2. 1-Click IDE Coding Agent Export:\nClicking 'Copy for Cursor' generates an AI-optimized prompt pre-formatted with the environment, error message, and stack frames—ready for Cursor, Claude Code, or VS Code Copilot.";
   }
 
   if (q.includes('collapse') || q.includes('cascade') || q.includes('sunday') || q.includes('outage') || q.includes('root cause') || q.includes('group')) {
@@ -134,30 +136,30 @@ function getDevBotAnswer(query: string): string {
   }
 
   if (q.includes('price') || q.includes('cost') || q.includes('beta') || q.includes('free') || q.includes('tier') || q.includes('pay') || q.includes('subscription')) {
-    return `Public Beta is currently active. The first 50 developers claim grandfathered Lifetime Starter Pro ($9/mo value forever) with 150,000 monthly events, 30-day retention, unlimited projects, and in-dashboard AI diagnostics for $0 forever. No credit card required.`;
+    return "Public Beta is currently active. The first 50 developers claim grandfathered Lifetime Starter Pro ($9/mo value forever) with 150,000 monthly events, 30-day retention, unlimited projects, and in-dashboard AI diagnostics for $0 forever. No credit card required.";
   }
 
   if (q.includes('language') || q.includes('stack') || q.includes('framework') || q.includes('python') || q.includes('node') || q.includes('rust') || q.includes('go') || q.includes('golang') || q.includes('php') || q.includes('csharp') || q.includes('ruby') || q.includes('flutter') || q.includes('kotlin') || q.includes('cloudflare') || q.includes('curl') || q.includes('support')) {
-    return `We support 100% of languages through our open REST ingestion protocol. Pre-configured drop-in snippets are ready in the dashboard for:\n• Frontend: Next.js (App & Pages Router), React, Vue, Svelte, Vite, Vanilla JS\n• Backend: Node.js (Express/Nest), Python (FastAPI/Django), Go (Golang), Rust (Axum/Actix), PHP (Laravel/WordPress), C# (.NET), Ruby on Rails\n• Mobile & Edge: Flutter (Dart), Kotlin/Android, Cloudflare Workers, and raw cURL/Bash.`;
+    return "We support 100% of languages through our open REST ingestion protocol. Pre-configured drop-in snippets are ready in the dashboard for:\n• Frontend: Next.js (App & Pages Router), React, Vue, Svelte, Vite, Vanilla JS\n• Backend: Node.js (Express/Nest), Python (FastAPI/Django), Go (Golang), Rust (Axum/Actix), PHP (Laravel/WordPress), C# (.NET), Ruby on Rails\n• Mobile & Edge: Flutter (Dart), Kotlin/Android, Cloudflare Workers, and raw cURL/Bash.";
   }
 
   if (q.includes('setup') || q.includes('install') || q.includes('how to') || q.includes('start') || q.includes('quickstart')) {
-    return `30-second setup:\n1. Place this 1-line script inside your HTML head or Next.js app/layout.tsx:\n<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="YOUR_KEY" async></script>\n2. When any uncaught exception occurs, SnapTrace automatically intercepts it, scrubs PII, throttles repeat loops, and pings your Discord/Slack/Email in milliseconds.`;
+    return "30-second setup:\n1. Place this 1-line script inside your HTML head or Next.js app/layout.tsx:\n<script src=\"https://snaptrace-dashboard.vercel.app/snaptrace.js\" data-api-key=\"YOUR_KEY\" async></script>\n2. When any uncaught exception occurs, SnapTrace automatically intercepts it, scrubs PII, throttles repeat loops, and pings your Discord/Slack/Email in milliseconds.";
   }
 
   if (q.includes('slack') || q.includes('discord') || q.includes('alert') || q.includes('notification') || q.includes('email') || q.includes('webhook')) {
-    return `Instant real-time alert dispatch in <1 second to your Discord channels (rich embeds), Slack incoming webhooks, and Gmail inbox with occurrence counters ([x500]). Configure your webhook URLs under Settings in 10 seconds.`;
+    return "Instant real-time alert dispatch in <1 second to your Discord channels (rich embeds), Slack incoming webhooks, and Gmail inbox with occurrence counters ([x500]). Configure your webhook URLs under Settings in 10 seconds.";
   }
 
   if (q.includes('loop') || q.includes('throttle') || q.includes('spam') || q.includes('storm') || q.includes('flood') || q.includes('duplicate') || q.includes('2 am') || q.includes('x500')) {
-    return `60-Second Loop Throttling Engine.\n\nIf an infinite re-render loop or failing API poll throws 500 times in 10 seconds, SnapTrace sends the 1st crash immediately, silences duplicate alerts over a 60-second window, and delivers 1 clean summary alert tagged [x500].`;
+    return "60-Second Loop Throttling Engine.\n\nIf an infinite re-render loop or failing API poll throws 500 times in 10 seconds, SnapTrace sends the 1st crash immediately, silences duplicate alerts over a 60-second window, and delivers 1 clean summary alert tagged [x500].";
   }
 
   if (q.includes('sentry') || q.includes('datadog') || q.includes('glitchtip') || q.includes('honeybadger') || q.includes('why snaptrace') || q.includes('versus') || q.includes('vs')) {
-    return `Why developers switch to SnapTrace:\n1. Featherweight SDK: <3.4KB vs Sentry's 100KB+ bundle penalty.\n2. Zero Alert Fatigue: 60s noise throttling groups cascade crashes into 1 alert tagged [xN].\n3. On-Device PII Masking: Passwords and cards scrubbed before transmission.\n4. Free BYOK AI: In-dashboard Gemini & OpenAI diagnostics without expensive enterprise add-ons.`;
+    return "Why developers switch to SnapTrace:\n1. Featherweight SDK: <3.4KB vs Sentry's 100KB+ bundle penalty.\n2. Zero Alert Fatigue: 60s noise throttling groups cascade crashes into 1 alert tagged [xN].\n3. On-Device PII Masking: Passwords and cards scrubbed before transmission.\n4. Free BYOK AI: In-dashboard Gemini & OpenAI diagnostics without expensive enterprise add-ons.";
   }
 
-  return `SnapTrace is a featherweight (<5KB) error monitoring platform built to eliminate alert fatigue and 100KB SDK bloat. Try asking about:\n• "which ai models does this support?"\n• "how does cascading error collapse work?"\n• "why is the SDK under 5KB?"\n• "which languages are supported?"\n• "how does client PII masking work?"`;
+  return "SnapTrace is a featherweight (<5KB) error monitoring platform built to eliminate alert fatigue and 100KB SDK bloat. Try asking about:\n• \"which ai models does this support?\"\n• \"how does cascading error collapse work?\"\n• \"why is the SDK under 5KB?\"\n• \"which languages are supported?\"\n• \"how does client PII masking work?\"";
 }
 
 export default function WelcomeLandingPage() {
@@ -169,11 +171,13 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
+  // Sentry-Style Dual Mode State
   const [marketingMode, setMarketingMode] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
   const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
 
+  // Chat State
   const [cliInput, setCliInput] = useState('');
   const [cliMessages, setCliMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
     {
@@ -228,7 +232,7 @@ export default function WelcomeLandingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const heroScriptSnippet = `<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="sk_live_your_project_key" async></script>`;
+  const heroScriptSnippet = '<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="sk_live_your_project_key" async></script>';
 
   const handleCopyHeroScript = () => {
     navigator.clipboard.writeText(heroScriptSnippet);
@@ -249,166 +253,18 @@ export default function WelcomeLandingPage() {
   };
 
   const snippets: Record<StackKey, string> = {
-    nextjs: `// app/layout.tsx (Next.js App Router)
-import Script from 'next/script';
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <Script
-          src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
-          strategy="beforeInteractive"
-          data-api-key="sk_live_your_project_key"
-        />
-      </head>
-      <body>{children}</body>
-    </html>
-  );
-}`,
-    js: `<!-- React, Vue, Svelte, or Vanilla JavaScript -->
-<script 
-  src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
-  data-api-key="sk_live_your_project_key"
-  async
-></script>`,
-    python: `# Python / Django / FastAPI / Flask
-import traceback, requests
-
-def log_to_snaptrace(exception, url="https://api.mycompany.com"):
-    try:
-        requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
-            "apiKey": "sk_live_your_project_key",
-            "message": str(exception),
-            "stackTrace": traceback.format_exc(),
-            "url": url,
-            "environment": "production"
-        }, timeout=2)
-    except Exception:
-        pass`,
-    node: `// Node.js / Express / NestJS
-process.on('uncaughtException', (err) => {
-  fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      apiKey: 'sk_live_your_project_key',
-      message: err.message,
-      stackTrace: err.stack,
-      environment: process.env.NODE_ENV || 'production'
-    })
-  }).catch(() => {});
-});`,
-    go: `// Go (Golang) Crash Reporter
-package main
-
-import (
-  "bytes"
-  "encoding/json"
-  "net/http"
-)
-
-func SendSnapTrace(err error, route string) {
-  payload, _ := json.Marshal(map[string]string{
-    "apiKey":      "sk_live_your_project_key",
-    "message":     err.Error(),
-    "environment": "production",
-    "url":         route,
-  })
-  http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))
-}`,
-    rust: `// Rust / Axum / Actix-web
-async fn capture_snaptrace(err: &str, route: &str) {
-    let payload = serde_json::json!({
-        "apiKey": "sk_live_your_project_key",
-        "message": err,
-        "url": route,
-        "environment": "production"
-    });
-    let _ = reqwest::Client::new()
-        .post("https://snaptrace-dashboard.vercel.app/api/v1/log")
-        .json(&payload)
-        .send()
-        .await;
-}`,
-    csharp: `// C# / ASP.NET Core
-public static async Task CaptureSnapTrace(Exception ex, string url = "API Service") {
-    var payload = new {
-        apiKey = "sk_live_your_project_key",
-        message = ex.Message,
-        stackTrace = ex.StackTrace,
-        url = url,
-        environment = "production"
-    };
-    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);
-}`,
-    php: `<?php
-// PHP / Laravel / WordPress
-set_exception_handler(function ($e) {
-    $ch = curl_init('https://snaptrace-dashboard.vercel.app/api/v1/log');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        'apiKey' => 'sk_live_your_project_key',
-        'message' => $e->getMessage(),
-        'stackTrace' => $e->getTraceAsString(),
-        'environment' => 'production'
-    ]));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_exec($ch);
-});
-?>`,
-    ruby: `# Ruby on Rails / Sinatra
-def send_snaptrace_alert(exception)
-  uri = URI('https://snaptrace-dashboard.vercel.app/api/v1/log')
-  Net::HTTP.post(uri, {
-    apiKey: 'sk_live_your_project_key',
-    message: exception.message,
-    stackTrace: exception.backtrace&.join("\\n"),
-    environment: 'production'
-  }.to_json, "Content-Type" => "application/json") rescue nil
-end`,
-    kotlin: `// Kotlin / Android / Java (OkHttp)
-fun sendSnapTrace(e: Throwable, context: String = "Android App") {
-    val json = JSONObject().apply {
-        put("apiKey", "sk_live_your_project_key")
-        put("message", e.localizedMessage ?: "Unknown Error")
-        put("environment", "production")
-        put("url", context)
-    }
-    // Asynchronous POST dispatch to https://snaptrace-dashboard.vercel.app/api/v1/log
-}`,
-    flutter: `// Flutter / Dart Crash Handler
-void captureSnapTrace(Object error, StackTrace stack) {
-  http.post(
-    Uri.parse('https://snaptrace-dashboard.vercel.app/api/v1/log'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'apiKey': 'sk_live_your_project_key',
-      'message': error.toString(),
-      'stackTrace': stack.toString(),
-      'environment': 'production'
-    }),
-  );
-}`,
-    cloudflare: `// Cloudflare Workers / Serverless Edge
-export default {
-  async fetch(req: Request, env: any, ctx: any) {
-    try {
-      return await handleRequest(req);
-    } catch (err: any) {
-      ctx.waitUntil(fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: 'sk_live_your_project_key',
-          message: err.message,
-          stackTrace: err.stack,
-          environment: 'production'
-        })
-      }));
-      return new Response('Edge Execution Error', { status: 500 });
-    }
-  }
-};`
+    nextjs: '// app/layout.tsx (Next.js App Router)\nimport Script from \'next/script\';\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang="en">\n      <head>\n        <Script\n          src="https://snaptrace-dashboard.vercel.app/snaptrace.js"\n          strategy="beforeInteractive"\n          data-api-key="sk_live_your_project_key"\n        />\n      </head>\n      <body>{children}</body>\n    </html>\n  );\n}',
+    js: '<!-- React, Vue, Svelte, or Vanilla JavaScript -->\n<script \n  src="https://snaptrace-dashboard.vercel.app/snaptrace.js"\n  data-api-key="sk_live_your_project_key"\n  async\n></script>',
+    python: '# Python / Django / FastAPI / Flask\nimport traceback, requests\n\ndef log_to_snaptrace(exception, url="https://api.mycompany.com"):\n    try:\n        requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={\n            "apiKey": "sk_live_your_project_key",\n            "message": str(exception),\n            "stackTrace": traceback.format_exc(),\n            "url": url,\n            "environment": "production"\n        }, timeout=2)\n    except Exception:\n        pass',
+    node: '// Node.js / Express / NestJS\nprocess.on(\'uncaughtException\', (err) => {\n  fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n    method: \'POST\',\n    headers: { \'Content-Type\': \'application/json\' },\n    body: JSON.stringify({\n      apiKey: \'sk_live_your_project_key\',\n      message: err.message,\n      stackTrace: err.stack,\n      environment: process.env.NODE_ENV || \'production\'\n    })\n  }).catch(() => {});\n});',
+    go: '// Go (Golang) Crash Reporter\npackage main\n\nimport (\n  "bytes"\n  "encoding/json"\n  "net/http"\n)\n\nfunc SendSnapTrace(err error, route string) {\n  payload, _ := json.Marshal(map[string]string{\n    "apiKey":      "sk_live_your_project_key",\n    "message":     err.Error(),\n    "environment": "production",\n    "url":         route,\n  })\n  http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))\n}',
+    rust: '// Rust / Axum / Actix-web\nasync fn capture_snaptrace(err: &str, route: &str) {\n    let payload = serde_json::json!({\n        "apiKey": "sk_live_your_project_key",\n        "message": err,\n        "url": route,\n        "environment": "production"\n    });\n    let _ = reqwest::Client::new()\n        .post("https://snaptrace-dashboard.vercel.app/api/v1/log")\n        .json(&payload)\n        .send()\n        .await;\n}',
+    csharp: '// C# / ASP.NET Core\npublic static async Task CaptureSnapTrace(Exception ex, string url = "API Service") {\n    var payload = new {\n        apiKey = "sk_live_your_project_key",\n        message = ex.Message,\n        stackTrace = ex.StackTrace,\n        url = url,\n        environment = "production"\n    };\n    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);\n}',
+    php: '<?php\n// PHP / Laravel / WordPress\nset_exception_handler(function ($e) {\n    $ch = curl_init(\'https://snaptrace-dashboard.vercel.app/api/v1/log\');\n    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([\n        \'apiKey\' => \'sk_live_your_project_key\',\n        \'message\' => $e->getMessage(),\n        \'stackTrace\' => $e->getTraceAsString(),\n        \'environment\' => \'production\'\n    ]));\n    curl_setopt($ch, CURLOPT_HTTPHEADER, [\'Content-Type: application/json\']);\n    curl_exec($ch);\n});\n?>',
+    ruby: '# Ruby on Rails / Sinatra\ndef send_snaptrace_alert(exception)\n  uri = URI(\'https://snaptrace-dashboard.vercel.app/api/v1/log\')\n  Net::HTTP.post(uri, {\n    apiKey: \'sk_live_your_project_key\',\n    message: exception.message,\n    stackTrace: exception.backtrace&.join("\\n"),\n    environment: \'production\'\n  }.to_json, "Content-Type" => "application/json") rescue nil\nend',
+    kotlin: '// Kotlin / Android / Java (OkHttp)\nfun sendSnapTrace(e: Throwable, context: String = "Android App") {\n    val json = JSONObject().apply {\n        put("apiKey", "sk_live_your_project_key")\n        put("message", e.localizedMessage ?: "Unknown Error")\n        put("environment", "production")\n        put("url", context)\n    }\n    // Asynchronous POST dispatch to https://snaptrace-dashboard.vercel.app/api/v1/log\n}',
+    flutter: '// Flutter / Dart Crash Handler\nvoid captureSnapTrace(Object error, StackTrace stack) {\n  http.post(\n    Uri.parse(\'https://snaptrace-dashboard.vercel.app/api/v1/log\'),\n    headers: {\'Content-Type\': \'application/json\'},\n    body: jsonEncode({\n      \'apiKey\': \'sk_live_your_project_key\',\n      \'message\': error.toString(),\n      \'stackTrace\': stack.toString(),\n      \'environment\': \'production\'\n    }),\n  );\n}',
+    cloudflare: '// Cloudflare Workers / Serverless Edge\nexport default {\n  async fetch(req: Request, env: any, ctx: any) {\n    try {\n      return await handleRequest(req);\n    } catch (err: any) {\n      ctx.waitUntil(fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n        method: \'POST\',\n        headers: { \'Content-Type\': \'application/json\' },\n        body: JSON.stringify({\n          apiKey: \'sk_live_your_project_key\',\n          message: err.message,\n          stackTrace: err.stack,\n          environment: \'production\'\n        })\n      }));\n      return new Response(\'Edge Execution Error\', { status: 500 });\n    }\n  }\n};'
   };
 
   const handleCopyCode = () => {
@@ -418,10 +274,7 @@ export default {
   };
 
   const handleCopyCursorDemo = () => {
-    const promptText = `Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:
-Error: ReferenceError: Connection pool exhausted at 10:00:00 PM
-File: database.js:18:11
-Provide a plain English diagnosis and the exact corrected code patch.`;
+    const promptText = "Act as an expert software engineer. Fix this runtime exception captured by SnapTrace:\nError: ReferenceError: Connection pool exhausted at 10:00:00 PM\nFile: database.js:18:11\nProvide a plain English diagnosis and the exact corrected code patch.";
     navigator.clipboard.writeText(promptText);
     setCopiedCursorPrompt(true);
     setTimeout(() => setCopiedCursorPrompt(false), 2500);
@@ -469,11 +322,12 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
     <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden relative">
       
       {/* 1. TOP BANNER */}
-      <div className={`px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2 transition-colors ${
-        marketingMode
+      <div className={
+        'px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-2 transition-colors ' +
+        (marketingMode
           ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950'
-          : 'bg-[#0B101D] border-b border-yellow-400/30 text-yellow-300'
-      }`}>
+          : 'bg-[#0B101D] border-b border-yellow-400/30 text-yellow-300')
+      }>
         <span>{marketingMode ? '🔥 Early Adopter Launch:' : '⚡ ARCHITECTURE SPEC:'}</span>
         <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px] font-mono border border-yellow-400/20">
           {marketingMode ? '40 / 50 Free Lifetime Pro Passes Claimed' : 'RFC-9110 Asynchronous Ingestion Engine Active'}
@@ -487,10 +341,12 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-40 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-6">
           
+          {/* Logo */}
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition shrink-0">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
+          {/* Clean Center Navigation */}
           <nav className="hidden lg:flex items-center space-x-7 text-xs font-semibold text-slate-300 font-mono">
             <div
               className="relative"
@@ -565,6 +421,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
+          {/* Action Buttons */}
           <div className="flex items-center space-x-3 font-mono shrink-0">
             <Link
               href="/login"
@@ -599,25 +456,27 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
             </span>
             <button
               onClick={toggleMarketingMode}
-              className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${
-                marketingMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-slate-700'
-              }`}
+              className={
+                'w-12 h-6 rounded-full transition-colors relative cursor-pointer ' +
+                (marketingMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-slate-700')
+              }
               title="Toggle between Marketing Mode and Dev Spec Mode"
             >
               <div
-                className={`w-4 h-4 rounded-full bg-slate-950 absolute top-1 transition-all ${
-                  marketingMode ? 'right-1' : 'left-1'
-                }`}
+                className={
+                  'w-4 h-4 rounded-full bg-slate-950 absolute top-1 transition-all ' +
+                  (marketingMode ? 'right-1' : 'left-1')
+                }
               />
             </button>
-            <span className={`text-[9px] font-bold font-mono ${marketingMode ? 'text-yellow-300' : 'text-slate-400'}`}>
+            <span className={'text-[9px] font-bold font-mono ' + (marketingMode ? 'text-yellow-300' : 'text-slate-400')}>
               {marketingMode ? 'ON' : 'OFF'}
             </span>
           </div>
         </div>
       </div>
 
-      {/* VIEW 1: WHEN MARKETING MODE IS OFF */}
+      {/* VIEW 1: DEV TERMINAL */}
       {!marketingMode ? (
         <section className="min-h-[calc(100vh-7rem)] flex items-center justify-center p-6 bg-[#05070E] relative overflow-hidden animate-in fade-in duration-150">
           <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
@@ -686,11 +545,12 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 {cliMessages.map((msg, idx) => (
                   <div
                     key={idx}
-                    className={`p-3.5 rounded-2xl ${
-                      msg.role === 'user'
+                    className={
+                      'p-3.5 rounded-2xl ' +
+                      (msg.role === 'user'
                         ? 'bg-[#0B101D] border border-slate-800 text-yellow-300 ml-6'
-                        : 'bg-[#05070E] border border-emerald-500/30 text-slate-200 mr-4'
-                    }`}
+                        : 'bg-[#05070E] border border-emerald-500/30 text-slate-200 mr-4')
+                    }
                   >
                     <span className="text-[10px] block font-bold text-slate-500 mb-1">
                       {msg.role === 'user' ? '> YOU' : '⚡ SNAPPY (ENGINE)'}
@@ -769,14 +629,12 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           </div>
         </section>
       ) : (
-        /* VIEW 2: WHEN MARKETING MODE IS ON */
+        /* VIEW 2: MARKETING HERO */
         <>
-          {/* 3. HERO SECTION */}
           <section className="relative pt-12 pb-14 overflow-hidden">
             <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[380px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
 
             <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
-              
               <div>
                 <a
                   href="#ai-agent"
@@ -798,7 +656,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 Stop spending Sundays connecting the dots by hand. SnapTrace collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes.
               </p>
 
-              {/* 🌟 HERO BUTTON (10 SEATS LEFT) */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 font-mono">
                 <Link
                   href="/signup"
@@ -814,7 +671,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                 </Link>
               </div>
 
-              {/* 1-Click Drop-in Hero Code Snippet */}
               <div className="pt-2 max-w-xl mx-auto">
                 <div className="bg-[#0B101D] border border-slate-800/90 rounded-2xl p-2.5 flex items-center justify-between gap-3 shadow-xl font-mono text-xs">
                   <div className="flex items-center gap-2 truncate text-slate-400 pl-2">
@@ -917,7 +773,6 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
           {/* 6. AI AGENT EXPORT SECTION */}
           <section id="ai-agent" className="py-20 border-t border-slate-800/80 relative">
             <div className="max-w-5xl mx-auto px-6 space-y-10">
-              
               <SmoothReveal className="text-center space-y-3 max-w-2xl mx-auto">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase font-mono">
                   <span>🤖</span> AI Workflow Native
@@ -934,11 +789,12 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                     <button
                       key={ide}
                       onClick={() => setActiveIdeTab(ide)}
-                      className={`px-3 py-1.5 rounded-lg font-semibold transition cursor-pointer ${
-                        activeIdeTab === ide
+                      className={
+                        'px-3 py-1.5 rounded-lg font-semibold transition cursor-pointer ' +
+                        (activeIdeTab === ide
                           ? 'bg-purple-600 text-white shadow-md'
-                          : 'bg-[#0B101D] text-slate-400 hover:text-white border border-slate-800'
-                      }`}
+                          : 'bg-[#0B101D] text-slate-400 hover:text-white border border-slate-800')
+                      }
                     >
                       {ide === 'cursor' && 'Cursor IDE'}
                       {ide === 'claude' && 'Claude Code'}
@@ -970,13 +826,7 @@ Provide a plain English diagnosis and the exact corrected code patch.`;
                     <strong>Plain English:</strong> The PostgreSQL client in <code className="text-yellow-300">database.js</code> is opening connections inside a tight loop without releasing them back to the pool.
                   </p>
                   <pre className="p-3 bg-[#0B101D] rounded-xl border border-slate-800 text-emerald-400 overflow-x-auto text-[11px]">
-{`// Fix in database.js: Release connection back to pool
-const client = await pool.connect();
-try {
-  await client.query('SELECT * FROM users WHERE id = $1', [userId]);
-} finally {
-  client.release(); // Releases connection
-}`}
+                    {"// Fix in database.js: Release connection back to pool\nconst client = await pool.connect();\ntry {\n  await client.query('SELECT * FROM users WHERE id = $1', [userId]);\n} finally {\n  client.release(); // Releases connection\n}"}
                   </pre>
                 </div>
               </SmoothReveal>
@@ -1007,11 +857,12 @@ try {
                     <button
                       key={tab.id}
                       onClick={() => setActiveQuickTab(tab.id as StackKey)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition uppercase cursor-pointer whitespace-nowrap font-mono ${
-                        activeQuickTab === tab.id
+                      className={
+                        'px-3 py-1.5 rounded-lg text-xs font-semibold transition uppercase cursor-pointer whitespace-nowrap font-mono ' +
+                        (activeQuickTab === tab.id
                           ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/40 shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                      }`}
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40')
+                      }
                     >
                       {tab.label}
                     </button>
@@ -1153,7 +1004,7 @@ try {
             </SmoothReveal>
           </section>
 
-          {/* 10. PRICING TIERS (UPDATED: 10 SPOTS REMAINING) */}
+          {/* 10. PRICING TIERS */}
           <section id="pricing" className="max-w-5xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-10">
             <SmoothReveal className="text-center space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
@@ -1194,7 +1045,7 @@ try {
                 </Link>
               </div>
 
-              {/* Card 2: Starter Pro (UPDATED: ONLY 10 SPOTS REMAINING) */}
+              {/* Card 2: Starter Pro */}
               <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
                 <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
                   ★ Only 10 Spots Remaining
@@ -1324,7 +1175,6 @@ try {
           {/* 13. SENTRY-STYLE ENTERPRISE FOOTER */}
           <footer className="border-t border-slate-800/80 bg-[#060911] py-16 relative overflow-hidden font-sans">
             <div className="max-w-5xl mx-auto px-6 space-y-10">
-              
               <div className="text-center space-y-3 max-w-xl mx-auto">
                 <h2 className="text-2xl sm:text-3xl font-black text-white">
                   Ready to catch bugs in a snap?
@@ -1393,7 +1243,6 @@ try {
                   <Link href="/test" className="hover:text-yellow-400">Sandbox</Link>
                 </div>
               </div>
-
             </div>
           </footer>
 

@@ -54,7 +54,6 @@ export default function SettingsPage() {
       const uEmail = user.email || '';
       setUserEmail(uEmail);
 
-      // Load Display Name from Supabase User Metadata
       const currentName = user.user_metadata?.full_name || user.user_metadata?.name || uEmail.split('@')[0] || '';
       setDisplayName(currentName);
 
@@ -62,7 +61,7 @@ export default function SettingsPage() {
       setIsOwner(ownerCheck);
 
       const savedProvider = (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_ai_provider') : 'gemini') as any;
-      const savedKey = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_ai_key') || localStorage.getItem('snaptrace_openai_key') : '';
+      const savedKey = typeof window !== 'undefined' ? (localStorage.getItem('snaptrace_ai_key') || localStorage.getItem('snaptrace_openai_key')) : '';
       
       if (savedProvider) setAiProvider(savedProvider);
       if (savedKey) {
@@ -70,7 +69,6 @@ export default function SettingsPage() {
         setAiKeySaved(true);
       }
 
-      // Query projects for this user
       const { data: userProjects } = await supabase
         .from('projects')
         .select('*')
@@ -86,7 +84,8 @@ export default function SettingsPage() {
         setEmail(p.recipient_email || p.alert_email || '');
         setDiscordWebhook(p.discord_webhook_url || p.discord_webhook || '');
         
-        const savedSlack = p.slack_webhook_url || (typeof window !== 'undefined' ? localStorage.getItem(`snaptrace_slack_${p.id}`) : '') || '';
+        const storageSlackKey = 'snaptrace_slack_' + p.id;
+        const savedSlack = p.slack_webhook_url || (typeof window !== 'undefined' ? localStorage.getItem(storageSlackKey) : '') || '';
         setSlackWebhook(savedSlack);
       } else {
         setProjectId('');
@@ -102,7 +101,6 @@ export default function SettingsPage() {
     loadSettings();
   }, []);
 
-  // Save Custom Developer Display Name to Supabase Auth
   const handleSaveDisplayName = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!displayName.trim()) return;
@@ -120,7 +118,7 @@ export default function SettingsPage() {
       setNameSavedMsg('✓ Display name updated!');
       setTimeout(() => setNameSavedMsg(null), 3000);
     } catch (err: any) {
-      alert(`Failed to update display name: ${err.message}`);
+      alert('Failed to update display name: ' + err.message);
     } finally {
       setSavingName(false);
     }
@@ -145,7 +143,8 @@ export default function SettingsPage() {
 
     try {
       if (typeof window !== 'undefined') {
-        localStorage.setItem(`snaptrace_slack_${projectId}`, slackWebhook);
+        const storageSlackKey = 'snaptrace_slack_' + projectId;
+        localStorage.setItem(storageSlackKey, slackWebhook);
       }
 
       const updatePayload: any = {
@@ -164,7 +163,7 @@ export default function SettingsPage() {
       setNotifSavedMsg('✓ Notification Channels Saved!');
       setTimeout(() => setNotifSavedMsg(null), 3000);
     } catch (err: any) {
-      alert(`Error saving notifications: ${err.message}`);
+      alert('Error saving notifications: ' + err.message);
     } finally {
       setSavingNotif(false);
     }
@@ -206,7 +205,7 @@ export default function SettingsPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            text: `🚨 *SnapTrace System Alert:* Live test notification captured for project ${apiKey.slice(0, 10)}...`,
+            text: '🚨 *SnapTrace System Alert:* Live test notification captured for project ' + apiKey.slice(0, 10) + '...',
           }),
           mode: 'no-cors',
         }).catch(() => {});
@@ -229,13 +228,13 @@ export default function SettingsPage() {
       if (res.ok && data.success) {
         setTestAlertMsg({
           type: 'success',
-          text: `✓ Alert Dispatched! Check Discord, Slack & ${email || 'email'}.`,
+          text: '✓ Alert Dispatched! Check Discord, Slack & ' + (email || 'email') + '.',
         });
       } else {
         throw new Error(data.error || 'Failed to send test alert');
       }
     } catch (err: any) {
-      setTestAlertMsg({ type: 'error', text: `Failed: ${err.message}` });
+      setTestAlertMsg({ type: 'error', text: 'Failed: ' + err.message });
     } finally {
       setTestingAlert(false);
       setTimeout(() => setTestAlertMsg(null), 4000);
@@ -253,7 +252,7 @@ export default function SettingsPage() {
       setPurgeMsg('✓ All resolved error logs purged!');
       setTimeout(() => setPurgeMsg(null), 3000);
     } catch (err: any) {
-      alert(`Purge failed: ${err.message}`);
+      alert('Purge failed: ' + err.message);
     } finally {
       setPurging(false);
     }
@@ -262,7 +261,7 @@ export default function SettingsPage() {
   const userInitial = displayName ? displayName.charAt(0).toUpperCase() : 'M';
   const displayToken = showApiKey
     ? apiKey
-    : `${apiKey.slice(0, 10)}••••••••••••••••${apiKey.slice(-8)}`;
+    : (apiKey.slice(0, 10) + '••••••••••••••••' + apiKey.slice(-8));
 
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
@@ -288,7 +287,7 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-6">
 
-            {/* 1. Subscription & Plan Status (TRUST-PRESERVED: NO EXPIRATION DATE FOR CURRENT USERS) */}
+            {/* 1. Subscription & Plan Status */}
             <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-5 relative">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
                 <div className="space-y-1">
@@ -353,7 +352,6 @@ export default function SettingsPage() {
                 </span>
               </div>
 
-              {/* Editable Name & Email Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 
                 {/* Custom Developer Display Name Form */}
@@ -388,7 +386,7 @@ export default function SettingsPage() {
                   </div>
                 </form>
 
-                {/* Account Email (Verified) */}
+                {/* Account Email */}
                 <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1 flex flex-col justify-center">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">
                     Account Email Address
@@ -448,7 +446,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                   {testAlertMsg && (
-                    <span className={`text-xs font-mono font-bold ${testAlertMsg.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className={'text-xs font-mono font-bold ' + (testAlertMsg.type === 'success' ? 'text-emerald-400' : 'text-red-400')}>
                       {testAlertMsg.text}
                     </span>
                   )}
