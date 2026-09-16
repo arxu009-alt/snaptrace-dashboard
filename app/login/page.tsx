@@ -15,6 +15,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Forgot Password Modal State
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState<string | null>(null);
+  const [forgotError, setForgotError] = useState<string | null>(null);
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -42,6 +49,44 @@ export default function LoginPage() {
       },
     });
     if (error) setError(error.message);
+  };
+
+  // Password Reset Dispatcher via Supabase Auth
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail.trim()) return;
+
+    setForgotLoading(true);
+    setForgotError(null);
+    setForgotSuccess(null);
+
+    try {
+      const redirectUrl = `${window.location.origin}/reset-password`;
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail.trim(), {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setForgotSuccess(
+        `✓ A password reset link has been dispatched to ${forgotEmail}. Please check your inbox and spam folder.`
+      );
+    } catch (err: any) {
+      setForgotError(err.message || 'Failed to send password reset email.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const openForgotModalWithCurrentEmail = () => {
+    if (email.trim()) {
+      setForgotEmail(email.trim());
+    }
+    setForgotSuccess(null);
+    setForgotError(null);
+    setShowForgotModal(true);
   };
 
   return (
@@ -95,7 +140,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="p-3.5 bg-red-950/60 border border-red-500/40 text-red-300 rounded-2xl text-xs animate-in zoom-in-95">
+              <div className="p-3.5 bg-red-950/60 border border-red-500/40 text-red-300 rounded-2xl text-xs animate-in zoom-in-95 font-mono">
                 {error}
               </div>
             )}
@@ -148,14 +193,26 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="developer@company.com"
-                  className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                  className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition font-mono"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+                    Password
+                  </label>
+                  
+                  {/* 🌟 NEW: FORGOT PASSWORD TRIGGER */}
+                  <button
+                    type="button"
+                    onClick={openForgotModalWithCurrentEmail}
+                    className="text-[11px] text-yellow-400 hover:text-yellow-300 hover:underline font-mono transition cursor-pointer"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                
                 <input
                   type="password"
                   required
@@ -169,13 +226,13 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer"
+                className="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer font-mono"
               >
                 {loading ? 'Authenticating...' : 'Sign In to Dashboard →'}
               </button>
             </form>
 
-            <p className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800/60">
+            <p className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800/60 font-sans">
               Don't have an account?{' '}
               <Link href="/signup" className="text-yellow-400 hover:underline font-bold">
                 Create Account
@@ -187,8 +244,93 @@ export default function LoginPage() {
 
       </div>
 
+      {/* 🌟 PASSWORD RESET REQUEST MODAL */}
+      {showForgotModal && (
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowForgotModal(false);
+          }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans"
+        >
+          <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl relative">
+            <button
+              onClick={() => setShowForgotModal(false)}
+              className="absolute right-5 top-5 text-slate-400 hover:text-white text-xs cursor-pointer font-mono"
+            >
+              ✕
+            </button>
+
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 text-[10px] font-mono font-bold uppercase">
+                <span>🔐</span> Account Recovery
+              </div>
+              <h3 className="text-lg font-bold text-white tracking-tight">
+                Reset your password
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Enter your account email. We will send you a secure verification link to reset your password with zero loss of project telemetry data.
+              </p>
+            </div>
+
+            {forgotError && (
+              <div className="p-3 bg-red-950/60 border border-red-500/40 text-red-300 rounded-xl text-xs font-mono">
+                {forgotError}
+              </div>
+            )}
+
+            {forgotSuccess ? (
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-2xl text-xs font-mono space-y-3 leading-relaxed animate-in zoom-in-95">
+                <p>{forgotSuccess}</p>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(false)}
+                  className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition font-mono cursor-pointer"
+                >
+                  Return to Sign In
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+                <div className="space-y-1.5 font-mono">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Account Email Address
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="developer@company.com"
+                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-1 font-mono">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(false)}
+                    className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-md disabled:opacity-50 cursor-pointer"
+                  >
+                    {forgotLoading ? 'Sending Link...' : 'Send Recovery Link →'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+          </div>
+        </div>
+      )}
+
       {/* Footer */}
-      <footer className="border-t border-slate-800/60 p-6 text-xs text-slate-500 relative z-10 max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="border-t border-slate-800/60 p-6 text-xs text-slate-500 relative z-10 max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
         <span>© {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform.</span>
         <div className="flex items-center space-x-6 text-slate-400">
           <Link href="/privacy" className="hover:text-yellow-400 transition">
