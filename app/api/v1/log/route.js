@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
+import { PLANS, getStartOfCurrentMonth } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,47 @@ export async function POST(req) {
       );
     }
 
+    // 🌟 1.5 4-TIER MONTHLY QUOTA ENFORCEMENT & RATE LIMITER
+    const recipientEmail =
+      project.recipient_email ||
+      project.alert_email ||
+      project.alert_email_address ||
+      project.email ||
+      project.owner_email;
+
+    const ownerEmails = ["arxu1045@gmail.com", "arxu009@gmail.com"];
+    const isOwner = recipientEmail && ownerEmails.includes(recipientEmail.toLowerCase());
+
+    // Determine tier (Default to 'pro' for grandfathered beta builders, 'scale' for owner)
+    const projectTier = isOwner ? "scale" : (project.plan_tier || "pro");
+    const activePlan = (PLANS && PLANS[projectTier]) ? PLANS[projectTier] : { monthlyEventCap: 100000 };
+
+    if (!isOwner) {
+      const startOfMonth = typeof getStartOfCurrentMonth === "function" 
+        ? getStartOfCurrentMonth() 
+        : new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString();
+
+      // Count events consumed this calendar month
+      const { count: monthlyCount, error: countError } = await supabase
+        .from("errors")
+        .select("*", { count: "exact", head: true })
+        .eq("project_id", project.id)
+        .gte("created_at", startOfMonth);
+
+      if (!countError && monthlyCount !== null && monthlyCount >= activePlan.monthlyEventCap) {
+        debugLogs.push("Quota exceeded: " + monthlyCount + " / " + activePlan.monthlyEventCap);
+        return NextResponse.json(
+          {
+            error: "Monthly event limit reached for your tier (" + activePlan.monthlyEventCap + " events). Ingestion paused until the 1st of next month.",
+            planTier: projectTier,
+            currentMonthlyUsage: monthlyCount,
+            monthlyLimit: activePlan.monthlyEventCap,
+          },
+          { status: 429 }
+        );
+      }
+    }
+
     // Resolve Discord Webhook URL across schema variants
     const discordWebhookUrl =
       project.discord_webhook_url ||
@@ -58,14 +100,6 @@ export async function POST(req) {
       project.slack_webhook_url ||
       project.slack_webhook ||
       project.slack_url;
-
-    // Resolve Recipient Email across schema variants
-    const recipientEmail =
-      project.recipient_email ||
-      project.alert_email ||
-      project.alert_email_address ||
-      project.email ||
-      project.owner_email;
 
     // Resolve SMTP Sender Credentials
     const smtpUser =
@@ -87,9 +121,9 @@ export async function POST(req) {
           body: JSON.stringify({
             embeds: [
               {
-                title: `🚨 ${message || "New Exception Event"}`,
+                title: "🚨 " + (message || "New Exception Event"),
                 description: stackTrace
-                  ? `\`\`\`\n${stackTrace.slice(0, 1000)}\n\`\`\``
+                  ? "```\n" + stackTrace.slice(0, 1000) + "\n```"
                   : "No stack trace provided",
                 color: 15158332,
                 fields: [
@@ -115,27 +149,27 @@ export async function POST(req) {
           debugLogs.push("Discord notification sent successfully.");
         } else {
           const text = await discordRes.text();
-          debugLogs.push(`Discord Webhook error (${discordRes.status}): ${text}`);
+          debugLogs.push("Discord Webhook error (" + discordRes.status + "): " + text);
         }
       } catch (discordErr) {
-        debugLogs.push(`Discord dispatch failed: ${discordErr.message}`);
+        debugLogs.push("Discord dispatch failed: " + discordErr.message);
       }
     } else {
       debugLogs.push("Discord skipped: No webhook URL configured.");
     }
 
-    // 3. Dispatch Native Slack Webhook Alert (Sentry-Style Rich Card)
+    // 3. Dispatch Native Slack Webhook Alert
     let slackSent = false;
     if (slackWebhookUrl) {
       try {
         const slackPayload = {
-          text: `🚨 *[SnapTrace Incident]* ${message || "New Exception Event"}`,
+          text: "🚨 *[SnapTrace Incident]* " + (message || "New Exception Event"),
           attachments: [
             {
               color: "#EF4444",
-              title: `Crash captured in ${environment || "production"}`,
+              title: "Crash captured in " + (environment || "production"),
               title_link: url || "https://snaptrace-dashboard.vercel.app/dashboard/errors",
-              text: `*Error:* \`${message || "Unknown Exception"}\`\n*Route:* ${url || "N/A"}\n\`\`\`${(stackTrace || "No stack trace").slice(0, 800)}\`\`\``,
+              text: "*Error:* `" + (message || "Unknown Exception") + "`\n*Route:* " + (url || "N/A") + "\n```" + (stackTrace || "No stack trace").slice(0, 800) + "```",
               footer: "SnapTrace Telemetry Monitor",
               ts: Math.floor(Date.now() / 1000),
             },
@@ -153,10 +187,10 @@ export async function POST(req) {
           debugLogs.push("Slack notification sent successfully.");
         } else {
           const text = await slackRes.text();
-          debugLogs.push(`Slack Webhook error (${slackRes.status}): ${text}`);
+          debugLogs.push("Slack Webhook error (" + slackRes.status + "): " + text);
         }
       } catch (slackErr) {
-        debugLogs.push(`Slack dispatch failed: ${slackErr.message}`);
+        debugLogs.push("Slack dispatch failed: " + slackErr.message);
       }
     } else {
       debugLogs.push("Slack skipped: No Slack webhook URL configured.");
@@ -177,9 +211,9 @@ export async function POST(req) {
         });
 
         await transporter.sendMail({
-          from: `"SnapTrace System Alerts" <${smtpUser}>`,
+          from: '"SnapTrace System Alerts" <' + smtpUser + '>',
           to: recipientEmail,
-          subject: `[SnapTrace Error] ${message || "New Exception Event"}`,
+          subject: "[SnapTrace Error] " + (message || "New Exception Event"),
           html: `
             <div style="font-family: sans-serif; padding: 20px; background: #0f172a; color: #ffffff; border-radius: 8px;">
               <h2 style="color: #ef4444; margin-top: 0;">🚨 New Exception Event</h2>
@@ -192,9 +226,9 @@ export async function POST(req) {
           `,
         });
         emailSent = true;
-        debugLogs.push(`Email sent successfully to ${recipientEmail}.`);
+        debugLogs.push("Email sent successfully to " + recipientEmail + ".");
       } catch (emailErr) {
-        debugLogs.push(`SMTP Email failed: ${emailErr.message}`);
+        debugLogs.push("SMTP Email failed: " + emailErr.message);
       }
     } else {
       debugLogs.push("Email skipped: Credentials missing.");
@@ -214,7 +248,7 @@ export async function POST(req) {
       ]);
       debugLogs.push("Error event recorded in database.");
     } catch (dbErr) {
-      debugLogs.push(`Database insertion failed: ${dbErr.message}`);
+      debugLogs.push("Database insertion failed: " + dbErr.message);
     }
 
     return NextResponse.json(
