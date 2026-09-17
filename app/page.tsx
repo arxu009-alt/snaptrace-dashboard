@@ -301,7 +301,7 @@ export default function WelcomeLandingPage() {
           {/* BOLD NAV WITH YELLOW PILL BOX ON HOVER */}
           <nav className="hidden lg:flex items-center space-x-1.5 text-xs font-bold text-slate-200 font-mono">
             
-            {/* Dropdown 1: Platform */}
+           {/* Dropdown 1: Platform */}
             <div
               className="relative"
               onMouseEnter={() => setOpenDropdown('platform')}
@@ -313,29 +313,31 @@ export default function WelcomeLandingPage() {
               </button>
 
               {openDropdown === 'platform' && (
-                <div className="absolute top-11 left-0 w-80 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-3.5 space-y-2 animate-in fade-in zoom-in-95 duration-100 font-sans">
-                  <div className="text-[10px] uppercase tracking-widest text-yellow-400 font-bold px-2">Core Capabilities</div>
-                  <a href="#features" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
-                    <span className="text-base">🪶</span>
-                    <div>
-                      <div className="text-white font-bold text-xs">&lt;5KB Telemetry SDK</div>
-                      <div className="text-[10px] text-slate-400">Zero Core Web Vitals penalty</div>
-                    </div>
-                  </a>
-                  <a href="#grouping" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
-                    <span className="text-base">🎯</span>
-                    <div>
-                      <div className="text-white font-bold text-xs">Root-Cause Collapse</div>
-                      <div className="text-[10px] text-slate-400">Multi-crash incident grouping</div>
-                    </div>
-                  </a>
-                  <a href="#features" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
-                    <span className="text-base">🔒</span>
-                    <div>
-                      <div className="text-white font-bold text-xs">Client-Side PII Firewall</div>
-                      <div className="text-[10px] text-slate-400">On-device password & card masking</div>
-                    </div>
-                  </a>
+                <div className="absolute top-full left-0 pt-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="w-80 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-3.5 space-y-2 font-sans">
+                    <div className="text-[10px] uppercase tracking-widest text-yellow-400 font-bold px-2">Core Capabilities</div>
+                    <a href="#features" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">🪶</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">&lt;5KB Telemetry SDK</div>
+                        <div className="text-[10px] text-slate-400">Zero Core Web Vitals penalty</div>
+                      </div>
+                    </a>
+                    <a href="#grouping" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">🎯</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">Root-Cause Collapse</div>
+                        <div className="text-[10px] text-slate-400">Multi-crash incident grouping</div>
+                      </div>
+                    </a>
+                    <a href="#features" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">🔒</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">Client-Side PII Firewall</div>
+                        <div className="text-[10px] text-slate-400">On-device password & card masking</div>
+                      </div>
+                    </a>
+                  </div>
                 </div>
               )}
             </div>
@@ -352,26 +354,27 @@ export default function WelcomeLandingPage() {
               </button>
 
               {openDropdown === 'ai' && (
-                <div className="absolute top-11 left-0 w-84 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-3.5 space-y-2 animate-in fade-in zoom-in-95 duration-100 font-sans">
-                  <div className="text-[10px] uppercase tracking-widest text-yellow-400 font-bold px-2">AI Capabilities</div>
-                  <a href="#ai-agent" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
-                    <span className="text-base">🤖</span>
-                    <div>
-                      <div className="text-white font-bold text-xs">Cursor & Claude 1-Click Export</div>
-                      <div className="text-[10px] text-slate-400">Export pre-formatted prompts for your IDE</div>
-                    </div>
-                  </a>
-                  <a href="#byok" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
-                    <span className="text-base">⚡</span>
-                    <div>
-                      <div className="text-white font-bold text-xs">BYOK AI Diagnosis Hub</div>
-                      <div className="text-[10px] text-slate-400">Analyze bugs live with Gemini & OpenAI</div>
-                    </div>
-                  </a>
+                <div className="absolute top-full left-0 pt-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="w-84 bg-[#0B101D] border border-slate-800 rounded-2xl shadow-2xl p-3.5 space-y-2 font-sans">
+                    <div className="text-[10px] uppercase tracking-widest text-yellow-400 font-bold px-2">AI Capabilities</div>
+                    <a href="#ai-agent" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">🤖</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">Cursor & Claude 1-Click Export</div>
+                        <div className="text-[10px] text-slate-400">Export pre-formatted prompts for your IDE</div>
+                      </div>
+                    </a>
+                    <a href="#byok" className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-800/60 transition">
+                      <span className="text-base">⚡</span>
+                      <div>
+                        <div className="text-white font-bold text-xs">BYOK AI Diagnosis Hub</div>
+                        <div className="text-[10px] text-slate-400">Analyze bugs live with Gemini & OpenAI</div>
+                      </div>
+                    </a>
+                  </div>
                 </div>
               )}
             </div>
-
             <a href="#quickstart" className="px-3.5 py-2 rounded-xl border border-transparent hover:border-yellow-400/80 hover:bg-yellow-400/15 hover:text-yellow-300 transition-all duration-200">
               SDK Setup
             </a>
