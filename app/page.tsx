@@ -128,9 +128,8 @@ export default function WelcomeLandingPage() {
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // 🌟 Scale Modal State & Email Copy
+  // Scale Modal State & Email Copy
   const [showScaleContactModal, setShowScaleContactModal] = useState(false);
   const [copiedScaleEmail, setCopiedScaleEmail] = useState(false);
   const scaleEmail = 'hello.snaptrace@gmail.com';
@@ -292,15 +291,15 @@ export default function WelcomeLandingPage() {
         </span>
       </div>
 
-      {/* 2. SENTRY-STYLE BOLD HEADER WITH HOVER PILL BOXES */}
+      {/* 2. HEADER WITH CLEAR NOTICEABLE SNAP YELLOW HOVER BOXES */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-40 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition shrink-0">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
 
-          {/* Bold Nav Options with Sentry-Style Pill Hover Highlights */}
-          <nav className="hidden lg:flex items-center space-x-2 text-xs font-bold text-slate-200 font-mono">
+          {/* BOLD NAV WITH YELLOW PILL BOX ON HOVER */}
+          <nav className="hidden lg:flex items-center space-x-1.5 text-xs font-bold text-slate-200 font-mono">
             
             {/* Dropdown 1: Platform */}
             <div
@@ -308,7 +307,7 @@ export default function WelcomeLandingPage() {
               onMouseEnter={() => setOpenDropdown('platform')}
               onMouseLeave={() => setOpenDropdown(null)}
             >
-              <button className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-yellow-400 transition flex items-center gap-1.5 cursor-pointer">
+              <button className="px-3.5 py-2 rounded-xl border border-transparent hover:border-yellow-400/80 hover:bg-yellow-400/15 hover:text-yellow-300 transition-all duration-200 flex items-center gap-1.5 cursor-pointer">
                 <span>Platform</span>
                 <span className="text-[10px] text-slate-400">▾</span>
               </button>
@@ -341,13 +340,13 @@ export default function WelcomeLandingPage() {
               )}
             </div>
 
-            {/* Dropdown 2: AI Copilot (2 SEPARATE DESTINATIONS: IDE Agent vs BYOK Section) */}
+            {/* Dropdown 2: AI Copilot (2 Distinct Targets: #ai-agent vs #byok) */}
             <div
               className="relative"
               onMouseEnter={() => setOpenDropdown('ai')}
               onMouseLeave={() => setOpenDropdown(null)}
             >
-              <button className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 text-yellow-300 hover:text-yellow-200 transition flex items-center gap-1.5 cursor-pointer">
+              <button className="px-3.5 py-2 rounded-xl border border-transparent hover:border-yellow-400/80 hover:bg-yellow-400/15 text-yellow-300 hover:text-yellow-200 transition-all duration-200 flex items-center gap-1.5 cursor-pointer">
                 <span>✨ AI Copilot</span>
                 <span className="text-[10px] text-yellow-400">▾</span>
               </button>
@@ -373,19 +372,19 @@ export default function WelcomeLandingPage() {
               )}
             </div>
 
-            <a href="#quickstart" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-yellow-400 transition">
+            <a href="#quickstart" className="px-3.5 py-2 rounded-xl border border-transparent hover:border-yellow-400/80 hover:bg-yellow-400/15 hover:text-yellow-300 transition-all duration-200">
               SDK Setup
             </a>
-            <a href="#comparison" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-yellow-400 transition">
+            <a href="#comparison" className="px-3.5 py-2 rounded-xl border border-transparent hover:border-yellow-400/80 hover:bg-yellow-400/15 hover:text-yellow-300 transition-all duration-200">
               Why SnapTrace
             </a>
-            <a href="#pricing" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-yellow-400 transition text-yellow-400">
+            <a href="#pricing" className="px-3.5 py-2 rounded-xl border border-transparent hover:border-yellow-400/80 hover:bg-yellow-400/15 hover:text-yellow-300 transition-all duration-200 text-yellow-400">
               Pricing
             </a>
-            <Link href="/about" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-yellow-400 transition">
+            <Link href="/about" className="px-3.5 py-2 rounded-xl border border-transparent hover:border-yellow-400/80 hover:bg-yellow-400/15 hover:text-yellow-300 transition-all duration-200">
               About
             </Link>
-            <a href="#faq" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-yellow-400 transition">
+            <a href="#faq" className="px-3.5 py-2 rounded-xl border border-transparent hover:border-yellow-400/80 hover:bg-yellow-400/15 hover:text-yellow-300 transition-all duration-200">
               FAQ
             </a>
           </nav>
@@ -584,8 +583,7 @@ export default function WelcomeLandingPage() {
       ) : (
         /* VIEW 2: MARKETING HERO */
         <>
-          {/* 3. HERO SECTION */}
-          <section className="relative pt-10 pb-16 overflow-hidden">
+          <section className="relative pt-8 pb-14 overflow-hidden">
             <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[750px] h-[360px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
 
             <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
@@ -610,7 +608,7 @@ export default function WelcomeLandingPage() {
                 Stop spending Sundays connecting the dots by hand. SnapTrace collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 font-mono">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-1 font-mono">
                 <Link
                   href="/signup"
                   className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-sm font-black rounded-xl shadow-xl shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
@@ -803,7 +801,6 @@ export default function WelcomeLandingPage() {
               </SmoothReveal>
 
               <SmoothReveal className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Card 1: Google Gemini */}
                 <div className="p-6 rounded-3xl bg-[#090D16] border border-slate-800 hover:border-yellow-400/40 transition space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-2xl">✨</span>
@@ -817,7 +814,6 @@ export default function WelcomeLandingPage() {
                   </p>
                 </div>
 
-                {/* Card 2: OpenAI GPT-4o */}
                 <div className="p-6 rounded-3xl bg-[#090D16] border border-slate-800 hover:border-yellow-400/40 transition space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-2xl">⚡</span>
@@ -831,7 +827,6 @@ export default function WelcomeLandingPage() {
                   </p>
                 </div>
 
-                {/* Card 3: Upcoming Integrations */}
                 <div className="p-6 rounded-3xl bg-[#090D16] border border-slate-800/80 space-y-3 relative overflow-hidden">
                   <div className="flex items-center justify-between">
                     <span className="text-2xl">🔮</span>
@@ -1018,14 +1013,14 @@ export default function WelcomeLandingPage() {
             </SmoothReveal>
           </section>
 
-          {/* 🌟 10. SENTRY-STYLE FRAMED 4-TIER PRICING CONTAINER */}
-          <section id="pricing" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-800/80">
-            <div className="bg-[#090D16]/90 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-10">
-              <SmoothReveal className="text-center space-y-3">
+          {/* 🌟 10. SENTRY-STYLE FRAMED 4-TIER PRICING CONTAINER (COMPACT VIEWPORT FIT) */}
+          <section id="pricing" className="max-w-7xl mx-auto px-6 pt-8 pb-16 border-t border-slate-800/80">
+            <div className="bg-[#090D16]/90 border border-slate-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-8">
+              <SmoothReveal className="text-center space-y-2.5">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
                   <span>💎</span> Predictable APM Pricing
                 </div>
-                <h2 className="text-3xl sm:text-5xl font-extrabold text-white">Simple, developer-first plans</h2>
+                <h2 className="text-3xl sm:text-4xl font-black text-white">Simple, developer-first plans</h2>
                 <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto font-mono">
                   Zero surprise overage bills. Generous headroom for micro-SaaS, agencies, and teams.
                 </p>
@@ -1069,18 +1064,18 @@ export default function WelcomeLandingPage() {
               </SmoothReveal>
 
               {/* The 4 Tiers Grid */}
-              <SmoothReveal className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch" delay={150}>
+              <SmoothReveal className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 items-stretch" delay={150}>
                 
                 {/* Tier 1: Developer Free */}
-                <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
-                  <div className="space-y-4">
+                <div className="bg-[#0B101D] border border-slate-800/90 rounded-3xl p-5 sm:p-6 space-y-5 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+                  <div className="space-y-3">
                     <div className="space-y-1">
                       <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Developer Free</span>
                       <div className="text-3xl font-black text-white">$0 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
-                      <p className="text-xs text-slate-400 pt-1">For side projects and personal experiments.</p>
+                      <p className="text-xs text-slate-400 pt-0.5">For side projects and experiments.</p>
                     </div>
 
-                    <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
+                    <ul className="space-y-2 text-xs text-slate-300 border-t border-slate-800/80 pt-4 font-mono">
                       <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>5,000</strong> Events / Month</li>
                       <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 7-Day Data Retention</li>
                       <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1 Active Project</li>
@@ -1092,34 +1087,34 @@ export default function WelcomeLandingPage() {
 
                   <Link
                     href="/signup"
-                    className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
+                    className="block w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
                   >
                     Start Free Forever →
                   </Link>
                 </div>
 
                 {/* Tier 2: Indie Pro */}
-                <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-6 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
-                  <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
+                <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-5 sm:p-6 space-y-5 shadow-2xl relative flex flex-col justify-between transform hover:border-yellow-400 transition">
+                  <span className="absolute -top-3 right-5 px-3 py-0.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
                     POPULAR FOR BUILDERS
                   </span>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="space-y-1">
                       <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Indie Pro</span>
                       <div className="text-3xl font-black text-white">
                         {billingInterval === 'annual' ? '$10' : '$14'}
                         <span className="text-xs text-slate-400 font-normal font-mono"> / month</span>
                       </div>
-                      <p className="text-xs text-slate-400 pt-1">For solo developers, freelancers & micro-SaaS.</p>
+                      <p className="text-xs text-slate-400 pt-0.5">For solo devs, freelancers & micro-SaaS.</p>
                     </div>
 
-                    <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5 font-mono">
+                    <ul className="space-y-2 text-xs text-slate-200 border-t border-slate-800/80 pt-4 font-mono">
                       <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>100,000</strong> Events / Month</li>
                       <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 30-Day Telemetry Retention</li>
                       <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Up to 5 Projects</li>
                       <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Discord, Telegram & Slack Webhooks</li>
-                      <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Cursor & Claude AI Fix Prompts</li>
+                      <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Cursor & Claude Fix Prompts</li>
                       <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 60s Sliding Loop Throttling ([x50])</li>
                       <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 1-Click Log Purge Tools</li>
                     </ul>
@@ -1127,28 +1122,28 @@ export default function WelcomeLandingPage() {
 
                   <Link
                     href="/signup"
-                    className="block w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl transition shadow-xl shadow-yellow-500/20 cursor-pointer font-mono"
+                    className="block w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl transition shadow-xl shadow-yellow-500/20 cursor-pointer font-mono"
                   >
                     Claim Pro Beta Pass →
                   </Link>
                 </div>
 
                 {/* Tier 3: Team & Studio */}
-                <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
-                  <div className="space-y-4">
+                <div className="bg-[#0B101D] border border-slate-800/90 rounded-3xl p-5 sm:p-6 space-y-5 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+                  <div className="space-y-3">
                     <div className="space-y-1">
                       <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Team & Studio</span>
                       <div className="text-3xl font-black text-white">
                         {billingInterval === 'annual' ? '$29' : '$39'}
                         <span className="text-xs text-slate-500 font-normal font-mono"> / month</span>
                       </div>
-                      <p className="text-xs text-slate-400 pt-1">For web agencies, studios & growing production apps.</p>
+                      <p className="text-xs text-slate-400 pt-0.5">For agencies, studios & production apps.</p>
                     </div>
 
-                    <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
+                    <ul className="space-y-2 text-xs text-slate-300 border-t border-slate-800/80 pt-4 font-mono">
                       <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>500,000</strong> Events / Month</li>
                       <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
-                      <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>UNLIMITED Projects & API Keys</strong></li>
+                      <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>UNLIMITED Projects & Keys</strong></li>
                       <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Multi-Seat Team Access</li>
                       <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Edge Ingestion</li>
                       <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Cascading Multi-Error Collapse</li>
@@ -1157,25 +1152,25 @@ export default function WelcomeLandingPage() {
 
                   <Link
                     href="/signup"
-                    className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
+                    className="block w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
                   >
                     Join Team Beta →
                   </Link>
                 </div>
 
                 {/* Tier 4: Business Scale (OPENS IN-APP MODAL - NO WINDOWS POPUP!) */}
-                <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
-                  <div className="space-y-4">
+                <div className="bg-[#0B101D] border border-slate-800/90 rounded-3xl p-5 sm:p-6 space-y-5 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+                  <div className="space-y-3">
                     <div className="space-y-1">
                       <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">Business Scale</span>
                       <div className="text-3xl font-black text-white">
                         {billingInterval === 'annual' ? '$79' : '$99'}
                         <span className="text-xs text-slate-500 font-normal font-mono"> / month</span>
                       </div>
-                      <p className="text-xs text-slate-400 pt-1">For high-traffic applications & regulated workloads.</p>
+                      <p className="text-xs text-slate-400 pt-0.5">For high-traffic & regulated workloads.</p>
                     </div>
 
-                    <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
+                    <ul className="space-y-2 text-xs text-slate-300 border-t border-slate-800/80 pt-4 font-mono">
                       <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>2,000,000</strong> Events / Month</li>
                       <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 180-Day Telemetry Retention</li>
                       <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Custom Client Regex PII Masking</li>
@@ -1188,7 +1183,7 @@ export default function WelcomeLandingPage() {
                   <button
                     type="button"
                     onClick={() => setShowScaleContactModal(true)}
-                    className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
+                    className="block w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
                   >
                     Contact for Scale →
                   </button>
@@ -1366,11 +1361,11 @@ export default function WelcomeLandingPage() {
                 Upgrade to Business Scale
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                For applications with <strong className="text-slate-200">2,000,000+ events/month</strong>, dedicated ingestion gateways, SLA guarantees, or custom team seats, contact our engineering desk directly:
+                For applications with <strong className="text-slate-200">2,000,000+ events/month</strong>, dedicated ingestion gateways, custom SLAs, or multi-seat billing, contact our engineering desk:
               </p>
             </div>
 
-            {/* Highlighted Email Box with Copy & Webmail Triggers */}
+            {/* Highlighted Email Box */}
             <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-4 space-y-3 font-mono text-xs">
               <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">
                 Official Founder & Engineering Desk
