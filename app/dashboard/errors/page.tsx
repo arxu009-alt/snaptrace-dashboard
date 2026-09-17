@@ -194,7 +194,6 @@ export default function ExceptionLogsPage() {
     }
   };
 
-  // Resolves all events in a grouped issue
   const handleResolveGroup = async (group: GroupedIssue) => {
     const targetStatus = group.latestLog.status === 'resolved' ? 'unresolved' : 'resolved';
     const ids = group.allLogs.map((l) => l.id);
@@ -253,7 +252,6 @@ export default function ExceptionLogsPage() {
     }
   };
 
-  // Filtered raw logs
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
       const logStatus = log.status || 'unresolved';
@@ -278,14 +276,12 @@ export default function ExceptionLogsPage() {
     });
   }, [logs, statusFilter, envFilter, searchQuery]);
 
-  // 🌟 SENTRY-STYLE FINGERPRINT GROUPING ALGORITHM
   const groupedIssues = useMemo(() => {
     const groups: Record<string, GroupedIssue> = {};
 
     filteredLogs.forEach((log) => {
-      // Deterministic fingerprint key based on message and environment
       const cleanMsg = (log.message || 'Unknown Exception').trim();
-      const key = `${cleanMsg}::${log.environment || 'production'}`;
+      const key = cleanMsg + '::' + (log.environment || 'production');
 
       if (!groups[key]) {
         groups[key] = {
@@ -299,7 +295,6 @@ export default function ExceptionLogsPage() {
       } else {
         groups[key].count += 1;
         groups[key].allLogs.push(log);
-        // keep most recent log as the representative
         if (new Date(log.created_at) > new Date(groups[key].lastSeen)) {
           groups[key].lastSeen = log.created_at;
           groups[key].latestLog = log;
@@ -311,6 +306,67 @@ export default function ExceptionLogsPage() {
       (a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime()
     );
   }, [filteredLogs]);
+
+  // 🌟 1-CLICK EXPORT HANDLERS (CSV & JSON)
+  const exportToCSV = () => {
+    const data = viewMode === 'grouped'
+      ? groupedIssues.map((g) => ({
+          issue_id: g.latestLog.id,
+          message: g.latestLog.message,
+          occurrences: g.count,
+          environment: g.latestLog.environment,
+          status: g.latestLog.status || 'unresolved',
+          last_seen: g.lastSeen,
+          first_seen: g.firstSeen,
+          url: g.latestLog.url || 'N/A',
+        }))
+      : filteredLogs.map((l) => ({
+          error_id: l.id,
+          message: l.message,
+          environment: l.environment,
+          status: l.status || 'unresolved',
+          timestamp: l.created_at,
+          url: l.url || 'N/A',
+        }));
+
+    if (!data.length) {
+      alert('No logs available to export.');
+      return;
+    }
+
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map((row: any) =>
+      Object.values(row)
+        .map((val) => '"' + String(val).replace(/"/g, '""') + '"')
+        .join(',')
+    );
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent([headers, ...rows].join('\n'));
+    const link = document.createElement('a');
+    link.setAttribute('href', csvContent);
+    const dateStr = new Date().toISOString().slice(0, 10);
+    link.setAttribute('download', 'snaptrace_logs_' + dateStr + '.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToJSON = () => {
+    const data = viewMode === 'grouped' ? groupedIssues : filteredLogs;
+    if (!data.length) {
+      alert('No logs available to export.');
+      return;
+    }
+
+    const jsonContent = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', jsonContent);
+    const dateStr = new Date().toISOString().slice(0, 10);
+    link.setAttribute('download', 'snaptrace_logs_' + dateStr + '.json');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const unresolvedCount = logs.filter((l) => (l.status || 'unresolved') === 'unresolved').length;
   const resolvedCount = logs.filter((l) => l.status === 'resolved').length;
@@ -350,11 +406,12 @@ export default function ExceptionLogsPage() {
           <div className="flex items-center gap-3 flex-wrap self-start sm:self-auto">
             <button
               onClick={toggleDemoMode}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border ${
-                demoMode
+              className={
+                'px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border ' +
+                (demoMode
                   ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
-                  : 'bg-[#090D16] text-slate-300 border-slate-800 hover:border-yellow-400/40'
-              }`}
+                  : 'bg-[#090D16] text-slate-300 border-slate-800 hover:border-yellow-400/40')
+              }
             >
               <span>{demoMode ? '✕ Clear Demo Crashes' : '⚡ Load Demo Crashes'}</span>
             </button>
@@ -371,8 +428,8 @@ export default function ExceptionLogsPage() {
           </div>
         </div>
 
-        {/* Filter Controls Bar with View Mode Toggle */}
-        <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-4 space-y-4 shadow-xl">
+        {/* Filter Controls Bar with View Mode & Export Tools */}
+        <div className="bg-gradient-to-b from-[#0B101D] to-[#060911] border border-slate-800/90 rounded-3xl p-4 space-y-4 shadow-xl">
           
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             <div className="flex-1 relative">
@@ -386,16 +443,17 @@ export default function ExceptionLogsPage() {
               />
             </div>
 
-            {/* SENTRY-STYLE VIEW MODE TOGGLE (Grouped vs Raw) */}
+            {/* View Mode Toggle */}
             <div className="flex items-center space-x-2">
               <div className="flex items-center bg-[#05070E] border border-slate-800 p-1 rounded-xl font-mono text-xs">
                 <button
                   onClick={() => setViewMode('grouped')}
-                  className={`px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                    viewMode === 'grouped'
+                  className={
+                    'px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ' +
+                    (viewMode === 'grouped'
                       ? 'bg-yellow-400 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                      : 'text-slate-400 hover:text-white')
+                  }
                   title="Group identical crashes by fingerprint"
                 >
                   <span>🎯</span>
@@ -403,11 +461,12 @@ export default function ExceptionLogsPage() {
                 </button>
                 <button
                   onClick={() => setViewMode('raw')}
-                  className={`px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                    viewMode === 'raw'
+                  className={
+                    'px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ' +
+                    (viewMode === 'raw'
                       ? 'bg-yellow-400 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                      : 'text-slate-400 hover:text-white')
+                  }
                   title="Show every individual crash event"
                 >
                   <span>📋</span>
@@ -421,11 +480,12 @@ export default function ExceptionLogsPage() {
                   <button
                     key={env}
                     onClick={() => setEnvFilter(env)}
-                    className={`px-2.5 py-1.5 text-xs font-semibold rounded-lg capitalize transition cursor-pointer ${
-                      envFilter === env
+                    className={
+                      'px-2.5 py-1.5 text-xs font-semibold rounded-lg capitalize transition cursor-pointer ' +
+                      (envFilter === env
                         ? 'bg-slate-800 text-yellow-300 font-bold'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
+                        : 'text-slate-400 hover:text-white')
+                    }
                   >
                     {env}
                   </button>
@@ -434,16 +494,17 @@ export default function ExceptionLogsPage() {
             </div>
           </div>
 
-          {/* Triage Status Tabs */}
+          {/* Triage Status Tabs + 🌟 1-CLICK EXPORT BUTTONS */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-800/80 pt-3 text-xs">
             <div className="flex items-center gap-2 flex-wrap font-mono">
               <button
                 onClick={() => setStatusFilter('unresolved')}
-                className={`px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  statusFilter === 'unresolved'
+                className={
+                  'px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ' +
+                  (statusFilter === 'unresolved'
                     ? 'bg-red-500/15 text-red-400 border border-red-500/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50')
+                }
               >
                 <span>🚨 Unresolved</span>
                 <span className="px-1.5 py-0.2 bg-red-950/60 rounded text-[10px] font-bold">
@@ -453,11 +514,12 @@ export default function ExceptionLogsPage() {
 
               <button
                 onClick={() => setStatusFilter('resolved')}
-                className={`px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  statusFilter === 'resolved'
+                className={
+                  'px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ' +
+                  (statusFilter === 'resolved'
                     ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50')
+                }
               >
                 <span>✓ Resolved</span>
                 <span className="px-1.5 py-0.2 bg-emerald-950/60 rounded text-[10px] font-bold">
@@ -467,25 +529,49 @@ export default function ExceptionLogsPage() {
 
               <button
                 onClick={() => setStatusFilter('all')}
-                className={`px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer ${
-                  statusFilter === 'all'
+                className={
+                  'px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer ' +
+                  (statusFilter === 'all'
                     ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50')
+                }
               >
                 All Events ({logs.length})
               </button>
             </div>
 
-            {unresolvedCount > 0 && (
+            {/* Export Actions & Bulk Resolve Button */}
+            <div className="flex items-center gap-2 self-start sm:self-auto font-mono flex-wrap">
               <button
-                onClick={() => setShowBulkResolveModal(true)}
-                className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shadow-sm font-mono"
+                onClick={exportToCSV}
+                disabled={filteredLogs.length === 0}
+                className="px-3 py-1.5 bg-[#05070E] hover:bg-slate-800 text-slate-300 hover:text-yellow-300 border border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer disabled:opacity-40 shadow-sm flex items-center gap-1.5"
+                title="Download current view as a CSV spreadsheet"
               >
-                <span>✓</span>
-                <span>Mark All as Resolved</span>
+                <span>📥</span>
+                <span>CSV</span>
               </button>
-            )}
+
+              <button
+                onClick={exportToJSON}
+                disabled={filteredLogs.length === 0}
+                className="px-3 py-1.5 bg-[#05070E] hover:bg-slate-800 text-slate-300 hover:text-yellow-300 border border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer disabled:opacity-40 shadow-sm flex items-center gap-1.5"
+                title="Download current view as a JSON file"
+              >
+                <span>📥</span>
+                <span>JSON</span>
+              </button>
+
+              {unresolvedCount > 0 && (
+                <button
+                  onClick={() => setShowBulkResolveModal(true)}
+                  className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <span>✓</span>
+                  <span>Mark All as Resolved</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -515,7 +601,7 @@ export default function ExceptionLogsPage() {
               )}
             </div>
           ) : viewMode === 'grouped' ? (
-            /* 🌟 VIEW 1: DEDUPLICATED GROUPED ISSUES TABLE (Sentry Style) */
+            /* VIEW 1: DEDUPLICATED GROUPED ISSUES TABLE */
             <div className="overflow-x-auto">
               <table className="w-full min-w-[780px] text-left border-collapse text-xs">
                 <thead>
@@ -535,18 +621,20 @@ export default function ExceptionLogsPage() {
                     return (
                       <tr
                         key={group.key}
-                        className={`hover:bg-slate-800/40 transition group ${
-                          isResolved ? 'opacity-50 bg-[#05070E]/50' : ''
-                        }`}
+                        className={
+                          'hover:bg-slate-800/40 transition group ' +
+                          (isResolved ? 'opacity-50 bg-[#05070E]/50' : '')
+                        }
                       >
                         <td className="py-4 px-4 text-center">
                           <button
                             onClick={() => handleResolveGroup(group)}
-                            className={`w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] font-bold transition cursor-pointer ${
-                              isResolved
+                            className={
+                              'w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] font-bold transition cursor-pointer ' +
+                              (isResolved
                                 ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
-                                : 'border-slate-700 hover:border-emerald-400 hover:text-emerald-400 text-transparent'
-                            }`}
+                                : 'border-slate-700 hover:border-emerald-400 hover:text-emerald-400 text-transparent')
+                            }
                             title={isResolved ? 'Mark as Unresolved' : 'Mark as Resolved'}
                           >
                             ✓
@@ -555,7 +643,7 @@ export default function ExceptionLogsPage() {
 
                         <td className="py-4 px-4 max-w-md">
                           <div className="space-y-0.5">
-                            <span className={`font-semibold text-xs block truncate ${isResolved ? 'line-through text-slate-400' : 'text-white'}`}>
+                            <span className={'font-semibold text-xs block truncate ' + (isResolved ? 'line-through text-slate-400' : 'text-white')}>
                               {group.latestLog.message}
                             </span>
                             <span className="text-[10px] text-slate-500 truncate block">
@@ -564,7 +652,6 @@ export default function ExceptionLogsPage() {
                           </div>
                         </td>
 
-                        {/* Occurrence Counter Pill */}
                         <td className="py-4 px-4 text-center">
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 shadow-sm">
                             x{group.count}
@@ -577,11 +664,12 @@ export default function ExceptionLogsPage() {
 
                         <td className="py-4 px-4 whitespace-nowrap">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              group.latestLog.environment === 'production'
+                            className={
+                              'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ' +
+                              (group.latestLog.environment === 'production'
                                 ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                            }`}
+                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20')
+                            }
                           >
                             {group.latestLog.environment || 'production'}
                           </span>
@@ -602,7 +690,7 @@ export default function ExceptionLogsPage() {
               </table>
             </div>
           ) : (
-            /* 📋 VIEW 2: RAW EVENT STREAM TABLE (Datadog Style) */
+            /* VIEW 2: RAW EVENT STREAM TABLE */
             <div className="overflow-x-auto">
               <table className="w-full min-w-[780px] text-left border-collapse text-xs">
                 <thead>
@@ -620,18 +708,20 @@ export default function ExceptionLogsPage() {
                     return (
                       <tr
                         key={log.id}
-                        className={`hover:bg-slate-800/40 transition group ${
-                          isResolved ? 'opacity-50 bg-[#05070E]/50' : ''
-                        }`}
+                        className={
+                          'hover:bg-slate-800/40 transition group ' +
+                          (isResolved ? 'opacity-50 bg-[#05070E]/50' : '')
+                        }
                       >
                         <td className="py-4 px-4 text-center">
                           <button
                             onClick={() => handleToggleStatus(log.id, log.status)}
-                            className={`w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] font-bold transition cursor-pointer ${
-                              isResolved
+                            className={
+                              'w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] font-bold transition cursor-pointer ' +
+                              (isResolved
                                 ? 'bg-emerald-500 border-emerald-400 text-slate-950'
-                                : 'border-slate-700 hover:border-emerald-400 text-transparent'
-                            }`}
+                                : 'border-slate-700 hover:border-emerald-400 text-transparent')
+                            }
                             title={isResolved ? 'Mark as Unresolved' : 'Mark as Resolved'}
                           >
                             ✓
@@ -650,11 +740,12 @@ export default function ExceptionLogsPage() {
 
                         <td className="py-4 px-4 whitespace-nowrap">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              log.environment === 'production'
+                            className={
+                              'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ' +
+                              (log.environment === 'production'
                                 ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                            }`}
+                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20')
+                            }
                           >
                             {log.environment || 'production'}
                           </span>
@@ -683,7 +774,7 @@ export default function ExceptionLogsPage() {
           )}
         </div>
 
-        {/* Deep Inspection Modal (100% PRESERVED) */}
+        {/* Deep Inspection Modal */}
         {selectedLog && (
           <InspectErrorModal
             log={selectedLog}
@@ -697,7 +788,7 @@ export default function ExceptionLogsPage() {
           />
         )}
 
-        {/* Bulk Resolve Modal (100% PRESERVED) */}
+        {/* Bulk Resolve Modal */}
         {showBulkResolveModal && (
           <div 
             onClick={(e) => {
