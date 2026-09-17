@@ -16,15 +16,17 @@ export default function SettingsPage() {
   const [updatingPassword, setUpdatingPassword] = useState<boolean>(false);
   const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // AI Copilot State
   const [aiProvider, setAiProvider] = useState<'gemini' | 'openai'>('gemini');
   const [aiKey, setAiKey] = useState<string>('');
   const [showAiKey, setShowAiKey] = useState<boolean>(false);
   const [aiKeySaved, setAiKeySaved] = useState<boolean>(false);
 
-  // Notification State
+  // Notification & Environment Alert Muting State
   const [email, setEmail] = useState<string>('');
   const [discordWebhook, setDiscordWebhook] = useState<string>('');
   const [slackWebhook, setSlackWebhook] = useState<string>('');
+  const [onlyProdAlerts, setOnlyProdAlerts] = useState<boolean>(false);
   const [apiKey, setApiKey] = useState<string>('');
   const [projectId, setProjectId] = useState<string>('');
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
@@ -92,12 +94,20 @@ export default function SettingsPage() {
         const storageSlackKey = 'snaptrace_slack_' + p.id;
         const savedSlack = p.slack_webhook_url || (typeof window !== 'undefined' ? localStorage.getItem(storageSlackKey) : '') || '';
         setSlackWebhook(savedSlack);
+
+        const storageOnlyProdKey = 'snaptrace_only_prod_' + p.id;
+        const savedOnlyProd = Boolean(
+          p.only_production_alerts || 
+          (typeof window !== 'undefined' && localStorage.getItem(storageOnlyProdKey) === 'true')
+        );
+        setOnlyProdAlerts(savedOnlyProd);
       } else {
         setProjectId('');
         setApiKey('No project created yet');
         setEmail(uEmail);
         setDiscordWebhook('');
         setSlackWebhook('');
+        setOnlyProdAlerts(false);
       }
 
       setLoading(false);
@@ -129,7 +139,6 @@ export default function SettingsPage() {
     }
   };
 
-  // Secure Password Update Handler
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordMsg(null);
@@ -183,8 +192,8 @@ export default function SettingsPage() {
 
     try {
       if (typeof window !== 'undefined') {
-        const storageSlackKey = 'snaptrace_slack_' + projectId;
-        localStorage.setItem(storageSlackKey, slackWebhook);
+        localStorage.setItem('snaptrace_slack_' + projectId, slackWebhook);
+        localStorage.setItem('snaptrace_only_prod_' + projectId, String(onlyProdAlerts));
       }
 
       const updatePayload: any = {
@@ -195,12 +204,21 @@ export default function SettingsPage() {
       };
 
       try {
-        await supabase.from('projects').update(updatePayload).eq('id', projectId);
+        // Update database with safe column fallback
+        const { error } = await supabase
+          .from('projects')
+          .update({ ...updatePayload, only_production_alerts: onlyProdAlerts })
+          .eq('id', projectId);
+
+        if (error) {
+          // If the column doesn't exist yet in Supabase, update without it gracefully
+          await supabase.from('projects').update(updatePayload).eq('id', projectId);
+        }
       } catch (dbErr) {
         console.warn('DB update fallback:', dbErr);
       }
 
-      setNotifSavedMsg('✓ Notification Channels Saved!');
+      setNotifSavedMsg('✓ Notification Channels & Alert Rules Saved!');
       setTimeout(() => setNotifSavedMsg(null), 3000);
     } catch (err: any) {
       alert('Error saving notifications: ' + err.message);
@@ -359,7 +377,7 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Monthly Event Cap</span>
-                  <span className="text-slate-200 font-semibold">150,000 events</span>
+                  <span className="text-slate-200 font-semibold">100,000 events</span>
                 </div>
                 <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Data Retention</span>
@@ -393,8 +411,6 @@ export default function SettingsPage() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                
-                {/* Custom Developer Display Name Form */}
                 <form onSubmit={handleSaveDisplayName} className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">
@@ -426,7 +442,6 @@ export default function SettingsPage() {
                   </div>
                 </form>
 
-                {/* Account Email */}
                 <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1 flex flex-col justify-center">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">
                     Account Email Address
@@ -438,10 +453,8 @@ export default function SettingsPage() {
                     </span>
                   </div>
                 </div>
-
               </div>
 
-              {/* Masked API Key */}
               <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">
@@ -469,10 +482,9 @@ export default function SettingsPage() {
                   </button>
                 </div>
               </div>
-
             </div>
 
-            {/* 🌟 3. NEW: SECURITY & UPDATE PASSWORD CARD */}
+            {/* 3. Security & Update Password */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
@@ -546,15 +558,15 @@ export default function SettingsPage() {
               </form>
             </div>
 
-            {/* 4. Notification Channels Form */}
+            {/* 4. Notification Channels & Alert Rules Form */}
             <form onSubmit={handleSaveNotifications} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-3">
                 <div>
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>🔔</span> Notification Channels (Discord, Slack & Email)
+                    <span>🔔</span> Notification Channels & Alert Rules
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Real-time exception alerts and deduplicated incident tags are dispatched here.
+                  <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                    Real-time exception alerts, webhook destinations, and environment filtering.
                   </p>
                 </div>
 
@@ -611,6 +623,34 @@ export default function SettingsPage() {
                     className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 font-mono transition"
                   />
                 </div>
+
+                {/* 🌟 NEW: ONLY ALERT ON PRODUCTION TOGGLE SWITCH */}
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-semibold text-slate-200 block font-mono flex items-center gap-1.5">
+                      <span>🔇</span> ONLY ALERT ON PRODUCTION
+                    </span>
+                    <p className="text-[11px] text-slate-400 font-sans">
+                      Mutes Discord, Slack, and Email notifications from development & localhost. Errors will still be visible in your dashboard stream.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setOnlyProdAlerts(!onlyProdAlerts)}
+                    className={
+                      'w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ' +
+                      (onlyProdAlerts ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-slate-800 border border-slate-700')
+                    }
+                    title="Toggle production-only alert filter"
+                  >
+                    <div
+                      className={
+                        'w-4 h-4 rounded-full bg-slate-950 absolute top-1 transition-all ' +
+                        (onlyProdAlerts ? 'right-1' : 'left-1')
+                      }
+                    />
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-2">
@@ -636,7 +676,7 @@ export default function SettingsPage() {
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
                     <span>✨</span> BYOK AI Copilot Configuration
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-slate-400 mt-0.5 font-sans">
                     Powers the "Analyze with AI" button inside the Exception Inspect Modal.
                   </p>
                 </div>
@@ -712,7 +752,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between gap-4 pt-1">
                 <div className="space-y-0.5">
                   <p className="text-xs text-slate-200 font-semibold font-mono">Purge Resolved Errors</p>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 font-sans">
                     Permanently deletes all exceptions that have been marked as resolved.
                   </p>
                 </div>
