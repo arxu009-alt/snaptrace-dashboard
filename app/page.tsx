@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
 import TelemetryBeamBackground from '@/components/TelemetryBeamBackground';
+
 export const dynamic = 'force-dynamic';
 
 type StackKey = 'nextjs' | 'js' | 'python' | 'node' | 'go' | 'rust' | 'csharp' | 'php' | 'ruby' | 'kotlin' | 'flutter' | 'cloudflare';
@@ -123,13 +124,11 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
-  // Dual Mode, Billing & UI Navigation States
   const [marketingMode, setMarketingMode] = useState(true);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
 
-  // Scale Modal State & Email Copy
   const [showScaleContactModal, setShowScaleContactModal] = useState(false);
   const [copiedScaleEmail, setCopiedScaleEmail] = useState(false);
   const scaleEmail = 'hello.snaptrace@gmail.com';
@@ -291,7 +290,7 @@ export default function WelcomeLandingPage() {
         </span>
       </div>
 
-      {/* 2. HEADER WITH CLEAR NOTICEABLE SNAP YELLOW HOVER BOXES */}
+      {/* 2. HEADER WITH NOTICEABLE YELLOW HOVER BOXES */}
       <header className="border-b border-slate-800/80 bg-[#090D16]/95 backdrop-blur-xl sticky top-0 z-40 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
           <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition shrink-0">
@@ -301,7 +300,7 @@ export default function WelcomeLandingPage() {
           {/* BOLD NAV WITH YELLOW PILL BOX ON HOVER */}
           <nav className="hidden lg:flex items-center space-x-1.5 text-xs font-bold text-slate-200 font-mono">
             
-           {/* Dropdown 1: Platform */}
+            {/* Dropdown 1: Platform */}
             <div
               className="relative"
               onMouseEnter={() => setOpenDropdown('platform')}
@@ -342,7 +341,7 @@ export default function WelcomeLandingPage() {
               )}
             </div>
 
-            {/* Dropdown 2: AI Copilot (2 Distinct Targets: #ai-agent vs #byok) */}
+            {/* Dropdown 2: AI Copilot */}
             <div
               className="relative"
               onMouseEnter={() => setOpenDropdown('ai')}
@@ -375,6 +374,7 @@ export default function WelcomeLandingPage() {
                 </div>
               )}
             </div>
+
             <a href="#quickstart" className="px-3.5 py-2 rounded-xl border border-transparent hover:border-yellow-400/80 hover:bg-yellow-400/15 hover:text-yellow-300 transition-all duration-200">
               SDK Setup
             </a>
@@ -587,12 +587,9 @@ export default function WelcomeLandingPage() {
         /* VIEW 2: MARKETING HERO */
         <>
           <section className="relative pt-8 pb-14 overflow-hidden">
-            {/* 3. HERO SECTION */}
-          <section className="relative pt-8 pb-14 overflow-hidden">
             {/* 🌟 ANIMATED TELEMETRY BEAM BACKGROUND */}
             <TelemetryBeamBackground />
 
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[750px] h-[360px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
             <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[750px] h-[360px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
 
             <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
@@ -1022,7 +1019,7 @@ export default function WelcomeLandingPage() {
             </SmoothReveal>
           </section>
 
-          {/* 🌟 10. SENTRY-STYLE FRAMED 4-TIER PRICING CONTAINER (COMPACT VIEWPORT FIT) */}
+          {/* 🌟 10. SENTRY-STYLE FRAMED 4-TIER PRICING CONTAINER */}
           <section id="pricing" className="max-w-7xl mx-auto px-6 pt-8 pb-16 border-t border-slate-800/80">
             <div className="bg-[#090D16]/90 border border-slate-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-8">
               <SmoothReveal className="text-center space-y-2.5">
@@ -1034,7 +1031,6 @@ export default function WelcomeLandingPage() {
                   Zero surprise overage bills. Generous headroom for micro-SaaS, agencies, and teams.
                 </p>
 
-                {/* Segmented Monthly / Annual Toggle */}
                 <div className="pt-2 flex items-center justify-center">
                   <div className="bg-[#0B101D] p-1 rounded-2xl border border-slate-800 inline-flex items-center gap-1 font-mono text-xs shadow-xl">
                     <button
@@ -1072,7 +1068,6 @@ export default function WelcomeLandingPage() {
                 )}
               </SmoothReveal>
 
-              {/* The 4 Tiers Grid */}
               <SmoothReveal className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 items-stretch" delay={150}>
                 
                 {/* Tier 1: Developer Free */}
@@ -1167,7 +1162,7 @@ export default function WelcomeLandingPage() {
                   </Link>
                 </div>
 
-                {/* Tier 4: Business Scale (OPENS IN-APP MODAL - NO WINDOWS POPUP!) */}
+                {/* Tier 4: Business Scale (OPENS IN-APP MODAL) */}
                 <div className="bg-[#0B101D] border border-slate-800/90 rounded-3xl p-5 sm:p-6 space-y-5 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
                   <div className="space-y-3">
                     <div className="space-y-1">
@@ -1395,7 +1390,7 @@ export default function WelcomeLandingPage() {
 
             <div className="space-y-2 pt-1 font-mono">
               <a
-                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${scaleEmail}&su=SnapTrace%20Business%20Scale%20Inquiry`}
+                href={'https://mail.google.com/mail/?view=cm&fs=1&to=' + scaleEmail + '&su=SnapTrace%20Business%20Scale%20Inquiry'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
