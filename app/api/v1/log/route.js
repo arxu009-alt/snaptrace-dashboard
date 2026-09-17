@@ -47,7 +47,7 @@ export async function POST(req) {
       );
     }
 
-    // 🌟 1.5 4-TIER MONTHLY QUOTA ENFORCEMENT & RATE LIMITER
+    // 1.5 4-TIER MONTHLY QUOTA ENFORCEMENT & RATE LIMITER
     const recipientEmail =
       project.recipient_email ||
       project.alert_email ||
@@ -88,6 +88,15 @@ export async function POST(req) {
       }
     }
 
+    // 🌟 1.8 ENVIRONMENT ALERT FILTER (Mute alerts from localhost/development if enabled)
+    const envString = (environment || "production").toLowerCase();
+    const isDevEnv = envString !== "production";
+    const muteAlerts = Boolean(project.only_production_alerts) && isDevEnv;
+
+    if (muteAlerts) {
+      debugLogs.push("Alerts muted: 'Only Alert on Production' is active and environment is '" + envString + "'.");
+    }
+
     // Resolve Discord Webhook URL across schema variants
     const discordWebhookUrl =
       project.discord_webhook_url ||
@@ -111,9 +120,9 @@ export async function POST(req) {
       process.env.GMAIL_APP_PASSWORD ||
       process.env.SMTP_PASS;
 
-    // 2. Dispatch Discord Webhook Alert
+    // 2. Dispatch Discord Webhook Alert (Skipped if muted)
     let discordSent = false;
-    if (discordWebhookUrl) {
+    if (discordWebhookUrl && !muteAlerts) {
       try {
         const discordRes = await fetch(discordWebhookUrl, {
           method: "POST",
@@ -154,13 +163,15 @@ export async function POST(req) {
       } catch (discordErr) {
         debugLogs.push("Discord dispatch failed: " + discordErr.message);
       }
+    } else if (muteAlerts) {
+      debugLogs.push("Discord skipped: Muted by environment filter.");
     } else {
       debugLogs.push("Discord skipped: No webhook URL configured.");
     }
 
-    // 3. Dispatch Native Slack Webhook Alert
+    // 3. Dispatch Native Slack Webhook Alert (Skipped if muted)
     let slackSent = false;
-    if (slackWebhookUrl) {
+    if (slackWebhookUrl && !muteAlerts) {
       try {
         const slackPayload = {
           text: "🚨 *[SnapTrace Incident]* " + (message || "New Exception Event"),
@@ -192,13 +203,15 @@ export async function POST(req) {
       } catch (slackErr) {
         debugLogs.push("Slack dispatch failed: " + slackErr.message);
       }
+    } else if (muteAlerts) {
+      debugLogs.push("Slack skipped: Muted by environment filter.");
     } else {
       debugLogs.push("Slack skipped: No Slack webhook URL configured.");
     }
 
-    // 4. Dispatch Email Alert via Nodemailer (SMTP)
+    // 4. Dispatch Email Alert via Nodemailer (SMTP) (Skipped if muted)
     let emailSent = false;
-    if (recipientEmail && smtpUser && smtpPass) {
+    if (recipientEmail && smtpUser && smtpPass && !muteAlerts) {
       try {
         const transporter = nodemailer.createTransport({
           host: "smtp.gmail.com",
@@ -230,11 +243,13 @@ export async function POST(req) {
       } catch (emailErr) {
         debugLogs.push("SMTP Email failed: " + emailErr.message);
       }
+    } else if (muteAlerts) {
+      debugLogs.push("Email skipped: Muted by environment filter.");
     } else {
       debugLogs.push("Email skipped: Credentials missing.");
     }
 
-    // 5. Save to Supabase Database
+    // 5. Save to Supabase Database (ALWAYS RECORDED!)
     try {
       await supabase.from("errors").insert([
         {
@@ -259,6 +274,7 @@ export async function POST(req) {
           discord: discordSent,
           slack: slackSent,
           email: emailSent,
+          mutedByFilter: muteAlerts,
         },
         debugLogs,
       },
