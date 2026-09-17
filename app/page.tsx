@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
-
+import TelemetryBeamBackground from '@/components/TelemetryBeamBackground';
 export const dynamic = 'force-dynamic';
 
 type StackKey = 'nextjs' | 'js' | 'python' | 'node' | 'go' | 'rust' | 'csharp' | 'php' | 'ruby' | 'kotlin' | 'flutter' | 'cloudflare';
@@ -587,6 +587,12 @@ export default function WelcomeLandingPage() {
         /* VIEW 2: MARKETING HERO */
         <>
           <section className="relative pt-8 pb-14 overflow-hidden">
+            {/* 3. HERO SECTION */}
+          <section className="relative pt-8 pb-14 overflow-hidden">
+            {/* 🌟 ANIMATED TELEMETRY BEAM BACKGROUND */}
+            <TelemetryBeamBackground />
+
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[750px] h-[360px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
             <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[750px] h-[360px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
 
             <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
