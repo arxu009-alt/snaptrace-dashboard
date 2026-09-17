@@ -71,6 +71,11 @@ export default function ExceptionLogsPage() {
   const [currentProjectName, setCurrentProjectName] = useState<string>('All Projects');
   const [isUrlFiltered, setIsUrlFiltered] = useState<boolean>(false);
 
+  // User Tier & Feature Gate State
+  const [userPlanTier, setUserPlanTier] = useState<string>('pro');
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [showExportLockModal, setShowExportLockModal] = useState<boolean>(false);
+
   const [showBulkResolveModal, setShowBulkResolveModal] = useState<boolean>(false);
   const [bulkResolving, setBulkResolving] = useState<boolean>(false);
 
@@ -90,9 +95,13 @@ export default function ExceptionLogsPage() {
       return;
     }
 
+    const email = session.user.email || '';
+    const ownerCheck = email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com';
+    setIsOwner(ownerCheck);
+
     const { data: userProjects } = await supabase
       .from('projects')
-      .select('id, name')
+      .select('id, name, plan_tier')
       .eq('user_id', session.user.id);
 
     if (!userProjects || userProjects.length === 0) {
@@ -105,6 +114,11 @@ export default function ExceptionLogsPage() {
     const isAll = !targetProjectId || targetProjectId === 'all';
     const userProjectIds = userProjects.map((p) => p.id);
 
+    // Determine tier
+    const activeProject = userProjects.find((p) => p.id === targetProjectId) || userProjects[0];
+    const tier = ownerCheck ? 'scale' : (activeProject?.plan_tier || 'pro');
+    setUserPlanTier(tier);
+
     setIsUrlFiltered(Boolean(urlProjectId));
 
     let query = supabase
@@ -116,8 +130,7 @@ export default function ExceptionLogsPage() {
       setCurrentProjectName('All Projects (Global)');
       query = query.in('project_id', userProjectIds);
     } else {
-      const activeProj = userProjects.find((p) => p.id === targetProjectId);
-      setCurrentProjectName(activeProj ? activeProj.name : 'Selected Project');
+      setCurrentProjectName(activeProject ? activeProject.name : 'Selected Project');
       query = query.eq('project_id', targetProjectId);
     }
 
@@ -307,8 +320,15 @@ export default function ExceptionLogsPage() {
     );
   }, [filteredLogs]);
 
-  // 🌟 1-CLICK EXPORT HANDLERS (CSV & JSON)
+  // 🌟 GATED EXPORT HANDLERS (BUSINESS SCALE / OWNER EXCLUSIVE)
+  const hasExportAccess = isOwner || userPlanTier === 'scale';
+
   const exportToCSV = () => {
+    if (!hasExportAccess) {
+      setShowExportLockModal(true);
+      return;
+    }
+
     const data = viewMode === 'grouped'
       ? groupedIssues.map((g) => ({
           issue_id: g.latestLog.id,
@@ -352,6 +372,11 @@ export default function ExceptionLogsPage() {
   };
 
   const exportToJSON = () => {
+    if (!hasExportAccess) {
+      setShowExportLockModal(true);
+      return;
+    }
+
     const data = viewMode === 'grouped' ? groupedIssues : filteredLogs;
     if (!data.length) {
       alert('No logs available to export.');
@@ -494,7 +519,7 @@ export default function ExceptionLogsPage() {
             </div>
           </div>
 
-          {/* Triage Status Tabs + 🌟 1-CLICK EXPORT BUTTONS */}
+          {/* Triage Status Tabs + Gated Export Buttons */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-800/80 pt-3 text-xs">
             <div className="flex items-center gap-2 flex-wrap font-mono">
               <button
@@ -540,15 +565,15 @@ export default function ExceptionLogsPage() {
               </button>
             </div>
 
-            {/* Export Actions & Bulk Resolve Button */}
+            {/* Gated Export Actions & Bulk Resolve Button */}
             <div className="flex items-center gap-2 self-start sm:self-auto font-mono flex-wrap">
               <button
                 onClick={exportToCSV}
                 disabled={filteredLogs.length === 0}
                 className="px-3 py-1.5 bg-[#05070E] hover:bg-slate-800 text-slate-300 hover:text-yellow-300 border border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer disabled:opacity-40 shadow-sm flex items-center gap-1.5"
-                title="Download current view as a CSV spreadsheet"
+                title={hasExportAccess ? 'Download filtered logs as CSV' : 'Business Scale Feature (Click to unlock)'}
               >
-                <span>📥</span>
+                <span>{hasExportAccess ? '📥' : '🔒'}</span>
                 <span>CSV</span>
               </button>
 
@@ -556,9 +581,9 @@ export default function ExceptionLogsPage() {
                 onClick={exportToJSON}
                 disabled={filteredLogs.length === 0}
                 className="px-3 py-1.5 bg-[#05070E] hover:bg-slate-800 text-slate-300 hover:text-yellow-300 border border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer disabled:opacity-40 shadow-sm flex items-center gap-1.5"
-                title="Download current view as a JSON file"
+                title={hasExportAccess ? 'Download filtered logs as JSON' : 'Business Scale Feature (Click to unlock)'}
               >
-                <span>📥</span>
+                <span>{hasExportAccess ? '📥' : '🔒'}</span>
                 <span>JSON</span>
               </button>
 
@@ -576,7 +601,7 @@ export default function ExceptionLogsPage() {
         </div>
 
         {/* Table View Container */}
-        <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="bg-gradient-to-b from-[#0B101D] to-[#060911] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
           {loading ? (
             <div className="p-16 flex flex-col items-center justify-center space-y-3 animate-in fade-in">
               <div className="relative animate-pulse">
@@ -831,6 +856,66 @@ export default function ExceptionLogsPage() {
                   className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer"
                 >
                   {bulkResolving ? 'Resolving All...' : 'Confirm & Mark Resolved →'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🌟 SCALE EXPORT FEATURE LOCK MODAL */}
+        {showExportLockModal && (
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowExportLockModal(false);
+            }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans"
+          >
+            <div className="bg-[#090D16] border-2 border-emerald-500/40 rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl relative">
+              <button
+                onClick={() => setShowExportLockModal(false)}
+                className="absolute right-5 top-5 text-slate-400 hover:text-white text-xs cursor-pointer font-mono"
+              >
+                ✕
+              </button>
+
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-bold uppercase">
+                  <span>🔒</span> Business Scale Feature
+                </div>
+                <h3 className="text-lg font-bold text-white tracking-tight">
+                  Raw Log Export is Locked
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                  Exporting filtered telemetry to raw <strong className="text-slate-200">CSV spreadsheets</strong> and <strong className="text-slate-200">JSON data payloads</strong> is an exclusive capability of the <strong className="text-emerald-400">Business Scale</strong> tier.
+                </p>
+              </div>
+
+              <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-4 space-y-2 font-mono text-xs">
+                <div className="flex items-center justify-between text-slate-400">
+                  <span>Your Current Plan:</span>
+                  <span className="text-yellow-300 font-bold uppercase">
+                    {isOwner ? 'Owner' : userPlanTier.toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-slate-400">
+                  <span>Required Plan:</span>
+                  <span className="text-emerald-400 font-bold uppercase">Business Scale</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-1 font-mono">
+                <a
+                  href="mailto:hello.snaptrace@gmail.com?subject=SnapTrace%20Business%20Scale%20CSV%20Export%20Upgrade"
+                  className="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
+                >
+                  <span>Contact to Upgrade to Scale →</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setShowExportLockModal(false)}
+                  className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-center"
+                >
+                  Close
                 </button>
               </div>
             </div>
