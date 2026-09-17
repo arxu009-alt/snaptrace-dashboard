@@ -123,12 +123,13 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   
-  // Sentry-Style Dual Mode & Billing Toggle
+  // Dual Mode, Billing & UI Navigation States
   const [marketingMode, setMarketingMode] = useState(true);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
   const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const [cliInput, setCliInput] = useState('');
   const [cliMessages, setCliMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
@@ -146,9 +147,17 @@ export default function WelcomeLandingPage() {
     }
   }, [cliMessages, marketingMode]);
 
+  // Intelligent Scroll: Show bottom bar ONLY mid-page, auto-hide at the bottom so it never covers the footer!
   useEffect(() => {
     const handleScroll = () => {
-      setShowStickyBottomBar(window.scrollY > 750);
+      const scrollY = window.scrollY;
+      const totalHeight = document.documentElement.scrollHeight;
+      const windowHeight = window.innerHeight;
+      
+      const isPastHero = scrollY > 650;
+      const isNearFooter = (scrollY + windowHeight) > (totalHeight - 450);
+
+      setShowStickyBottomBar(isPastHero && !isNearFooter);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -367,6 +376,7 @@ export default function WelcomeLandingPage() {
             <a href="#quickstart" className="hover:text-yellow-400 transition">SDK Setup</a>
             <a href="#comparison" className="hover:text-yellow-400 transition">Why SnapTrace</a>
             <a href="#pricing" className="hover:text-yellow-400 transition font-bold text-yellow-400">Pricing</a>
+            <Link href="/about" className="hover:text-yellow-400 transition">About</Link>
             <a href="#faq" className="hover:text-yellow-400 transition">FAQ</a>
           </nav>
 
@@ -540,12 +550,6 @@ export default function WelcomeLandingPage() {
                   >
                     🔒 PII Masking?
                   </button>
-                  <button
-                    onClick={() => handleAskCli('how does the free beta pass work?')}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
-                  >
-                    💰 Pricing / Beta?
-                  </button>
                 </div>
 
                 <form
@@ -576,8 +580,8 @@ export default function WelcomeLandingPage() {
       ) : (
         /* VIEW 2: MARKETING HERO */
         <>
-          <section className="relative pt-12 pb-14 overflow-hidden">
-            <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[380px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
+          <section className="relative pt-10 pb-16 overflow-hidden">
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[750px] h-[360px] bg-gradient-to-tr from-yellow-500/15 via-purple-500/10 to-emerald-500/15 blur-[140px] pointer-events-none rounded-full" />
 
             <div className="max-w-5xl mx-auto px-6 text-center space-y-6 relative z-10">
               <div>
@@ -590,27 +594,27 @@ export default function WelcomeLandingPage() {
                 </a>
               </div>
 
-              <h1 className="text-5xl sm:text-7xl md:text-[76px] font-black tracking-tight text-white leading-[1.05] max-w-5xl mx-auto">
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.08] max-w-5xl mx-auto">
                 Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>, fix it in a{' '}
                 <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
                   snap.
                 </span>
               </h1>
 
-              <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed font-sans">
+              <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed font-sans">
                 Stop spending Sundays connecting the dots by hand. SnapTrace collapses cascading multi-error outages into a single root-cause incident. Under <span className="text-yellow-300 font-mono font-bold">&lt;5KB</span>, with on-device PII masking and 1-click AI code fixes.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 font-mono">
                 <Link
                   href="/signup"
-                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-sm font-black rounded-xl shadow-xl shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 text-sm font-black rounded-xl shadow-xl shadow-yellow-500/25 transition transform hover:-translate-y-0.5"
                 >
                   Claim Free Lifetime Pro Pass (Only 10 Left) →
                 </Link>
                 <Link
                   href="/demo"
-                  className="w-full sm:w-auto px-8 py-4 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-sm font-bold rounded-xl transition shadow-md"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-sm font-bold rounded-xl transition shadow-md"
                 >
                   ⚡ Open Demo Workspace (No Signup)
                 </Link>
@@ -948,7 +952,7 @@ export default function WelcomeLandingPage() {
             </SmoothReveal>
           </section>
 
-          {/* 🌟 10. RE-ENGINEERED 4-TIER PRICING SECTION WITH MONTHLY / ANNUAL TOGGLE */}
+          {/* 🌟 10. 4-TIER PRICING SECTION */}
           <section id="pricing" className="max-w-7xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-10">
             <SmoothReveal className="text-center space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
@@ -1027,7 +1031,7 @@ export default function WelcomeLandingPage() {
                 </Link>
               </div>
 
-              {/* Tier 2: Indie Pro (Popular for Builders) */}
+              {/* Tier 2: Indie Pro */}
               <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-6 space-y-6 shadow-2xl relative flex flex-col justify-between transform md:-translate-y-2 hover:border-yellow-400 transition">
                 <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
                   POPULAR FOR BUILDERS
@@ -1092,7 +1096,7 @@ export default function WelcomeLandingPage() {
                 </Link>
               </div>
 
-              {/* Tier 4: Business Scale */}
+              {/* Tier 4: Business Scale (WIRED DIRECTLY TO hello.snaptrace@gmail.com) */}
               <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
                 <div className="space-y-4">
                   <div className="space-y-1">
@@ -1115,7 +1119,7 @@ export default function WelcomeLandingPage() {
                 </div>
 
                 <a
-                  href="mailto:hello@snaptrace.dev?subject=Business%20Scale%20Inquiry"
+                  href="mailto:hello.snaptrace@gmail.com?subject=SnapTrace%20Business%20Scale%20Inquiry"
                   className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
                 >
                   Contact for Scale →
@@ -1191,7 +1195,7 @@ export default function WelcomeLandingPage() {
             </SmoothReveal>
           </section>
 
-          {/* 13. SENTRY-STYLE ENTERPRISE FOOTER */}
+          {/* 🌟 13. SENTRY-STYLE ENTERPRISE FOOTER WITH ABOUT US LINK */}
           <footer className="border-t border-slate-800/80 bg-[#060911] py-16 relative overflow-hidden font-sans">
             <div className="max-w-5xl mx-auto px-6 space-y-10">
               <div className="text-center space-y-3 max-w-xl mx-auto">
@@ -1244,6 +1248,7 @@ export default function WelcomeLandingPage() {
                 <div className="space-y-2.5">
                   <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest block">Company & Legal</span>
                   <ul className="space-y-1.5 text-slate-400">
+                    <li><Link href="/about" className="hover:text-yellow-400 font-semibold transition">About Us →</Link></li>
                     <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
                     <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
                     <li><Link href="/demo" className="hover:text-yellow-400 transition font-bold">Public Demo</Link></li>
@@ -1256,6 +1261,7 @@ export default function WelcomeLandingPage() {
               <div className="pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-mono gap-3">
                 <span>© {new Date().getFullYear()} SnapTrace. All rights reserved. The Independent Developer Telemetry Platform.</span>
                 <div className="flex items-center space-x-4 text-slate-400">
+                  <Link href="/about" className="hover:text-yellow-400">About</Link>
                   <Link href="/privacy" className="hover:text-yellow-400">Privacy</Link>
                   <Link href="/terms" className="hover:text-yellow-400">Terms</Link>
                   <Link href="/demo" className="hover:text-yellow-400">Demo</Link>
@@ -1265,10 +1271,10 @@ export default function WelcomeLandingPage() {
             </div>
           </footer>
 
-          {/* 14. STICKY BOTTOM BAR */}
+          {/* 🌟 14. FIXED STICKY BOTTOM BAR (Auto-hides at bottom so it NEVER covers footer or pricing!) */}
           {showStickyBottomBar && (
-            <div className="fixed bottom-3 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-200 font-mono">
-              <div className="bg-[#0B101D]/90 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
+            <div className="fixed bottom-4 inset-x-4 max-w-xl mx-auto z-40 animate-in fade-in slide-in-from-bottom-3 duration-200 font-mono">
+              <div className="bg-[#0B101D]/95 border border-yellow-400/40 rounded-2xl p-2.5 px-4 shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 truncate">
                   <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping shrink-0" />
                   <span className="text-xs text-slate-200 font-bold truncate">
