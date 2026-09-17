@@ -10,6 +10,12 @@ export default function SettingsPage() {
   const [savingName, setSavingName] = useState<boolean>(false);
   const [nameSavedMsg, setNameSavedMsg] = useState<string | null>(null);
 
+  // Password Update State
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [updatingPassword, setUpdatingPassword] = useState<boolean>(false);
+  const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   const [aiProvider, setAiProvider] = useState<'gemini' | 'openai'>('gemini');
   const [aiKey, setAiKey] = useState<string>('');
   const [showAiKey, setShowAiKey] = useState<boolean>(false);
@@ -29,13 +35,13 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [savingNotif, setSavingNotif] = useState<boolean>(false);
   const [notifSavedMsg, setNotifSavedMsg] = useState<string | null>(null);
-
+  
   const [savingAi, setSavingAi] = useState<boolean>(false);
   const [aiSavedMsg, setAiSavedMsg] = useState<string | null>(null);
 
   const [testingAlert, setTestingAlert] = useState<boolean>(false);
   const [testAlertMsg, setTestAlertMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
+  
   const [purging, setPurging] = useState<boolean>(false);
   const [purgeMsg, setPurgeMsg] = useState<string | null>(null);
 
@@ -61,7 +67,7 @@ export default function SettingsPage() {
 
       const savedProvider = (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_ai_provider') : 'gemini') as any;
       const savedKey = typeof window !== 'undefined' ? (localStorage.getItem('snaptrace_ai_key') || localStorage.getItem('snaptrace_openai_key')) : '';
-
+      
       if (savedProvider) setAiProvider(savedProvider);
       if (savedKey) {
         setAiKey(savedKey);
@@ -82,7 +88,7 @@ export default function SettingsPage() {
         setApiKey(p.api_key || '');
         setEmail(p.recipient_email || p.alert_email || '');
         setDiscordWebhook(p.discord_webhook_url || p.discord_webhook || '');
-
+        
         const storageSlackKey = 'snaptrace_slack_' + p.id;
         const savedSlack = p.slack_webhook_url || (typeof window !== 'undefined' ? localStorage.getItem(storageSlackKey) : '') || '';
         setSlackWebhook(savedSlack);
@@ -120,6 +126,41 @@ export default function SettingsPage() {
       alert('Failed to update display name: ' + err.message);
     } finally {
       setSavingName(false);
+    }
+  };
+
+  // Secure Password Update Handler
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMsg(null);
+
+    if (newPassword.length < 6) {
+      setPasswordMsg({ type: 'error', text: 'Password must be at least 6 characters long.' });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg({ type: 'error', text: 'Passwords do not match. Please re-enter.' });
+      return;
+    }
+
+    setUpdatingPassword(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      setPasswordMsg({ type: 'success', text: '✓ Password updated successfully!' });
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPasswordMsg(null), 3500);
+    } catch (err: any) {
+      setPasswordMsg({ type: 'error', text: err.message || 'Failed to update password.' });
+    } finally {
+      setUpdatingPassword(false);
     }
   };
 
@@ -272,7 +313,7 @@ export default function SettingsPage() {
             <span>Project Settings & Developer Profile</span>
           </h1>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            Manage your developer identity, notification webhooks, BYOK AI keys, and database maintenance.
+            Manage your developer identity, security credentials, notification webhooks, and BYOK AI keys.
           </p>
         </div>
 
@@ -431,7 +472,81 @@ export default function SettingsPage() {
 
             </div>
 
-            {/* 3. Notification Channels Form */}
+            {/* 🌟 3. NEW: SECURITY & UPDATE PASSWORD CARD */}
+            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                <div>
+                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span>🔐</span> Security & Update Password
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                    Change your account password directly without logging out.
+                  </p>
+                </div>
+                <span className="px-2.5 py-1 bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 rounded-full text-[10px] font-bold uppercase font-mono">
+                  Encrypted
+                </span>
+              </div>
+
+              <form onSubmit={handleUpdatePassword} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5 font-mono">
+                    <label className="text-xs font-semibold text-slate-300 block">
+                      NEW PASSWORD
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 font-mono">
+                    <label className="text-xs font-semibold text-slate-300 block">
+                      CONFIRM NEW PASSWORD
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Repeat new password"
+                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div>
+                    {passwordMsg && (
+                      <span
+                        className={
+                          'text-xs font-mono font-bold ' +
+                          (passwordMsg.type === 'success' ? 'text-emerald-400' : 'text-red-400')
+                        }
+                      >
+                        {passwordMsg.text}
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={updatingPassword}
+                    className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer font-mono shrink-0"
+                  >
+                    {updatingPassword ? 'Updating...' : 'Update Password →'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* 4. Notification Channels Form */}
             <form onSubmit={handleSaveNotifications} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-3">
                 <div>
@@ -514,7 +629,7 @@ export default function SettingsPage() {
               </div>
             </form>
 
-            {/* 4. BYOK AI Copilot */}
+            {/* 5. BYOK AI Copilot */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div>
@@ -583,7 +698,7 @@ export default function SettingsPage() {
               </form>
             </div>
 
-            {/* 5. Database Maintenance & Purge */}
+            {/* 6. Database Maintenance & Purge */}
             <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-red-900/30 rounded-3xl p-6 shadow-xl space-y-4">
               <div className="border-b border-slate-800/80 pb-3">
                 <h2 className="text-sm font-bold text-red-400 flex items-center gap-2">
