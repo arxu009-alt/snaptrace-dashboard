@@ -29,6 +29,8 @@ interface GroupedIssue {
   allLogs: ErrorLog[];
 }
 
+type DateFilter = 'all' | 'today' | '7d' | '30d';
+
 const MOCK_DEMO_ERRORS: ErrorLog[] = [
   {
     id: 99901,
@@ -84,6 +86,7 @@ export default function ExceptionLogsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'development'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unresolved' | 'resolved'>('unresolved');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
   const [demoMode, setDemoMode] = useState(false);
 
   const loadLogs = useCallback(async () => {
@@ -265,7 +268,12 @@ export default function ExceptionLogsPage() {
     }
   };
 
+  // 🌟 DYNAMIC FILTER LOGIC INCLUDING DATE RANGE
   const filteredLogs = useMemo(() => {
+    const now = Date.now();
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
     return logs.filter((log) => {
       const logStatus = log.status || 'unresolved';
       
@@ -275,6 +283,20 @@ export default function ExceptionLogsPage() {
 
       if (envFilter !== 'all' && log.environment.toLowerCase() !== envFilter) {
         return false;
+      }
+
+      // Date Range Filter Logic
+      if (dateFilter !== 'all') {
+        const logTime = new Date(log.created_at).getTime();
+        if (dateFilter === 'today' && logTime < startOfToday.getTime()) {
+          return false;
+        }
+        if (dateFilter === '7d' && logTime < (now - 7 * 24 * 60 * 60 * 1000)) {
+          return false;
+        }
+        if (dateFilter === '30d' && logTime < (now - 30 * 24 * 60 * 60 * 1000)) {
+          return false;
+        }
       }
 
       if (searchQuery.trim()) {
@@ -287,7 +309,7 @@ export default function ExceptionLogsPage() {
 
       return true;
     });
-  }, [logs, statusFilter, envFilter, searchQuery]);
+  }, [logs, statusFilter, envFilter, dateFilter, searchQuery]);
 
   const groupedIssues = useMemo(() => {
     const groups: Record<string, GroupedIssue> = {};
@@ -320,7 +342,7 @@ export default function ExceptionLogsPage() {
     );
   }, [filteredLogs]);
 
-  // 🌟 GATED EXPORT HANDLERS (BUSINESS SCALE / OWNER EXCLUSIVE)
+  // GATED EXPORT HANDLERS (BUSINESS SCALE / OWNER EXCLUSIVE)
   const hasExportAccess = isOwner || userPlanTier === 'scale';
 
   const exportToCSV = () => {
@@ -350,7 +372,7 @@ export default function ExceptionLogsPage() {
         }));
 
     if (!data.length) {
-      alert('No logs available to export.');
+      alert('No logs available to export for this filter.');
       return;
     }
 
@@ -379,7 +401,7 @@ export default function ExceptionLogsPage() {
 
     const data = viewMode === 'grouped' ? groupedIssues : filteredLogs;
     if (!data.length) {
-      alert('No logs available to export.');
+      alert('No logs available to export for this filter.');
       return;
     }
 
@@ -424,7 +446,7 @@ export default function ExceptionLogsPage() {
               )}
             </h1>
             <p className="text-xs text-slate-400 font-mono">
-              Live telemetry feed with issue triage, fingerprint deduplication, and AI fixes.
+              Live telemetry feed with issue triage, date filters, fingerprint deduplication, and AI fixes.
             </p>
           </div>
 
@@ -453,10 +475,10 @@ export default function ExceptionLogsPage() {
           </div>
         </div>
 
-        {/* Filter Controls Bar with View Mode & Export Tools */}
+        {/* Filter Controls Bar with Search, View Mode, Date Filter, & Environment Pills */}
         <div className="bg-gradient-to-b from-[#0B101D] to-[#060911] border border-slate-800/90 rounded-3xl p-4 space-y-4 shadow-xl">
           
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
             <div className="flex-1 relative">
               <span className="absolute left-3.5 top-2.5 text-slate-500 text-xs">🔍</span>
               <input
@@ -468,8 +490,26 @@ export default function ExceptionLogsPage() {
               />
             </div>
 
-            {/* View Mode Toggle */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-wrap gap-y-2">
+              {/* 🌟 1. INTERACTIVE DATE RANGE SELECTOR */}
+              <div className="flex items-center bg-[#05070E] border border-slate-800 p-1 rounded-xl font-mono text-xs">
+                {(['all', 'today', '7d', '30d'] as const).map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => setDateFilter(range)}
+                    className={
+                      'px-2.5 py-1 text-xs font-semibold rounded-lg transition cursor-pointer ' +
+                      (dateFilter === range
+                        ? 'bg-slate-800 text-yellow-300 font-bold shadow-sm'
+                        : 'text-slate-400 hover:text-white')
+                    }
+                  >
+                    {range === 'all' ? 'All Time' : range === 'today' ? 'Today' : range === '7d' ? '7 Days' : '30 Days'}
+                  </button>
+                ))}
+              </div>
+
+              {/* View Mode Toggle */}
               <div className="flex items-center bg-[#05070E] border border-slate-800 p-1 rounded-xl font-mono text-xs">
                 <button
                   onClick={() => setViewMode('grouped')}
@@ -482,7 +522,7 @@ export default function ExceptionLogsPage() {
                   title="Group identical crashes by fingerprint"
                 >
                   <span>🎯</span>
-                  <span>Grouped Issues</span>
+                  <span>Grouped</span>
                 </button>
                 <button
                   onClick={() => setViewMode('raw')}
@@ -495,7 +535,7 @@ export default function ExceptionLogsPage() {
                   title="Show every individual crash event"
                 >
                   <span>📋</span>
-                  <span>Raw Events</span>
+                  <span>Raw</span>
                 </button>
               </div>
 
@@ -613,7 +653,7 @@ export default function ExceptionLogsPage() {
             <div className="p-16 text-center text-slate-500 text-xs font-mono space-y-3">
               <div className="text-3xl">🎉</div>
               <p className="font-semibold text-slate-300 text-sm">
-                {logs.length === 0 ? 'No exceptions captured yet.' : 'No matching issues found for this filter.'}
+                {logs.length === 0 ? 'No exceptions captured yet.' : 'No matching issues found for this timeframe/filter.'}
               </p>
               <p className="text-slate-500">Your application runtime is running smoothly.</p>
               {logs.length === 0 && !demoMode && (
@@ -862,7 +902,7 @@ export default function ExceptionLogsPage() {
           </div>
         )}
 
-        {/* 🌟 SCALE EXPORT FEATURE LOCK MODAL */}
+        {/* SCALE EXPORT FEATURE LOCK MODAL */}
         {showExportLockModal && (
           <div
             onClick={(e) => {
