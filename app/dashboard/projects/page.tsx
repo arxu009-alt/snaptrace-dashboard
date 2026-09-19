@@ -20,7 +20,7 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // User Tier & Project Limits
+  // User Tier & Project Limits (All early beta users get Pro with 5 projects!)
   const [userPlanTier, setUserPlanTier] = useState<string>('pro');
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [limitErrorModal, setLimitErrorModal] = useState<string | null>(null);
@@ -54,6 +54,10 @@ export default function ProjectsPage() {
     const ownerCheck = email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com';
     setIsOwner(ownerCheck);
 
+    // During Public Beta, all registered accounts receive Pro Builder (5 projects) or Unlimited (Owner)
+    const activeTier = ownerCheck ? 'agency' : 'pro';
+    setUserPlanTier(activeTier);
+
     const { data: projectList, error } = await supabase
       .from('projects')
       .select('*')
@@ -61,10 +65,6 @@ export default function ProjectsPage() {
       .order('created_at', { ascending: false });
 
     if (!error && projectList) {
-      // Determine plan tier (Default 'pro' during beta, 'agency' for owner)
-      const tier = ownerCheck ? 'agency' : (projectList[0]?.plan_tier || 'pro');
-      setUserPlanTier(tier);
-
       const { data: errors } = await supabase
         .from('errors')
         .select('project_id');
@@ -104,20 +104,16 @@ export default function ProjectsPage() {
     return 'sk_live_' + randomHex;
   };
 
-  // 🌟 CHECK PROJECT CREATION LIMIT BASED ON TIER
+  // 🌟 CHECK PROJECT CREATION LIMIT: Pro Beta users get 5 projects!
   const handleOpenCreateModal = () => {
     if (isOwner || userPlanTier === 'agency' || userPlanTier === 'team') {
       setIsCreateModalOpen(true);
       return;
     }
 
-    if (userPlanTier === 'free' && projects.length >= 1) {
-      setLimitErrorModal('Free tier is limited to 1 project. Please upgrade to Pro for up to 5 projects.');
-      return;
-    }
-
-    if (userPlanTier === 'pro' && projects.length >= 5) {
-      setLimitErrorModal('Pro tier is limited to 5 projects. Upgrade to Agency for Unlimited projects.');
+    // Pro tier limit: 5 projects
+    if (projects.length >= 5) {
+      setLimitErrorModal('You have reached the Pro limit of 5 active projects. To manage unlimited client projects, request Agency Studio access.');
       return;
     }
 
@@ -258,9 +254,7 @@ export default function ProjectsPage() {
 
   const projectCapLabel = isOwner || userPlanTier === 'agency' || userPlanTier === 'team'
     ? 'Unlimited'
-    : userPlanTier === 'free'
-    ? '1 Max'
-    : '5 Max';
+    : '5 Projects (Beta Pro)';
 
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950">
@@ -272,7 +266,7 @@ export default function ProjectsPage() {
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5 flex-wrap">
               <span>Projects & Credentials</span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 font-mono font-semibold">
-                {projects.length} / {projectCapLabel} Projects
+                {projects.length} / {projectCapLabel}
               </span>
             </h1>
             <p className="text-xs text-slate-400 font-mono">
@@ -441,7 +435,7 @@ export default function ProjectsPage() {
           </div>
         )}
 
-        {/* 🌟 PROJECT LIMIT EXCEEDED MODAL */}
+        {/* PROJECT LIMIT MODAL */}
         {limitErrorModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
             <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl relative">
@@ -454,10 +448,10 @@ export default function ProjectsPage() {
 
               <div className="space-y-1.5">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 text-[10px] font-mono font-bold uppercase">
-                  <span>⚠️</span> Plan Quota Reached
+                  <span>⚡</span> Plan Quota Notice
                 </div>
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  Project Creation Limit
+                  Pro Beta Project Limit
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   {limitErrorModal}
@@ -465,7 +459,7 @@ export default function ProjectsPage() {
               </div>
 
               <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 text-[11px] text-slate-400 font-mono">
-                💡 Need more active projects for client websites or microservices? Contact our team at <strong className="text-yellow-300">hello.snaptrace@gmail.com</strong>.
+                💡 Need unlimited client projects for an agency? Contact our team at <strong className="text-yellow-300">hello.snaptrace@gmail.com</strong>.
               </div>
 
               <div className="flex items-center justify-end gap-2.5 pt-1 font-mono">
