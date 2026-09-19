@@ -47,7 +47,7 @@ export async function POST(req) {
       );
     }
 
-    // 1.5 4-TIER MONTHLY QUOTA ENFORCEMENT & RATE LIMITER
+    // 🌟 1.5 TIER QUOTA ENFORCEMENT & RATE-LIMITING CIRCUIT BREAKER
     const recipientEmail =
       project.recipient_email ||
       project.alert_email ||
@@ -58,37 +58,36 @@ export async function POST(req) {
     const ownerEmails = ["arxu1045@gmail.com", "arxu009@gmail.com"];
     const isOwner = recipientEmail && ownerEmails.includes(recipientEmail.toLowerCase());
 
-    // Determine tier (Default to 'pro' for grandfathered beta builders, 'scale' for owner)
-    const projectTier = isOwner ? "scale" : (project.plan_tier || "pro");
-    const activePlan = (PLANS && PLANS[projectTier]) ? PLANS[projectTier] : { monthlyEventCap: 100000 };
+    // Resolve tier: Owner has unlimited access; others resolve to plan_tier or 'pro' during beta
+    const projectTier = isOwner ? "agency" : (project.plan_tier || "pro");
+    const activePlan = (PLANS && PLANS[projectTier]) ? PLANS[projectTier] : { monthlyEventCap: 75000 };
 
     if (!isOwner) {
-      const startOfMonth = typeof getStartOfCurrentMonth === "function" 
-        ? getStartOfCurrentMonth() 
+      const startOfMonth = typeof getStartOfCurrentMonth === "function"
+        ? getStartOfCurrentMonth()
         : new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString();
 
-      // Count events consumed this calendar month
+      // Count events recorded for this project in the current monthly cycle
       const { count: monthlyCount, error: countError } = await supabase
         .from("errors")
         .select("*", { count: "exact", head: true })
         .eq("project_id", project.id)
         .gte("created_at", startOfMonth);
 
+      // CIRCUIT BREAKER TRIGGER: Stop execution & block database write
       if (!countError && monthlyCount !== null && monthlyCount >= activePlan.monthlyEventCap) {
-        debugLogs.push("Quota exceeded: " + monthlyCount + " / " + activePlan.monthlyEventCap);
         return NextResponse.json(
           {
-            error: "Monthly event limit reached for your tier (" + activePlan.monthlyEventCap + " events). Ingestion paused until the 1st of next month.",
-            planTier: projectTier,
-            currentMonthlyUsage: monthlyCount,
-            monthlyLimit: activePlan.monthlyEventCap,
+            error: "Monthly event quota exceeded for your current plan.",
+            limit: activePlan.monthlyEventCap,
+            upgrade_url: "https://snaptrace-dashboard.vercel.app/dashboard/settings",
           },
           { status: 429 }
         );
       }
     }
 
-    // 🌟 1.8 ENVIRONMENT ALERT FILTER (Mute alerts from localhost/development if enabled)
+    // 🌟 1.8 ENVIRONMENT ALERT FILTER (Only Alert on Production)
     const envString = (environment || "production").toLowerCase();
     const isDevEnv = envString !== "production";
     const muteAlerts = Boolean(project.only_production_alerts) && isDevEnv;
@@ -249,7 +248,7 @@ export async function POST(req) {
       debugLogs.push("Email skipped: Credentials missing.");
     }
 
-    // 5. Save to Supabase Database (ALWAYS RECORDED!)
+    // 5. Save to Supabase Database
     try {
       await supabase.from("errors").insert([
         {
