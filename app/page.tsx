@@ -11,97 +11,314 @@ export const dynamic = 'force-dynamic';
 
 type StackKey = 'nextjs' | 'js' | 'python' | 'node' | 'go' | 'rust' | 'csharp' | 'php' | 'ruby' | 'kotlin' | 'flutter' | 'cloudflare';
 type BillingInterval = 'monthly' | 'annual';
+type IconProps = { className?: string };
 
-/* ─────────────────────────────────────────────────────────────
-   AUTHENTIC OFFICIAL BRAND SVG LOGOS (Pixel-Perfect Vector Geometry)
-   ───────────────────────────────────────────────────────────── */
+/* ============================================================================
+   DESIGN TOKENS (shared class strings — keeps the whole page consistent)
+============================================================================ */
 
-function GeminiLogo({ className = "w-7 h-7" }: { className?: string }) {
+const BTN_PRIMARY =
+  'inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-yellow-300 to-amber-500 px-5 py-3 text-[13px] font-semibold tracking-tight text-slate-950 shadow-[0_1px_0_0_rgba(255,255,255,0.4)_inset,0_12px_34px_-14px_rgba(250,204,21,0.75)] transition duration-200 hover:from-yellow-200 hover:to-amber-400 active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#05070E]';
+
+const BTN_GHOST =
+  'inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-5 py-3 text-[13px] font-semibold tracking-tight text-slate-200 transition duration-200 hover:border-white/20 hover:bg-white/[0.07] hover:text-white active:translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30';
+
+const CARD =
+  'rounded-2xl border border-white/[0.07] bg-[#0A0F1A]/80 backdrop-blur-xl shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]';
+
+const MICRO_LABEL =
+  'text-[10.5px] font-mono font-semibold uppercase tracking-[0.16em] text-slate-500';
+
+/* ============================================================================
+   ICONS — line icons drawn inline (no emoji, no icon library dependency)
+============================================================================ */
+
+function IconFeather({ className = 'w-4 h-4' }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z" />
+      <path d="M16 8 2 22" />
+      <path d="M17.5 15H9" />
+    </svg>
+  );
+}
+
+function IconTarget({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="4.5" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function IconShield({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 21.5s7.5-3.6 7.5-9.5V5.6L12 2.5 4.5 5.6V12c0 5.9 7.5 9.5 7.5 9.5z" />
+      <path d="m9 12 2.2 2.2L15.5 10" />
+    </svg>
+  );
+}
+
+function IconSpark({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m12 3 1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
+      <path d="M18.5 16.5 19 18l1.5.5-1.5.5-.5 1.5-.5-1.5-1.5-.5 1.5-.5z" />
+    </svg>
+  );
+}
+
+function IconBolt({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M13 2.5 4.5 13.5H11l-1 8 8.5-11H12z" />
+    </svg>
+  );
+}
+
+function IconCheck({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m20 6-11 11-5-5" />
+    </svg>
+  );
+}
+
+function IconCross({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
+
+function IconCopy({ className = 'w-3.5 h-3.5' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="11" height="11" rx="2.5" />
+      <path d="M5 15V6a2.5 2.5 0 0 1 2.5-2.5H15" />
+    </svg>
+  );
+}
+
+function IconArrow({ className = 'w-3.5 h-3.5' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 12h15" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+function IconChevron({ className = 'w-3.5 h-3.5' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+function IconMenu({ className = 'w-5 h-5' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
+function IconClose({ className = 'w-5 h-5' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
+
+function IconTerminal({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m5 8 4 4-4 4" />
+      <path d="M12 16h7" />
+    </svg>
+  );
+}
+
+function IconAlert({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M10.3 3.9 2.6 17.2A1.9 1.9 0 0 0 4.3 20h15.4a1.9 1.9 0 0 0 1.7-2.8L13.7 3.9a1.9 1.9 0 0 0-3.4 0z" />
+      <path d="M12 9v4.5M12 17h.01" />
+    </svg>
+  );
+}
+
+function IconMute({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M10.5 6.5 6 10H3v4h3l4.5 3.5z" />
+      <path d="m16 10 4 4M20 10l-4 4" />
+    </svg>
+  );
+}
+
+function IconUnlock({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="10.5" width="16" height="10" rx="2.5" />
+      <path d="M8 10.5V7a4 4 0 0 1 7.8-1.3" />
+    </svg>
+  );
+}
+
+function IconGauge({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 17a8 8 0 1 1 16 0" />
+      <path d="m12 14 4-4" />
+    </svg>
+  );
+}
+
+function IconLayers({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m12 3 8.5 4.5L12 12 3.5 7.5z" />
+      <path d="m3.5 12.5 8.5 4.5 8.5-4.5" />
+    </svg>
+  );
+}
+
+function IconSend({ className = 'w-3.5 h-3.5' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m4 12 16-8-6 16-2.5-6.5z" />
+    </svg>
+  );
+}
+
+/* ============================================================================
+   BRAND MARKS — AI providers & IDEs, drawn as vectors
+============================================================================ */
+
+function GeminiMark({ className = 'w-6 h-6' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
       <defs>
-        <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1A73E8" />
-          <stop offset="35%" stopColor="#6C5CE7" />
-          <stop offset="70%" stopColor="#E056FD" />
-          <stop offset="100%" stopColor="#F9CA24" />
+        <linearGradient id="st-gemini-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#4285F4" />
+          <stop offset="52%" stopColor="#9B72CB" />
+          <stop offset="100%" stopColor="#D96570" />
         </linearGradient>
       </defs>
       <path
-        d="M12 2C12 2 12.8 7.5 16.5 10.5C19.5 12.8 22 12 22 12C22 12 19.5 13.2 16.5 15.5C12.8 18.5 12 22 12 22C12 22 11.2 18.5 7.5 15.5C4.5 13.2 2 12 2 12C2 12 4.5 10.8 7.5 10.5C11.2 7.5 12 2 12 2Z"
-        fill="url(#gemini-gradient)"
+        fill="url(#st-gemini-grad)"
+        d="M12 24A14.3 14.3 0 0 0 0 12 14.3 14.3 0 0 0 12 0a14.3 14.3 0 0 0 12 12 14.3 14.3 0 0 0-12 12z"
       />
     </svg>
   );
 }
 
-function OpenAILogo({ className = "w-7 h-7" }: { className?: string }) {
+function OpenAIMark({ className = 'w-6 h-6' }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z" />
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.998-2.9 6.056 6.056 0 0 0-.748-7.073zm-9.022 12.608a4.476 4.476 0 0 1-2.876-1.04l.142-.08 4.778-2.758a.795.795 0 0 0 .393-.681v-6.737l2.02 1.168a.07.07 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.495 4.493zm-9.66-4.125a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.758a.771.771 0 0 0 .78 0l5.843-3.368v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973v5.677a.766.766 0 0 0 .388.677l5.814 3.354-2.02 1.168a.076.076 0 0 1-.071 0L4 14.014a4.504 4.504 0 0 1-1.66-6.118zm16.597 3.855-5.833-3.387 2.015-1.163a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.668zm2.01-3.023-.142-.085-4.773-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zM8.307 12.863l-2.02-1.164a.08.08 0 0 1-.038-.057V6.074a4.5 4.5 0 0 1 7.376-3.454l-.142.081-4.778 2.758a.795.795 0 0 0-.393.681zm1.097-2.365 2.602-1.5 2.607 1.5v3l-2.598 1.5-2.606-1.5z" />
     </svg>
   );
 }
 
-function DeepSeekLogo({ className = "w-7 h-7" }: { className?: string }) {
+function AnthropicMark({ className = 'w-6 h-6' }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="deepseek-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#0066FF" />
-          <stop offset="50%" stopColor="#1E88E5" />
-          <stop offset="100%" stopColor="#00E5FF" />
-        </linearGradient>
-      </defs>
-      <rect width="32" height="32" rx="8" fill="#061226" stroke="#0066FF" strokeWidth="1.5" strokeOpacity="0.4" />
-      <path
-        d="M8 20.5C9.5 16 12.5 11 18 10C21.5 9.5 24 11.5 24 14C24 17 21 19.5 17 20C13 20.5 10 22 8 24"
-        stroke="url(#deepseek-grad)"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <circle cx="20.5" cy="13.5" r="1.8" fill="#00E5FF" />
-      <path
-        d="M13 15.5C14.5 14 16.5 13.5 19 14"
-        stroke="#FFFFFF"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeOpacity="0.8"
-      />
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
+        <line x1="12" y1="3.4" x2="12" y2="20.6" />
+        <line x1="12" y1="3.4" x2="12" y2="20.6" transform="rotate(36 12 12)" />
+        <line x1="12" y1="3.4" x2="12" y2="20.6" transform="rotate(72 12 12)" />
+        <line x1="12" y1="3.4" x2="12" y2="20.6" transform="rotate(108 12 12)" />
+        <line x1="12" y1="3.4" x2="12" y2="20.6" transform="rotate(144 12 12)" />
+      </g>
     </svg>
   );
 }
 
-function ClaudeLogo({ className = "w-7 h-7" }: { className?: string }) {
+function DeepSeekMark({ className = 'w-5 h-5' }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M4.5 19.5L12 4.5L19.5 19.5M8 15H16M12 4.5V19.5"
-        stroke="#D97706"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="12" r="1.5" fill="#F59E0B" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 13.5c3.2-.6 5.1-2.6 8.4-2.6 2.8 0 4.9 1.4 6.4 3.1.7.8 1.7 1 2.7.6" />
+      <path d="M20.5 14.6c-.5 2.2-2.6 3.8-5.5 3.8-3.6 0-5.6-1.9-7.6-3.4" />
+      <path d="M11.4 10.9c-.5-1.9.3-3.7 2-4.9" />
+      <circle cx="16.4" cy="13.4" r=".9" fill="currentColor" stroke="none" />
     </svg>
   );
 }
 
-function OllamaLogo({ className = "w-7 h-7" }: { className?: string }) {
+function OllamaMark({ className = 'w-5 h-5' }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="12" cy="12" rx="6" ry="8" stroke="currentColor" strokeWidth="1.8" />
-      <circle cx="10" cy="10" r="1.2" fill="currentColor" />
-      <circle cx="14" cy="10" r="1.2" fill="currentColor" />
-      <path d="M10 16C10 16 11 17 12 17C13 17 14 16 14 16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M7 4L9 8M17 4L15 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M8 8.4C8 6 6.9 3.6 6 3.5c-.9-.1-1.4 2-1 4.4" />
+      <path d="M16 8.4c0-2.4 1.1-4.8 2-4.9.9-.1 1.4 2 1 4.4" />
+      <path d="M12 8c3 0 5 2.2 5 5.2 0 2-.4 3.2-.4 5.1 0 1.2-.9 2.2-2.1 2.2H9.5c-1.2 0-2.1-1-2.1-2.2 0-1.9-.4-3.1-.4-5.1C7 10.2 9 8 12 8z" />
+      <path d="M10.4 13.3h.01M13.6 13.3h.01" />
     </svg>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   SMOOTH REVEAL COMPONENT (High-Performance GPU Intersection)
-   ───────────────────────────────────────────────────────────── */
+function CursorMark({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
+      <path d="m12 2.5 8.5 4.8v9.4L12 21.5 3.5 16.7V7.3z" />
+      <path d="M12 12.1 20.5 7.3M12 12.1v9.4M12 12.1 3.5 7.3" />
+    </svg>
+  );
+}
+
+function VSCodeMark({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M17.6 2.2 22 4.4v15.2l-4.4 2.2-9.1-8-4 3L2 15.6V8.4l2.5-1.2 4 3zm0 5.1L11.7 12l5.9 4.7z" />
+    </svg>
+  );
+}
+
+/* Social marks (footer) */
+function XMark({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+function GitHubMark({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+    </svg>
+  );
+}
+
+function LinkedInMark({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+    </svg>
+  );
+}
+
+function DiscordMark({ className = 'w-4 h-4' }: IconProps) {
+  return (
+    <svg className={className} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.894.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+    </svg>
+  );
+}
+
+/* ============================================================================
+   SCROLL REVEAL
+============================================================================ */
+
 function SmoothReveal({
   children,
   className = '',
@@ -138,12 +355,10 @@ function SmoothReveal({
   return (
     <div
       ref={domRef}
-      style={{ transitionDelay: `${delay}ms` }}
+      style={{ transitionDelay: String(delay) + 'ms' }}
       className={
-        'transform-gpu transition-all duration-700 ease-out ' +
-        (isVisible
-          ? 'opacity-100 translate-y-0 filter blur-0'
-          : 'opacity-0 translate-y-8 filter blur-[2px]') +
+        'transform-gpu transition-all duration-500 ease-out motion-reduce:transition-none ' +
+        (isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3') +
         (className ? ' ' + className : '')
       }
     >
@@ -152,9 +367,42 @@ function SmoothReveal({
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   DEV KNOWLEDGE BASE & CLI BOT (100% Preserved)
-   ───────────────────────────────────────────────────────────── */
+/* Small reusable heading block */
+function SectionHeading({
+  eyebrow,
+  title,
+  body,
+  align = 'center',
+}: {
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  align?: 'center' | 'left';
+}) {
+  return (
+    <div className={'space-y-3 ' + (align === 'center' ? 'text-center mx-auto max-w-2xl' : 'text-left max-w-xl')}>
+      {eyebrow ? (
+        <div
+          className={
+            'inline-flex items-center gap-2 ' +
+            (align === 'center' ? 'justify-center' : '')
+          }
+        >
+          <span className="h-px w-5 bg-gradient-to-r from-transparent to-yellow-400/60" />
+          <span className="text-[11px] font-mono font-semibold tracking-[0.14em] text-yellow-400/90">{eyebrow}</span>
+          <span className="h-px w-5 bg-gradient-to-l from-transparent to-yellow-400/60" />
+        </div>
+      ) : null}
+      <h2 className="text-[26px] sm:text-4xl font-semibold tracking-[-0.02em] text-white leading-[1.12]">{title}</h2>
+      {body ? <p className="text-sm text-slate-400 leading-relaxed">{body}</p> : null}
+    </div>
+  );
+}
+
+/* ============================================================================
+   DEV TERMINAL KNOWLEDGE BASE
+============================================================================ */
+
 const DEV_KNOWLEDGE_BASE: Record<string, string> = {
   collapse: 'When an outage happens (like a DB pool drop), legacy loggers spam 5 separate alerts for downstream errors. SnapTrace hashes the error origin via deterministic SHA-256 fingerprints, collapses the entire cascade into 1 consolidated thread tagged [xN], and points directly to the failing line (database.js:18) with an AI fix.',
   bundle: 'SnapTrace is strictly <3.4KB gzipped (Sentry is ~100KB+). We use native browser listeners and dispatch asynchronously via navigator.sendBeacon. Zero blocking time on page hydration; 100/100 Google Core Web Vitals score.',
@@ -165,8 +413,8 @@ const DEV_KNOWLEDGE_BASE: Record<string, string> = {
 function getDevBotAnswer(query: string): string {
   const q = query.toLowerCase().trim();
 
-  if (q.includes('ai') || q.includes('model') || q.includes('gemini') || q.includes('openai') || q.includes('gpt') || q.includes('claude') || q.includes('cursor') || q.includes('copilot') || q.includes('llm') || q.includes('deepseek')) {
-    return 'SnapTrace features a dual AI architecture:\n\n1. In-Dashboard BYOK Diagnostics (2 Active Live Models):\n• Google Gemini (100% Free via Gemini 2.5 Flash Lite) for instant 150ms root-cause diffs.\n• OpenAI (GPT-4o & GPT-4o-mini) with standard sk-... API keys.\n• DeepSeek, Claude 3.5 Sonnet, and local Ollama are in active pipeline integration.\nYour API keys are encrypted on-device and never stored on our servers.\n\n2. 1-Click IDE Coding Agent Export:\nClicking "Copy for Cursor" generates an AI-optimized prompt pre-formatted with the environment, error message, and stack frames—ready for Cursor, Claude Code, or VS Code Copilot.';
+  if (q.includes('ai') || q.includes('model') || q.includes('gemini') || q.includes('openai') || q.includes('gpt') || q.includes('claude') || q.includes('cursor') || q.includes('copilot') || q.includes('llm')) {
+    return 'SnapTrace features a dual AI architecture:\n\n1. In-Dashboard BYOK Diagnostics:\nConnect your Google Gemini (100% Free via Gemini 2.5 Flash Lite) or OpenAI (GPT-4o) key in Settings for automated root-cause analysis and code patch diffs.\n\n2. 1-Click IDE Coding Agent Export:\nClicking "Copy for Cursor" generates an AI-optimized prompt pre-formatted with the environment, error message, and stack frames—ready for Cursor, Claude Code, or VS Code Copilot.';
   }
 
   if (q.includes('collapse') || q.includes('cascade') || q.includes('sunday') || q.includes('outage') || q.includes('root cause') || q.includes('group')) {
@@ -208,6 +456,10 @@ function getDevBotAnswer(query: string): string {
   return 'SnapTrace is a featherweight (<5KB) error monitoring platform built to eliminate alert fatigue and 100KB SDK bloat [1.1.7, 1.2.2]. Try asking about:\n• "which ai models does this support?"\n• "how does cascading error collapse work?"\n• "why is the SDK under 5KB?"\n• "which languages are supported?"\n• "how does client PII masking work?"';
 }
 
+/* ============================================================================
+   PAGE
+============================================================================ */
+
 export default function WelcomeLandingPage() {
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -216,16 +468,16 @@ export default function WelcomeLandingPage() {
   const [copiedCursorPrompt, setCopiedCursorPrompt] = useState(false);
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
-  
+
   // Dual Mode, Billing & UI Navigation States
   const [marketingMode, setMarketingMode] = useState(true);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
 
-  // Interactive Live Triage Simulator State
-  const [simulatedResolved, setSimulatedResolved] = useState(false);
-  const [activeTriageTab, setActiveTriageTab] = useState<'stack' | 'breadcrumbs' | 'aifix'>('stack');
+  // Header chrome
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Agency Contact Modal State
   const [showAgencyModal, setShowAgencyModal] = useState(false);
@@ -254,11 +506,23 @@ export default function WelcomeLandingPage() {
     }
   }, [cliMessages, marketingMode]);
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const toggleMarketingMode = () => {
     setMarketingMode((prev) => !prev);
+    setMobileNavOpen(false);
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
+  };
+
+  const setMode = (wantMarketing: boolean) => {
+    if (wantMarketing !== marketingMode) toggleMarketingMode();
   };
 
   useEffect(() => {
@@ -335,7 +599,7 @@ export default function WelcomeLandingPage() {
   const faqs = [
     {
       q: 'How does SnapTrace collapse cascading multi-error outages?',
-      a: 'During an outage, a single database connection drop often triggers 4 or 5 different downstream errors (auth fails, queries fail, UI renders fail). Instead of sending 5 separate noisy alerts that you have to piece together manually on a Sunday, SnapTrace groups cascading failures using deterministic SHA-256 fingerprinting and isolates the single root cause with an instant AI fix [1.1.7].',
+      a: 'During an outage, a single database connection drop often triggers 4 or 5 different downstream errors (auth fails, queries fail, UI renders fail). Instead of sending 5 separate noisy alerts that you have to piece together manually on a Sunday, SnapTrace groups cascading failures and isolates the single root cause with an instant AI fix [1.1.7].',
     },
     {
       q: 'Do I need to keep the SnapTrace website open to receive alerts?',
@@ -359,1573 +623,1447 @@ export default function WelcomeLandingPage() {
     },
   ];
 
+  const stackTabs: Array<{ id: StackKey; label: string }> = [
+    { id: 'nextjs', label: 'Next.js' },
+    { id: 'js', label: 'JavaScript' },
+    { id: 'python', label: 'Python' },
+    { id: 'node', label: 'Node.js' },
+    { id: 'go', label: 'Go' },
+    { id: 'rust', label: 'Rust' },
+    { id: 'csharp', label: 'C# .NET' },
+    { id: 'php', label: 'PHP' },
+    { id: 'ruby', label: 'Ruby' },
+    { id: 'kotlin', label: 'Kotlin' },
+    { id: 'flutter', label: 'Flutter' },
+    { id: 'cloudflare', label: 'Cloudflare' },
+  ];
+
+  const navLinks = [
+    { href: '#quickstart', label: 'SDK setup' },
+    { href: '#comparison', label: 'Why SnapTrace' },
+    { href: '#pricing', label: 'Pricing' },
+    { href: '#faq', label: 'FAQ' },
+  ];
+
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-[#05070E] flex items-center justify-center font-sans text-slate-400">
         <div className="flex flex-col items-center space-y-4">
-          <div className="relative">
-            <div className="h-10 w-10 border-2 border-yellow-400/20 rounded-full" />
-            <div className="h-10 w-10 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin absolute inset-0 shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
+          <div className="relative h-9 w-9">
+            <div className="absolute inset-0 rounded-full border border-slate-800" />
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-yellow-400 animate-spin" />
           </div>
-          <p className="text-xs font-mono text-slate-400 tracking-wider animate-pulse">Authenticating Session...</p>
+          <p className="text-[11px] font-mono tracking-[0.14em] text-slate-500">Authenticating session</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden relative">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans selection:bg-yellow-400 selection:text-slate-950 overflow-x-hidden relative antialiased">
 
-      {/* SENTRY/LINEAR LEVEL BESPOKE CSS ANIMATIONS & STYLES */}
-      <style>{`
-        @keyframes pulse-beam {
-          0%, 100% { opacity: 0.2; transform: scale(0.98); }
-          50% { opacity: 0.7; transform: scale(1.02); }
-        }
-        @keyframes scanline {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(1000%); }
-        }
-        @keyframes shimmer-border {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-shimmer-border {
-          background: linear-gradient(90deg, #FACC15, #F59E0B, #A855F7, #38BDF8, #FACC15);
-          background-size: 300% 300%;
-          animation: shimmer-border 6s linear infinite;
-        }
-        .hero-grid {
-          background-image: 
-            linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-          background-size: 40px 40px;
-        }
-        .laser-glow {
-          box-shadow: 0 0 50px -10px rgba(250, 204, 21, 0.25);
-        }
-        .laser-glow-purple {
-          box-shadow: 0 0 50px -10px rgba(168, 85, 247, 0.25);
-        }
-        .card-inner-glow {
-          box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
-        }
-        .ticker-wrap {
-          animation: marquee 30s linear infinite;
-        }
-      `}</style>
-      
-      {/* 🌟 1. TOP TICKER / LIVE TELEMETRY STATUS BAR */}
-      <div className={
-        'px-4 py-2 text-center text-xs font-bold font-mono shadow-md flex items-center justify-center gap-3 transition-colors border-b ' +
-        (marketingMode
-          ? 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950 border-yellow-400/40'
-          : 'bg-[#0B101D] border-yellow-400/30 text-yellow-300')
-      }>
-        <div className="flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-950"></span>
-          </span>
-          <span>{marketingMode ? '🔥 EARLY ADOPTER ACCESS:' : '⚡ TELEMETRY DAEMON SPEC:'}</span>
-        </div>
-        <span className="bg-slate-950 text-yellow-300 px-2.5 py-0.5 rounded text-[11px] font-mono border border-yellow-400/30 font-black tracking-wide">
-          {marketingMode ? 'LIFETIME STARTER PRO PASS ($0 FOREVER)' : 'RFC-9110 ZERO HYDRATION LATENCY ACTIVE'}
-        </span>
-        <span className="hidden md:inline font-mono text-[11px] opacity-90">
-          {marketingMode ? '• Grandfathered account with 75,000 events/mo & BYOK AI diagnostics' : '• 0.0ms main thread blocking • <3.4KB Gzipped'}
-        </span>
-      </div>
+      {/* AMBIENT PAGE BACKDROP */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.55]"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, rgba(148,163,184,0.055) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.055) 1px, transparent 1px)',
+          backgroundSize: '72px 72px',
+          maskImage: 'radial-gradient(ellipse 90% 55% at 50% 0%, #000 30%, transparent 85%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 90% 55% at 50% 0%, #000 30%, transparent 85%)',
+        }}
+      />
 
-      {/* 2. SENTRY-GRADE ULTRA NAVIGATION HEADER */}
-      <header className="border-b border-slate-800/80 bg-[#090D16]/90 backdrop-blur-2xl sticky top-0 z-40 transition-all">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
-          <Link href="/" onClick={scrollToTop} className="cursor-pointer hover:opacity-90 transition shrink-0 flex items-center gap-2">
-            <SnapTraceLogo size="md" showText={true} />
-            <span className="px-2 py-0.5 rounded bg-yellow-400/10 border border-yellow-400/30 text-yellow-300 text-[10px] font-mono font-bold uppercase tracking-wider hidden sm:inline-block">
-              Sentry Alternative
+      <div className="relative z-10">
+
+        {/* ── 1. ANNOUNCEMENT BAR ─────────────────────────────────────────── */}
+        <div className="relative border-b border-white/[0.06] bg-[#080C15]">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-yellow-400/60 to-transparent" />
+          <div className="max-w-7xl mx-auto px-5 py-2.5 flex items-center justify-center gap-3 text-center">
+            <span className="relative flex h-1.5 w-1.5 shrink-0">
+              <span className={'absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ' + (marketingMode ? 'bg-yellow-400' : 'bg-emerald-400')} />
+              <span className={'relative inline-flex h-1.5 w-1.5 rounded-full ' + (marketingMode ? 'bg-yellow-400' : 'bg-emerald-400')} />
             </span>
-          </Link>
 
-          <nav className="hidden lg:flex items-center space-x-1 text-xs font-bold text-slate-300 font-mono">
-            {/* Dropdown 1: Platform */}
-            <div
-              className="relative"
-              onMouseEnter={() => setOpenDropdown('platform')}
-              onMouseLeave={() => setOpenDropdown(null)}
-            >
-              <button className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
-                <span>Architecture</span>
-                <span className="text-[10px] text-slate-500">▾</span>
-              </button>
+            <span className={'text-[11px] font-mono font-semibold tracking-tight ' + (marketingMode ? 'text-yellow-300' : 'text-emerald-300')}>
+              {marketingMode ? 'Early adopter launch' : 'Architecture spec'}
+            </span>
 
-              {openDropdown === 'platform' && (
-                <div className="absolute top-full left-0 pt-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="w-88 bg-[#0B101D]/95 border border-slate-700/60 rounded-2xl shadow-2xl p-4 space-y-2.5 font-sans backdrop-blur-xl card-inner-glow">
-                    <div className="text-[10px] uppercase tracking-widest text-yellow-400 font-bold px-2 font-mono">High-Throughput Telemetry</div>
-                    <a href="#features" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition group">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition">
-                        🪶
-                      </div>
-                      <div>
-                        <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">&lt;5KB Featherweight SDK</div>
-                        <div className="text-[11px] text-slate-400">Zero Core Web Vitals delay & async beacon dispatcher.</div>
-                      </div>
-                    </a>
-                    <a href="#grouping" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition group">
-                      <div className="w-8 h-8 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-400 shrink-0 group-hover:scale-110 transition">
-                        🎯
-                      </div>
-                      <div>
-                        <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">Outage Collapse Engine</div>
-                        <div className="text-[11px] text-slate-400">Collapses 500 duplicate cascade errors into 1 root cause.</div>
-                      </div>
-                    </a>
-                    <a href="#pii" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition group">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 group-hover:scale-110 transition">
-                        🔒
-                      </div>
-                      <div>
-                        <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">Client-Side PII Firewall</div>
-                        <div className="text-[11px] text-slate-400">On-device regex AST scrubs tokens & credentials before wire.</div>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
+            <span className="text-[11px] text-slate-300 truncate">
+              {marketingMode ? 'Limited seats left for Lifetime Pro access' : 'RFC-9110 asynchronous ingestion engine active'}
+            </span>
 
-            {/* Dropdown 2: AI Copilot */}
-            <div
-              className="relative"
-              onMouseEnter={() => setOpenDropdown('ai')}
-              onMouseLeave={() => setOpenDropdown(null)}
-            >
-              <button className="px-3.5 py-2 rounded-xl hover:bg-yellow-400/10 text-yellow-300 hover:text-yellow-200 transition-all flex items-center gap-1.5 cursor-pointer border border-yellow-400/20 bg-yellow-400/5">
-                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-ping" />
-                <span>AI Diagnostics</span>
-                <span className="text-[10px] text-yellow-400">▾</span>
-              </button>
-
-              {openDropdown === 'ai' && (
-                <div className="absolute top-full left-0 pt-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="w-96 bg-[#0B101D]/95 border border-slate-700/60 rounded-2xl shadow-2xl p-4 space-y-2.5 font-sans backdrop-blur-xl card-inner-glow">
-                    <div className="text-[10px] uppercase tracking-widest text-yellow-400 font-bold px-2 font-mono">Autonomous Root Cause Analysis</div>
-                    <a href="#byok" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition group">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 flex items-center justify-center shrink-0">
-                        <GeminiLogo className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">BYOK AI Hub (Gemini & OpenAI)</div>
-                        <div className="text-[11px] text-slate-400">Bring your own key for $0 platform markup & zero data retention.</div>
-                      </div>
-                    </a>
-                    <a href="#ai-agent" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition group">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300 shrink-0">
-                        🤖
-                      </div>
-                      <div>
-                        <div className="text-white font-bold text-xs group-hover:text-yellow-400 transition">1-Click Cursor & Claude Export</div>
-                        <div className="text-[11px] text-slate-400">Formatted markdown prompt with stack trace for local agent fixes.</div>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <a href="#quickstart" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-white transition">SDK Setup</a>
-            <a href="#comparison" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-white transition">Why SnapTrace</a>
-            <a href="#pricing" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-yellow-400 transition text-yellow-400 font-black">Pricing</a>
-            <Link href="/about" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-white transition">About</Link>
-            <a href="#faq" className="px-3.5 py-2 rounded-xl hover:bg-slate-800/60 hover:text-white transition">FAQ</a>
-          </nav>
-
-          <div className="flex items-center space-x-3 font-mono shrink-0">
-            <Link
-              href="/login"
-              className="text-xs font-semibold text-slate-300 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800/50 transition"
-            >
-              Sign In
-            </Link>
-
-            <Link
-              href="/demo"
-              className="px-4 py-2 rounded-xl border border-yellow-400/40 hover:border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 font-bold text-xs transition shadow-sm hidden sm:inline-block"
-            >
-              LIVE DEMO
-            </Link>
-
-            <Link
-              href="/signup"
-              className="px-4 py-2 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-300 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/25 transition transform hover:-translate-y-0.5 flex items-center gap-1.5"
-            >
-              <span>CLAIM PRO PASS</span>
-              <span>→</span>
-            </Link>
+            <span className="hidden sm:inline text-[11px] text-slate-500 truncate">
+              {marketingMode ? '— no credit card needed' : '— 0ms hydration penalty, <3.4KB gzipped'}
+            </span>
           </div>
         </div>
-      </header>
 
-      {/* SENTRY/ENGINEER TOGGLE FLOATER */}
-      <div className="max-w-7xl mx-auto px-6 relative">
-        <div className="absolute top-4 right-6 z-30 hidden sm:block">
-          <div className="bg-[#0e1424]/90 border border-yellow-400/30 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1 font-mono laser-glow">
-            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider select-none flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
-              Dev Console
-            </span>
-            <button
-              onClick={toggleMarketingMode}
-              className={
-                'w-11 h-5.5 rounded-full transition-colors relative cursor-pointer ' +
-                (marketingMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-slate-700')
-              }
-              title="Toggle between Marketing Mode and Dev Spec Mode"
-            >
+        {/* ── 2. HEADER ───────────────────────────────────────────────────── */}
+        <header
+          className={
+            'sticky top-0 z-40 transition-all duration-300 ' +
+            (scrolled
+              ? 'border-b border-white/[0.08] bg-[#070B13]/90 backdrop-blur-xl shadow-[0_10px_40px_-20px_rgba(0,0,0,0.9)]'
+              : 'border-b border-white/[0.04] bg-[#070B13]/60 backdrop-blur-md')
+          }
+        >
+          <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between gap-5">
+            <Link href="/" onClick={scrollToTop} className="shrink-0 rounded-lg transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/60">
+              <SnapTraceLogo size="md" showText={true} />
+            </Link>
+
+            <nav className="hidden lg:flex items-center gap-0.5 text-[13px] font-medium text-slate-300">
+              {/* Dropdown 1: Platform */}
               <div
+                className="relative"
+                onMouseEnter={() => setOpenDropdown('platform')}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                <button className="flex items-center gap-1.5 rounded-lg px-3 py-2 transition hover:bg-white/[0.06] hover:text-white cursor-pointer">
+                  <span>Platform</span>
+                  <IconChevron className={'w-3 h-3 text-slate-500 transition-transform duration-200 ' + (openDropdown === 'platform' ? 'rotate-180' : '')} />
+                </button>
+
+                {openDropdown === 'platform' && (
+                  <div className="absolute top-full left-0 pt-2 z-50">
+                    <div className={'w-[340px] p-2 ' + CARD}>
+                      <div className="px-2 pt-1.5 pb-2 text-[10.5px] font-mono uppercase tracking-[0.16em] text-slate-500">Core capabilities</div>
+                      <a href="#features" className="flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-white/[0.05] group">
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-yellow-400/20 bg-yellow-400/10 text-yellow-300">
+                          <IconFeather />
+                        </span>
+                        <span className="block">
+                          <span className="block text-[13px] font-semibold text-white">Sub-5KB telemetry SDK</span>
+                          <span className="block text-[11.5px] text-slate-400 leading-snug">Zero Core Web Vitals penalty</span>
+                        </span>
+                      </a>
+                      <a href="#grouping" className="flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-white/[0.05]">
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
+                          <IconTarget />
+                        </span>
+                        <span className="block">
+                          <span className="block text-[13px] font-semibold text-white">Root-cause collapse</span>
+                          <span className="block text-[11.5px] text-slate-400 leading-snug">Multi-crash incident grouping</span>
+                        </span>
+                      </a>
+                      <a href="#features" className="flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-white/[0.05]">
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-400/20 bg-sky-400/10 text-sky-300">
+                          <IconShield />
+                        </span>
+                        <span className="block">
+                          <span className="block text-[13px] font-semibold text-white">Client-side PII firewall</span>
+                          <span className="block text-[11.5px] text-slate-400 leading-snug">On-device password &amp; card masking</span>
+                        </span>
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Dropdown 2: AI Copilot */}
+              <div
+                className="relative"
+                onMouseEnter={() => setOpenDropdown('ai')}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                <button className="flex items-center gap-1.5 rounded-lg px-3 py-2 transition hover:bg-white/[0.06] hover:text-white cursor-pointer">
+                  <IconSpark className="w-3.5 h-3.5 text-purple-300" />
+                  <span>AI Copilot</span>
+                  <IconChevron className={'w-3 h-3 text-slate-500 transition-transform duration-200 ' + (openDropdown === 'ai' ? 'rotate-180' : '')} />
+                </button>
+
+                {openDropdown === 'ai' && (
+                  <div className="absolute top-full left-0 pt-2 z-50">
+                    <div className={'w-[340px] p-2 ' + CARD}>
+                      <div className="px-2 pt-1.5 pb-2 text-[10.5px] font-mono uppercase tracking-[0.16em] text-slate-500">AI capabilities</div>
+                      <a href="#ai-agent" className="flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-white/[0.05]">
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-purple-400/20 bg-purple-400/10 text-purple-300">
+                          <CursorMark />
+                        </span>
+                        <span className="block">
+                          <span className="block text-[13px] font-semibold text-white">Cursor &amp; Claude 1-click export</span>
+                          <span className="block text-[11.5px] text-slate-400 leading-snug">Pre-formatted prompts for your IDE [1.4.1, 1.4.2]</span>
+                        </span>
+                      </a>
+                      <a href="#byok" className="flex items-start gap-3 rounded-xl p-2.5 transition hover:bg-white/[0.05]">
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-yellow-400/20 bg-yellow-400/10 text-yellow-300">
+                          <IconBolt />
+                        </span>
+                        <span className="block">
+                          <span className="block text-[13px] font-semibold text-white">BYOK diagnosis hub</span>
+                          <span className="block text-[11.5px] text-slate-400 leading-snug">Analyse bugs live with Gemini &amp; OpenAI</span>
+                        </span>
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-lg px-3 py-2 transition hover:bg-white/[0.06] hover:text-white"
+                >
+                  {link.label}
+                </a>
+              ))}
+
+              <Link href="/about" className="rounded-lg px-3 py-2 transition hover:bg-white/[0.06] hover:text-white">
+                About
+              </Link>
+            </nav>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href="/login"
+                className="hidden sm:inline-flex rounded-lg px-3 py-2 text-[13px] font-medium text-slate-300 transition hover:bg-white/[0.06] hover:text-white"
+              >
+                Sign in
+              </Link>
+
+              <Link
+                href="/demo"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3.5 py-2 text-[13px] font-semibold text-slate-200 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
+              >
+                Live demo
+              </Link>
+
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-b from-yellow-300 to-amber-500 px-3.5 py-2 text-[13px] font-semibold text-slate-950 shadow-[0_1px_0_0_rgba(255,255,255,0.4)_inset,0_10px_26px_-14px_rgba(250,204,21,0.8)] transition hover:from-yellow-200 hover:to-amber-400"
+              >
+                Get started
+              </Link>
+
+              <button
+                onClick={() => setMobileNavOpen((v) => !v)}
+                className="lg:hidden ml-1 flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-300 transition hover:text-white cursor-pointer"
+                aria-label="Toggle navigation menu"
+                aria-expanded={mobileNavOpen}
+              >
+                {mobileNavOpen ? <IconClose /> : <IconMenu />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile navigation */}
+          {mobileNavOpen && (
+            <div className="lg:hidden border-t border-white/[0.06] bg-[#070B13]/98 backdrop-blur-xl">
+              <div className="max-w-7xl mx-auto px-5 py-4 space-y-1 text-[14px]">
+                <a href="#features" onClick={() => setMobileNavOpen(false)} className="block rounded-lg px-3 py-2.5 text-slate-300 hover:bg-white/[0.05] hover:text-white">Platform</a>
+                <a href="#ai-agent" onClick={() => setMobileNavOpen(false)} className="block rounded-lg px-3 py-2.5 text-slate-300 hover:bg-white/[0.05] hover:text-white">AI Copilot</a>
+                <a href="#byok" onClick={() => setMobileNavOpen(false)} className="block rounded-lg px-3 py-2.5 text-slate-300 hover:bg-white/[0.05] hover:text-white">Bring your own key</a>
+                {navLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileNavOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-slate-300 hover:bg-white/[0.05] hover:text-white"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+                <Link href="/about" onClick={() => setMobileNavOpen(false)} className="block rounded-lg px-3 py-2.5 text-slate-300 hover:bg-white/[0.05] hover:text-white">About</Link>
+
+                <div className="grid grid-cols-2 gap-2 pt-3">
+                  <Link href="/login" onClick={() => setMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-center text-[13px] font-semibold text-slate-200">Sign in</Link>
+                  <Link href="/demo" onClick={() => setMobileNavOpen(false)} className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-center text-[13px] font-semibold text-slate-200">Live demo</Link>
+                </div>
+
+                <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2.5 mt-2">
+                  <span className="text-[12px] text-slate-400">Dev spec mode</span>
+                  <button
+                    onClick={toggleMarketingMode}
+                    className={
+                      'relative h-5 w-9 rounded-full transition-colors cursor-pointer ' +
+                      (marketingMode ? 'bg-slate-700' : 'bg-gradient-to-r from-yellow-300 to-amber-500')
+                    }
+                    aria-label="Toggle dev spec mode"
+                  >
+                    <span className={'absolute top-1 h-3 w-3 rounded-full bg-slate-950 transition-all ' + (marketingMode ? 'left-1' : 'right-1')} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </header>
+
+        {/* ── MODE SWITCH (Marketing ↔ Dev spec) ──────────────────────────── */}
+        <div className="max-w-7xl mx-auto px-5 relative">
+          <div className="absolute right-5 top-4 z-30 hidden sm:block">
+            <div className="flex items-center gap-1 rounded-xl border border-white/[0.08] bg-[#0A0F1A]/90 p-1 backdrop-blur-xl shadow-[0_18px_40px_-24px_rgba(0,0,0,1)]">
+              <button
+                onClick={() => setMode(true)}
+                title="Marketing overview"
                 className={
-                  'w-3.5 h-3.5 rounded-full bg-slate-950 absolute top-1 transition-all ' +
-                  (marketingMode ? 'right-1' : 'left-1')
+                  'rounded-lg px-3 py-1.5 text-[11px] font-mono font-semibold transition cursor-pointer ' +
+                  (marketingMode ? 'bg-gradient-to-b from-yellow-300 to-amber-500 text-slate-950' : 'text-slate-400 hover:text-white')
                 }
-              />
-            </button>
-            <span className={'text-[9px] font-bold font-mono ' + (marketingMode ? 'text-yellow-300' : 'text-slate-400')}>
-              {marketingMode ? 'MARKETING' : 'RAW SPEC'}
-            </span>
+              >
+                Marketing
+              </button>
+              <button
+                onClick={() => setMode(false)}
+                title="Developer spec terminal"
+                className={
+                  'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-mono font-semibold transition cursor-pointer ' +
+                  (!marketingMode ? 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/30' : 'text-slate-400 hover:text-white')
+                }
+              >
+                <IconTerminal className="w-3.5 h-3.5" />
+                Dev spec
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ════════════════════════════════════════════════════════════════
-          VIEW 1: RAW DEV TERMINAL INTERFACE
-         ════════════════════════════════════════════════════════════════ */}
-      {!marketingMode ? (
-        <section className="min-h-[calc(100vh-6rem)] flex items-center justify-center p-6 bg-[#05070E] relative overflow-hidden animate-in fade-in duration-200">
-          <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
-            <div className="lg:col-span-6 space-y-6">
-              <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Daemon Protocol Active • 0.0ms Main Thread Latency</span>
+        {/* ══ VIEW 1: DEV TERMINAL ═════════════════════════════════════════ */}
+        {!marketingMode ? (
+          <section className="min-h-[calc(100vh-7rem)] flex items-center justify-center px-5 py-10">
+            <div className="max-w-6xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-6 space-y-7">
+                <div className="space-y-4">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/[0.07] px-3 py-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[11px] font-mono text-emerald-300">marketing.js terminated — 0.0ms main thread blocking</span>
+                  </div>
+
+                  <h1 className="font-mono text-[34px] sm:text-5xl lg:text-[56px] font-bold tracking-[-0.03em] text-white leading-[1.02]">
+                    No 100KB bundles.<br />
+                    No 2 AM spam alerts.<br />
+                    <span className="text-yellow-400">No Sunday log hunting.</span>
+                  </h1>
                 </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-mono tracking-tight text-white leading-none">
-                  NO 100KB BUNDLES.<br />
-                  NO 2 AM SPAM ALERTS.<br />
-                  <span className="text-yellow-400">NO SUNDAY LOG HUNTING.</span>
-                </h1>
-              </div>
 
-              <div className="space-y-3 text-xs font-mono text-slate-300 leading-relaxed">
-                <p>
-                  <strong>Why SnapTrace?</strong> Traditional APMs force 100KB+ client libraries that degrade Lighthouse scores, and when a single Postgres connection pool times out, they spam your phone with 5 fragmented alerts.
-                </p>
-                <p className="text-yellow-300 bg-yellow-400/5 p-3 rounded-xl border border-yellow-400/20">
-                  SnapTrace collapses the entire outage cascade into <strong>1 consolidated root cause</strong> with a deterministic SHA-256 fingerprint and generates a 2-line AI code patch via Gemini or GPT-4o.
-                </p>
-              </div>
+                <div className="space-y-3 text-[13px] leading-relaxed text-slate-400 max-w-lg">
+                  <p>
+                    <span className="text-slate-200 font-semibold">Why we built this: </span>
+                    legacy APMs became bloated and noisy [1.1.7, 1.2.2]. A single database pool timeout triggers 4 downstream HTTP crashes, and traditional trackers spam your inbox with 4 separate alerts that you have to piece together by hand on a Sunday [1.1.7].
+                  </p>
+                  <p className="text-yellow-300/90">
+                    SnapTrace collapses the entire outage cascade into <strong className="font-semibold text-yellow-300">1 consolidated root cause</strong> with a 2-line AI fix ready in seconds.
+                  </p>
+                </div>
 
-              <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-3 text-xs font-mono card-inner-glow">
-                <span className="text-[10px] text-yellow-400 uppercase font-bold tracking-widest block">
-                  ⚡ PRODUCTION BENCHMARKS
-                </span>
-                <div className="grid grid-cols-2 gap-3 text-[11px] text-slate-300">
-                  <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-                    <span className="text-slate-500 block text-[10px]">SDK PAYLOAD</span>
-                    <strong className="text-emerald-400 text-sm">&lt;3.4KB gzipped</strong>
+                <div className={'p-5 ' + CARD}>
+                  <div className="flex items-center gap-2 pb-3 mb-3 border-b border-white/[0.06]">
+                    <IconGauge className="w-3.5 h-3.5 text-yellow-400" />
+                    <span className={MICRO_LABEL}>Production benchmarks</span>
                   </div>
-                  <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-                    <span className="text-slate-500 block text-[10px]">TRANSPORT</span>
-                    <strong className="text-slate-200 text-sm">sendBeacon (0ms)</strong>
-                  </div>
-                  <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-                    <span className="text-slate-500 block text-[10px]">PII FIREWALL</span>
-                    <strong className="text-emerald-400 text-sm">On-Device Regex AST</strong>
-                  </div>
-                  <div className="p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-                    <span className="text-slate-500 block text-[10px]">AI AGENT EXPORT</span>
-                    <strong className="text-purple-400 text-sm">1-Click Cursor / Claude</strong>
-                  </div>
+                  <dl className="grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-[12px]">
+                    <div className="flex flex-col gap-0.5">
+                      <dt className="text-slate-500">SDK size</dt>
+                      <dd className="font-semibold text-emerald-400">&lt; 3.4KB gzipped</dd>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <dt className="text-slate-500">Transport</dt>
+                      <dd className="font-semibold text-slate-200">sendBeacon (0ms)</dd>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <dt className="text-slate-500">PII masking</dt>
+                      <dd className="font-semibold text-emerald-400">Client-side regex</dd>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <dt className="text-slate-500">AI workflow</dt>
+                      <dd className="font-semibold text-purple-300">1-click Cursor / Claude [1.4.1, 1.4.2]</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link href="/signup" className={BTN_PRIMARY}>
+                    Get your free beta key
+                    <IconArrow />
+                  </Link>
+                  <Link href="/demo" className={BTN_GHOST}>
+                    <IconBolt className="w-3.5 h-3.5 text-yellow-300" />
+                    Open demo workspace
+                  </Link>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-1 font-mono">
-                <Link
-                  href="/signup"
-                  className="px-6 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5"
-                >
-                  Get Free Beta Key in 30s →
-                </Link>
-                <Link
-                  href="/demo"
-                  className="px-5 py-3.5 bg-[#0B101D] hover:bg-slate-800 border border-slate-800 text-yellow-300 text-xs font-bold rounded-xl transition"
-                >
-                  ⚡ Open Demo Workspace
-                </Link>
+              {/* Terminal */}
+              <div className="lg:col-span-6">
+                <div className="overflow-hidden rounded-2xl border border-emerald-500/25 bg-[#070B13] shadow-[0_40px_120px_-40px_rgba(16,185,129,0.25)]">
+                  <div className="flex items-center justify-between border-b border-white/[0.07] bg-[#0A0F1A] px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
+                      </span>
+                      <span className="font-mono text-[12px] text-slate-300">
+                        /snappy-cli <span className="text-slate-600">v1.0-beta</span>
+                      </span>
+                    </div>
+                    <span className="hidden sm:inline font-mono text-[10.5px] text-slate-600">ask any technical question</span>
+                  </div>
+
+                  <div className="max-h-[320px] space-y-3 overflow-y-auto p-4">
+                    {cliMessages.map((msg, idx) => (
+                      <div
+                        key={idx}
+                        className={
+                          'rounded-xl p-3.5 text-[12.5px] ' +
+                          (msg.role === 'user'
+                            ? 'ml-8 border border-white/[0.08] bg-white/[0.04] text-yellow-200'
+                            : 'mr-4 border border-emerald-500/20 bg-emerald-500/[0.04] text-slate-200')
+                        }
+                      >
+                        <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">
+                          {msg.role === 'user' ? 'you' : 'snappy · engine'}
+                        </span>
+                        <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  <div className="space-y-3 border-t border-white/[0.07] bg-[#0A0F1A] p-4">
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        onClick={() => handleAskCli('which ai models does this support?')}
+                        className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-yellow-400/40 hover:text-yellow-300 cursor-pointer"
+                      >
+                        Which AI models?
+                      </button>
+                      <button
+                        onClick={() => handleAskCli('which languages does this support?')}
+                        className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-yellow-400/40 hover:text-yellow-300 cursor-pointer"
+                      >
+                        Supported languages?
+                      </button>
+                      <button
+                        onClick={() => handleAskCli('how does cascading error collapse work?')}
+                        className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-yellow-400/40 hover:text-yellow-300 cursor-pointer"
+                      >
+                        Cascading collapse?
+                      </button>
+                      <button
+                        onClick={() => handleAskCli('why is the SDK under 5KB?')}
+                        className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-yellow-400/40 hover:text-yellow-300 cursor-pointer"
+                      >
+                        Why under 5KB?
+                      </button>
+                    </div>
+
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (cliInput.trim()) handleAskCli(cliInput.trim());
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <div className="relative flex-1">
+                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[12px] text-emerald-500">&gt;</span>
+                        <input
+                          type="text"
+                          placeholder="Ask any technical question..."
+                          value={cliInput}
+                          onChange={(e) => setCliInput(e.target.value)}
+                          className="w-full rounded-lg border border-white/[0.08] bg-[#05070E] py-2.5 pl-7 pr-3 font-mono text-[12.5px] text-slate-200 placeholder-slate-600 transition focus:border-emerald-400/60 focus:outline-none"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-3.5 py-2.5 font-mono text-[12px] font-semibold text-emerald-300 transition hover:bg-emerald-500/25 cursor-pointer"
+                      >
+                        Send
+                        <IconSend />
+                      </button>
+                    </form>
+                  </div>
+                </div>
               </div>
             </div>
+          </section>
+        ) : (
+          /* ══ VIEW 2: MARKETING ══════════════════════════════════════════ */
+          <>
+            {/* ── 3. HERO ─────────────────────────────────────────────────── */}
+            <section className="relative overflow-hidden pt-16 pb-16 sm:pt-20">
+              <TelemetryBeamBackground />
 
-            {/* CLI Chat Engine */}
-            <div className="lg:col-span-6 bg-[#090D16] border-2 border-emerald-500/40 rounded-3xl p-5 shadow-2xl flex flex-col justify-between font-mono space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div className="flex items-center gap-2 text-xs font-bold text-white">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>/snappy-cli <span className="text-[10px] text-slate-500 font-normal">v2.1-engine</span></span>
-                </div>
-                <span className="text-[10px] text-slate-500">Autonomous Diagnostic Bot</span>
-              </div>
+              <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-yellow-500/[0.12] via-purple-500/[0.09] to-emerald-500/[0.10] blur-[150px]" />
 
-              <div className="space-y-3 overflow-y-auto max-h-[320px] pr-1 text-xs">
-                {cliMessages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={
-                      'p-3.5 rounded-2xl ' +
-                      (msg.role === 'user'
-                        ? 'bg-[#0B101D] border border-slate-800 text-yellow-300 ml-6'
-                        : 'bg-[#05070E] border border-emerald-500/30 text-slate-200 mr-4')
-                    }
-                  >
-                    <span className="text-[10px] block font-bold text-slate-500 mb-1">
-                      {msg.role === 'user' ? '> YOU' : '⚡ SNAPPY (DIAGNOSTIC ENGINE)'}
-                    </span>
-                    <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-
-              <div className="space-y-2.5 pt-2 border-t border-slate-800/80">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <button
-                    onClick={() => handleAskCli('which ai models does this support?')}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
-                  >
-                    🤖 Supported AI Models?
-                  </button>
-                  <button
-                    onClick={() => handleAskCli('how does cascading error collapse work?')}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
-                  >
-                    🎯 Outage Collapse?
-                  </button>
-                  <button
-                    onClick={() => handleAskCli('why is the SDK under 5KB?')}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
-                  >
-                    ⚡ Why &lt;5KB?
-                  </button>
-                  <button
-                    onClick={() => handleAskCli('how does client PII masking work?')}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-[10px] text-slate-300 hover:text-yellow-400 border border-slate-700/60 transition cursor-pointer"
-                  >
-                    🔒 PII Scrubbing?
-                  </button>
-                </div>
-
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (cliInput.trim()) handleAskCli(cliInput.trim());
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <input
-                    type="text"
-                    placeholder="Ask any technical question..."
-                    value={cliInput}
-                    onChange={(e) => setCliInput(e.target.value)}
-                    className="flex-1 bg-[#05070E] border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-400 font-mono"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
-                  >
-                    Query →
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : (
-        /* ════════════════════════════════════════════════════════════════
-            VIEW 2: SENTRY-LEVEL MARKETING MASTERCLASS
-           ════════════════════════════════════════════════════════════════ */
-        <>
-          {/* 3. HERO: PERSPECTIVE LASER GRID & HIGH-CONVERSION PITCH */}
-          <section className="relative pt-12 pb-24 overflow-hidden hero-grid">
-            <TelemetryBeamBackground />
-
-            {/* Glowing ambient light orbs */}
-            <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[850px] h-[450px] bg-gradient-to-tr from-yellow-500/15 via-purple-600/15 to-blue-500/15 blur-[160px] pointer-events-none rounded-full" />
-            <div className="absolute -top-32 left-1/4 w-[400px] h-[350px] bg-yellow-400/10 blur-[130px] pointer-events-none rounded-full" />
-
-            <div className="max-w-6xl mx-auto px-6 text-center space-y-8 relative z-10">
-              
-              {/* Top Banner Tag */}
-              <div>
+              <div className="relative z-10 mx-auto max-w-4xl px-5 text-center">
                 <a
                   href="#ai-agent"
-                  className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-gradient-to-r from-purple-900/40 via-purple-800/20 to-yellow-900/30 border border-purple-500/40 hover:border-yellow-400/60 text-xs font-mono font-bold text-slate-200 transition shadow-2xl group cursor-pointer"
+                  className="group inline-flex items-center gap-2.5 rounded-full border border-purple-400/25 bg-purple-500/[0.08] py-1.5 pl-2 pr-4 transition hover:border-purple-400/50 hover:bg-purple-500/[0.14]"
                 >
-                  <span className="flex h-2 w-2 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
+                  <span className="rounded-full bg-purple-500/20 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wide text-purple-200">New</span>
+                  <span className="text-[12.5px] text-purple-100/90">
+                    Fix production crashes right inside Cursor &amp; Claude Code [1.4.1, 1.4.2]
                   </span>
-                  <span>SnapTrace 2.0: Automated AI Root Cause Fixes in Cursor & Claude Code</span>
-                  <span className="text-yellow-400 group-hover:translate-x-0.5 transition">→</span>
+                  <IconArrow className="w-3.5 h-3.5 text-purple-300 transition-transform group-hover:translate-x-0.5" />
                 </a>
-              </div>
 
-              {/* Main Punchy Sentry-Kill Title */}
-              <div className="space-y-4">
-                <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.08] max-w-5xl mx-auto">
-                  Code breaks. We isolate the root cause and{' '}
-                  <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent underline decoration-yellow-500/30 decoration-wavy">
-                    fix it in a snap.
+                <h1 className="mt-8 text-[40px] sm:text-[62px] lg:text-[72px] font-semibold tracking-[-0.035em] text-white leading-[1.02]">
+                  Code{' '}
+                  <span className="relative inline-block text-red-400">
+                    breaks
+                    <span className="absolute inset-x-0 -bottom-1 h-[3px] rounded-full bg-gradient-to-r from-red-500/10 via-red-500/80 to-red-500/10" />
                   </span>
+                  , fix it in a{' '}
+                  <span className="bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-500 bg-clip-text text-transparent">snap.</span>
                 </h1>
 
-                <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-300 leading-relaxed font-sans">
-                  The modern developer telemetry platform. Under <strong className="text-yellow-400 font-mono font-bold">&lt;5KB</strong>, zero alert fatigue, client-side PII firewall, and <strong>Bring Your Own Key (BYOK)</strong> AI root-cause diagnostics without enterprise price tags.
+                <p className="mx-auto mt-6 max-w-xl text-[15px] leading-relaxed text-slate-400">
+                  Stop spending Sundays connecting the dots by hand. SnapTrace collapses cascading multi-error outages into a single root-cause incident — under{' '}
+                  <span className="font-mono font-semibold text-yellow-300">5KB</span>, with on-device PII masking and 1-click AI code fixes.
                 </p>
-              </div>
 
-              {/* HERO CTA BUTTONS */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2 font-mono">
-                <Link
-                  href="/signup"
-                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-300 text-slate-950 text-sm font-black rounded-2xl shadow-xl shadow-yellow-500/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 laser-glow"
-                >
-                  <span>Claim Lifetime Pro Beta ($0 Forever)</span>
-                  <span>→</span>
-                </Link>
-                <Link
-                  href="/demo"
-                  className="w-full sm:w-auto px-8 py-4 bg-[#0B101D] hover:bg-slate-800/80 border border-slate-700/80 hover:border-yellow-400/50 text-yellow-300 text-sm font-bold rounded-2xl transition shadow-lg flex items-center justify-center gap-2 card-inner-glow"
-                >
-                  <span>⚡ Launch Interactive Playground</span>
-                </Link>
-              </div>
-
-              {/* Quick Snippet Box */}
-              <div className="pt-2 max-w-xl mx-auto">
-                <div className="bg-[#0B101D]/90 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-3 shadow-2xl font-mono text-xs card-inner-glow backdrop-blur-xl">
-                  <div className="flex items-center gap-2 truncate text-slate-400 pl-2">
-                    <span className="text-yellow-400 font-bold select-none">&lt;/&gt;</span>
-                    <span className="truncate text-slate-300 text-[11px]">
-                      &lt;script src=&quot;https://snaptrace-dashboard.vercel.app/snaptrace.js&quot; data-api-key=&quot;<span className="text-yellow-300 font-bold">YOUR_KEY</span>&quot; async&gt;&lt;/script&gt;
-                    </span>
-                  </div>
-                  <button
-                    onClick={handleCopyHeroScript}
-                    className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-yellow-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer shadow-sm active:scale-95 border border-slate-700/60"
-                  >
-                    {copiedHeroScript ? '✓ Copied!' : '📋 Copy SDK'}
-                  </button>
-                </div>
-                <div className="flex items-center justify-center gap-6 text-[11px] text-slate-400 font-mono pt-3">
-                  <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> &lt;3.4KB Gzipped</span>
-                  <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> 0ms Hydration Penalty</span>
-                  <span className="flex items-center gap-1.5"><span className="text-emerald-400 font-bold">✓</span> Drop into HTML &lt;head&gt;</span>
-                </div>
-              </div>
-
-            </div>
-
-            {/* 🌟 SENTRY-STYLE INTERACTIVE LIVE CRASH TRIAGE SIMULATOR */}
-            <div className="max-w-5xl mx-auto px-6 pt-16">
-              <div className="bg-gradient-to-b from-[#0F1629] via-[#090D18] to-[#05070E] border-2 border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden laser-glow">
-                
-                {/* Window header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800/80 gap-3 font-mono text-xs">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
-                      <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
-                      <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
-                    </div>
-                    <span className="text-slate-300 font-bold ml-2">SnapTrace Live Triage Console</span>
-                    <span className="px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-black animate-pulse">
-                      UNRESOLVED [x500]
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setSimulatedResolved(!simulatedResolved)}
-                      className={
-                        'px-3 py-1.5 rounded-xl font-bold transition text-xs cursor-pointer flex items-center gap-1.5 border ' +
-                        (simulatedResolved
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                          : 'bg-yellow-400/20 text-yellow-300 border-yellow-400/40 hover:bg-yellow-400/30')
-                      }
-                    >
-                      <span>{simulatedResolved ? '✓ Resolved' : '⚡ Simulate AI Resolution'}</span>
-                    </button>
-                  </div>
+                <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                  <Link href="/signup" className={BTN_PRIMARY + ' w-full sm:w-auto'}>
+                    Claim lifetime Pro pass
+                    <IconArrow />
+                  </Link>
+                  <Link href="/demo" className={BTN_GHOST + ' w-full sm:w-auto'}>
+                    <IconBolt className="w-3.5 h-3.5 text-yellow-300" />
+                    Open demo workspace — no signup
+                  </Link>
                 </div>
 
-                {/* Crash Meta Row */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                  <div className="md:col-span-8 space-y-3">
-                    <div className="flex items-center gap-2 flex-wrap font-mono text-xs">
-                      <span className="px-2.5 py-1 bg-red-500/20 text-red-300 border border-red-500/30 rounded-lg font-bold">
-                        FATAL ERROR
+                {/* Install line */}
+                <div className="mx-auto mt-10 max-w-2xl">
+                  <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0A0F1A]/90 backdrop-blur-xl shadow-[0_30px_90px_-40px_rgba(0,0,0,1)]">
+                    <div className="flex items-center justify-between border-b border-white/[0.06] px-3.5 py-2">
+                      <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-500">install — 1 line</span>
+                      <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-emerald-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        ready
                       </span>
-                      <span className="text-slate-400">PostgreSQL Connection Pool Exhaustion</span>
-                      <span className="text-slate-500">•</span>
-                      <span className="text-yellow-300 font-bold">database.js:18:11</span>
                     </div>
-
-                    <p className="text-slate-300 text-sm font-sans">
-                      Client connections exceeded limit during checkout flow. 500 identical loop cascades collapsed into single beacon incident.
-                    </p>
-
-                    {/* Interactive Tab Switcher */}
-                    <div className="flex items-center gap-2 pt-2 font-mono text-xs">
+                    <div className="flex items-center gap-3 px-3.5 py-3">
+                      <code className="flex-1 truncate text-left font-mono text-[12px] text-slate-300">
+                        <span className="text-slate-600">&lt;script</span> src=&quot;https://snaptrace.../snaptrace.js&quot; data-api-key=&quot;
+                        <span className="font-semibold text-yellow-300">YOUR_KEY</span>&quot; async
+                        <span className="text-slate-600">&gt;&lt;/script&gt;</span>
+                      </code>
                       <button
-                        onClick={() => setActiveTriageTab('stack')}
-                        className={'px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ' + (activeTriageTab === 'stack' ? 'bg-slate-800 text-yellow-300 border border-yellow-400/30' : 'text-slate-400 hover:text-white')}
+                        onClick={handleCopyHeroScript}
+                        className={
+                          'inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-[11.5px] font-semibold transition cursor-pointer active:scale-95 ' +
+                          (copiedHeroScript
+                            ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-300'
+                            : 'border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/20 hover:text-white')
+                        }
                       >
-                        Stack Trace (Clean AST)
-                      </button>
-                      <button
-                        onClick={() => setActiveTriageTab('breadcrumbs')}
-                        className={'px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ' + (activeTriageTab === 'breadcrumbs' ? 'bg-slate-800 text-yellow-300 border border-yellow-400/30' : 'text-slate-400 hover:text-white')}
-                      >
-                        User Breadcrumbs (PII Scrubbed)
-                      </button>
-                      <button
-                        onClick={() => setActiveTriageTab('aifix')}
-                        className={'px-3 py-1.5 rounded-lg font-bold transition cursor-pointer ' + (activeTriageTab === 'aifix' ? 'bg-purple-900/40 text-purple-300 border border-purple-500/40' : 'text-purple-400 hover:text-purple-200')}
-                      >
-                        ✨ BYOK AI Patch Diff
+                        {copiedHeroScript ? <IconCheck className="w-3.5 h-3.5" /> : <IconCopy />}
+                        {copiedHeroScript ? 'Copied' : 'Copy'}
                       </button>
                     </div>
+                  </div>
 
-                    {/* Tab Panels */}
-                    <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-4 font-mono text-xs overflow-x-auto">
-                      {activeTriageTab === 'stack' && (
-                        <div className="space-y-1 text-slate-300 leading-relaxed">
-                          <div className="text-red-400 font-bold">ReferenceError: pool.connect() timed out after 5000ms</div>
-                          <div className="text-slate-500 pl-4">at async queryUserOrders (database.js:18:11)</div>
-                          <div className="text-slate-500 pl-4">at async handleCheckoutAction (app/api/checkout/route.ts:42:5)</div>
-                          <div className="text-slate-600 pl-4">at async NextNodeServer.handleRequest (node_modules/next/...)</div>
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-[11.5px] text-slate-500">
+                    <span className="inline-flex items-center gap-1.5"><IconCheck className="w-3 h-3 text-emerald-500" /> Drop into HTML head</span>
+                    <span className="inline-flex items-center gap-1.5"><IconCheck className="w-3 h-3 text-emerald-500" /> 0ms main thread delay</span>
+                    <span className="inline-flex items-center gap-1.5"><IconCheck className="w-3 h-3 text-emerald-500" /> Under 5KB featherweight</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* ── 4. ROOT-CAUSE SCANNER ───────────────────────────────────── */}
+            <SmoothReveal className="mx-auto max-w-5xl px-5 pb-24" delay={40}>
+              <div id="grouping" className="overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-b from-[#0C1221] to-[#070B13] shadow-[0_40px_120px_-50px_rgba(250,204,21,0.25)]">
+                <div className="flex items-center justify-between border-b border-white/[0.07] bg-[#0A0F1A] px-5 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
+                    </span>
+                    <span className="text-[12.5px] font-medium text-slate-300">Live production incident scanner</span>
+                  </div>
+                  <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 font-mono text-[10.5px] font-semibold text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    active root cause trace
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 p-5 sm:p-7 md:grid-cols-12">
+                  <div className="md:col-span-7">
+                    <ol className="relative space-y-2 pl-6">
+                      <span className="absolute left-[7px] top-3 bottom-6 w-px bg-gradient-to-b from-emerald-500/40 via-emerald-500/20 to-red-500/60" />
+
+                      {[
+                        'User submits checkout form',
+                        'Frontend dispatches POST /v1/order',
+                        'Next.js Server Action executes',
+                      ].map((step) => (
+                        <li key={step} className="relative flex items-center justify-between rounded-xl border border-white/[0.06] bg-[#080C15] px-3.5 py-3">
+                          <span className="absolute -left-6 top-1/2 h-[15px] w-[15px] -translate-y-1/2 rounded-full border-2 border-emerald-500/60 bg-[#05070E]" />
+                          <span className="text-[12.5px] text-slate-300">{step}</span>
+                          <span className="font-mono text-[11px] font-semibold text-emerald-400">200 OK</span>
+                        </li>
+                      ))}
+
+                      <li className="relative flex items-center justify-between rounded-xl border border-red-500/40 bg-red-950/30 px-3.5 py-3 shadow-[0_0_0_1px_rgba(239,68,68,0.15),0_18px_40px_-26px_rgba(239,68,68,0.8)]">
+                        <span className="absolute -left-6 top-1/2 h-[15px] w-[15px] -translate-y-1/2 rounded-full border-2 border-red-500 bg-[#05070E]" />
+                        <span className="flex items-center gap-2 font-mono text-[12.5px] font-semibold text-red-300">
+                          <IconAlert className="w-3.5 h-3.5" />
+                          database.js:18 pool.connect()
+                        </span>
+                        <span className="font-mono text-[11px] font-semibold text-red-400">crash origin</span>
+                      </li>
+                    </ol>
+                  </div>
+
+                  <div className="md:col-span-5">
+                    <div className="h-full rounded-xl border border-yellow-400/25 bg-[#080C15] p-5">
+                      <div className="flex items-center gap-2">
+                        <IconTarget className="w-3.5 h-3.5 text-yellow-400" />
+                        <span className={MICRO_LABEL}>Collapse engine</span>
+                      </div>
+                      <h3 className="mt-3 text-[15px] font-semibold text-white">Root cause: connection pool exhaustion</h3>
+                      <p className="mt-2 text-[12.5px] leading-relaxed text-slate-400">
+                        4 downstream HTTP 500 crashes collapsed under <code className="font-mono text-yellow-300">database.js</code>. The client connection was never released.
+                      </p>
+                      <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3 font-mono text-[11.5px]">
+                        <span className="text-slate-500">Code patch ready</span>
+                        <span className="font-semibold text-emerald-400">client.release()</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </SmoothReveal>
+
+            {/* ── 5. SOCIAL PROOF ─────────────────────────────────────────── */}
+            <SmoothReveal className="mx-auto max-w-5xl px-5 pb-24" delay={60}>
+              <figure id="social-proof" className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0A0F1A]/70 p-7 sm:p-9">
+                <span className="absolute left-0 top-8 h-16 w-[3px] rounded-r-full bg-gradient-to-b from-yellow-300 to-amber-500" />
+                <span className="absolute right-6 top-4 select-none font-serif text-[86px] leading-none text-white/[0.04]">&rdquo;</span>
+
+                <blockquote className="relative max-w-3xl text-[15px] leading-relaxed text-slate-300">
+                  5KB and no inbox flood is a great pair to lead with. The errors that cost me the most time on my own app were not loud at all. Four separate reports, one cause underneath, and I only worked that out by reading all four by hand on a Sunday. If SnapTrace collapses those itself, say it louder than the bundle size. Nobody knows they want that until week two.
+                </blockquote>
+
+                <figcaption className="mt-6 flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-yellow-400/30 bg-yellow-400/10 font-mono text-[12px] font-semibold text-yellow-300">
+                    EB
+                  </span>
+                  <span className="block">
+                    <span className="block text-[13px] font-semibold text-white">Eusebiu Balan</span>
+                    <span className="block text-[11.5px] text-slate-500">Senior full-stack engineer · via Dev.to</span>
+                  </span>
+                </figcaption>
+              </figure>
+            </SmoothReveal>
+
+            {/* ── 6. AI AGENT EXPORT ──────────────────────────────────────── */}
+            <section id="ai-agent" className="border-t border-white/[0.05] py-24">
+              <div className="mx-auto max-w-5xl px-5 space-y-10">
+                <SmoothReveal>
+                  <SectionHeading
+                    eyebrow="AI workflow native"
+                    title="Turn runtime stack traces into instant AI bug fixes"
+                    body="Export pre-formatted, AI-ready crash diagnostics straight into Cursor, Claude Code, or VS Code Copilot and generate 2-line patches locally in your IDE [1.4.1, 1.4.2]."
+                  />
+
+                  <div className="mt-7 flex items-center justify-center">
+                    <div className="inline-flex items-center gap-1 rounded-xl border border-white/[0.08] bg-[#0A0F1A] p-1">
+                      {([
+                        { id: 'cursor', label: 'Cursor IDE', mark: <CursorMark className="w-3.5 h-3.5" /> },
+                        { id: 'claude', label: 'Claude Code', mark: <AnthropicMark className="w-3.5 h-3.5" /> },
+                        { id: 'vscode', label: 'VS Code Copilot', mark: <VSCodeMark className="w-3.5 h-3.5" /> },
+                      ] as const).map((ide) => (
+                        <button
+                          key={ide.id}
+                          onClick={() => setActiveIdeTab(ide.id)}
+                          className={
+                            'inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-[12.5px] font-semibold transition cursor-pointer ' +
+                            (activeIdeTab === ide.id
+                              ? 'bg-purple-600/90 text-white shadow-[0_10px_30px_-16px_rgba(147,51,234,1)]'
+                              : 'text-slate-400 hover:text-white')
+                          }
+                        >
+                          {ide.mark}
+                          {ide.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </SmoothReveal>
+
+                <SmoothReveal delay={100}>
+                  <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0F1A]/80 backdrop-blur-xl">
+                    <div className="flex flex-col gap-3 border-b border-white/[0.07] p-5 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-start gap-2.5">
+                        <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-red-500/25 bg-red-500/10 text-red-400">
+                          <IconAlert className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="block">
+                          <span className="block font-mono text-[12.5px] font-semibold text-red-300">ReferenceError: Connection pool exhausted</span>
+                          <span className="block font-mono text-[11px] text-slate-500">captured at database.js:18:11</span>
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={handleCopyCursorDemo}
+                        className={
+                          'inline-flex shrink-0 items-center gap-2 self-start rounded-lg px-4 py-2.5 text-[12.5px] font-semibold transition cursor-pointer sm:self-auto ' +
+                          (copiedCursorPrompt
+                            ? 'border border-emerald-400/40 bg-emerald-400/10 text-emerald-300'
+                            : 'bg-gradient-to-b from-purple-500 to-indigo-600 text-white shadow-[0_14px_34px_-18px_rgba(129,88,246,1)] hover:from-purple-400 hover:to-indigo-500')
+                        }
+                      >
+                        {copiedCursorPrompt ? <IconCheck className="w-3.5 h-3.5" /> : <IconCopy />}
+                        {copiedCursorPrompt ? 'Copied AI prompt' : 'Copy prompt for Cursor / Claude [1.4.1, 1.4.2]'}
+                      </button>
+                    </div>
+
+                    <div className="p-5">
+                      <div className="rounded-xl border border-purple-500/25 bg-[#080C15] p-5">
+                        <div className="flex items-center gap-2 text-purple-300">
+                          <IconSpark className="w-3.5 h-3.5" />
+                          <span className="font-mono text-[10.5px] uppercase tracking-[0.16em]">Instant root-cause diagnosis</span>
                         </div>
-                      )}
 
-                      {activeTriageTab === 'breadcrumbs' && (
-                        <div className="space-y-2 text-[11px] text-slate-300">
-                          <div className="flex items-center justify-between p-1.5 rounded bg-slate-900/60 border border-slate-800">
-                            <span>1. DOM Click: [data-testid=&quot;checkout-btn&quot;]</span>
-                            <span className="text-emerald-400">10:00:01 PM</span>
-                          </div>
-                          <div className="flex items-center justify-between p-1.5 rounded bg-slate-900/60 border border-slate-800">
-                            <span>2. POST /v1/checkout - Body: <code className="text-emerald-300">card: &quot;[SCRUBBED]&quot;</code></span>
-                            <span className="text-emerald-400">200 OK</span>
-                          </div>
-                          <div className="flex items-center justify-between p-1.5 rounded bg-red-950/40 border border-red-500/40 text-red-300 font-bold">
-                            <span>3. Crash captured: database.js:18 pool connection dropped</span>
-                            <span className="text-red-400">🚨 CRASH</span>
-                          </div>
-                        </div>
-                      )}
+                        <p className="mt-3 text-[13px] leading-relaxed text-slate-300">
+                          <span className="font-semibold text-white">Plain English: </span>
+                          the PostgreSQL client in <code className="font-mono text-yellow-300">database.js</code> opens connections inside a tight loop without releasing them back to the pool.
+                        </p>
 
-                      {activeTriageTab === 'aifix' && (
-                        <div className="space-y-2">
-                          <div className="text-purple-300 font-bold text-[11px] flex items-center gap-1.5">
-                            <GeminiLogo className="w-4 h-4" />
-                            <span>Generated by Gemini 2.5 Flash Lite (0.18s)</span>
+                        <div className="mt-4 overflow-hidden rounded-lg border border-white/[0.07] bg-[#05070E]">
+                          <div className="flex items-center justify-between border-b border-white/[0.06] px-3.5 py-2">
+                            <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-500">database.js — patch</span>
+                            <span className="font-mono text-[10.5px] text-emerald-400">+3 −1</span>
                           </div>
-                          <pre className="text-emerald-400 text-[11px] leading-relaxed bg-[#0A0E1A] p-2.5 rounded-lg border border-slate-800">
-                            {`// Proposed Patch for database.js:18\n- const client = await pool.connect();\n- return await client.query(sql, params);\n+ const client = await pool.connect();\n+ try { return await client.query(sql, params); }\n+ finally { client.release(); } // Ensure release`}
+                          <pre className="overflow-x-auto p-4 font-mono text-[12px] leading-relaxed text-emerald-300">
+                            {'// Fix in database.js: Release connection back to pool\nconst client = await pool.connect();\ntry {\n  await client.query(\'SELECT * FROM users WHERE id = $1\', [userId]);\n} finally {\n  client.release(); // Releases connection\n}'}
                           </pre>
                         </div>
-                      )}
+                      </div>
+                    </div>
+                  </div>
+                </SmoothReveal>
+              </div>
+            </section>
+
+            {/* ── 7. BYOK ─────────────────────────────────────────────────── */}
+            <section id="byok" className="relative border-t border-white/[0.05] bg-gradient-to-b from-[#080C15] to-[#05070E] py-24">
+              <div className="mx-auto max-w-5xl px-5 space-y-12">
+                <SmoothReveal>
+                  <SectionHeading
+                    eyebrow="Zero platform markup"
+                    title="Bring your own key"
+                    body="Analyse and fix runtime crashes inside your dashboard with your favourite AI models. No enterprise markups, no vendor lock-in."
+                  />
+                </SmoothReveal>
+
+                <SmoothReveal delay={80}>
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+                    {/* Gemini */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0A0F1A] p-6 transition duration-300 hover:border-yellow-400/30">
+                      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br from-blue-500/20 via-purple-500/10 to-transparent blur-2xl opacity-0 transition duration-500 group-hover:opacity-100" />
+                      <div className="flex items-start justify-between">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03]">
+                          <GeminiMark className="w-6 h-6" />
+                        </span>
+                        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 font-mono text-[10px] font-semibold text-emerald-400">
+                          free tier
+                        </span>
+                      </div>
+                      <h3 className="mt-5 text-[15px] font-semibold text-white">Google Gemini</h3>
+                      <p className="mt-2 text-[12.5px] leading-relaxed text-slate-400">
+                        Integrated with <span className="font-medium text-slate-200">Gemini 2.5 Flash Lite</span>. Lightning-fast root-cause explanations and copy-paste patches inside your Inspect modal, at $0 cost.
+                      </p>
+                    </div>
+
+                    {/* OpenAI */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0A0F1A] p-6 transition duration-300 hover:border-yellow-400/30">
+                      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br from-emerald-400/15 to-transparent blur-2xl opacity-0 transition duration-500 group-hover:opacity-100" />
+                      <div className="flex items-start justify-between">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-white">
+                          <OpenAIMark className="w-6 h-6" />
+                        </span>
+                        <span className="rounded-full border border-yellow-400/20 bg-yellow-400/10 px-2.5 py-1 font-mono text-[10px] font-semibold text-yellow-300">
+                          GPT-4o ready
+                        </span>
+                      </div>
+                      <h3 className="mt-5 text-[15px] font-semibold text-white">OpenAI models</h3>
+                      <p className="mt-2 text-[12.5px] leading-relaxed text-slate-400">
+                        Paste your standard OpenAI key (<code className="font-mono text-yellow-300">sk-...</code>) to analyse deep stack traces with state-of-the-art reasoning models. Stored securely on your device.
+                      </p>
+                    </div>
+
+                    {/* In pipeline */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0A0F1A] p-6 transition duration-300 hover:border-purple-400/30">
+                      <div className="flex items-start justify-between">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-purple-300">
+                          <IconLayers className="w-5 h-5" />
+                        </span>
+                        <span className="rounded-full border border-purple-500/20 bg-purple-500/10 px-2.5 py-1 font-mono text-[10px] font-semibold text-purple-300">
+                          in pipeline
+                        </span>
+                      </div>
+                      <h3 className="mt-5 text-[15px] font-semibold text-white">More models coming</h3>
+                      <p className="mt-2 text-[12.5px] leading-relaxed text-slate-400">
+                        Direct API support for Claude 3.5 Sonnet, DeepSeek R1, and Ollama for 100% private local offline diagnostics.
+                      </p>
+
+                      <div className="mt-4 flex flex-wrap gap-1.5">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.07] bg-white/[0.03] px-2 py-1 font-mono text-[10.5px] text-slate-300">
+                          <AnthropicMark className="w-3.5 h-3.5 text-[#D97757]" /> Claude
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.07] bg-white/[0.03] px-2 py-1 font-mono text-[10.5px] text-slate-300">
+                          <DeepSeekMark className="w-3.5 h-3.5 text-sky-400" /> DeepSeek
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.07] bg-white/[0.03] px-2 py-1 font-mono text-[10.5px] text-slate-300">
+                          <OllamaMark className="w-3.5 h-3.5 text-slate-200" /> Ollama
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </SmoothReveal>
+              </div>
+            </section>
+
+            {/* ── 8. QUICKSTART (12 stacks) ───────────────────────────────── */}
+            <SmoothReveal className="mx-auto max-w-5xl px-5 py-24" delay={40}>
+              <div id="quickstart" className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0F1A] shadow-[0_40px_120px_-60px_rgba(0,0,0,1)]">
+                <div className="flex flex-col gap-3 border-b border-white/[0.07] bg-[#080C15] px-4 py-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                    <span className="mr-1 shrink-0 font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-500">stack</span>
+                    {stackTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveQuickTab(tab.id)}
+                        className={
+                          'shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 font-mono text-[11.5px] font-medium transition cursor-pointer ' +
+                          (activeQuickTab === tab.id
+                            ? 'bg-yellow-400/12 text-yellow-300 ring-1 ring-yellow-400/30'
+                            : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-100')
+                        }
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={handleCopyCode}
+                    className={
+                      'inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg border px-3 py-1.5 font-mono text-[11.5px] font-semibold transition cursor-pointer md:self-auto ' +
+                      (copiedSnippet
+                        ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-300'
+                        : 'border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/20 hover:text-white')
+                    }
+                  >
+                    {copiedSnippet ? <IconCheck className="w-3.5 h-3.5" /> : <IconCopy />}
+                    {copiedSnippet ? 'Snippet copied' : 'Copy SDK code'}
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto bg-[#05070E] p-5">
+                  <div className="min-w-max select-text font-mono text-[12px] leading-[1.75]">
+                    {snippets[activeQuickTab].split('\n').map((line, i) => (
+                      <div key={i} className="flex">
+                        <span className="w-9 shrink-0 select-none pr-4 text-right text-slate-700">{i + 1}</span>
+                        <span className="whitespace-pre text-slate-300">{line}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SmoothReveal>
+
+            {/* ── 9. FEATHERWEIGHT SDK ────────────────────────────────────── */}
+            <section id="features" className="border-t border-white/[0.05] bg-[#060911]/60 py-24">
+              <div className="mx-auto max-w-5xl px-5">
+                <SmoothReveal className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+                  <div className="lg:col-span-6 space-y-6">
+                    <SectionHeading
+                      align="left"
+                      eyebrow="Performance"
+                      title="An error tracker that never slows your users down"
+                      body="Legacy APMs force your users to download 100KB+ bundles that delay First Contentful Paint and hurt Lighthouse scores [1.2.2]. SnapTrace is a zero-dependency script under 5KB gzipped."
+                    />
+
+                    <div className="space-y-3 pt-1">
+                      {[
+                        { name: 'SnapTrace JS telemetry SDK', size: '< 5 KB', width: '6%', tone: 'text-emerald-400', bar: 'bg-gradient-to-r from-emerald-400 to-emerald-500', dim: '' },
+                        { name: 'Honeybadger client', size: '~35 KB', width: '35%', tone: 'text-slate-400', bar: 'bg-slate-600', dim: 'opacity-80' },
+                        { name: 'Sentry browser SDK', size: '100+ KB', width: '100%', tone: 'text-red-400', bar: 'bg-gradient-to-r from-red-500/70 to-red-500', dim: 'opacity-70' },
+                      ].map((row) => (
+                        <div key={row.name} className={'rounded-xl border border-white/[0.06] bg-[#0A0F1A] p-3.5 ' + row.dim}>
+                          <div className="flex items-center justify-between text-[12.5px]">
+                            <span className="text-slate-300">{row.name}</span>
+                            <span className={'font-mono font-semibold ' + row.tone}>{row.size}</span>
+                          </div>
+                          <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
+                            <div className={'h-full rounded-full ' + row.bar} style={{ width: row.width }} />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Right Status Summary Box */}
-                  <div className="md:col-span-4 p-5 bg-[#070A14] rounded-2xl border border-yellow-400/40 space-y-4 font-mono text-xs card-inner-glow">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-400">
-                      ⚡ CASCADE COLLAPSE STATS
+                  <div className="lg:col-span-6">
+                    <div className={'p-6 sm:p-7 ' + CARD}>
+                      <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
+                        <span className="flex items-center gap-2 text-[12.5px] text-slate-300">
+                          <IconGauge className="w-4 h-4 text-yellow-400" />
+                          Google Lighthouse impact
+                        </span>
+                        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 font-mono text-[11px] font-semibold text-emerald-400">
+                          100 / 100
+                        </span>
+                      </div>
+
+                      <div className="mt-5 grid grid-cols-2 gap-4">
+                        <div className="rounded-xl border border-white/[0.06] bg-[#080C15] p-5">
+                          <div className="font-mono text-[26px] font-semibold tracking-tight text-emerald-400">0.0ms</div>
+                          <p className="mt-1 text-[11.5px] text-slate-500">Main thread delay</p>
+                        </div>
+                        <div className="rounded-xl border border-white/[0.06] bg-[#080C15] p-5">
+                          <div className="font-mono text-[26px] font-semibold tracking-tight text-emerald-400">3.4 KB</div>
+                          <p className="mt-1 text-[11.5px] text-slate-500">Total gzipped size</p>
+                        </div>
+                      </div>
+
+                      <p className="mt-5 border-t border-white/[0.06] pt-4 text-[12.5px] italic leading-relaxed text-slate-400">
+                        &ldquo;We dropped heavy tracking tools for SnapTrace and our Next.js bundle footprint dropped instantly.&rdquo;
+                      </p>
                     </div>
-                    <div className="space-y-2 text-slate-300 text-[11px]">
-                      <div className="flex justify-between pb-1 border-b border-slate-800">
-                        <span className="text-slate-500">Occurrences:</span>
-                        <strong className="text-yellow-300">500 crashes</strong>
-                      </div>
-                      <div className="flex justify-between pb-1 border-b border-slate-800">
-                        <span className="text-slate-500">Alerts Dispatched:</span>
-                        <strong className="text-emerald-400">1 Unified Alert</strong>
-                      </div>
-                      <div className="flex justify-between pb-1 border-b border-slate-800">
-                        <span className="text-slate-500">Fingerprint:</span>
-                        <code className="text-slate-400 text-[10px]">sha256(db:18)</code>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">AI Fix Status:</span>
-                        <strong className="text-purple-400">Verified Patch</strong>
-                      </div>
+                  </div>
+                </SmoothReveal>
+              </div>
+            </section>
+
+            {/* ── 10. COMPARISON ──────────────────────────────────────────── */}
+            <section id="comparison" className="mx-auto max-w-5xl px-5 py-24 border-t border-white/[0.05]">
+              <SmoothReveal>
+                <SectionHeading
+                  eyebrow="Comparison"
+                  title="Why developers choose SnapTrace"
+                  body="Built to replace bloated, noisy enterprise APMs [1.1.7, 1.2.2]."
+                />
+              </SmoothReveal>
+
+              <SmoothReveal className="mt-10" delay={80}>
+                <div className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-[#0A0F1A]">
+                  <table className="w-full min-w-[720px] text-left text-[12.5px]">
+                    <thead>
+                      <tr className="border-b border-white/[0.07] bg-[#080C15]">
+                        <th className="p-4 font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-500">Feature</th>
+                        <th className="relative p-4 text-[13px] font-semibold text-yellow-300">
+                          <span className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-yellow-400/0 via-yellow-400 to-yellow-400/0" />
+                          SnapTrace
+                        </th>
+                        <th className="p-4 text-[13px] font-medium text-slate-400">Sentry</th>
+                        <th className="p-4 text-[13px] font-medium text-slate-400">GlitchTip</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/[0.05] text-slate-400">
+                      {[
+                        { f: 'SDK weight', s: 'Under 5 KB', sentry: '~100 KB+', g: '~100 KB+', ok: true },
+                        { f: 'Cascading root-cause collapse', s: 'Multi-crash unified incident', sentry: 'Noisy separate alerts [1.1.7]', g: 'None', ok: true },
+                        { f: 'Free tier events', s: '2,000 / month', sentry: '5,000 / month', g: '1,000 / month', ok: true },
+                        { f: 'Client-side PII scrubbing', s: 'Native on-device', sentry: 'Complex server rules', g: 'None', ok: true },
+                        { f: 'In-dashboard AI diagnosis (BYOK)', s: 'Included in Pro', sentry: 'Expensive add-on', g: 'None', ok: true },
+                        { f: '1-click prompt export for Cursor', s: 'Free forever', sentry: 'Manual copy', g: 'Manual copy', ok: true },
+                      ].map((row) => (
+                        <tr key={row.f} className="transition hover:bg-white/[0.02]">
+                          <td className="p-4 font-medium text-white">{row.f}</td>
+                          <td className="bg-yellow-400/[0.03] p-4">
+                            <span className="inline-flex items-center gap-2 font-medium text-emerald-400">
+                              <IconCheck className="w-3.5 h-3.5 shrink-0" />
+                              {row.s}
+                            </span>
+                          </td>
+                          <td className="p-4 text-slate-500">{row.sentry}</td>
+                          <td className="p-4 text-slate-500">
+                            {row.g === 'None' ? (
+                              <span className="inline-flex items-center gap-2">
+                                <IconCross className="w-3.5 h-3.5 text-slate-600" />
+                                None
+                              </span>
+                            ) : (
+                              row.g
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </SmoothReveal>
+            </section>
+
+            {/* ── 11. PRICING ─────────────────────────────────────────────── */}
+            <section id="pricing" className="border-t border-white/[0.05] py-24">
+              <div className="mx-auto max-w-6xl px-5">
+                <SmoothReveal>
+                  <SectionHeading
+                    eyebrow="Pricing"
+                    title="Simple, developer-first plans"
+                    body="No surprise overage bills. Generous headroom for solo builders and client studios."
+                  />
+
+                  <div className="mt-7 flex flex-col items-center gap-3">
+                    <div className="inline-flex items-center gap-1 rounded-xl border border-white/[0.08] bg-[#0A0F1A] p-1">
+                      <button
+                        onClick={() => setBillingInterval('monthly')}
+                        className={
+                          'rounded-lg px-4 py-2 text-[12.5px] font-semibold transition cursor-pointer ' +
+                          (billingInterval === 'monthly' ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-white')
+                        }
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        onClick={() => setBillingInterval('annual')}
+                        className={
+                          'flex items-center gap-2 rounded-lg px-4 py-2 text-[12.5px] font-semibold transition cursor-pointer ' +
+                          (billingInterval === 'annual'
+                            ? 'bg-gradient-to-b from-yellow-300 to-amber-500 text-slate-950'
+                            : 'text-slate-400 hover:text-yellow-300')
+                        }
+                      >
+                        Annual
+                        <span
+                          className={
+                            'rounded-md px-1.5 py-0.5 font-mono text-[10px] font-semibold ' +
+                            (billingInterval === 'annual' ? 'bg-slate-950 text-yellow-300' : 'bg-yellow-400/10 text-yellow-300')
+                          }
+                        >
+                          Save 20% + 2 months free
+                        </span>
+                      </button>
                     </div>
 
-                    <Link
-                      href="/signup"
-                      className="block w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl shadow-md transition"
+                    {billingInterval === 'annual' && (
+                      <p className="flex items-center gap-1.5 font-mono text-[11.5px] text-emerald-400">
+                        <IconCheck className="w-3.5 h-3.5" />
+                        Billed annually — includes 2 months completely free
+                      </p>
+                    )}
+                  </div>
+                </SmoothReveal>
+
+                <SmoothReveal className="mt-12" delay={80}>
+                  <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3">
+
+                    {/* Tier 1 — Developer Free */}
+                    <div className="flex flex-col justify-between rounded-2xl border border-white/[0.07] bg-[#0A0F1A] p-7 transition hover:border-white/15">
+                      <div>
+                        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500">Developer Free</span>
+                        <div className="mt-3 flex items-baseline gap-1.5">
+                          <span className="text-[34px] font-semibold tracking-tight text-white">$0</span>
+                          <span className="font-mono text-[12px] text-slate-500">/ month</span>
+                        </div>
+                        <p className="mt-2 text-[12.5px] text-slate-400">For side projects and personal experiments.</p>
+
+                        <ul className="mt-6 space-y-3 border-t border-white/[0.06] pt-6 text-[12.5px] text-slate-300">
+                          {[
+                            '2,000 events / month',
+                            '7-day data retention',
+                            '1 active project',
+                            'Sub-5KB SDK & 0ms main thread delay',
+                            'In-dashboard error inspection',
+                            'Client-side regex PII firewall',
+                            'Email & in-app alerts (no webhooks)',
+                          ].map((item) => (
+                            <li key={item} className="flex items-start gap-2.5">
+                              <IconCheck className="mt-0.5 w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <Link
+                        href="/signup"
+                        className="mt-7 block w-full rounded-lg border border-white/10 bg-white/[0.04] py-3 text-center text-[13px] font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.08]"
+                      >
+                        Start free forever
+                      </Link>
+                    </div>
+
+                    {/* Tier 2 — Pro Builder */}
+                    <div className="relative flex flex-col justify-between rounded-2xl border border-yellow-400/40 bg-gradient-to-b from-[#12172A] to-[#070B14] p-7 shadow-[0_40px_110px_-45px_rgba(250,204,21,0.45)] lg:-translate-y-3">
+                      <span className="absolute -top-3 left-7 rounded-full bg-gradient-to-r from-yellow-300 to-amber-500 px-3 py-1 font-mono text-[10px] font-semibold text-slate-950">
+                        Popular for solo devs
+                      </span>
+
+                      <div>
+                        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-yellow-400">Pro Builder</span>
+                        <div className="mt-3 flex items-baseline gap-1.5">
+                          <span className="text-[34px] font-semibold tracking-tight text-white">
+                            {billingInterval === 'annual' ? '$15' : '$19'}
+                          </span>
+                          <span className="font-mono text-[12px] text-slate-400">/ month</span>
+                        </div>
+                        <p className="mt-2 text-[12.5px] text-slate-400">
+                          {billingInterval === 'annual' ? 'Billed annually at $180/yr.' : 'For solo developers, freelancers & micro-SaaS.'}
+                        </p>
+
+                        <ul className="mt-6 space-y-3 border-t border-white/[0.06] pt-6 text-[12.5px] text-slate-200">
+                          {[
+                            '75,000 events / month',
+                            '30-day telemetry retention',
+                            'Up to 5 active projects',
+                            'Instant Discord, Slack & Telegram alerts',
+                            '1-click Cursor & Claude AI fix prompts [1.4.1, 1.4.2]',
+                            '60s loop deduplication ([x50] noise throttling) [1.1.7]',
+                            'In-dashboard BYOK AI Copilot',
+                          ].map((item) => (
+                            <li key={item} className="flex items-start gap-2.5">
+                              <IconCheck className="mt-0.5 w-3.5 h-3.5 shrink-0 text-yellow-400" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <Link href="/signup" className={BTN_PRIMARY + ' mt-7 w-full'}>
+                        Claim Pro beta pass
+                        <IconArrow />
+                      </Link>
+                    </div>
+
+                    {/* Tier 3 — Agency Studio */}
+                    <div className="flex flex-col justify-between rounded-2xl border border-white/[0.07] bg-[#0A0F1A] p-7 transition hover:border-purple-400/30">
+                      <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-purple-400">Agency Studio</span>
+                          <span className="rounded-full border border-purple-500/20 bg-purple-500/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-purple-300">
+                            for agencies
+                          </span>
+                        </div>
+                        <div className="mt-3 flex items-baseline gap-1.5">
+                          <span className="text-[34px] font-semibold tracking-tight text-white">
+                            {billingInterval === 'annual' ? '$39' : '$49'}
+                          </span>
+                          <span className="font-mono text-[12px] text-slate-500">/ month</span>
+                        </div>
+                        <p className="mt-2 text-[12.5px] text-slate-400">
+                          {billingInterval === 'annual' ? 'Billed annually at $468/yr.' : 'For web studios & agencies managing multiple client sites.'}
+                        </p>
+
+                        <ul className="mt-6 space-y-3 border-t border-white/[0.06] pt-6 text-[12.5px] text-slate-300">
+                          {[
+                            '500,000 events / month',
+                            '90-day telemetry retention',
+                            'Unlimited client projects & keys',
+                            'Multi-seat team & client invites',
+                            'Cascading multi-error outage collapse',
+                            'Priority edge ingestion gateways',
+                            'Raw log CSV / JSON data export',
+                          ].map((item) => (
+                            <li key={item} className="flex items-start gap-2.5">
+                              <IconCheck className="mt-0.5 w-3.5 h-3.5 shrink-0 text-purple-400" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowAgencyModal(true)}
+                        className="mt-7 block w-full rounded-lg border border-white/10 bg-white/[0.04] py-3 text-center text-[13px] font-semibold text-white transition hover:border-purple-400/40 hover:bg-purple-500/10 cursor-pointer"
+                      >
+                        Request agency access
+                      </button>
+                    </div>
+
+                  </div>
+                </SmoothReveal>
+              </div>
+            </section>
+
+            {/* ── 12. SECURITY ────────────────────────────────────────────── */}
+            <section className="border-t border-white/[0.05] bg-[#060911]/60 py-20">
+              <div className="mx-auto max-w-5xl px-5">
+                <SmoothReveal>
+                  <SectionHeading
+                    eyebrow="Security by default"
+                    title="Built for developer privacy and performance"
+                  />
+                </SmoothReveal>
+
+                <SmoothReveal className="mt-10" delay={60}>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                    {[
+                      { icon: <IconShield className="w-4 h-4" />, tone: 'text-emerald-300 border-emerald-400/20 bg-emerald-400/10', title: 'GDPR ready', body: 'On-device PII masking' },
+                      { icon: <IconFeather className="w-4 h-4" />, tone: 'text-yellow-300 border-yellow-400/20 bg-yellow-400/10', title: 'Under 5KB', body: '100/100 Core Web Vitals' },
+                      { icon: <IconMute className="w-4 h-4" />, tone: 'text-sky-300 border-sky-400/20 bg-sky-400/10', title: 'Anti-noise guard', body: 'SHA-256 loop throttling [1.1.7]' },
+                      { icon: <IconUnlock className="w-4 h-4" />, tone: 'text-purple-300 border-purple-400/20 bg-purple-400/10', title: 'No vendor lock-in', body: 'Universal REST protocol' },
+                    ].map((card) => (
+                      <div key={card.title} className="rounded-2xl border border-white/[0.07] bg-[#0A0F1A] p-5 transition hover:border-white/15">
+                        <span className={'flex h-9 w-9 items-center justify-center rounded-lg border ' + card.tone}>
+                          {card.icon}
+                        </span>
+                        <div className="mt-4 text-[13px] font-semibold text-white">{card.title}</div>
+                        <div className="mt-1 text-[11.5px] leading-snug text-slate-500">{card.body}</div>
+                      </div>
+                    ))}
+                  </div>
+                </SmoothReveal>
+              </div>
+            </section>
+
+            {/* ── 13. FAQ ─────────────────────────────────────────────────── */}
+            <section id="faq" className="mx-auto max-w-3xl px-5 py-24 border-t border-white/[0.05]">
+              <SmoothReveal>
+                <SectionHeading
+                  eyebrow="FAQ"
+                  title="Frequently asked questions"
+                  body="Real technical answers for developers evaluating SnapTrace."
+                />
+              </SmoothReveal>
+
+              <SmoothReveal className="mt-10 space-y-2.5" delay={60}>
+                {faqs.map((faq, idx) => {
+                  const isOpen = activeFaq === idx;
+                  return (
+                    <div
+                      key={idx}
+                      className={
+                        'overflow-hidden rounded-xl border transition duration-200 ' +
+                        (isOpen ? 'border-yellow-400/25 bg-[#0C1221]' : 'border-white/[0.07] bg-[#0A0F1A] hover:border-white/15')
+                      }
                     >
-                      Explore Live Console →
+                      <button
+                        onClick={() => setActiveFaq(isOpen ? null : idx)}
+                        className="flex w-full cursor-pointer items-center justify-between gap-4 p-5 text-left"
+                        aria-expanded={isOpen}
+                      >
+                        <span className={'text-[13.5px] font-semibold transition ' + (isOpen ? 'text-yellow-300' : 'text-white')}>
+                          {faq.q}
+                        </span>
+                        <IconChevron className={'w-4 h-4 shrink-0 text-slate-500 transition-transform duration-200 ' + (isOpen ? 'rotate-180' : '')} />
+                      </button>
+                      {isOpen && (
+                        <div className="border-t border-white/[0.06] px-5 pb-5 pt-4 text-[13px] leading-relaxed text-slate-400">
+                          {faq.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </SmoothReveal>
+            </section>
+
+            {/* ── 14. FOOTER ──────────────────────────────────────────────── */}
+            <footer className="relative overflow-hidden border-t border-white/[0.06] bg-[#060911] pb-12 pt-20">
+              <div className="mx-auto max-w-6xl space-y-14 px-5">
+
+                {/* Closing CTA */}
+                <div className="mx-auto max-w-xl space-y-4 text-center">
+                  <h2 className="text-[26px] sm:text-[32px] font-semibold tracking-[-0.02em] text-white">
+                    Ready to catch bugs in a snap?
+                  </h2>
+                  <p className="text-[13px] leading-relaxed text-slate-400">
+                    Join developers catching crashes in real time with zero noise and instant AI diagnoses.
+                  </p>
+                  <div className="pt-1">
+                    <Link href="/signup" className={BTN_PRIMARY}>
+                      Claim your free beta pass
+                      <IconArrow />
                     </Link>
                   </div>
                 </div>
 
-              </div>
-            </div>
-
-          </section>
-
-          {/* 4. REALISTIC "SUNDAY 2 AM" OUTAGE VISUALIZER (#grouping) */}
-          <SmoothReveal className="max-w-5xl mx-auto px-6 py-12" delay={50}>
-            <div id="grouping" className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-8 card-inner-glow">
-              <div className="text-center space-y-3 max-w-2xl mx-auto">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/30 text-yellow-300 text-xs font-mono font-bold uppercase">
-                  <span>🎯</span> The Sunday 2 AM Cascade Problem
-                </div>
-                <h2 className="text-3xl sm:text-4xl font-black text-white">
-                  One Outage Shouldn’t Trigger 500 Panic Alerts
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-sans">
-                  When a backend connection pool dies, your auth breaks, your cart breaks, your checkout breaks, and your webhook breaks. Traditional APMs treat each as an independent emergency. SnapTrace connects the dots.
-                </p>
-              </div>
-
-              {/* Side by side comparison */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 font-mono text-xs">
-                {/* Legacy Sentry / Datadog Way */}
-                <div className="p-6 rounded-2xl bg-red-950/20 border border-red-500/30 space-y-4">
-                  <div className="flex items-center justify-between border-b border-red-500/20 pb-2">
-                    <span className="text-red-400 font-bold uppercase text-[11px]">Legacy Error Trackers</span>
-                    <span className="text-red-500 font-bold">5 ALERTS (FLOOD)</span>
-                  </div>
-                  <div className="space-y-2 opacity-80">
-                    <div className="p-2.5 bg-red-900/30 rounded-lg border border-red-700/40 text-red-200">
-                      🚨 02:00:01 AM - HTTP 500: Auth Service Dropped
-                    </div>
-                    <div className="p-2.5 bg-red-900/30 rounded-lg border border-red-700/40 text-red-200">
-                      🚨 02:00:02 AM - HTTP 500: Cart Query Failed
-                    </div>
-                    <div className="p-2.5 bg-red-900/30 rounded-lg border border-red-700/40 text-red-200">
-                      🚨 02:00:03 AM - HTTP 500: Order Checkout Timeout
-                    </div>
-                    <div className="p-2.5 bg-red-900/30 rounded-lg border border-red-700/40 text-red-200">
-                      🚨 02:00:04 AM - Webhook Retries Exhausted
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-red-300/80 pt-1 font-sans">
-                    You wake up at 2 AM reading 5 noisy notifications trying to manually diagnose which error caused which.
-                  </p>
-                </div>
-
-                {/* The SnapTrace Way */}
-                <div className="p-6 rounded-2xl bg-emerald-950/20 border-2 border-emerald-500/40 space-y-4 laser-glow">
-                  <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
-                    <span className="text-emerald-400 font-bold uppercase text-[11px]">SnapTrace Smart Collapse</span>
-                    <span className="text-emerald-300 font-bold bg-emerald-500/20 px-2 py-0.5 rounded">1 UNIFIED THREAD</span>
-                  </div>
-                  <div className="p-4 bg-[#070A12] rounded-xl border border-emerald-500/30 space-y-2 text-slate-200">
-                    <div className="text-yellow-400 font-bold text-xs flex items-center justify-between">
-                      <span>Root Cause: database.js:18</span>
-                      <span className="text-[10px] bg-yellow-400/10 px-2 py-0.5 rounded text-yellow-300">4 Crashes Collapsed</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-                      Downstream HTTP crashes in Auth, Cart, and Checkout were caused by PostgreSQL client exhaustion.
+                {/* Link grid */}
+                <div className="grid grid-cols-2 gap-10 border-t border-white/[0.06] pt-12 lg:grid-cols-12">
+                  <div className="col-span-2 space-y-4 lg:col-span-4">
+                    <SnapTraceLogo size="md" showText={true} />
+                    <p className="max-w-[260px] text-[12.5px] leading-relaxed text-slate-500">
+                      The modern developer telemetry platform. Featherweight crash monitoring with root-cause collapse and AI fixes.
                     </p>
-                    <div className="pt-2 border-t border-slate-800 text-[11px] text-emerald-400 flex items-center justify-between">
-                      <span>✓ 1 Alert to Discord/Slack</span>
-                      <span>✓ AI Code Diff Attached</span>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-emerald-300 pt-1 font-sans">
-                    Zero alert fatigue. You receive 1 crisp notification pinpointing the exact broken line and how to patch it.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </SmoothReveal>
-
-          {/* 5. SENIOR ENGINEER SOCIAL PROOF */}
-          <SmoothReveal className="max-w-5xl mx-auto px-6 py-8" delay={100}>
-            <div id="social-proof" className="p-7 rounded-3xl bg-gradient-to-r from-[#0B101D] to-[#080d1a] border border-slate-800 shadow-xl space-y-3 card-inner-glow">
-              <div className="flex items-center gap-2 text-yellow-400 text-xs font-mono font-bold uppercase tracking-widest">
-                <span>💬</span> Validated by Senior Production Engineers
-              </div>
-              <blockquote className="text-sm sm:text-base text-slate-200 italic leading-relaxed font-sans">
-                &quot;5KB and no inbox flood is a great pair to lead with. The errors that cost me the most time on my own app were not loud at all. Four separate reports, one cause underneath, and I only worked that out by reading all four by hand on a Sunday. If SnapTrace collapses those itself, say it louder than the bundle size. Nobody knows they want that until week two.&quot;
-              </blockquote>
-              <div className="flex items-center gap-3 pt-2 text-xs font-mono">
-                <div className="w-8 h-8 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center font-bold text-yellow-300 text-xs">
-                  EB
-                </div>
-                <div>
-                  <div className="text-white font-bold">Eusebiu Balan</div>
-                  <div className="text-slate-400 text-[11px]">Senior Full-Stack Engineer • via Dev.to Community</div>
-                </div>
-              </div>
-            </div>
-          </SmoothReveal>
-
-          {/* 🌟 6. BRING YOUR OWN KEY (BYOK) MASTER SECTION (#byok) */}
-          <section id="byok" className="py-24 border-t border-slate-800/80 bg-gradient-to-b from-[#090D18] to-[#05070E] relative overflow-hidden">
-            
-            {/* Ambient Background Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-purple-600/10 blur-[150px] pointer-events-none rounded-full" />
-
-            <div className="max-w-6xl mx-auto px-6 space-y-14 relative z-10">
-              
-              <SmoothReveal className="text-center space-y-4 max-w-3xl mx-auto">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-yellow-400/15 via-purple-500/15 to-blue-500/15 border border-yellow-400/30 text-yellow-300 text-xs font-bold uppercase font-mono">
-                  <span>⚡</span> Zero AI Markups • Client-Side Encryption
-                </div>
-                <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-                  Bring Your Own Key (BYOK) AI Architecture
-                </h2>
-                <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
-                  Unlike legacy monitoring tools that charge exorbitant monthly per-seat add-ons for AI summaries, SnapTrace connects directly to your own API keys. <strong>Your keys and source code are encrypted on-device and never stored or trained on our servers.</strong>
-                </p>
-              </SmoothReveal>
-
-              {/* CURRENTLY LIVE MODELS (2 ACTIVE) */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 font-mono text-xs text-yellow-400 font-bold uppercase tracking-wider">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Currently Live & Supported in Dashboard</span>
-                </div>
-
-                <SmoothReveal className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
-                  {/* Model 1: Google Gemini (Active) */}
-                  <div className="p-7 rounded-3xl bg-[#0B101D] border-2 border-emerald-500/50 hover:border-emerald-400 transition-all space-y-5 shadow-2xl relative overflow-hidden card-inner-glow">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-2xl bg-blue-500/10 border border-blue-500/30">
-                          <GeminiLogo className="w-8 h-8" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-white font-mono">Google Gemini</h3>
-                          <span className="text-[11px] text-emerald-400 font-mono font-bold">100% Free Tier • Recommended</span>
-                        </div>
-                      </div>
-                      <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-black uppercase">
-                        ACTIVE LIVE
-                      </span>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
-                      Direct integration with <strong className="text-white">Gemini 2.5 Flash Lite</strong>. Generate ultra-fast root-cause analyses and exact code patch diffs directly in your dashboard modal in less than 200 milliseconds. <strong>$0 cost on Google&apos;s generous free API tier.</strong>
-                    </p>
-
-                    <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 font-mono text-[11px] text-slate-400 flex items-center justify-between">
-                      <span>Supported Model: <strong className="text-white">gemini-2.5-flash-lite</strong></span>
-                      <span className="text-emerald-400 font-bold">⚡ ~180ms</span>
-                    </div>
-                  </div>
-
-                  {/* Model 2: OpenAI (Active) */}
-                  <div className="p-7 rounded-3xl bg-[#0B101D] border-2 border-yellow-400/50 hover:border-yellow-400 transition-all space-y-5 shadow-2xl relative overflow-hidden card-inner-glow">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-2xl bg-slate-800 border border-slate-700">
-                          <OpenAILogo className="w-8 h-8 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-white font-mono">OpenAI Models</h3>
-                          <span className="text-[11px] text-yellow-400 font-mono font-bold">GPT-4o & GPT-4o-mini</span>
-                        </div>
-                      </div>
-                      <span className="px-3 py-1 rounded-full bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-[10px] font-mono font-black uppercase">
-                        ACTIVE LIVE
-                      </span>
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
-                      Paste your standard OpenAI key (<code className="text-yellow-300 font-mono bg-yellow-400/10 px-1.5 py-0.5 rounded">sk-...</code>) in Settings. SnapTrace runs AST-level reasoning across stack frames, environment variables, and user breadcrumbs to pinpoint complex concurrency issues.
-                    </p>
-
-                    <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 font-mono text-[11px] text-slate-400 flex items-center justify-between">
-                      <span>Supported Model: <strong className="text-white">gpt-4o / gpt-4o-mini</strong></span>
-                      <span className="text-yellow-300 font-bold">⚡ Deep AST</span>
-                    </div>
-                  </div>
-
-                </SmoothReveal>
-              </div>
-
-              {/* UPCOMING MODEL PIPELINE (DEEPSEEK, CLAUDE, OLLAMA) */}
-              <div className="space-y-4 pt-4">
-                <div className="flex items-center justify-between font-mono text-xs">
-                  <span className="text-slate-400 font-bold uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-purple-400" />
-                    <span>In Active Pipeline (Upcoming In-Dashboard Support)</span>
-                  </span>
-                  <span className="text-[11px] text-purple-400">Available Soon in Settings</span>
-                </div>
-
-                <SmoothReveal className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  
-                  {/* Pipeline 1: DeepSeek */}
-                  <div className="p-6 rounded-2xl bg-[#080C16] border border-slate-800 hover:border-blue-500/40 transition space-y-3 relative group">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <DeepSeekLogo className="w-7 h-7" />
-                        <h4 className="font-bold text-white text-sm font-mono">DeepSeek V3 / R1</h4>
-                      </div>
-                      <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 text-[10px] font-mono font-bold">
-                        UPCOMING
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                      State-of-the-art open-weights reasoning. Use your DeepSeek API keys for high-capacity, cost-effective stack trace troubleshooting.
-                    </p>
-                  </div>
-
-                  {/* Pipeline 2: Anthropic Claude */}
-                  <div className="p-6 rounded-2xl bg-[#080C16] border border-slate-800 hover:border-amber-500/40 transition space-y-3 relative group">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <ClaudeLogo className="w-7 h-7" />
-                        <h4 className="font-bold text-white text-sm font-mono">Claude 3.5 Sonnet</h4>
-                      </div>
-                      <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[10px] font-mono font-bold">
-                        UPCOMING
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                      Direct API integration with Anthropic&apos;s leading coding model for deep syntactic analysis and complex multi-file architectural fixes.
-                    </p>
-                  </div>
-
-                  {/* Pipeline 3: Ollama / Local */}
-                  <div className="p-6 rounded-2xl bg-[#080C16] border border-slate-800 hover:border-slate-600 transition space-y-3 relative group">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <OllamaLogo className="w-7 h-7 text-slate-300" />
-                        <h4 className="font-bold text-white text-sm font-mono">Ollama (100% Local)</h4>
-                      </div>
-                      <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] font-mono font-bold">
-                        AIR-GAPPED
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                      Connect your localhost Ollama endpoint (<code className="text-slate-300">localhost:11434</code>) for completely air-gapped, zero-cloud private model inference.
-                    </p>
-                  </div>
-
-                </SmoothReveal>
-              </div>
-
-              {/* Zero-Trust Security Callout */}
-              <div className="p-5 rounded-2xl bg-gradient-to-r from-[#0B101D] to-[#070A14] border border-yellow-400/20 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">🛡️</span>
-                  <div>
-                    <strong className="text-white">Zero-Trust Local Key Storage Guarantee:</strong>
-                    <span className="text-slate-400 block sm:inline sm:ml-1">
-                      SnapTrace never stores your AI API keys in database records. Keys reside in encrypted client memory.
+                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/[0.07] px-2.5 py-1 font-mono text-[10.5px] font-semibold text-emerald-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Systems operational
                     </span>
                   </div>
+
+                  <div className="space-y-3 lg:col-span-2">
+                    <span className="block font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-500">Company</span>
+                    <ul className="space-y-2.5 text-[12.5px] text-slate-400">
+                      <li><Link href="/about" className="transition hover:text-white">About SnapTrace</Link></li>
+                      <li><a href="#features" className="transition hover:text-white">Engineering blog</a></li>
+                      <li><a href="#ai-agent" className="transition hover:text-white">Careers</a></li>
+                      <li><a href="mailto:hello.snaptrace@gmail.com" className="font-medium text-slate-300 transition hover:text-yellow-300">Contact support</a></li>
+                      <li><Link href="/privacy" className="transition hover:text-white">Trust &amp; security</Link></li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3 lg:col-span-2">
+                    <span className="block font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-500">Platform</span>
+                    <ul className="space-y-2.5 text-[12.5px] text-slate-400">
+                      <li><a href="#features" className="transition hover:text-white">Telemetry ingestion</a></li>
+                      <li><a href="#features" className="transition hover:text-white">Sub-5KB client SDK</a></li>
+                      <li><a href="#ai-agent" className="transition hover:text-white">AI root cause engine</a></li>
+                      <li><a href="#features" className="transition hover:text-white">Client-side PII firewall</a></li>
+                      <li><a href="#features" className="transition hover:text-white">60s loop throttling [1.1.7]</a></li>
+                      <li><Link href="/dashboard" className="transition hover:text-white">Realtime WebSockets</Link></li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3 lg:col-span-2">
+                    <span className="block font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-500">Solutions</span>
+                    <ul className="space-y-2.5 text-[12.5px] text-slate-400">
+                      <li><a href="#quickstart" className="transition hover:text-white">Next.js App Router</a></li>
+                      <li><a href="#quickstart" className="transition hover:text-white">Python &amp; FastAPI</a></li>
+                      <li><a href="#quickstart" className="transition hover:text-white">Node.js / Express</a></li>
+                      <li><a href="#quickstart" className="transition hover:text-white">Go, Rust &amp; PHP</a></li>
+                      <li><a href="#pricing" className="transition hover:text-white">Micro-SaaS &amp; startups</a></li>
+                      <li><a href="#pricing" className="transition hover:text-white">Agencies &amp; studios</a></li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-3 lg:col-span-2">
+                    <span className="block font-mono text-[10.5px] uppercase tracking-[0.16em] text-slate-500">Get help</span>
+                    <ul className="space-y-2.5 text-[12.5px] text-slate-400">
+                      <li>
+                        <a href="mailto:hello.snaptrace@gmail.com" className="block truncate font-medium text-yellow-300 hover:underline">
+                          hello.snaptrace@gmail.com
+                        </a>
+                      </li>
+                      <li><a href="#quickstart" className="transition hover:text-white">SDK documentation</a></li>
+                      <li><Link href="/demo" className="font-medium text-slate-300 transition hover:text-yellow-300">Public demo</Link></li>
+                      <li><Link href="/test" className="transition hover:text-white">Live test sandbox</Link></li>
+                    </ul>
+                  </div>
                 </div>
-                <Link
-                  href="/privacy"
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-yellow-300 font-bold shrink-0 transition"
-                >
-                  Read Security Spec →
-                </Link>
+
+                {/* Signature wave */}
+                <div className="w-full overflow-hidden text-slate-800/80">
+                  <svg className="h-3 w-full" viewBox="0 0 1200 12" fill="none" preserveAspectRatio="none" aria-hidden="true">
+                    <path
+                      d="M0 6 Q 30 0, 60 6 T 120 6 T 180 6 T 240 6 T 300 6 T 360 6 T 420 6 T 480 6 T 540 6 T 600 6 T 660 6 T 720 6 T 780 6 T 840 6 T 900 6 T 960 6 T 1020 6 T 1080 6 T 1140 6 T 1200 6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+
+                {/* Legal + social */}
+                <div className="flex flex-col items-center justify-between gap-5 pt-2 text-[12px] text-slate-500 md:flex-row">
+                  <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+                    <Link href="/terms" className="transition hover:text-yellow-300">Terms</Link>
+                    <Link href="/privacy" className="transition hover:text-yellow-300">Security &amp; compliance</Link>
+                    <Link href="/privacy" className="transition hover:text-yellow-300">Privacy</Link>
+                    <Link href="/about" className="transition hover:text-yellow-300">About</Link>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-slate-500">
+                    <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="transition hover:text-white" aria-label="X (Twitter)">
+                      <XMark />
+                    </a>
+                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="transition hover:text-white" aria-label="GitHub">
+                      <GitHubMark />
+                    </a>
+                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="transition hover:text-white" aria-label="LinkedIn">
+                      <LinkedInMark />
+                    </a>
+                    <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="transition hover:text-white" aria-label="Discord">
+                      <DiscordMark />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="border-t border-white/[0.05] pt-6 text-center font-mono text-[11px] text-slate-600">
+                  © {new Date().getFullYear()} SnapTrace. The modern developer telemetry platform.
+                </div>
               </div>
+            </footer>
+          </>
+        )}
 
-            </div>
-          </section>
+        {/* ── AGENCY STUDIO CONTACT MODAL ─────────────────────────────────── */}
+        {showAgencyModal && (
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowAgencyModal(false);
+            }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="relative w-full max-w-md rounded-2xl border border-purple-500/30 bg-[#0A0F1A] p-7 shadow-[0_50px_120px_-40px_rgba(0,0,0,1)]">
+              <button
+                onClick={() => setShowAgencyModal(false)}
+                className="absolute right-5 top-5 text-slate-500 transition hover:text-white cursor-pointer"
+                aria-label="Close"
+              >
+                <IconClose className="w-4 h-4" />
+              </button>
 
-          {/* 7. AI AGENT EXPORT SECTION (#ai-agent) */}
-          <section id="ai-agent" className="py-20 border-t border-slate-800/80 relative">
-            <div className="max-w-5xl mx-auto px-6 space-y-10">
-              <SmoothReveal className="text-center space-y-3 max-w-2xl mx-auto">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase font-mono">
-                  <span>🤖</span> AI Workflow Native
-                </div>
-                <h2 className="text-3xl sm:text-4xl font-black text-white">
-                  Turn runtime stack traces into instant AI bug fixes
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Export pre-formatted, AI-ready crash diagnostic prompts directly into <strong>Cursor, Claude Code, or VS Code Copilot</strong> to generate 2-line code patches locally in your IDE [1.4.1, 1.4.2].
-                </p>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-purple-500/20 bg-purple-500/10 px-2.5 py-1 font-mono text-[10px] font-semibold text-purple-300">
+                <IconBolt className="w-3 h-3" />
+                Agency Studio — $49/mo
+              </span>
 
-                <div className="flex items-center justify-center gap-2 pt-2 font-mono text-xs">
-                  {(['cursor', 'claude', 'vscode'] as const).map((ide) => (
-                    <button
-                      key={ide}
-                      onClick={() => setActiveIdeTab(ide)}
-                      className={
-                        'px-4 py-2 rounded-xl font-bold transition cursor-pointer ' +
-                        (activeIdeTab === ide
-                          ? 'bg-purple-600 text-white shadow-md'
-                          : 'bg-[#0B101D] text-slate-400 hover:text-white border border-slate-800')
-                      }
-                    >
-                      {ide === 'cursor' && 'Cursor IDE'}
-                      {ide === 'claude' && 'Claude Code'}
-                      {ide === 'vscode' && 'VS Code Copilot'}
-                    </button>
-                  ))}
-                </div>
-              </SmoothReveal>
-
-              <SmoothReveal className="bg-[#0B101D] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl max-w-4xl mx-auto space-y-5 card-inner-glow" delay={150}>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-3">
-                  <div>
-                    <span className="text-xs font-bold text-red-400 font-mono block">CRASH: ReferenceError: Connection pool exhausted</span>
-                    <span className="text-[10px] text-slate-500 font-mono">Captured at database.js:18:11</span>
-                  </div>
-                  <button
-                    onClick={handleCopyCursorDemo}
-                    className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer self-start sm:self-auto font-mono flex items-center gap-2"
-                  >
-                    <span>{copiedCursorPrompt ? '✓ Copied AI Prompt!' : '📋 Copy Prompt for Cursor / Claude'}</span>
-                  </button>
-                </div>
-
-                <div className="bg-[#070A12] border border-purple-500/30 rounded-2xl p-4 sm:p-5 space-y-3 font-mono text-xs">
-                  <div className="flex items-center gap-2 text-purple-300 font-bold uppercase tracking-wider text-[10px]">
-                    <span>✨</span> Instant AI Root-Cause Diagnosis
-                  </div>
-                  <p className="text-slate-300 leading-relaxed text-[11px]">
-                    <strong>Plain English:</strong> The PostgreSQL client in <code className="text-yellow-300">database.js</code> is opening connections inside a tight loop without releasing them back to the pool.
-                  </p>
-                  <pre className="p-3.5 bg-[#0B101D] rounded-xl border border-slate-800 text-emerald-400 overflow-x-auto text-[11px] leading-relaxed">
-                    {'// Fix in database.js: Release connection back to pool\nconst client = await pool.connect();\ntry {\n  await client.query(\'SELECT * FROM users WHERE id = $1\', [userId]);\n} finally {\n  client.release(); // Releases connection\n}'}
-                  </pre>
-                </div>
-              </SmoothReveal>
-            </div>
-          </section>
-
-          {/* 🌟 8. INTERACTIVE 12-LANGUAGE TERMINAL (#quickstart) */}
-          <SmoothReveal className="max-w-5xl mx-auto px-6 pb-20" delay={100}>
-            <div id="quickstart" className="bg-[#0B101D] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl card-inner-glow">
-              <div className="bg-[#070A12] px-6 py-4 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center space-x-1.5 overflow-x-auto pb-2 md:pb-0">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mr-2 font-mono whitespace-nowrap">Stack:</span>
-                  {[
-                    { id: 'nextjs', label: 'Next.js' },
-                    { id: 'js', label: 'JavaScript' },
-                    { id: 'python', label: 'Python' },
-                    { id: 'node', label: 'Node.js' },
-                    { id: 'go', label: 'Go' },
-                    { id: 'rust', label: 'Rust' },
-                    { id: 'csharp', label: 'C# .NET' },
-                    { id: 'php', label: 'PHP' },
-                    { id: 'ruby', label: 'Ruby' },
-                    { id: 'kotlin', label: 'Kotlin' },
-                    { id: 'flutter', label: 'Flutter' },
-                    { id: 'cloudflare', label: 'Cloudflare' },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveQuickTab(tab.id as StackKey)}
-                      className={
-                        'px-3 py-1.5 rounded-lg text-xs font-semibold transition uppercase cursor-pointer whitespace-nowrap font-mono ' +
-                        (activeQuickTab === tab.id
-                          ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/40 shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40')
-                      }
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                <button
-                  onClick={handleCopyCode}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition cursor-pointer self-start md:self-auto font-mono whitespace-nowrap border border-slate-700"
-                >
-                  {copiedSnippet ? '✓ Snippet Copied!' : '📋 Copy SDK Code'}
-                </button>
-              </div>
-
-              <div className="p-6 bg-[#070A12] overflow-x-auto">
-                <pre className="font-mono text-xs text-yellow-300 leading-relaxed p-1 overflow-x-auto select-text">
-                  <code>{snippets[activeQuickTab]}</code>
-                </pre>
-              </div>
-            </div>
-          </SmoothReveal>
-
-          {/* 9. SUB-5KB FEATHERWEIGHT SDK SECTION (#features) */}
-          <section id="features" className="py-20 border-t border-slate-800/80 bg-[#060911]/60">
-            <div className="max-w-5xl mx-auto px-6">
-              <SmoothReveal className="grid grid-cols-1 lg:grid-cols-12 items-center gap-10">
-                <div className="lg:col-span-6 space-y-5">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
-                    <span>🪶</span> Performance & Core Web Vitals
-                  </div>
-                  <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
-                    An error tracker that never slows down your users
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-sans">
-                    Legacy APMs force your users to download massive 100KB+ bundles that delay First Contentful Paint (FCP) and hurt Google Lighthouse scores [1.2.2]. SnapTrace is a zero-dependency script under <strong>5KB</strong> gzipped.
-                  </p>
-
-                  <div className="space-y-2.5 pt-1 font-mono">
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0B101D] border border-emerald-500/40 text-xs">
-                      <span className="text-white font-bold flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                        SnapTrace JS Telemetry SDK
-                      </span>
-                      <span className="text-emerald-400 font-bold">&lt; 3.4 KB Gzipped</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0B101D] border border-slate-800 text-xs opacity-70">
-                      <span className="text-slate-400">Honeybadger Client</span>
-                      <span className="text-slate-400 font-bold">~35 KB</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0B101D] border border-slate-800 text-xs opacity-50">
-                      <span className="text-slate-500">Sentry Browser SDK</span>
-                      <span className="text-red-400 font-bold">100+ KB</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-6 bg-[#0B101D] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 card-inner-glow">
-                  <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Google Lighthouse Impact</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold border border-emerald-500/20 font-mono">
-                      Score: 100/100
-                    </span>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div className="p-4 rounded-2xl bg-[#070A12] border border-slate-800 space-y-1">
-                      <div className="text-3xl font-black text-emerald-400 font-mono">0.0ms</div>
-                      <p className="text-[10px] text-slate-400 font-mono">Main Thread Delay</p>
-                    </div>
-                    <div className="p-4 rounded-2xl bg-[#070A12] border border-slate-800 space-y-1">
-                      <div className="text-3xl font-black text-emerald-400 font-mono">3.4 KB</div>
-                      <p className="text-[10px] text-slate-400 font-mono">Total Gzipped Size</p>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-slate-400 leading-relaxed italic border-t border-slate-800/80 pt-3 font-mono">
-                    &quot;We dropped heavy tracking tools for SnapTrace and our Next.js bundle footprint dropped instantly.&quot;
-                  </p>
-                </div>
-              </SmoothReveal>
-            </div>
-          </section>
-
-          {/* 10. DETAILED SENTRY VS SNAPTRACE COMPARISON TABLE (#comparison) */}
-          <section id="comparison" className="max-w-5xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-10">
-            <SmoothReveal className="text-center space-y-2">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Why Developers Choose SnapTrace</h2>
-              <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto font-mono">
-                Built to replace bloated, noisy enterprise APMs [1.1.7, 1.2.2].
+              <h3 className="mt-4 text-[17px] font-semibold tracking-tight text-white">Request Agency Studio access</h3>
+              <p className="mt-2 text-[12.5px] leading-relaxed text-slate-400">
+                For web development studios and software agencies managing multiple client projects
+                (<span className="font-medium text-slate-200">500,000 events/mo and unlimited projects</span>), contact our engineering desk for immediate activation.
               </p>
-            </SmoothReveal>
 
-            <SmoothReveal className="bg-[#0B101D] border border-slate-800 rounded-3xl overflow-x-auto shadow-2xl card-inner-glow" delay={150}>
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-800 bg-[#070A12] text-slate-400 font-semibold uppercase font-mono">
-                    <th className="p-4">Feature Matrix</th>
-                    <th className="p-4 text-yellow-400 font-bold bg-yellow-400/5">⚡ SnapTrace</th>
-                    <th className="p-4">Sentry</th>
-                    <th className="p-4">GlitchTip</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800 text-slate-300 font-mono">
-                  <tr>
-                    <td className="p-4 font-semibold text-white">SDK Bundle Footprint</td>
-                    <td className="p-4 text-emerald-400 font-bold bg-yellow-400/5">&lt; 3.4 KB (Featherweight)</td>
-                    <td className="p-4 text-slate-500">~100 KB+</td>
-                    <td className="p-4 text-slate-500">~100 KB+</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4 font-semibold text-white">Cascading Outage Collapse</td>
-                    <td className="p-4 text-emerald-400 font-bold bg-yellow-400/5">✓ Multi-crash unified thread</td>
-                    <td className="p-4 text-slate-500">5 separate alerts [1.1.7]</td>
-                    <td className="p-4 text-slate-500">✕ None</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4 font-semibold text-white">Free Tier Events</td>
-                    <td className="p-4 text-emerald-400 font-bold bg-yellow-400/5">2,000 / month</td>
-                    <td className="p-4 text-slate-500">5,000 / month</td>
-                    <td className="p-4 text-slate-500">1,000 / month</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4 font-semibold text-white">Client-Side PII Scrubbing</td>
-                    <td className="p-4 text-emerald-400 font-bold bg-yellow-400/5">✓ Native on-device regex</td>
-                    <td className="p-4 text-slate-500">Complex server rules</td>
-                    <td className="p-4 text-slate-500">✕ None</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4 font-semibold text-white">BYOK AI Diagnostics Hub</td>
-                    <td className="p-4 text-emerald-400 font-bold bg-yellow-400/5">✓ Included in Pro ($0 markup)</td>
-                    <td className="p-4 text-slate-500">$$$ Expensive per-seat add-on</td>
-                    <td className="p-4 text-slate-500">✕ None</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4 font-semibold text-white">1-Click Prompt Export for Cursor</td>
-                    <td className="p-4 text-emerald-400 font-bold bg-yellow-400/5">✓ Free Forever</td>
-                    <td className="p-4 text-slate-500">✕ Manual copy</td>
-                    <td className="p-4 text-slate-500">✕ Manual copy</td>
-                  </tr>
-                </tbody>
-              </table>
-            </SmoothReveal>
-          </section>
-
-          {/* 🌟 11. RE-ENGINEERED 3-TIER PRICING SECTION (#pricing) */}
-          <section id="pricing" className="max-w-7xl mx-auto px-6 pt-8 pb-16 border-t border-slate-800/80">
-            <div className="bg-[#090D16]/90 border border-slate-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-xl shadow-2xl space-y-8 card-inner-glow">
-              <SmoothReveal className="text-center space-y-2.5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase font-mono">
-                  <span>💎</span> Predictable APM Pricing
-                </div>
-                <h2 className="text-3xl sm:text-4xl font-black text-white">Simple, developer-first plans</h2>
-                <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto font-mono">
-                  Zero surprise overage bills. Generous headroom for solo builders and client studios.
-                </p>
-
-                {/* Segmented Monthly / Annual Toggle */}
-                <div className="pt-2 flex items-center justify-center">
-                  <div className="bg-[#0B101D] p-1 rounded-2xl border border-slate-800 inline-flex items-center gap-1 font-mono text-xs shadow-xl">
-                    <button
-                      onClick={() => setBillingInterval('monthly')}
-                      className={
-                        'px-4 py-2 rounded-xl font-bold transition cursor-pointer ' +
-                        (billingInterval === 'monthly'
-                          ? 'bg-slate-800 text-white shadow-sm'
-                          : 'text-slate-400 hover:text-white')
-                      }
-                    >
-                      Monthly
-                    </button>
-                    <button
-                      onClick={() => setBillingInterval('annual')}
-                      className={
-                        'px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 cursor-pointer ' +
-                        (billingInterval === 'annual'
-                          ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 shadow-md font-black'
-                          : 'text-slate-400 hover:text-yellow-300')
-                      }
-                    >
-                      <span>Annual</span>
-                      <span className="px-1.5 py-0.5 rounded-md bg-slate-950 text-yellow-300 text-[10px] font-bold">
-                        Save 20% + 2 Months Free ⚡
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
-                {billingInterval === 'annual' && (
-                  <p className="text-[11px] text-emerald-400 font-mono animate-in fade-in">
-                    ✓ Billed annually (Includes 2 months completely free)
-                  </p>
-                )}
-              </SmoothReveal>
-
-              {/* The 3 Tiers Grid */}
-              <SmoothReveal className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch max-w-6xl mx-auto" delay={150}>
-                
-                {/* Tier 1: Developer Free */}
-                <div className="bg-[#0B101D] border border-slate-800/90 rounded-3xl p-6 sm:p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Developer Free</span>
-                      <div className="text-3xl font-black text-white">$0 <span className="text-xs text-slate-500 font-normal font-mono">/ month</span></div>
-                      <p className="text-xs text-slate-400 pt-0.5">For side projects and personal experiments.</p>
-                    </div>
-
-                    <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
-                      <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> <strong>2,000</strong> Events / Month</li>
-                      <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 7-Day Data Retention</li>
-                      <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> 1 Active Project</li>
-                      <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Sub-5KB SDK & 0ms Main Thread Delay</li>
-                      <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> In-Dashboard Error Inspection</li>
-                      <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Client-Side Regex PII Firewall</li>
-                      <li className="flex items-center gap-2"><span className="text-emerald-400 font-bold">✓</span> Email & In-App Alerts (No Webhooks)</li>
-                    </ul>
-                  </div>
-
-                  <Link
-                    href="/signup"
-                    className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
-                  >
-                    Start Free Forever →
-                  </Link>
-                </div>
-
-                {/* Tier 2: Pro Builder (Most Popular for Solo Devs) */}
-                <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/60 rounded-3xl p-6 sm:p-7 space-y-6 shadow-2xl relative flex flex-col justify-between transform lg:-translate-y-2 hover:border-yellow-400 transition laser-glow">
-                  <span className="absolute -top-3.5 right-6 px-3.5 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-lg font-mono">
-                    POPULAR FOR SOLO DEVS
-                  </span>
-
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-yellow-400 font-mono">Pro Builder</span>
-                      <div className="text-3xl font-black text-white">
-                        {billingInterval === 'annual' ? '$15' : '$19'}
-                        <span className="text-xs text-slate-400 font-normal font-mono"> / month</span>
-                      </div>
-                      <p className="text-xs text-slate-400 pt-0.5">
-                        {billingInterval === 'annual' ? 'Billed annually at $180/yr.' : 'For solo developers, freelancers & micro-SaaS.'}
-                      </p>
-                    </div>
-
-                    <ul className="space-y-2.5 text-xs text-slate-200 border-t border-slate-800/80 pt-5 font-mono">
-                      <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> <strong>75,000</strong> Events / Month</li>
-                      <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> 30-Day Telemetry Retention</li>
-                      <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> Up to 5 Active Projects</li>
-                      <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> ⚡ Instant Discord, Slack & Telegram Alerts</li>
-                      <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> ⚡ 1-Click Cursor & Claude AI Fix Prompts [1.4.1, 1.4.2]</li>
-                      <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> ⚡ 60s Loop Deduplication ([x50] Noise Throttling) [1.1.7]</li>
-                      <li className="flex items-center gap-2"><span className="text-yellow-400 font-bold">✓</span> In-Dashboard BYOK AI Copilot (Gemini & OpenAI)</li>
-                    </ul>
-                  </div>
-
-                  <Link
-                    href="/signup"
-                    className="block w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-center text-xs rounded-xl transition shadow-xl shadow-yellow-500/20 cursor-pointer font-mono"
-                  >
-                    Claim Pro Beta Pass →
-                  </Link>
-                </div>
-
-                {/* Tier 3: Agency Studio (Built for Agencies - Gated to Modal) */}
-                <div className="bg-[#0B101D] border border-slate-800/90 rounded-3xl p-6 sm:p-7 space-y-6 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-purple-400 font-mono">Agency Studio</span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 font-bold">
-                          BUILT FOR AGENCIES
-                        </span>
-                      </div>
-                      <div className="text-3xl font-black text-white">
-                        {billingInterval === 'annual' ? '$39' : '$49'}
-                        <span className="text-xs text-slate-500 font-normal font-mono"> / month</span>
-                      </div>
-                      <p className="text-xs text-slate-400 pt-0.5">
-                        {billingInterval === 'annual' ? 'Billed annually at $468/yr.' : 'For web studios & agencies managing multiple client sites.'}
-                      </p>
-                    </div>
-
-                    <ul className="space-y-2.5 text-xs text-slate-300 border-t border-slate-800/80 pt-5 font-mono">
-                      <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>500,000</strong> Events / Month</li>
-                      <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> 90-Day Telemetry Retention</li>
-                      <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> <strong>UNLIMITED Client Projects & Keys</strong></li>
-                      <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Multi-Seat Team & Client Invites</li>
-                      <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> ⚡ Cascading Multi-Error Outage Collapse</li>
-                      <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Priority Edge Ingestion Gateways</li>
-                      <li className="flex items-center gap-2"><span className="text-purple-400 font-bold">✓</span> Raw Log CSV / JSON Data Export</li>
-                    </ul>
-                  </div>
-
+              <div className="mt-5 rounded-xl border border-white/[0.07] bg-[#05070E] p-4">
+                <span className="block font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                  Direct founder &amp; engineering desk
+                </span>
+                <div className="mt-3 flex items-center justify-between gap-2">
+                  <span className="truncate font-mono text-[13px] font-semibold text-yellow-300">{supportEmail}</span>
                   <button
                     type="button"
-                    onClick={() => setShowAgencyModal(true)}
-                    className="block w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-center text-xs rounded-xl transition cursor-pointer font-mono"
+                    onClick={handleCopyEmail}
+                    className={
+                      'inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-[11.5px] font-semibold transition cursor-pointer ' +
+                      (copiedEmail
+                        ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-300'
+                        : 'border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/20 hover:text-white')
+                    }
                   >
-                    Request Agency Access →
+                    {copiedEmail ? <IconCheck className="w-3.5 h-3.5" /> : <IconCopy />}
+                    {copiedEmail ? 'Copied' : 'Copy'}
                   </button>
                 </div>
-
-              </SmoothReveal>
-            </div>
-          </section>
-
-          {/* 12. SECURITY & COMPLIANCE BADGES */}
-          <section id="pii" className="py-16 border-t border-slate-800/80 bg-[#060911]/60">
-            <div className="max-w-5xl mx-auto px-6 text-center space-y-6">
-              <div className="space-y-1">
-                <h3 className="text-xs font-bold font-mono uppercase tracking-widest text-yellow-400">Zero-Trust Telemetry</h3>
-                <h2 className="text-2xl sm:text-3xl font-black text-white">Client-Side Privacy & AST Sanitization</h2>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-xs font-mono">
-                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1 card-inner-glow">
-                  <span className="text-xl">🛡️</span>
-                  <div className="text-white font-bold">GDPR & CCPA</div>
-                  <div className="text-[10px] text-slate-400">On-device PII masking</div>
-                </div>
-                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1 card-inner-glow">
-                  <span className="text-xl">🪶</span>
-                  <div className="text-white font-bold">&lt;3.4KB Footprint</div>
-                  <div className="text-[10px] text-slate-400">100/100 Core Web Vitals</div>
-                </div>
-                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1 card-inner-glow">
-                  <span className="text-xl">🔇</span>
-                  <div className="text-white font-bold">Loop Throttler</div>
-                  <div className="text-[10px] text-slate-400">SHA-256 deduplication [1.1.7]</div>
-                </div>
-                <div className="p-4 bg-[#0B101D] border border-slate-800 rounded-2xl space-y-1 card-inner-glow">
-                  <span className="text-xl">🔓</span>
-                  <div className="text-white font-bold">Open Protocol</div>
-                  <div className="text-[10px] text-slate-400">Standard JSON REST API</div>
-                </div>
-              </div>
-            </div>
-          </section>
+              <div className="mt-5 space-y-2">
+                <a
+                  href={
+                    'https://mail.google.com/mail/?view=cm&fs=1&to=' +
+                    supportEmail +
+                    '&su=SnapTrace%20Agency%20Studio%20Plan%20Inquiry'
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={BTN_PRIMARY + ' w-full'}
+                >
+                  Compose in Gmail
+                  <IconArrow />
+                </a>
 
-          {/* 13. FAQ SECTION (#faq) */}
-          <section id="faq" className="max-w-4xl mx-auto px-6 py-20 border-t border-slate-800/80 space-y-8">
-            <SmoothReveal className="text-center space-y-2">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
-              <p className="text-xs sm:text-sm text-slate-400 font-mono">Real technical answers for developers evaluating SnapTrace.</p>
-            </SmoothReveal>
-
-            <SmoothReveal className="space-y-3" delay={150}>
-              {faqs.map((faq, idx) => {
-                const isOpen = activeFaq === idx;
-                return (
-                  <div
-                    key={idx}
-                    className="bg-[#0B101D] border border-slate-800 rounded-2xl overflow-hidden transition card-inner-glow"
-                  >
-                    <button
-                      onClick={() => setActiveFaq(isOpen ? null : idx)}
-                      className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:text-yellow-400 transition"
-                    >
-                      <span className="font-bold text-xs sm:text-sm text-white">{faq.q}</span>
-                      <span className="text-slate-500 font-mono text-base">{isOpen ? '−' : '+'}</span>
-                    </button>
-                    {isOpen && (
-                      <div className="px-4 sm:px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3 font-sans">
-                        {faq.a}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </SmoothReveal>
-          </section>
-
-          {/* 14. SENTRY-STYLE ENTERPRISE FOOTER */}
-          <footer className="border-t border-slate-800/80 bg-[#060911] pt-16 pb-12 relative overflow-hidden font-sans">
-            <div className="max-w-6xl mx-auto px-6 space-y-12">
-              
-              {/* Top CTA Banner */}
-              <div className="text-center space-y-4 max-w-xl mx-auto">
-                <h2 className="text-3xl sm:text-4xl font-black text-white">
-                  Ready to catch bugs in a snap?
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-mono">
-                  Join developers catching crashes in real time with zero noise and instant BYOK AI diagnoses.
-                </p>
-                <div className="pt-2 font-mono">
-                  <Link
-                    href="/signup"
-                    className="inline-block px-8 py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5 laser-glow"
-                  >
-                    Claim Your Free Beta Pass in 60s →
-                  </Link>
-                </div>
-              </div>
-
-              {/* Sentry-Style 4-Column Navigation */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-slate-800/80 text-xs font-mono">
-                
-                {/* Column 1: Company */}
-                <div className="space-y-3">
-                  <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Company</span>
-                  <ul className="space-y-2 text-slate-400">
-                    <li><Link href="/about" className="hover:text-white transition">About SnapTrace</Link></li>
-                    <li><a href="#features" className="hover:text-white transition">Engineering Blog</a></li>
-                    <li><a href="#ai-agent" className="hover:text-white transition">Careers</a></li>
-                    <li><a href="mailto:hello.snaptrace@gmail.com" className="hover:text-yellow-400 transition font-bold">Contact Support</a></li>
-                    <li><Link href="/privacy" className="hover:text-white transition">Trust & Security</Link></li>
-                  </ul>
-                </div>
-
-                {/* Column 2: Platform */}
-                <div className="space-y-3">
-                  <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Platform</span>
-                  <ul className="space-y-2 text-slate-400">
-                    <li><a href="#features" className="hover:text-white transition">Telemetry Ingestion</a></li>
-                    <li><a href="#features" className="hover:text-white transition">&lt;5KB Client SDK</a></li>
-                    <li><a href="#ai-agent" className="hover:text-white transition">AI Root Cause Engine</a></li>
-                    <li><a href="#pii" className="hover:text-white transition">Client-Side PII Firewall</a></li>
-                    <li><a href="#grouping" className="hover:text-white transition">60s Loop Throttling [1.1.7]</a></li>
-                    <li><Link href="/dashboard" className="hover:text-white transition">Realtime WebSockets</Link></li>
-                  </ul>
-                </div>
-
-                {/* Column 3: Solutions */}
-                <div className="space-y-3">
-                  <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Solutions</span>
-                  <ul className="space-y-2 text-slate-400">
-                    <li><a href="#quickstart" className="hover:text-white transition">Next.js App Router</a></li>
-                    <li><a href="#quickstart" className="hover:text-white transition">Python & FastAPI</a></li>
-                    <li><a href="#quickstart" className="hover:text-white transition">Node.js / Express</a></li>
-                    <li><a href="#quickstart" className="hover:text-white transition">Go, Rust & PHP</a></li>
-                    <li><a href="#pricing" className="hover:text-white transition">Micro-SaaS & Startups</a></li>
-                    <li><a href="#pricing" className="hover:text-white transition">Agencies & Studios</a></li>
-                  </ul>
-                </div>
-
-                {/* Column 4: Get Help & Contact */}
-                <div className="space-y-3">
-                  <span className="text-[11px] font-bold text-yellow-400 uppercase tracking-widest block">Get Help</span>
-                  <ul className="space-y-2 text-slate-400">
-                    <li>
-                      <a href="mailto:hello.snaptrace@gmail.com" className="text-yellow-300 font-bold hover:underline block truncate">
-                        hello.snaptrace@gmail.com
-                      </a>
-                    </li>
-                    <li><a href="#quickstart" className="hover:text-white transition">SDK Documentation</a></li>
-                    <li><Link href="/demo" className="hover:text-yellow-400 transition font-bold">Public Demo</Link></li>
-                    <li><Link href="/test" className="hover:text-white transition">Live Test Sandbox</Link></li>
-                    <li><span className="text-emerald-400 flex items-center gap-1.5 font-bold"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Systems Operational</span></li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Sentry wave vector divider */}
-              <div className="w-full overflow-hidden text-slate-800 opacity-80 pt-4">
-                <svg className="w-full h-3" viewBox="0 0 1200 12" fill="none" preserveAspectRatio="none">
-                  <path
-                    d="M0 6 Q 30 0, 60 6 T 120 6 T 180 6 T 240 6 T 300 6 T 360 6 T 420 6 T 480 6 T 540 6 T 600 6 T 660 6 T 720 6 T 780 6 T 840 6 T 900 6 T 960 6 T 1020 6 T 1080 6 T 1140 6 T 1200 6"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-
-              {/* Bottom Copyright & Sentry-Style Legal + Social Row */}
-              <div className="flex flex-col md:flex-row items-center justify-between text-xs font-mono text-slate-500 gap-4 pt-2">
-                <div className="flex items-center space-x-6 text-[11px]">
-                  <Link href="/terms" className="hover:text-yellow-400 transition font-bold uppercase">TERMS</Link>
-                  <Link href="/privacy" className="hover:text-yellow-400 transition font-bold uppercase">SECURITY & COMPLIANCE</Link>
-                  <Link href="/privacy" className="hover:text-yellow-400 transition font-bold uppercase">PRIVACY</Link>
-                  <Link href="/about" className="hover:text-yellow-400 transition font-bold uppercase">ABOUT</Link>
-                </div>
-
-                {/* Social SVG Links */}
-                <div className="flex items-center space-x-5 text-slate-400">
-                  <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition" aria-label="X (Twitter)">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                  </a>
-                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition" aria-label="GitHub">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-                    </svg>
-                  </a>
-                  <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition" aria-label="LinkedIn">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                    </svg>
-                  </a>
-                  <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition" aria-label="Discord">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.894.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-
-              <div className="text-center text-[11px] text-slate-600 font-mono pt-4 border-t border-slate-900">
-                © {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform. Built by developers, for developers.
-              </div>
-
-            </div>
-          </footer>
-        </>
-      )}
-
-      {/* 15. IN-APP CONTACT MODAL FOR AGENCY STUDIO ACCESS ($49 TIER) */}
-      {showAgencyModal && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowAgencyModal(false);
-          }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans"
-        >
-          <div className="bg-[#090D16] border-2 border-purple-500/40 rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl relative card-inner-glow">
-            <button
-              onClick={() => setShowAgencyModal(false)}
-              className="absolute right-5 top-5 text-slate-400 hover:text-white text-xs cursor-pointer font-mono"
-            >
-              ✕
-            </button>
-
-            <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 text-[10px] font-mono font-bold uppercase">
-                <span>⚡</span> Agency Studio Plan ($49/mo)
-              </div>
-              <h3 className="text-lg font-bold text-white tracking-tight">
-                Request Agency Studio Access
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                For web development studios & software agencies managing multiple client projects (<strong className="text-slate-200">500,000 events/mo & UNLIMITED projects</strong>), contact our engineering desk for immediate activation:
-              </p>
-            </div>
-
-            {/* Highlighted Email Box */}
-            <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-4 space-y-3 font-mono text-xs">
-              <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">
-                Direct Founder & Engineering Desk
-              </span>
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-yellow-300 font-bold text-sm truncate">
-                  {supportEmail}
-                </span>
                 <button
                   type="button"
-                  onClick={handleCopyEmail}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition shrink-0 cursor-pointer shadow-sm border border-slate-700"
+                  onClick={() => setShowAgencyModal(false)}
+                  className="w-full rounded-lg border border-white/[0.06] bg-white/[0.02] py-2.5 text-[12.5px] font-medium text-slate-400 transition hover:bg-white/[0.05] hover:text-white cursor-pointer"
                 >
-                  {copiedEmail ? '✓ Copied!' : '📋 Copy'}
+                  Close
                 </button>
               </div>
+
+              <p className="mt-4 text-center font-mono text-[11px] text-slate-500">
+                Direct activation from our lead engineer within 24 hours.
+              </p>
             </div>
-
-            <div className="space-y-2 pt-1 font-mono">
-              <a
-                href={
-                  'https://mail.google.com/mail/?view=cm&fs=1&to=' +
-                  supportEmail +
-                  '&su=SnapTrace%20Agency%20Studio%20Plan%20Inquiry'
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
-              >
-                <span>Compose in Gmail Web →</span>
-              </a>
-
-              <button
-                type="button"
-                onClick={() => setShowAgencyModal(false)}
-                className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-center"
-              >
-                Close
-              </button>
-            </div>
-
-            <p className="text-[11px] text-slate-500 font-mono text-center">
-              Guaranteed direct activation from our lead engineer within 24 hours.
-            </p>
           </div>
-        </div>
-      )}
+        )}
 
+      </div>
     </div>
   );
 }
