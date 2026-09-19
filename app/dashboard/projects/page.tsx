@@ -11,6 +11,7 @@ interface Project {
   name: string;
   api_key: string;
   created_at: string;
+  plan_tier?: string;
   error_count?: number;
 }
 
@@ -19,6 +20,11 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   
+  // User Tier & Project Limits
+  const [userPlanTier, setUserPlanTier] = useState<string>('pro');
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [limitErrorModal, setLimitErrorModal] = useState<string | null>(null);
+
   // Create Project State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
@@ -44,6 +50,10 @@ export default function ProjectsPage() {
       return;
     }
 
+    const email = session.user.email || '';
+    const ownerCheck = email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com';
+    setIsOwner(ownerCheck);
+
     const { data: projectList, error } = await supabase
       .from('projects')
       .select('*')
@@ -51,6 +61,10 @@ export default function ProjectsPage() {
       .order('created_at', { ascending: false });
 
     if (!error && projectList) {
+      // Determine plan tier (Default 'pro' during beta, 'agency' for owner)
+      const tier = ownerCheck ? 'agency' : (projectList[0]?.plan_tier || 'pro');
+      setUserPlanTier(tier);
+
       const { data: errors } = await supabase
         .from('errors')
         .select('project_id');
@@ -87,7 +101,27 @@ export default function ProjectsPage() {
     const randomHex = Array.from(crypto.getRandomValues(new Uint8Array(16)))
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
-    return `sk_live_${randomHex}`;
+    return 'sk_live_' + randomHex;
+  };
+
+  // 🌟 CHECK PROJECT CREATION LIMIT BASED ON TIER
+  const handleOpenCreateModal = () => {
+    if (isOwner || userPlanTier === 'agency' || userPlanTier === 'team') {
+      setIsCreateModalOpen(true);
+      return;
+    }
+
+    if (userPlanTier === 'free' && projects.length >= 1) {
+      setLimitErrorModal('Free tier is limited to 1 project. Please upgrade to Pro for up to 5 projects.');
+      return;
+    }
+
+    if (userPlanTier === 'pro' && projects.length >= 5) {
+      setLimitErrorModal('Pro tier is limited to 5 projects. Upgrade to Agency for Unlimited projects.');
+      return;
+    }
+
+    setIsCreateModalOpen(true);
   };
 
   const handleCreateProject = async (e: React.FormEvent) => {
@@ -111,6 +145,7 @@ export default function ProjectsPage() {
           name: newProjectName.trim(),
           api_key: apiKey,
           user_id: session.user.id,
+          plan_tier: userPlanTier,
         },
       ])
       .select();
@@ -124,7 +159,6 @@ export default function ProjectsPage() {
     setCreating(false);
   };
 
-  // Rename Project Handler
   const handleRenameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!renameData || !renameInput.trim() || renameInput.trim() === renameData.name) {
@@ -151,7 +185,6 @@ export default function ProjectsPage() {
     setRenameData(null);
   };
 
-  // Rotate / Regenerate Key
   const handleRotateKey = async (projectId: string) => {
     if (!confirm('Are you sure you want to rotate this API key? Applications using the old token will stop logging errors until updated.')) {
       return;
@@ -172,7 +205,6 @@ export default function ProjectsPage() {
     }
   };
 
-  // Test Ping for This Specific Project
   const handleTestPingForProject = async (project: Project) => {
     setPingingId(project.id);
     setPingSuccessId(null);
@@ -183,8 +215,8 @@ export default function ProjectsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           apiKey: project.api_key,
-          message: `Synthetic Test Crash: ${project.name}`,
-          stackTrace: `Error: Verification crash on ${project.name}\n    at ProjectCard.testPing (/dashboard/projects)`,
+          message: 'Synthetic Test Crash: ' + project.name,
+          stackTrace: 'Error: Verification crash on ' + project.name + '\n    at ProjectCard.testPing (/dashboard/projects)',
           environment: 'production',
           url: window.location.href,
         }),
@@ -224,6 +256,12 @@ export default function ProjectsPage() {
     setRevealedKeys((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const projectCapLabel = isOwner || userPlanTier === 'agency' || userPlanTier === 'team'
+    ? 'Unlimited'
+    : userPlanTier === 'free'
+    ? '1 Max'
+    : '5 Max';
+
   return (
     <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -231,10 +269,10 @@ export default function ProjectsPage() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-5 gap-4">
           <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5 flex-wrap">
               <span>Projects & Credentials</span>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 font-mono font-semibold">
-                {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
+                {projects.length} / {projectCapLabel} Projects
               </span>
             </h1>
             <p className="text-xs text-slate-400 font-mono">
@@ -243,7 +281,7 @@ export default function ProjectsPage() {
           </div>
 
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={handleOpenCreateModal}
             className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-1.5 self-start sm:self-auto font-mono"
           >
             <span>+</span>
@@ -268,7 +306,7 @@ export default function ProjectsPage() {
               </p>
             </div>
             <button
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={handleOpenCreateModal}
               className="px-5 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer font-mono"
             >
               + Create First Project
@@ -280,14 +318,13 @@ export default function ProjectsPage() {
               const isRevealed = Boolean(revealedKeys[project.id]);
               const displayKey = isRevealed
                 ? project.api_key
-                : `${project.api_key.slice(0, 10)}••••••••••••••••${project.api_key.slice(-8)}`;
+                : project.api_key.slice(0, 10) + '••••••••••••••••' + project.api_key.slice(-8);
 
               return (
                 <div
                   key={project.id}
                   className="bg-[#0B101D]/90 border border-slate-800/80 hover:border-slate-700 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg transition backdrop-blur-sm group"
                 >
-                  {/* Project Header Row with Rename & Action Buttons */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3.5">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2.5 flex-wrap">
@@ -296,7 +333,6 @@ export default function ProjectsPage() {
                           {project.name}
                         </h2>
 
-                        {/* 1. RENAME PROJECT BUTTON */}
                         <button
                           onClick={() => {
                             setRenameData({ id: project.id, name: project.name });
@@ -309,7 +345,6 @@ export default function ProjectsPage() {
                           <span className="text-[10px]">Rename</span>
                         </button>
                         
-                        {/* Event Counter Badge */}
                         <button
                           onClick={() => handleJumpToErrors(project.id)}
                           className="text-[11px] font-mono px-3 py-0.5 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 transition flex items-center gap-1 cursor-pointer"
@@ -331,7 +366,6 @@ export default function ProjectsPage() {
                       </p>
                     </div>
 
-                    {/* Header Action Buttons: Test Ping, Rotate, Delete */}
                     <div className="flex items-center gap-2 font-mono flex-wrap">
                       <button
                         onClick={() => handleTestPingForProject(project)}
@@ -359,7 +393,6 @@ export default function ProjectsPage() {
                     </div>
                   </div>
 
-                  {/* API Key Box with Masking & Copy */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
@@ -386,7 +419,6 @@ export default function ProjectsPage() {
                     </div>
                   </div>
 
-                  {/* Multi-Language Snippets Shortcut */}
                   <div className="bg-[#05070E] border border-slate-800/80 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-sans">
                     <div className="space-y-0.5">
                       <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
@@ -409,7 +441,53 @@ export default function ProjectsPage() {
           </div>
         )}
 
-        {/* 🌟 MODAL 1: RENAME PROJECT */}
+        {/* 🌟 PROJECT LIMIT EXCEEDED MODAL */}
+        {limitErrorModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
+            <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl relative">
+              <button
+                onClick={() => setLimitErrorModal(null)}
+                className="absolute right-5 top-5 text-slate-400 hover:text-white text-xs cursor-pointer font-mono"
+              >
+                ✕
+              </button>
+
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 text-[10px] font-mono font-bold uppercase">
+                  <span>⚠️</span> Plan Quota Reached
+                </div>
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  Project Creation Limit
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {limitErrorModal}
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 text-[11px] text-slate-400 font-mono">
+                💡 Need more active projects for client websites or microservices? Contact our team at <strong className="text-yellow-300">hello.snaptrace@gmail.com</strong>.
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-1 font-mono">
+                <button
+                  type="button"
+                  onClick={() => setLimitErrorModal(null)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl transition cursor-pointer"
+                >
+                  Close
+                </button>
+                <Link
+                  href="/dashboard/settings"
+                  className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold text-xs rounded-xl transition shadow-md font-mono"
+                >
+                  View Plan Settings →
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: RENAME PROJECT */}
         {renameData && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
             <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
@@ -456,7 +534,7 @@ export default function ProjectsPage() {
           </div>
         )}
 
-        {/* MODAL 2: CREATE NEW PROJECT */}
+        {/* MODAL: CREATE NEW PROJECT */}
         {isCreateModalOpen && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
             <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
