@@ -90,7 +90,7 @@
       // 3. Intelligent Noise Management
       if (!_errorCache[fingerprint]) {
         // First occurrence: Send immediately and alert developer
-        _errorCache[fingerprint] = { count: 1, lastSent: now, timeoutId: null };
+        _errorCache[fingerprint] = { count: 0, lastSent: now, timeoutId: null };
         this._dispatch(safeMessage, safeStack, safeUrl, env, fingerprint, 1);
       } else {
         // Duplicate occurrence: Throttle to prevent alert flood
@@ -140,6 +140,8 @@
     },
 
     _listenToErrors: function () {
+      if (this._l) return; // never register listeners twice (duplicate init would double-count errors)
+      this._l = 1;
       var self = this;
       window.addEventListener('online', flushBuffer);
       window.addEventListener('error', function (event) {

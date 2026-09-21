@@ -5,6 +5,11 @@ import { PLANS, getStartOfCurrentMonth } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
+// Backtick characters are built from their character code so this file survives copy/paste.
+const TICK = String.fromCharCode(96);
+const FENCE = TICK + TICK + TICK;
+const DEFAULT_URL = "https://snaptrace-dashboard.vercel.app/";
+
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
@@ -18,13 +23,57 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey);
 }
 
+// Records ingestion-health counters. Never throws: a stats failure must never block telemetry.
+async function recordIngestionStats(supabase, projectId, accepted, throttled, suppressed, debugLogs) {
+  try {
+    const { error } = await supabase.rpc("bump_ingestion_stats", {
+      p_project: projectId,
+      p_accepted: accepted,
+      p_throttled: throttled,
+      p_suppressed: suppressed,
+    });
+    if (error) debugLogs.push("Ingestion stats update failed: " + error.message);
+  } catch (statsErr) {
+    debugLogs.push("Ingestion stats update failed: " + statsErr.message);
+  }
+}
+
+// Client-supplied text must never be trusted: escape it before it goes into an HTML email.
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Slack requires & < > to be escaped, otherwise <!channel> and fake links can be injected.
+function slackEscape(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Only real http(s) links are allowed to become clickable; anything else falls back.
+function safeHttpUrl(value, fallback) {
+  try {
+    const parsed = new URL(String(value));
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
+  } catch (urlErr) {
+    // not a valid URL, use fallback
+  }
+  return fallback;
+}
+
 export async function POST(req) {
   const debugLogs = [];
 
   try {
     const supabase = getSupabaseClient();
     const body = await req.json();
-    const { apiKey, message, stackTrace, environment, url, userAgent } = body;
+    const { apiKey, message, stackTrace, environment, url, userAgent, occurrenceCount } = body;
 
     if (!apiKey) {
       return NextResponse.json(
@@ -76,6 +125,7 @@ export async function POST(req) {
 
       // CIRCUIT BREAKER TRIGGER: Stop execution & block database write
       if (!countError && monthlyCount !== null && monthlyCount >= activePlan.monthlyEventCap) {
+        await recordIngestionStats(supabase, project.id, 0, 1, 0, debugLogs);
         return NextResponse.json(
           {
             error: "Monthly event quota exceeded for your current plan.",
@@ -94,6 +144,29 @@ export async function POST(req) {
 
     if (muteAlerts) {
       debugLogs.push("Alerts muted: 'Only Alert on Production' is active and environment is '" + envString + "'.");
+    }
+
+    // 2. Save to Supabase Database FIRST, so a slow or hanging alert channel can never lose the event
+    try {
+      const { error: insertError } = await supabase.from("errors").insert([
+        {
+          project_id: project.id,
+          message: message || "Unknown Error",
+          stack_trace: stackTrace || null,
+          environment: environment || "production",
+          url: url || null,
+          user_agent: userAgent || null,
+        },
+      ]);
+      if (insertError) {
+        debugLogs.push("Database insertion failed: " + insertError.message);
+      } else {
+        debugLogs.push("Error event recorded in database.");
+        const collapsed = Math.min(Math.max(Math.floor(Number(occurrenceCount)) || 1, 1) - 1, 10000);
+        await recordIngestionStats(supabase, project.id, 1, 0, collapsed, debugLogs);
+      }
+    } catch (dbErr) {
+      debugLogs.push("Database insertion failed: " + dbErr.message);
     }
 
     // Resolve Discord Webhook URL across schema variants
@@ -119,7 +192,7 @@ export async function POST(req) {
       process.env.GMAIL_APP_PASSWORD ||
       process.env.SMTP_PASS;
 
-    // 2. Dispatch Discord Webhook Alert (Skipped if muted)
+    // 3. Dispatch Discord Webhook Alert (Skipped if muted)
     let discordSent = false;
     if (discordWebhookUrl && !muteAlerts) {
       try {
@@ -131,7 +204,7 @@ export async function POST(req) {
               {
                 title: "🚨 " + (message || "New Exception Event"),
                 description: stackTrace
-                  ? "```\n" + stackTrace.slice(0, 1000) + "\n```"
+                  ? FENCE + "\n" + stackTrace.slice(0, 1000) + "\n" + FENCE
                   : "No stack trace provided",
                 color: 15158332,
                 fields: [
@@ -142,7 +215,7 @@ export async function POST(req) {
                   },
                   {
                     name: "URL",
-                    value: url || "https://snaptrace-dashboard.vercel.app/",
+                    value: url || DEFAULT_URL,
                     inline: true,
                   },
                 ],
@@ -168,18 +241,21 @@ export async function POST(req) {
       debugLogs.push("Discord skipped: No webhook URL configured.");
     }
 
-    // 3. Dispatch Native Slack Webhook Alert (Skipped if muted)
+    // 4. Dispatch Native Slack Webhook Alert (Skipped if muted)
     let slackSent = false;
     if (slackWebhookUrl && !muteAlerts) {
       try {
         const slackPayload = {
-          text: "🚨 *[SnapTrace Incident]* " + (message || "New Exception Event"),
+          text: "🚨 *[SnapTrace Incident]* " + slackEscape(message || "New Exception Event"),
           attachments: [
             {
               color: "#EF4444",
-              title: "Crash captured in " + (environment || "production"),
-              title_link: url || "https://snaptrace-dashboard.vercel.app/dashboard/errors",
-              text: "*Error:* `" + (message || "Unknown Exception") + "`\n*Route:* " + (url || "N/A") + "\n```" + (stackTrace || "No stack trace").slice(0, 800) + "```",
+              title: "Crash captured in " + slackEscape(environment || "production"),
+              title_link: safeHttpUrl(url, "https://snaptrace-dashboard.vercel.app/dashboard/errors"),
+              text:
+                "*Error:* " + TICK + slackEscape(message || "Unknown Exception") + TICK +
+                "\n*Route:* " + slackEscape(url || "N/A") +
+                "\n" + FENCE + slackEscape((stackTrace || "No stack trace").slice(0, 800)) + FENCE,
               footer: "SnapTrace Telemetry Monitor",
               ts: Math.floor(Date.now() / 1000),
             },
@@ -208,7 +284,7 @@ export async function POST(req) {
       debugLogs.push("Slack skipped: No Slack webhook URL configured.");
     }
 
-    // 4. Dispatch Email Alert via Nodemailer (SMTP) (Skipped if muted)
+    // 5. Dispatch Email Alert via Nodemailer (SMTP) (Skipped if muted)
     let emailSent = false;
     if (recipientEmail && smtpUser && smtpPass && !muteAlerts) {
       try {
@@ -222,20 +298,27 @@ export async function POST(req) {
           },
         });
 
+        // Everything that came from the client is escaped before entering the HTML below
+        const safeMessage = escapeHtml(message || "Unknown Error");
+        const safeEnvironment = escapeHtml(environment || "production");
+        const safeUrlText = escapeHtml(url || DEFAULT_URL);
+        const safeUrlHref = escapeHtml(safeHttpUrl(url, DEFAULT_URL));
+        const safeStack = escapeHtml(stackTrace || "No stack trace provided");
+
         await transporter.sendMail({
           from: '"SnapTrace System Alerts" <' + smtpUser + '>',
           to: recipientEmail,
           subject: "[SnapTrace Error] " + (message || "New Exception Event"),
-          html: `
-            <div style="font-family: sans-serif; padding: 20px; background: #0f172a; color: #ffffff; border-radius: 8px;">
-              <h2 style="color: #ef4444; margin-top: 0;">🚨 New Exception Event</h2>
-              <p><strong>Message:</strong> ${message || "Unknown Error"}</p>
-              <p><strong>Environment:</strong> ${environment || "production"}</p>
-              <p><strong>URL:</strong> <a href="${url || "https://snaptrace-dashboard.vercel.app/"}" style="color: #38bdf8;">${url || "https://snaptrace-dashboard.vercel.app/"}</a></p>
-              <h3 style="color: #cbd5e1;">Stack Trace:</h3>
-              <pre style="background: #1e293b; color: #f87171; padding: 14px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap;">${stackTrace || "No stack trace provided"}</pre>
-            </div>
-          `,
+          html: [
+            '<div style="font-family: sans-serif; padding: 20px; background: #0f172a; color: #ffffff; border-radius: 8px;">',
+            '  <h2 style="color: #ef4444; margin-top: 0;">🚨 New Exception Event</h2>',
+            '  <p><strong>Message:</strong> ' + safeMessage + '</p>',
+            '  <p><strong>Environment:</strong> ' + safeEnvironment + '</p>',
+            '  <p><strong>URL:</strong> <a href="' + safeUrlHref + '" style="color: #38bdf8;">' + safeUrlText + '</a></p>',
+            '  <h3 style="color: #cbd5e1;">Stack Trace:</h3>',
+            '  <pre style="background: #1e293b; color: #f87171; padding: 14px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap;">' + safeStack + '</pre>',
+            '</div>',
+          ].join("\n"),
         });
         emailSent = true;
         debugLogs.push("Email sent successfully to " + recipientEmail + ".");
@@ -246,23 +329,6 @@ export async function POST(req) {
       debugLogs.push("Email skipped: Muted by environment filter.");
     } else {
       debugLogs.push("Email skipped: Credentials missing.");
-    }
-
-    // 5. Save to Supabase Database
-    try {
-      await supabase.from("errors").insert([
-        {
-          project_id: project.id,
-          message: message || "Unknown Error",
-          stack_trace: stackTrace || null,
-          environment: environment || "production",
-          url: url || null,
-          user_agent: userAgent || null,
-        },
-      ]);
-      debugLogs.push("Error event recorded in database.");
-    } catch (dbErr) {
-      debugLogs.push("Database insertion failed: " + dbErr.message);
     }
 
     return NextResponse.json(
