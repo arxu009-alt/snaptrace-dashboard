@@ -5,6 +5,31 @@
   var _endpoint = '/api/v1/log';
   var _errorCache = {};
   var THROTTLE_WINDOW_MS = 60000; // 60-second duplicate suppression window
+  var _queue = []; // offline memory buffer (max 10 events)
+  var MAX_QUEUE = 10;
+
+  function enqueue(url, body) {
+    if (_queue.length >= MAX_QUEUE) _queue.shift(); // drop oldest when full
+    _queue.push({ u: url, b: body });
+  }
+
+  // Dual transport: sendBeacon first, fetch keepalive if the beacon buffer is saturated
+  function send(url, body) {
+    var ok = false;
+    try {
+      ok = !!(navigator.sendBeacon && navigator.sendBeacon(url, new Blob([body], { type: 'application/json' })));
+    } catch (e) {}
+    if (ok) return;
+    try {
+      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, keepalive: true })
+        .catch(function () { enqueue(url, body); });
+    } catch (e) {}
+  }
+
+  function flushBuffer() {
+    var q = _queue.splice(0);
+    for (var i = 0; i < q.length; i++) send(q[i].u, q[i].b);
+  }
 
   window.SnapTrace = {
     init: function (config) {
@@ -109,21 +134,14 @@
         console.warn('🛡️ [SnapTrace Debug Event Captured]:', payload);
       }
 
-      if (navigator.sendBeacon) {
-        var blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-        navigator.sendBeacon(targetUrl, blob);
-      } else {
-        fetch(_endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          keepalive: true
-        }).catch(function () {});
-      }
+      var body = JSON.stringify(payload);
+      if (navigator.onLine === false) return enqueue(targetUrl, body);
+      send(targetUrl, body);
     },
 
     _listenToErrors: function () {
       var self = this;
+      window.addEventListener('online', flushBuffer);
       window.addEventListener('error', function (event) {
         self.captureException(event.error || new Error(event.message));
       });
