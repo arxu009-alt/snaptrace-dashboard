@@ -340,8 +340,31 @@ function SectionIntro({
 }
 
 /* ============================================================================
-   TOP-LEVEL CONSTANTS (STRICTLY TYPED TO PREVENT ANY IMPLICIT ANY BUILD ERRORS)
+   TOP-LEVEL CONSTANTS & AI BOT ENGINE
 ============================================================================ */
+
+function getDevBotAnswer(prompt: string): string {
+  const p = (prompt || '').toLowerCase();
+  if (p.includes('ai') || p.includes('model') || p.includes('gemini') || p.includes('gpt')) {
+    return 'SnapTrace natively integrates with Google Gemini 2.5 Flash Lite and OpenAI (gpt-4o, gpt-4o-mini) via BYOK, with Claude 3.5 Sonnet, DeepSeek V3/R1, and local Ollama in active development. Keys are stored encrypted in client memory.';
+  }
+  if (p.includes('lang') || p.includes('stack') || p.includes('framework') || p.includes('support')) {
+    return 'SnapTrace supports 12+ environments over a universal REST endpoint: Next.js App Router, React, Vue, Node.js, Python, FastAPI, Django, Go, Rust, C# (.NET), PHP, Ruby, Kotlin, Flutter, and Cloudflare Workers.';
+  }
+  if (p.includes('cascade') || p.includes('group') || p.includes('outage') || p.includes('collapse')) {
+    return 'SnapTrace uses deterministic SHA-256 fingerprinting to isolate single root causes from downstream symptom cascades, collapsing hundreds of duplicate alerts into one clean incident with an instant AI fix prompt.';
+  }
+  if (p.includes('5kb') || p.includes('size') || p.includes('weight') || p.includes('bundle') || p.includes('3.4kb')) {
+    return 'The client SDK is strictly under 3.4KB gzipped with zero dependencies. It dispatches telemetry asynchronously using native navigator.sendBeacon, guaranteeing 0.0ms main thread delay and zero impact on Google Core Web Vitals.';
+  }
+  if (p.includes('pii') || p.includes('privacy') || p.includes('security') || p.includes('gdpr')) {
+    return 'Our on-device regex AST engine automatically scrubs emails, credit cards, passwords, bearer tokens, and secrets in the browser before the payload touches the network. Raw secrets never reach our servers.';
+  }
+  if (p.includes('price') || p.includes('cost') || p.includes('plan') || p.includes('tier')) {
+    return 'We offer Developer Free (2,000 events/mo, 1 project), Pro Builder ($19/mo, 75k events, 5 projects, Discord/Slack alerts, Cursor AI fixes), and Agency Studio ($49/mo, 500k events, unlimited projects). Early beta passes are currently available.';
+  }
+  return 'SnapTrace is a featherweight, noise-free crash telemetry platform. It runs asynchronously on navigator.sendBeacon (<3.4KB gzipped) and exports 1-click AI prompts for Cursor, Claude Code, and Copilot.';
+}
 
 const STACK_TABS: Array<{ id: StackKey; label: string }> = [
   { id: 'nextjs', label: 'Next.js' },
@@ -456,11 +479,11 @@ export default function WelcomeLandingPage() {
   const [feedbackSent, setFeedbackSent] = useState(false);
 
   const feedbackGmailUrl = () => {
-    const subject = encodeURIComponent(`[SnapTrace Feedback] ${feedbackCategory.toUpperCase()}`);
+    const subject = encodeURIComponent('[SnapTrace Feedback] ' + feedbackCategory.toUpperCase());
     const bodyLines = [
-      `Category: ${feedbackCategory.toUpperCase()}`,
-      feedbackName.trim() ? `User: ${feedbackName.trim()}` : '',
-      `Timestamp: ${new Date().toISOString()}`,
+      'Category: ' + feedbackCategory.toUpperCase(),
+      feedbackName.trim() ? 'User: ' + feedbackName.trim() : '',
+      'Timestamp: ' + new Date().toISOString(),
       '',
       'Feedback:',
       '---------------------------------------------',
@@ -468,7 +491,7 @@ export default function WelcomeLandingPage() {
       '---------------------------------------------',
     ].filter(Boolean);
     const body = encodeURIComponent(bodyLines.join('\n'));
-    return `https://mail.google.com/mail/?view=cm&fs=1&to=${SUPPORT_EMAIL}&su=${subject}&body=${body}`;
+    return 'https://mail.google.com/mail/?view=cm&fs=1&to=' + SUPPORT_EMAIL + '&su=' + subject + '&body=' + body;
   };
 
   const handleSendFeedback = () => {
@@ -2313,7 +2336,7 @@ export default function WelcomeLandingPage() {
 
             <div className="space-y-2 font-mono">
               <a
-                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${SUPPORT_EMAIL}&su=SnapTrace%20Agency%20Studio%20Plan%20Inquiry`}
+                href={'https://mail.google.com/mail/?view=cm&fs=1&to=' + SUPPORT_EMAIL + '&su=SnapTrace%20Agency%20Studio%20Plan%20Inquiry'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={BTN_PRIMARY + ' w-full text-center'}
