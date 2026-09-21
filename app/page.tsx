@@ -17,36 +17,16 @@ type IconProps = { className?: string };
 
 const SUPPORT_EMAIL = 'hello.snaptrace@gmail.com';
 
-/* ============================================================================
-   GLOBAL SENTRY-GRADE STYLE LAYER
-============================================================================ */
-
 const GLOBAL_CSS = `
-/* ---------- Fluid Type System ---------- */
-.st-display  { font-size: clamp(2.35rem, 1.15rem + 5vw, 4.75rem); line-height: 1.04; letter-spacing: -0.035em; font-weight: 700; }
-.st-h2       { font-size: clamp(1.65rem, 1.1rem + 2vw, 2.5rem); line-height: 1.14; letter-spacing: -0.025em; font-weight: 700; }
-.st-h3       { font-size: clamp(1.08rem, 0.96rem + 0.45vw, 1.25rem); line-height: 1.3; letter-spacing: -0.015em; font-weight: 600; }
-.st-lead     { font-size: clamp(0.95rem, 0.88rem + 0.25vw, 1.05rem); line-height: 1.65; }
-
-/* ---------- Consistent Vertical Rhythm ---------- */
-.st-section  { padding-top: clamp(3.5rem, 2.8rem + 2.5vw, 6rem); padding-bottom: clamp(3.5rem, 2.8rem + 2.5vw, 6rem); }
+.st-display { font-size: clamp(2.35rem, 1.15rem + 5vw, 4.75rem); line-height: 1.04; letter-spacing: -0.035em; font-weight: 700; }
+.st-h2 { font-size: clamp(1.65rem, 1.1rem + 2vw, 2.5rem); line-height: 1.14; letter-spacing: -0.025em; font-weight: 700; }
+.st-h3 { font-size: clamp(1.08rem, 0.96rem + 0.45vw, 1.25rem); line-height: 1.3; letter-spacing: -0.015em; font-weight: 600; }
+.st-lead { font-size: clamp(0.95rem, 0.88rem + 0.25vw, 1.05rem); line-height: 1.65; }
+.st-section { padding-top: clamp(3.5rem, 2.8rem + 2.5vw, 6rem); padding-bottom: clamp(3.5rem, 2.8rem + 2.5vw, 6rem); }
 .st-intro > * + * { margin-top: 0.75rem; }
 .st-intro .st-eyebrow-row + .st-h2 { margin-top: 0.9rem; }
-
 button, a { touch-action: manipulation; }
-
-/* ---------- Ambient Background & Perspective Grids ---------- */
 .st-grain { position: relative; }
-.st-grain::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
 .st-grid {
   background-image:
     linear-gradient(to right, rgba(148,163,184,0.05) 1px, transparent 1px),
@@ -55,10 +35,7 @@ button, a { touch-action: manipulation; }
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
 }
-
 .st-cv { content-visibility: auto; contain-intrinsic-size: 1px 780px; }
-
-/* ---------- Deep Glass Surface Tokens ---------- */
 .st-card {
   background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.005) 100%), #0A0E1A;
   border: 1px solid rgba(255,255,255,0.08);
@@ -72,32 +49,19 @@ button, a { touch-action: manipulation; }
     transform: translateY(-2px);
   }
 }
-
 .st-glow-amber {
   box-shadow: 0 0 0 1px rgba(250,204,21,0.3), 0 30px 70px -30px rgba(250,204,21,0.35), inset 0 1px 1px rgba(255,255,255,0.15);
 }
-
 .st-window-topbar {
   background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%), #080C16;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
-
-/* ---------- Marquees & Tapes ---------- */
 .st-marquee-track { display: flex; width: max-content; animation: st-marquee 42s linear infinite; }
 @keyframes st-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
 .st-fade-x {
   -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
   mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
 }
-
-.st-tape-track { display: flex; flex-direction: column; animation: st-tape 14s linear infinite; }
-@keyframes st-tape { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
-.st-fade-y {
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
-}
-
 .st-ring { position: relative; }
 .st-ring::before {
   content: '';
@@ -108,16 +72,12 @@ button, a { touch-action: manipulation; }
   animation: st-ring 2.2s cubic-bezier(0.2,0.7,0.3,1) infinite;
 }
 @keyframes st-ring { 0% { transform: scale(0.85); opacity: 0.9; } 70%, 100% { transform: scale(1.7); opacity: 0; } }
-
 .st-accordion { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s cubic-bezier(0.4,0,0.2,1); }
 .st-accordion[data-open='true'] { grid-template-rows: 1fr; }
 .st-accordion > div { overflow: hidden; }
-
 .st-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
 .st-scroll::-webkit-scrollbar-track { background: transparent; }
 .st-scroll::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.2); border-radius: 999px; }
-.st-scroll::-webkit-scrollbar-thumb:hover { background: rgba(250,204,21,0.4); }
-
 .st-beta-pill {
   font: 700 9.5px/1 ui-monospace, monospace;
   letter-spacing: 0.08em;
@@ -131,25 +91,16 @@ button, a { touch-action: manipulation; }
   gap: 4px;
   box-shadow: 0 0 12px rgba(250,204,21,0.2);
 }
-
-.st-mobile-nav {
-  transition: opacity .22s ease, visibility .22s ease;
-}
+.st-mobile-nav { transition: opacity .22s ease, visibility .22s ease; }
 .st-mobile-nav[data-open='false'] { opacity: 0; visibility: hidden; pointer-events: none; }
 .st-mobile-nav[data-open='true'] { opacity: 1; visibility: visible; }
-
 .st-safe-b { padding-bottom: max(0.85rem, env(safe-area-inset-bottom)); }
 .st-safe-t { padding-top: env(safe-area-inset-top); }
-
 @media (prefers-reduced-motion: reduce) {
-  .st-marquee-track, .st-tape-track { animation: none; }
+  .st-marquee-track { animation: none; }
   .st-ring::before { animation: none; opacity: 0; }
 }
 `;
-
-/* ============================================================================
-   INLINE DEVELOPER ICON SYSTEM
-============================================================================ */
 
 const stroke = (className: string) => ({
   className,
@@ -223,10 +174,6 @@ const IconMail = ({ className = 'w-4 h-4' }: IconProps) => (
   <svg {...stroke(className)}><rect x="3.5" y="5.5" width="17" height="13" rx="2.2" /><path d="m4.5 7 7.5 5.8L19.5 7" /></svg>
 );
 
-/* ============================================================================
-   AUTHENTIC BRAND MARKS
-============================================================================ */
-
 const MarkGemini = ({ className = 'w-6 h-6' }: IconProps) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <defs>
@@ -293,10 +240,6 @@ const MarkVSCode = ({ className = 'w-4 h-4' }: IconProps) => (
   </svg>
 );
 
-/* ============================================================================
-   DESIGN SYSTEM BUTTON TOKENS
-============================================================================ */
-
 const BTN_PRIMARY =
   'group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-bold tracking-[-0.01em] text-slate-950 ' +
   'bg-[linear-gradient(180deg,#FDE68A_0%,#FACC15_46%,#EAB308_100%)] ' +
@@ -315,10 +258,6 @@ const BTN_SECONDARY =
 const BTN_GHOST_SM =
   'inline-flex min-h-[38px] items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold text-slate-300 ' +
   'transition hover:bg-white/[0.08] hover:text-white active:scale-[0.98] focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30';
-
-/* ============================================================================
-   SMOOTH REVEAL & SECTION INTRO HELPERS
-============================================================================ */
 
 function SmoothReveal({
   children,
@@ -366,28 +305,6 @@ function SmoothReveal({
   );
 }
 
-function Eyebrow({
-  icon,
-  children,
-  tone = 'amber',
-}: {
-  icon: React.ReactNode;
-  children: React.ReactNode;
-  tone?: 'amber' | 'purple' | 'emerald';
-}) {
-  const tones = {
-    amber: 'text-yellow-300/95 border-yellow-400/30 bg-yellow-400/[0.08]',
-    purple: 'text-purple-300/95 border-purple-400/30 bg-purple-500/[0.1]',
-    emerald: 'text-emerald-300/95 border-emerald-400/30 bg-emerald-500/[0.08]',
-  };
-  return (
-    <span className={'st-eyebrow-row inline-flex items-center gap-2 rounded-full border px-3.5 py-1 font-mono text-[11px] font-semibold ' + tones[tone]}>
-      {icon}
-      {children}
-    </span>
-  );
-}
-
 function SectionIntro({
   eyebrowIcon,
   eyebrowLabel,
@@ -405,9 +322,17 @@ function SectionIntro({
   center?: boolean;
   className?: string;
 }) {
+  const tones = {
+    amber: 'text-yellow-300/95 border-yellow-400/30 bg-yellow-400/[0.08]',
+    purple: 'text-purple-300/95 border-purple-400/30 bg-purple-500/[0.1]',
+    emerald: 'text-emerald-300/95 border-emerald-400/30 bg-emerald-500/[0.08]',
+  };
   return (
     <div className={'st-intro ' + (center ? 'mx-auto max-w-3xl text-center' : 'max-w-2xl') + (className ? ' ' + className : '')}>
-      <Eyebrow icon={eyebrowIcon} tone={eyebrowTone}>{eyebrowLabel}</Eyebrow>
+      <span className={'st-eyebrow-row inline-flex items-center gap-2 rounded-full border px-3.5 py-1 font-mono text-[11px] font-semibold ' + tones[eyebrowTone]}>
+        {eyebrowIcon}
+        {eyebrowLabel}
+      </span>
       <h2 className="st-h2 text-white">{heading}</h2>
       {lead && <p className="st-lead text-slate-400">{lead}</p>}
     </div>
@@ -415,7 +340,83 @@ function SectionIntro({
 }
 
 /* ============================================================================
-   PAGE IMPLEMENTATION
+   TOP-LEVEL CONSTANTS (STRICTLY TYPED TO PREVENT ANY IMPLICIT ANY BUILD ERRORS)
+============================================================================ */
+
+const STACK_TABS: Array<{ id: StackKey; label: string }> = [
+  { id: 'nextjs', label: 'Next.js' },
+  { id: 'js', label: 'JavaScript' },
+  { id: 'python', label: 'Python' },
+  { id: 'node', label: 'Node.js' },
+  { id: 'go', label: 'Go' },
+  { id: 'rust', label: 'Rust' },
+  { id: 'csharp', label: 'C# .NET' },
+  { id: 'php', label: 'PHP' },
+  { id: 'ruby', label: 'Ruby' },
+  { id: 'kotlin', label: 'Kotlin' },
+  { id: 'flutter', label: 'Flutter' },
+  { id: 'cloudflare', label: 'Cloudflare' },
+];
+
+const MARQUEE_ITEMS: string[] = [
+  'Next.js', 'React', 'Vue', 'Svelte', 'Vite', 'Node.js', 'Express', 'NestJS',
+  'Python', 'FastAPI', 'Django', 'Go', 'Rust', 'Axum', 'PHP', 'Laravel',
+  'WordPress', 'C# .NET', 'Ruby on Rails', 'Kotlin', 'Flutter', 'Cloudflare Workers', 'cURL',
+];
+
+const FAQS: Array<{ q: string; a: string }> = [
+  {
+    q: 'How does SnapTrace collapse cascading multi-error outages?',
+    a: 'During an outage, a single database connection drop often triggers 4 or 5 different downstream errors (auth fails, queries fail, UI renders fail). Instead of sending 5 separate noisy alerts that you have to piece together manually on a Sunday, SnapTrace groups cascading failures using deterministic SHA-256 fingerprinting and isolates the single root cause with an instant AI fix.',
+  },
+  {
+    q: 'Do I need to keep the SnapTrace website open to receive alerts?',
+    a: 'No! The SnapTrace SDK runs silently inside your live application. When an unhandled crash happens in production, SnapTrace automatically pings your configured Discord channel, Slack room, and Gmail inbox in milliseconds.',
+  },
+  {
+    q: 'How does SnapTrace integrate with VS Code, Cursor, and AI IDEs?',
+    a: 'When an exception occurs, SnapTrace provides a 1-click "Copy for Cursor" button inside the Inspect modal. It generates an AI-optimized prompt containing the runtime environment, error message, and stack frames, ready to paste into Cursor, VS Code Copilot, or Claude Code for instant local code fixes.',
+  },
+  {
+    q: 'What languages and frameworks does SnapTrace support?',
+    a: 'SnapTrace uses a universal REST telemetry endpoint. We provide drop-in snippets for Next.js, JavaScript, React, Vue, Node.js, Python, Go, Rust, C# (.NET), PHP, Ruby, Kotlin, Flutter, Cloudflare Workers, and cURL.',
+  },
+  {
+    q: 'How does SnapTrace maintain a <5KB bundle size with 0ms delay?',
+    a: 'Unlike legacy APMs that bundle 100KB+ of heavy performance profilers and session serializers, SnapTrace is focused strictly on crash telemetry, client-side PII regex scrubbing, and asynchronous beacon delivery via navigator.sendBeacon. It never delays page hydration or blocks Google Core Web Vitals.',
+  },
+  {
+    q: 'How does the limited-time Beta promotion work?',
+    a: 'Early developers claim grandfathered Lifetime Starter Pro with 75,000 monthly events, 30-day retention, and full in-dashboard AI diagnostics for $0 forever. No credit card required.',
+  },
+];
+
+const COMPARISON_ROWS: Array<{ f: string; st: string; sentry: string; glitch: string }> = [
+  { f: 'SDK bundle weight', st: '<3.4 KB (Featherweight)', sentry: '~100 KB+', glitch: '~100 KB+' },
+  { f: 'Cascading outage collapse', st: '✓ 1 unified root incident', sentry: '5 separate alert storms', glitch: '✕ None' },
+  { f: 'Free tier events', st: '2,000 / month', sentry: '5,000 / month', glitch: '1,000 / month' },
+  { f: 'Client-side PII scrubbing', st: '✓ Native regex AST on-device', sentry: 'Complex server rules', glitch: '✕ None' },
+  { f: 'In-dashboard BYOK AI diagnostics', st: '✓ Free in Pro ($0 markup)', sentry: '$$$ Expensive add-on', glitch: '✕ None' },
+  { f: '1-click prompt export for Cursor', st: '✓ Free forever', sentry: '✕ Manual copy', glitch: '✕ Manual copy' },
+];
+
+const SNIPPETS: Record<StackKey, string> = {
+  nextjs: '// app/layout.tsx (Next.js App Router)\nimport Script from \'next/script\';\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang="en">\n      <head>\n        <Script\n          src="https://snaptrace-dashboard.vercel.app/snaptrace.js"\n          strategy="beforeInteractive"\n          data-api-key="sk_live_your_project_key"\n        />\n      </head>\n      <body>{children}</body>\n    </html>\n  );\n}',
+  js: '<!-- React, Vue, Svelte, or Vanilla JavaScript -->\n<script \n  src="https://snaptrace-dashboard.vercel.app/snaptrace.js"\n  data-api-key="sk_live_your_project_key"\n  async\n></script>',
+  python: '# Python / Django / FastAPI / Flask\nimport traceback, requests\n\ndef log_to_snaptrace(exception, url="https://api.mycompany.com"):\n    try:\n        requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={\n            "apiKey": "sk_live_your_project_key",\n            "message": str(exception),\n            "stackTrace": traceback.format_exc(),\n            "url": url,\n            "environment": "production"\n        }, timeout=2)\n    except Exception:\n        pass',
+  node: '// Node.js / Express / NestJS\nprocess.on(\'uncaughtException\', (err) => {\n  fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n    method: \'POST\',\n    headers: { \'Content-Type\': \'application/json\' },\n    body: JSON.stringify({ apiKey: \'sk_live_your_project_key\', message: err.message, stackTrace: err.stack, environment: process.env.NODE_ENV || \'production\' })\n  }).catch(() => {});\n});',
+  go: '// Go (Golang) Crash Reporter\npackage main\n\nimport (\n  "bytes"\n  "encoding/json"\n  "net/http"\n)\n\nfunc SendSnapTrace(err error, route string) {\n  payload, _ := json.Marshal(map[string]string{ "apiKey": "sk_live_your_project_key", "message": err.Error(), "environment": "production", "url": route })\n  http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))\n}',
+  rust: '// Rust / Axum / Actix-web\nasync fn capture_snaptrace(err: &str, route: &str) {\n    let payload = serde_json::json!({ "apiKey": "sk_live_your_project_key", "message": err, "url": route, "environment": "production" });\n    let _ = reqwest::Client::new().post("https://snaptrace-dashboard.vercel.app/api/v1/log").json(&payload).send().await;\n}',
+  csharp: '// C# / ASP.NET Core\npublic static async Task CaptureSnapTrace(Exception ex, string url = "API Service") {\n    var payload = new { apiKey = "sk_live_your_project_key", message = ex.Message, stackTrace = ex.StackTrace, url = url, environment = "production" };\n    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);\n}',
+  php: '<?php\n// PHP / Laravel / WordPress\nset_exception_handler(function ($e) {\n    $ch = curl_init(\'https://snaptrace-dashboard.vercel.app/api/v1/log\');\n    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([\'apiKey\' => \'sk_live_your_project_key\', \'message\' => $e->getMessage(), \'stackTrace\' => $e->getTraceAsString(), \'environment\' => \'production\']));\n    curl_setopt($ch, CURLOPT_HTTPHEADER, [\'Content-Type: application/json\']);\n    curl_exec($ch);\n});\n?>',
+  ruby: '# Ruby on Rails / Sinatra\ndef send_snaptrace_alert(exception)\n  uri = URI(\'https://snaptrace-dashboard.vercel.app/api/v1/log\')\n  Net::HTTP.post(uri, { apiKey: \'sk_live_your_project_key\', message: exception.message, stackTrace: exception.backtrace&.join("\\n"), environment: \'production\' }.to_json, "Content-Type" => "application/json") rescue nil\nend',
+  kotlin: '// Kotlin / Android / Java (OkHttp)\nfun sendSnapTrace(e: Throwable, context: String = "Android App") {\n    val json = JSONObject().apply {\n        put("apiKey", "sk_live_your_project_key")\n        put("message", e.localizedMessage ?: "Unknown Error")\n        put("environment", "production")\n        put("url", context)\n    }\n}',
+  flutter: '// Flutter / Dart Crash Handler\nvoid captureSnapTrace(Object error, StackTrace stack) {\n  http.post(Uri.parse(\'https://snaptrace-dashboard.vercel.app/api/v1/log\'), headers: {\'Content-Type\': \'application/json\'}, body: jsonEncode({\'apiKey\': \'sk_live_your_project_key\', \'message\': error.toString(), \'stackTrace\': stack.toString(), \'environment\': \'production\'}));\n}',
+  cloudflare: '// Cloudflare Workers / Serverless Edge\nexport default {\n  async fetch(req: Request, env: any, ctx: any) {\n    try {\n      return await handleRequest(req);\n    } catch (err: any) {\n      ctx.waitUntil(fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n        method: \'POST\',\n        headers: { \'Content-Type\': \'application/json\' },\n        body: JSON.stringify({ apiKey: \'sk_live_your_project_key\', message: err.message, stackTrace: err.stack, environment: \'production\' })\n      }));\n      return new Response(\'Edge Execution Error\', { status: 500 });\n    }\n  }\n};'
+};
+
+/* ============================================================================
+   MAIN COMPONENT
 ============================================================================ */
 
 export default function WelcomeLandingPage() {
@@ -427,7 +428,6 @@ export default function WelcomeLandingPage() {
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  // Dual mode, billing & navigation
   const [marketingMode, setMarketingMode] = useState(true);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -435,12 +435,10 @@ export default function WelcomeLandingPage() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Interactive Live Triage Simulator State
   const [activeTriageTab, setActiveTriageTab] = useState<TriageTab>('stack');
   const [simulatedResolved, setSimulatedResolved] = useState(false);
   const [maskedPiiView, setMaskedPiiView] = useState(true);
 
-  // Agency contact modal
   const [showAgencyModal, setShowAgencyModal] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
 
@@ -450,7 +448,6 @@ export default function WelcomeLandingPage() {
     setTimeout(() => setCopiedEmail(false), 2500);
   };
 
-  // Feedback widget state (Direct Gmail integration)
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategory>('feature');
   const [feedbackMessage, setFeedbackMessage] = useState('');
@@ -605,8 +602,6 @@ export default function WelcomeLandingPage() {
     setTimeout(() => setCopiedCursorPrompt(false), 2500);
   };
 
-  /* ------------------------------ Loading State ------------------------------ */
-
   if (checkingAuth) {
     return (
       <div className="min-h-screen bg-[#05070E] flex items-center justify-center font-sans text-slate-400">
@@ -622,13 +617,11 @@ export default function WelcomeLandingPage() {
     );
   }
 
-  /* --------------------------------- Page Render --------------------------------- */
-
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#05070E] font-sans text-slate-100 antialiased selection:bg-yellow-400 selection:text-slate-950">
       <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
 
-      {/* ========================= 1. ANNOUNCEMENT BAR ========================= */}
+      {/* ANNOUNCEMENT BAR */}
       <div
         className={
           'relative z-50 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b px-4 py-2 text-center font-mono text-[11px] transition-colors ' +
@@ -658,7 +651,7 @@ export default function WelcomeLandingPage() {
         )}
       </div>
 
-      {/* ============================== 2. HEADER ============================== */}
+      {/* HEADER */}
       <header
         className={
           'sticky top-0 z-40 border-b transition-all duration-300 ' +
@@ -759,7 +752,6 @@ export default function WelcomeLandingPage() {
           </nav>
 
           <div className="flex shrink-0 items-center gap-2 font-mono">
-            {/* Dev Mode Switcher */}
             <button
               onClick={toggleMarketingMode}
               title="Switch between the marketing site and the developer terminal"
@@ -799,7 +791,7 @@ export default function WelcomeLandingPage() {
         </div>
       </header>
 
-      {/* --------------------- Mobile Full-Screen Navigation --------------------- */}
+      {/* Mobile Drawer */}
       <div
         data-open={mobileNavOpen ? 'true' : 'false'}
         className="st-mobile-nav fixed inset-0 z-50 lg:hidden"
@@ -832,7 +824,7 @@ export default function WelcomeLandingPage() {
               { href: '#comparison', label: 'Why SnapTrace' },
               { href: '#pricing', label: 'Pricing' },
               { href: '#faq', label: 'FAQ' },
-            ].map((item) => (
+            ].map((item: { href: string; label: string }) => (
               <a key={item.label} href={item.href} onClick={() => setMobileNavOpen(false)} className="st-h3 border-b border-slate-800/60 py-3.5 text-slate-200 transition active:text-yellow-300">
                 {item.label}
               </a>
@@ -860,7 +852,7 @@ export default function WelcomeLandingPage() {
         </div>
       </div>
 
-      {/* ========================= VIEW 1: RAW DEV TERMINAL ========================= */}
+      {/* VIEW 1: RAW DEV TERMINAL */}
       {!marketingMode ? (
         <section className="st-grain relative min-h-[calc(100vh-6.5rem)]">
           <div className="st-grid pointer-events-none absolute inset-0" />
@@ -999,15 +991,13 @@ export default function WelcomeLandingPage() {
       ) : (
         /* ======================== VIEW 2: MARKETING SITE ======================== */
         <>
-          {/* ------------------------------ 3. HERO SECTION ------------------------------ */}
+          {/* 3. HERO SECTION */}
           <section className="st-grain relative overflow-hidden pb-14 pt-12 sm:pb-20 sm:pt-16">
             <TelemetryBeamBackground />
             <div className="st-grid pointer-events-none absolute inset-0" />
             <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(250,204,21,0.12),rgba(147,51,234,0.08),transparent)] blur-[110px]" />
 
             <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6">
-              
-              {/* Top Hero Pitch */}
               <div className="text-center max-w-4xl mx-auto space-y-4">
                 <a
                   href="#ai-agent"
@@ -1040,7 +1030,6 @@ export default function WelcomeLandingPage() {
                   </Link>
                 </div>
 
-                {/* 1-Line Embed Pill */}
                 <div className="pt-4 max-w-xl mx-auto">
                   <div className="st-card flex items-center gap-3 rounded-xl p-2 pl-3.5 border-slate-800">
                     <IconCode className="h-4 w-4 shrink-0 text-yellow-400/80 hidden sm:block" />
@@ -1060,11 +1049,9 @@ export default function WelcomeLandingPage() {
                 </div>
               </div>
 
-              {/* 🪟 MACOS SENTRY-STYLE INTERACTIVE PREVIEW WINDOW */}
+              {/* MACOS INTERACTIVE PREVIEW WINDOW */}
               <div className="mt-12 max-w-5xl mx-auto">
                 <div className="st-card rounded-2xl overflow-hidden shadow-2xl border-slate-700/70">
-                  
-                  {/* Window Chrome Header */}
                   <div className="st-window-topbar px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5">
@@ -1103,11 +1090,8 @@ export default function WelcomeLandingPage() {
                     </div>
                   </div>
 
-                  {/* Window Body */}
                   <div className="p-5 sm:p-7 space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                      
-                      {/* Left: Interactive Inspection Tabs */}
                       <div className="lg:col-span-8 space-y-3">
                         <div className="flex items-center gap-2 flex-wrap font-mono text-xs">
                           <span className="px-2 py-0.5 bg-red-500/20 text-red-300 border border-red-500/30 rounded font-bold text-[11px]">
@@ -1118,7 +1102,6 @@ export default function WelcomeLandingPage() {
                           <span className="text-yellow-300 font-bold">database.js:18:11</span>
                         </div>
 
-                        {/* Tabs Bar */}
                         <div className="flex items-center gap-1.5 pt-1 font-mono text-xs overflow-x-auto">
                           <button
                             onClick={() => setActiveTriageTab('stack')}
@@ -1146,10 +1129,7 @@ export default function WelcomeLandingPage() {
                           </button>
                         </div>
 
-                        {/* Interactive Tab Content */}
                         <div className="bg-[#05070E] border border-slate-800/90 rounded-2xl p-4 font-mono text-xs overflow-x-auto">
-                          
-                          {/* TAB 1: STACK TRACE */}
                           {activeTriageTab === 'stack' && (
                             <div className="space-y-1.5 text-slate-300 leading-relaxed text-[11.5px]">
                               <div className="text-red-400 font-bold">ReferenceError: pool.connect() timed out after 5000ms</div>
@@ -1161,7 +1141,6 @@ export default function WelcomeLandingPage() {
                             </div>
                           )}
 
-                          {/* TAB 2: TELEMETRY SPANS */}
                           {activeTriageTab === 'timeline' && (
                             <div className="space-y-2 text-[11px]">
                               <div className="flex items-center justify-between pb-1 text-slate-500 font-mono text-[10px]">
@@ -1185,7 +1164,6 @@ export default function WelcomeLandingPage() {
                             </div>
                           )}
 
-                          {/* TAB 3: CLIENT PII SCRUBBING */}
                           {activeTriageTab === 'pii' && (
                             <div className="space-y-2.5 text-[11px]">
                               <div className="flex items-center justify-between">
@@ -1205,7 +1183,6 @@ export default function WelcomeLandingPage() {
                             </div>
                           )}
 
-                          {/* TAB 4: AI PATCH DIFF */}
                           {activeTriageTab === 'aifix' && (
                             <div className="space-y-2 text-[11px]">
                               <div className="text-purple-300 font-bold flex items-center gap-1.5">
@@ -1217,11 +1194,9 @@ export default function WelcomeLandingPage() {
                               </pre>
                             </div>
                           )}
-
                         </div>
                       </div>
 
-                      {/* Right: Cascade Collapse Stats Box */}
                       <div className="lg:col-span-4 p-4.5 bg-[#080C16] rounded-2xl border border-yellow-400/30 space-y-3.5 font-mono text-xs">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-yellow-400 flex items-center gap-1.5">
                           <IconBolt className="h-3.5 w-3.5" />
@@ -1253,26 +1228,23 @@ export default function WelcomeLandingPage() {
                           Explore Live Dashboard →
                         </Link>
                       </div>
-
                     </div>
                   </div>
-
                 </div>
               </div>
-
             </div>
           </section>
 
-          {/* --------------------------- 4. STACK MARQUEE --------------------------- */}
+          {/* 4. STACK MARQUEE */}
           <div className="border-y border-slate-800/70 bg-[#070B13]/60 py-5">
             <p className="mb-4 text-center font-mono text-[10px] tracking-[0.14em] text-slate-500 uppercase font-bold">
               ONE UNIVERSAL REST INGESTION PROTOCOL · ZERO DEPENDENCY CONFLICTS
             </p>
             <div className="st-fade-x overflow-hidden">
               <div className="st-marquee-track">
-                {[0, 1].map((dup) => (
+                {[0, 1].map((dup: number) => (
                   <div key={dup} className="flex shrink-0 items-center gap-10 pr-10" aria-hidden={dup === 1}>
-                    {MARQUEE_ITEMS.map((item) => (
+                    {MARQUEE_ITEMS.map((item: string) => (
                       <span key={String(dup) + item} className="whitespace-nowrap font-mono text-[13px] text-slate-500 transition-colors hover:text-slate-200">
                         {item}
                       </span>
@@ -1283,7 +1255,7 @@ export default function WelcomeLandingPage() {
             </div>
           </div>
 
-          {/* --------------------- 5. SUNDAY 2 AM OUTAGE COLLAPSE (#grouping) --------------------- */}
+          {/* 5. SUNDAY 2 AM OUTAGE COLLAPSE (#grouping) */}
           <section id="grouping" className="st-section st-cv mx-auto max-w-6xl px-5 sm:px-6">
             <SmoothReveal className="mb-8">
               <SectionIntro
@@ -1310,8 +1282,6 @@ export default function WelcomeLandingPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 p-5 sm:p-7 lg:grid-cols-12">
-                  
-                  {/* Step List */}
                   <ol className="relative lg:col-span-7">
                     <span className="absolute bottom-3 left-[11px] top-3 w-px bg-slate-800" aria-hidden="true" />
                     {[
@@ -1319,7 +1289,7 @@ export default function WelcomeLandingPage() {
                       { step: 'Frontend dispatches POST /v1/order', crash: false },
                       { step: 'Next.js server action executes', crash: false },
                       { step: 'database.js:18 pool.connect() timeout', crash: true },
-                    ].map((row) => (
+                    ].map((row: { step: string; crash: boolean }) => (
                       <li key={row.step} className="relative flex items-center gap-4 py-2">
                         <span
                           className={
@@ -1346,7 +1316,6 @@ export default function WelcomeLandingPage() {
                     ))}
                   </ol>
 
-                  {/* Root Cause Card */}
                   <div className="lg:col-span-5">
                     <div className="h-full rounded-xl border border-yellow-400/30 bg-[linear-gradient(180deg,rgba(250,204,21,0.08),rgba(250,204,21,0))] p-5 space-y-3">
                       <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.12em] text-yellow-300 font-bold">
@@ -1372,7 +1341,7 @@ export default function WelcomeLandingPage() {
             </SmoothReveal>
           </section>
 
-          {/* ----------------------- 6. FEATHERWEIGHT SDK (#features) ----------------------- */}
+          {/* 6. FEATHERWEIGHT SDK (#features) */}
           <section id="features" className="st-section st-cv border-t border-slate-800/70 bg-[#060911]/70">
             <div className="mx-auto max-w-6xl px-5 sm:px-6">
               <SmoothReveal className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
@@ -1389,7 +1358,7 @@ export default function WelcomeLandingPage() {
                       { name: 'SnapTrace JS telemetry SDK', size: '<3.4 KB', width: '5%', tone: 'emerald' },
                       { name: 'Honeybadger client', size: '~35 KB', width: '35%', tone: 'slate' },
                       { name: 'Sentry browser SDK', size: '100+ KB', width: '100%', tone: 'red' },
-                    ].map((row) => (
+                    ].map((row: { name: string; size: string; width: string; tone: string }) => (
                       <div key={row.name} className="rounded-xl border border-slate-800 bg-[#0B101D] px-4 py-3">
                         <div className="flex items-center justify-between font-mono text-[12.5px]">
                           <span className={row.tone === 'emerald' ? 'text-slate-200 font-bold' : 'text-slate-400'}>{row.name}</span>
@@ -1445,7 +1414,7 @@ export default function WelcomeLandingPage() {
             </div>
           </section>
 
-          {/* ------------------------ 7. AI AGENT EXPORT (#ai-agent) ------------------------ */}
+          {/* 7. AI AGENT EXPORT (#ai-agent) */}
           <section id="ai-agent" className="st-section st-cv border-t border-slate-800/70">
             <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-8">
               <SmoothReveal>
@@ -1525,10 +1494,9 @@ export default function WelcomeLandingPage() {
             </div>
           </section>
 
-          {/* ------------------------------ 8. BRING YOUR OWN KEY (BYOK) (#byok) ------------------------------ */}
+          {/* 8. BRING YOUR OWN KEY (BYOK) (#byok) */}
           <section id="byok" className="st-section st-cv border-t border-slate-800/70 bg-[linear-gradient(180deg,rgba(11,16,29,0.7),rgba(5,7,14,1))]">
             <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-10">
-              
               <SmoothReveal>
                 <SectionIntro
                   center
@@ -1539,7 +1507,6 @@ export default function WelcomeLandingPage() {
                 />
               </SmoothReveal>
 
-              {/* 🟢 2 CURRENTLY LIVE MODELS */}
               <div className="space-y-3.5">
                 <div className="flex items-center gap-2 font-mono text-xs text-yellow-400 font-bold uppercase tracking-wider">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -1547,8 +1514,6 @@ export default function WelcomeLandingPage() {
                 </div>
 
                 <SmoothReveal delay={80} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  
-                  {/* Google Gemini */}
                   <div className="st-card st-card-hover rounded-2xl p-6 border-2 border-emerald-500/50 space-y-4">
                     <div className="flex items-start justify-between">
                       <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10">
@@ -1570,7 +1535,6 @@ export default function WelcomeLandingPage() {
                     </div>
                   </div>
 
-                  {/* OpenAI */}
                   <div className="st-card st-card-hover rounded-2xl p-6 border-2 border-yellow-400/50 space-y-4">
                     <div className="flex items-start justify-between">
                       <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-100">
@@ -1591,11 +1555,9 @@ export default function WelcomeLandingPage() {
                       <span className="text-yellow-300 font-bold">⚡ Deep AST</span>
                     </div>
                   </div>
-
                 </SmoothReveal>
               </div>
 
-              {/* 🟣 3 PIPELINE UPCOMING MODELS */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between font-mono text-xs">
                   <span className="text-slate-400 font-bold uppercase tracking-wider flex items-center gap-2">
@@ -1647,7 +1609,6 @@ export default function WelcomeLandingPage() {
                 </SmoothReveal>
               </div>
 
-              {/* Zero-Trust Local Storage Banner */}
               <div className="p-4.5 rounded-2xl bg-[#0B101D] border border-yellow-400/20 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs">
                 <div className="flex items-center gap-3">
                   <span className="text-xl">🛡️</span>
@@ -1665,11 +1626,10 @@ export default function WelcomeLandingPage() {
                   Read Security Spec →
                 </Link>
               </div>
-
             </div>
           </section>
 
-          {/* --------------------------- 9. QUICKSTART CODE STUDIO (#quickstart) --------------------------- */}
+          {/* 9. QUICKSTART CODE STUDIO (#quickstart) */}
           <section id="quickstart" className="st-section st-cv border-t border-slate-800/70">
             <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-8">
               <SmoothReveal>
@@ -1685,7 +1645,7 @@ export default function WelcomeLandingPage() {
                 <div className="st-card overflow-hidden rounded-2xl shadow-2xl">
                   <div className="st-window-topbar flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
                     <div className="st-scroll -mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-1 md:pb-0">
-                      {STACK_TABS.map((tab) => (
+                      {STACK_TABS.map((tab: { id: StackKey; label: string }) => (
                         <button
                           key={tab.id}
                           onClick={() => setActiveQuickTab(tab.id)}
@@ -1717,7 +1677,7 @@ export default function WelcomeLandingPage() {
             </div>
           </section>
 
-          {/* --------------------------- 10. COMPARISON MATRIX (#comparison) --------------------------- */}
+          {/* 10. COMPARISON MATRIX (#comparison) */}
           <section id="comparison" className="st-section st-cv border-t border-slate-800/70 bg-[#060911]/70">
             <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-8">
               <SmoothReveal>
@@ -1730,7 +1690,6 @@ export default function WelcomeLandingPage() {
                 />
               </SmoothReveal>
 
-              {/* Desktop table */}
               <SmoothReveal delay={80} className="hidden md:block">
                 <div className="st-card st-scroll overflow-x-auto rounded-2xl shadow-xl">
                   <table className="w-full min-w-[720px] border-collapse text-left">
@@ -1748,7 +1707,7 @@ export default function WelcomeLandingPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/80 font-mono">
-                      {COMPARISON_ROWS.map((row) => (
+                      {COMPARISON_ROWS.map((row: { f: string; st: string; sentry: string; glitch: string }) => (
                         <tr key={row.f} className="transition-colors hover:bg-white/[0.02]">
                           <td className="px-5 py-4 text-[13px] font-semibold text-white font-sans">{row.f}</td>
                           <td className="bg-yellow-400/[0.04] px-5 py-4 text-[12.5px] font-bold text-emerald-400">
@@ -1766,9 +1725,8 @@ export default function WelcomeLandingPage() {
                 </div>
               </SmoothReveal>
 
-              {/* Mobile stacked cards */}
               <SmoothReveal delay={80} className="space-y-3 md:hidden">
-                {COMPARISON_ROWS.map((row) => (
+                {COMPARISON_ROWS.map((row: { f: string; st: string; sentry: string; glitch: string }) => (
                   <div key={row.f} className="st-card rounded-xl p-4">
                     <div className="text-[13px] font-bold text-white">{row.f}</div>
                     <div className="mt-3 grid grid-cols-3 gap-2 text-center font-mono text-[11px]">
@@ -1791,7 +1749,7 @@ export default function WelcomeLandingPage() {
             </div>
           </section>
 
-          {/* ------------------------ 11. SOCIAL PROOF (#social-proof) ------------------------ */}
+          {/* 11. SOCIAL PROOF (#social-proof) */}
           <section id="social-proof" className="st-section st-cv border-t border-slate-800/70">
             <SmoothReveal className="mx-auto max-w-3xl px-5 sm:px-6">
               <figure className="st-card p-7 sm:p-8 rounded-2xl relative">
@@ -1811,7 +1769,7 @@ export default function WelcomeLandingPage() {
             </SmoothReveal>
           </section>
 
-          {/* ------------------------------ 12. PRICING (#pricing) ------------------------------ */}
+          {/* 12. PRICING (#pricing) */}
           <section id="pricing" className="st-section st-cv border-t border-slate-800/70 bg-[#060911]/70">
             <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-8">
               <SmoothReveal>
@@ -1867,8 +1825,6 @@ export default function WelcomeLandingPage() {
               </SmoothReveal>
 
               <SmoothReveal delay={100} className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3">
-                
-                {/* Tier 1 */}
                 <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6 sm:p-7">
                   <div>
                     <span className="font-mono text-[11px] tracking-[0.1em] text-slate-500 font-bold">DEVELOPER FREE</span>
@@ -1887,7 +1843,7 @@ export default function WelcomeLandingPage() {
                         'In-dashboard error inspection',
                         'Client-side regex PII firewall',
                         'Email and in-app alerts (no webhooks)',
-                      ].map((f) => (
+                      ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
                           <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
                           <span>{f}</span>
@@ -1901,7 +1857,6 @@ export default function WelcomeLandingPage() {
                   </Link>
                 </div>
 
-                {/* Tier 2: Pro Builder */}
                 <div className="st-glow-amber relative flex flex-col justify-between rounded-2xl border-2 border-yellow-400/50 bg-[linear-gradient(180deg,rgba(250,204,21,0.06),rgba(11,16,29,1)_45%)] p-6 sm:p-7 lg:-translate-y-2">
                   <span className="absolute -top-3 left-6 rounded-full bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3 py-1 font-mono text-[10px] font-black tracking-wider text-slate-950">
                     POPULAR FOR SOLO DEVS
@@ -1928,7 +1883,7 @@ export default function WelcomeLandingPage() {
                         '1-click Cursor and Claude fix prompts',
                         '60s loop deduplication ([x50] noise throttling)',
                         'In-dashboard BYOK AI copilot (Gemini & OpenAI)',
-                      ].map((f) => (
+                      ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
                           <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-yellow-400" />
                           <span>{f}</span>
@@ -1942,7 +1897,6 @@ export default function WelcomeLandingPage() {
                   </Link>
                 </div>
 
-                {/* Tier 3: Agency Studio */}
                 <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6 sm:p-7">
                   <div>
                     <div className="flex items-center justify-between gap-3">
@@ -1970,7 +1924,7 @@ export default function WelcomeLandingPage() {
                         'Cascading multi-error outage collapse',
                         'Priority edge ingestion gateways',
                         'Raw log CSV / JSON export',
-                      ].map((f) => (
+                      ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
                           <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-purple-400" />
                           <span>{f}</span>
@@ -1983,12 +1937,11 @@ export default function WelcomeLandingPage() {
                     Request agency access →
                   </button>
                 </div>
-
               </SmoothReveal>
             </div>
           </section>
 
-          {/* ----------------------------- 13. SECURITY & COMPLIANCE (#pii) ----------------------------- */}
+          {/* 13. SECURITY & COMPLIANCE (#pii) */}
           <section id="pii" className="st-section st-cv border-t border-slate-800/70">
             <div className="mx-auto max-w-6xl px-5 sm:px-6">
               <SmoothReveal className="mx-auto max-w-2xl text-center">
@@ -2001,7 +1954,7 @@ export default function WelcomeLandingPage() {
                   { icon: <IconFeather />, title: 'Under 3.4KB', sub: '100/100 Core Web Vitals' },
                   { icon: <IconMute />, title: 'Anti-noise guard', sub: 'SHA-256 loop throttling' },
                   { icon: <IconUnlocked />, title: 'No vendor lock-in', sub: 'Universal REST protocol' },
-                ].map((b) => (
+                ].map((b: { icon: React.ReactNode; title: string; sub: string }) => (
                   <div key={b.title} className="st-card st-card-hover rounded-xl p-5">
                     <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-yellow-400/20 bg-yellow-400/[0.08] text-yellow-300">
                       {b.icon}
@@ -2014,7 +1967,7 @@ export default function WelcomeLandingPage() {
             </div>
           </section>
 
-          {/* --------------------------------- 14. FAQ (#faq) --------------------------------- */}
+          {/* 14. FAQ (#faq) */}
           <section id="faq" className="st-section st-cv border-t border-slate-800/70">
             <div className="mx-auto max-w-3xl px-5 sm:px-6 space-y-8">
               <SmoothReveal>
@@ -2023,7 +1976,7 @@ export default function WelcomeLandingPage() {
               </SmoothReveal>
 
               <SmoothReveal delay={80} className="divide-y divide-slate-800/80 border-y border-slate-800/80">
-                {FAQS.map((faq, idx) => {
+                {FAQS.map((faq: { q: string; a: string }, idx: number) => {
                   const isOpen = activeFaq === idx;
                   return (
                     <div key={idx}>
@@ -2051,7 +2004,7 @@ export default function WelcomeLandingPage() {
             </div>
           </section>
 
-          {/* ---------------------------------- 15. FOOTER (INTEGRATED SOCIAL LINKS) ---------------------------------- */}
+          {/* 15. FOOTER */}
           <footer className="relative overflow-hidden border-t border-slate-800/70 bg-[#060911] pb-28 pt-16 sm:pb-10 sm:pt-20">
             <div className="pointer-events-none absolute -bottom-52 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(250,204,21,0.08),transparent)] blur-[90px]" />
 
@@ -2150,9 +2103,7 @@ export default function WelcomeLandingPage() {
                   <Link href="/about" className="transition hover:text-yellow-300">ABOUT</Link>
                 </div>
 
-                {/* 🌟 VERIFIED REAL SOCIAL MEDIA LINKS */}
                 <div className="flex items-center gap-2">
-                  {/* Twitter / X */}
                   <a
                     href="https://x.com/Arslan009a"
                     target="_blank"
@@ -2165,7 +2116,6 @@ export default function WelcomeLandingPage() {
                     </svg>
                   </a>
 
-                  {/* GitHub Repository */}
                   <a
                     href="https://github.com/arxu009-alt/snaptrace-dashboard"
                     target="_blank"
@@ -2178,7 +2128,6 @@ export default function WelcomeLandingPage() {
                     </svg>
                   </a>
 
-                  {/* Discord Community */}
                   <a
                     href="https://discord.gg/eUkeFDpRU"
                     target="_blank"
@@ -2187,7 +2136,8 @@ export default function WelcomeLandingPage() {
                     className="p-2 text-slate-500 hover:text-white transition cursor-pointer"
                   >
                     <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.894.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                      <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.894.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                    </svg>
                   </a>
                 </div>
               </div>
@@ -2198,7 +2148,7 @@ export default function WelcomeLandingPage() {
             </div>
           </footer>
 
-          {/* --------- Mobile-Only Sticky Bottom CTA --------- */}
+          {/* Mobile Bottom CTA */}
           <div className="st-safe-b fixed inset-x-0 bottom-0 z-30 border-t border-slate-800/80 bg-[#070B13]/95 px-4 pt-3 backdrop-blur-xl sm:hidden">
             <Link href="/signup" className={BTN_PRIMARY + ' w-full font-mono'}>
               Claim Lifetime Pro Pass ($0) →
@@ -2207,7 +2157,7 @@ export default function WelcomeLandingPage() {
         </>
       )}
 
-      {/* ========================== 16. FEEDBACK FAB & MODAL ========================== */}
+      {/* FEEDBACK MODAL */}
       <button
         onClick={() => setShowFeedbackModal(true)}
         aria-label="Send feedback"
@@ -2251,7 +2201,6 @@ export default function WelcomeLandingPage() {
               </p>
             </div>
 
-            {/* Category Selectors */}
             <div className="space-y-1.5 font-mono text-xs">
               <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Category</span>
               <div className="grid grid-cols-2 gap-1.5 text-[11px]">
@@ -2260,7 +2209,7 @@ export default function WelcomeLandingPage() {
                   { id: 'bug', label: '🐞 Bug Report' },
                   { id: 'ux', label: '⚡ Developer UX' },
                   { id: 'general', label: '💬 General Vibe' },
-                ].map((cat) => (
+                ].map((cat: { id: string; label: string }) => (
                   <button
                     type="button"
                     key={cat.id}
@@ -2321,7 +2270,7 @@ export default function WelcomeLandingPage() {
         </div>
       )}
 
-      {/* ========================== 17. AGENCY STUDIO MODAL ($49 TIER) ========================== */}
+      {/* AGENCY STUDIO MODAL */}
       {showAgencyModal && (
         <div
           onClick={(e) => {
@@ -2386,7 +2335,6 @@ export default function WelcomeLandingPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
