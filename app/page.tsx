@@ -19,11 +19,6 @@ const SUPPORT_EMAIL = 'hello.snaptrace@gmail.com';
 
 /* ============================================================================
    GLOBAL SENTRY-GRADE STYLE LAYER
-   - Fluid typography (clamp) ensuring exact scale at all zoom levels
-   - Hardware-accelerated glass cards with 1px radiant glow borders
-   - High-contrast developer dark palette (#05070E background)
-   - Micro-glow ambient highlights and scanline effects
-   - Content visibility optimization for off-screen performance
 ============================================================================ */
 
 const GLOBAL_CSS = `
@@ -153,7 +148,7 @@ button, a { touch-action: manipulation; }
 `;
 
 /* ============================================================================
-   INLINE DEVELOPER ICON SYSTEM (Zero Dependency, Pixel-Crisp Line Geometry)
+   INLINE DEVELOPER ICON SYSTEM
 ============================================================================ */
 
 const stroke = (className: string) => ({
@@ -229,7 +224,7 @@ const IconMail = ({ className = 'w-4 h-4' }: IconProps) => (
 );
 
 /* ============================================================================
-   AUTHENTIC BRAND MARKS (Exact Geometric Brand Vectors)
+   AUTHENTIC BRAND MARKS
 ============================================================================ */
 
 const MarkGemini = ({ className = 'w-6 h-6' }: IconProps) => (
@@ -420,145 +415,7 @@ function SectionIntro({
 }
 
 /* ============================================================================
-   DEV KNOWLEDGE BASE & CLI BOT (100% Preserved)
-============================================================================ */
-
-const DEV_KNOWLEDGE_BASE: Record<string, string> = {
-  collapse: 'When an outage happens (like a DB pool drop), legacy loggers spam 5 separate alerts for downstream errors. SnapTrace hashes the error origin via deterministic SHA-256 fingerprints, collapses the entire cascade into 1 consolidated thread tagged [xN], and points directly to the failing line (database.js:18) with an AI fix.',
-  bundle: 'SnapTrace is strictly <3.4KB gzipped (Sentry is ~100KB+). We use native browser listeners and dispatch asynchronously via navigator.sendBeacon. Zero blocking time on page hydration; 100/100 Google Core Web Vitals score.',
-  pii: 'Zero-Trust On-Device Sanitization. Passwords, bearer tokens, emails, and credit cards are scrubbed with regex AST directly in the browser before payloads touch the network. Sensitive credentials never hit third-party servers.',
-  cursor: 'When an exception occurs, 1 click exports an AI-optimized prompt pre-formatted with the runtime environment, error message, and stack frames ready to paste into Cursor, Claude Code, or VS Code Copilot for an instant 2-line patch.',
-};
-
-function getDevBotAnswer(query: string): string {
-  const q = query.toLowerCase().trim();
-
-  if (q.includes('ai') || q.includes('model') || q.includes('gemini') || q.includes('openai') || q.includes('gpt') || q.includes('claude') || q.includes('cursor') || q.includes('copilot') || q.includes('llm') || q.includes('deepseek')) {
-    return 'SnapTrace features a dual AI architecture:\n\n1. In-Dashboard BYOK Diagnostics (2 Active Live Models):\n• Google Gemini (100% Free via Gemini 2.5 Flash Lite) for instant 150ms root-cause diffs.\n• OpenAI (GPT-4o & GPT-4o-mini) with standard sk-... API keys.\n• DeepSeek, Claude 3.5 Sonnet, and local Ollama are in active pipeline integration.\nYour API keys are encrypted on-device and never stored on our servers.\n\n2. 1-Click IDE Coding Agent Export:\nClicking "Copy for Cursor" generates an AI-optimized prompt pre-formatted with the environment, error message, and stack frames—ready for Cursor, Claude Code, or VS Code Copilot.';
-  }
-
-  if (q.includes('collapse') || q.includes('cascade') || q.includes('sunday') || q.includes('outage') || q.includes('root cause') || q.includes('group')) {
-    return DEV_KNOWLEDGE_BASE.collapse;
-  }
-
-  if (q.includes('bundle') || q.includes('size') || q.includes('speed') || q.includes('fast') || q.includes('lightweight') || q.includes('5kb') || q.includes('performance') || q.includes('beacon') || q.includes('sendbeacon') || q.includes('lighthouse') || q.includes('vitals')) {
-    return DEV_KNOWLEDGE_BASE.bundle;
-  }
-
-  if (q.includes('pii') || q.includes('privacy') || q.includes('password') || q.includes('mask') || q.includes('credit card') || q.includes('card') || q.includes('token') || q.includes('gdpr') || q.includes('sanitize')) {
-    return DEV_KNOWLEDGE_BASE.pii;
-  }
-
-  if (q.includes('price') || q.includes('cost') || q.includes('beta') || q.includes('free') || q.includes('tier') || q.includes('pay') || q.includes('subscription')) {
-    return 'Public Beta is currently active. Early developers claim grandfathered Lifetime Starter Pro with high-capacity monitoring and full in-dashboard AI diagnostics for $0 forever. No credit card required.';
-  }
-
-  if (q.includes('language') || q.includes('stack') || q.includes('framework') || q.includes('python') || q.includes('node') || q.includes('rust') || q.includes('go') || q.includes('golang') || q.includes('php') || q.includes('csharp') || q.includes('ruby') || q.includes('flutter') || q.includes('kotlin') || q.includes('cloudflare') || q.includes('curl') || q.includes('support')) {
-    return 'We support 100% of languages through our open REST ingestion protocol. Pre-configured drop-in snippets are ready in the dashboard for:\n• Frontend: Next.js (App & Pages Router), React, Vue, Svelte, Vite, Vanilla JS\n• Backend: Node.js (Express/Nest), Python (FastAPI/Django), Go (Golang), Rust (Axum/Actix), PHP (Laravel/WordPress), C# (.NET), Ruby on Rails\n• Mobile & Edge: Flutter (Dart), Kotlin/Android, Cloudflare Workers, and raw cURL/Bash.';
-  }
-
-  if (q.includes('setup') || q.includes('install') || q.includes('how to') || q.includes('start') || q.includes('quickstart')) {
-    return '30-second setup:\n1. Place this 1-line script inside your HTML head or Next.js app/layout.tsx:\n<script src="https://snaptrace-dashboard.vercel.app/snaptrace.js" data-api-key="YOUR_KEY" async></script>\n2. When any uncaught exception occurs, SnapTrace automatically intercepts it, scrubs PII, throttles repeat loops, and pings your Discord/Slack/Email in milliseconds.';
-  }
-
-  if (q.includes('slack') || q.includes('discord') || q.includes('alert') || q.includes('notification') || q.includes('email') || q.includes('webhook')) {
-    return 'Instant real-time alert dispatch in <1 second to your Discord channels (rich embeds), Slack incoming webhooks, and Gmail inbox with occurrence counters ([x500]). Configure your webhook URLs under Settings in 10 seconds.';
-  }
-
-  if (q.includes('loop') || q.includes('throttle') || q.includes('spam') || q.includes('storm') || q.includes('flood') || q.includes('duplicate') || q.includes('2 am') || q.includes('x500')) {
-    return '60-Second Loop Throttling Engine.\n\nIf an infinite re-render loop or failing API poll throws 500 times in 10 seconds, SnapTrace sends the 1st crash immediately, silences duplicate alerts over a 60-second window, and delivers 1 clean summary alert tagged [x500].';
-  }
-
-  if (q.includes('sentry') || q.includes('datadog') || q.includes('glitchtip') || q.includes('honeybadger') || q.includes('why snaptrace') || q.includes('versus') || q.includes('vs')) {
-    return 'Why developers switch to SnapTrace:\n1. Featherweight SDK: <3.4KB vs Sentry\'s 100KB+ bundle penalty [1.2.2].\n2. Zero Alert Fatigue: 60s noise throttling groups cascade crashes into 1 alert tagged [xN] [1.1.7].\n3. On-Device PII Masking: Passwords and cards scrubbed before transmission.\n4. Free BYOK AI: In-dashboard Gemini & OpenAI diagnostics without expensive enterprise add-ons.';
-  }
-
-  return 'SnapTrace is a featherweight (<5KB) error monitoring platform built to eliminate alert fatigue and 100KB SDK bloat. Try asking about:\n• "which ai models does this support?"\n• "how does cascading error collapse work?"\n• "why is the SDK under 5KB?"\n• "which languages are supported?"\n• "how does client PII masking work?"';
-}
-
-const STACK_TABS: Array<{ id: StackKey; label: string }> = [
-  { id: 'nextjs', label: 'Next.js' },
-  { id: 'js', label: 'JavaScript' },
-  { id: 'python', label: 'Python' },
-  { id: 'node', label: 'Node.js' },
-  { id: 'go', label: 'Go' },
-  { id: 'rust', label: 'Rust' },
-  { id: 'csharp', label: 'C# .NET' },
-  { id: 'php', label: 'PHP' },
-  { id: 'ruby', label: 'Ruby' },
-  { id: 'kotlin', label: 'Kotlin' },
-  { id: 'flutter', label: 'Flutter' },
-  { id: 'cloudflare', label: 'Cloudflare' },
-];
-
-const MARQUEE_ITEMS = [
-  'Next.js', 'React', 'Vue', 'Svelte', 'Vite', 'Node.js', 'Express', 'NestJS',
-  'Python', 'FastAPI', 'Django', 'Go', 'Rust', 'Axum', 'PHP', 'Laravel',
-  'WordPress', 'C# .NET', 'Ruby on Rails', 'Kotlin', 'Flutter', 'Cloudflare Workers', 'cURL',
-];
-
-const TAPE_EVENTS = [
-  { label: 'ReferenceError · database.js:18', tone: 'crash' },
-  { label: 'Cascade collapsed → 1 incident [x4]', tone: 'fix' },
-  { label: 'PII scrubbed before transmission', tone: 'ok' },
-  { label: 'Discord alert dispatched · 0.4s', tone: 'ok' },
-  { label: 'TypeError · checkout.tsx:92', tone: 'crash' },
-  { label: 'AI patch ready · client.release()', tone: 'fix' },
-];
-
-const FAQS = [
-  {
-    q: 'How does SnapTrace collapse cascading multi-error outages?',
-    a: 'During an outage, a single database connection drop often triggers 4 or 5 different downstream errors (auth fails, queries fail, UI renders fail). Instead of sending 5 separate noisy alerts that you have to piece together manually on a Sunday, SnapTrace groups cascading failures using deterministic SHA-256 fingerprinting and isolates the single root cause with an instant AI fix.',
-  },
-  {
-    q: 'Do I need to keep the SnapTrace website open to receive alerts?',
-    a: 'No! The SnapTrace SDK runs silently inside your live application. When an unhandled crash happens in production, SnapTrace automatically pings your configured Discord channel, Slack room, and Gmail inbox in milliseconds.',
-  },
-  {
-    q: 'How does SnapTrace integrate with VS Code, Cursor, and AI IDEs?',
-    a: 'When an exception occurs, SnapTrace provides a 1-click "Copy for Cursor" button inside the Inspect modal. It generates an AI-optimized prompt containing the runtime environment, error message, and stack frames, ready to paste into Cursor, VS Code Copilot, or Claude Code for instant local code fixes.',
-  },
-  {
-    q: 'What languages and frameworks does SnapTrace support?',
-    a: 'SnapTrace uses a universal REST telemetry endpoint. We provide drop-in snippets for Next.js, JavaScript, React, Vue, Node.js, Python, Go, Rust, C# (.NET), PHP, Ruby, Kotlin, Flutter, Cloudflare Workers, and cURL.',
-  },
-  {
-    q: 'How does SnapTrace maintain a <5KB bundle size with 0ms delay?',
-    a: 'Unlike legacy APMs that bundle 100KB+ of heavy performance profilers and session serializers, SnapTrace is focused strictly on crash telemetry, client-side PII regex scrubbing, and asynchronous beacon delivery via navigator.sendBeacon. It never delays page hydration or blocks Google Core Web Vitals.',
-  },
-  {
-    q: 'How does the limited-time Beta promotion work?',
-    a: 'Early developers claim grandfathered Lifetime Starter Pro with 75,000 monthly events, 30-day retention, and full in-dashboard AI diagnostics for $0 forever. No credit card required.',
-  },
-];
-
-const COMPARISON_ROWS = [
-  { f: 'SDK bundle weight', st: '<3.4 KB (Featherweight)', sentry: '~100 KB+', glitch: '~100 KB+' },
-  { f: 'Cascading outage collapse', st: '✓ 1 unified root incident', sentry: '5 separate alert storms', glitch: '✕ None' },
-  { f: 'Free tier events', st: '2,000 / month', sentry: '5,000 / month', glitch: '1,000 / month' },
-  { f: 'Client-side PII scrubbing', st: '✓ Native regex AST on-device', sentry: 'Complex server rules', glitch: '✕ None' },
-  { f: 'In-dashboard BYOK AI diagnostics', st: '✓ Free in Pro ($0 markup)', sentry: '$$$ Expensive add-on', glitch: '✕ None' },
-  { f: '1-click prompt export for Cursor', st: '✓ Free forever', sentry: '✕ Manual copy', glitch: '✕ Manual copy' },
-];
-
-const SNIPPETS: Record<StackKey, string> = {
-  nextjs: '// app/layout.tsx (Next.js App Router)\nimport Script from \'next/script\';\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang="en">\n      <head>\n        <Script\n          src="https://snaptrace-dashboard.vercel.app/snaptrace.js"\n          strategy="beforeInteractive"\n          data-api-key="sk_live_your_project_key"\n        />\n      </head>\n      <body>{children}</body>\n    </html>\n  );\n}',
-  js: '<!-- React, Vue, Svelte, or Vanilla JavaScript -->\n<script \n  src="https://snaptrace-dashboard.vercel.app/snaptrace.js"\n  data-api-key="sk_live_your_project_key"\n  async\n></script>',
-  python: '# Python / Django / FastAPI / Flask\nimport traceback, requests\n\ndef log_to_snaptrace(exception, url="https://api.mycompany.com"):\n    try:\n        requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={\n            "apiKey": "sk_live_your_project_key",\n            "message": str(exception),\n            "stackTrace": traceback.format_exc(),\n            "url": url,\n            "environment": "production"\n        }, timeout=2)\n    except Exception:\n        pass',
-  node: '// Node.js / Express / NestJS\nprocess.on(\'uncaughtException\', (err) => {\n  fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n    method: \'POST\',\n    headers: { \'Content-Type\': \'application/json\' },\n    body: JSON.stringify({ apiKey: \'sk_live_your_project_key\', message: err.message, stackTrace: err.stack, environment: process.env.NODE_ENV || \'production\' })\n  }).catch(() => {});\n});',
-  go: '// Go (Golang) Crash Reporter\npackage main\n\nimport (\n  "bytes"\n  "encoding/json"\n  "net/http"\n)\n\nfunc SendSnapTrace(err error, route string) {\n  payload, _ := json.Marshal(map[string]string{ "apiKey": "sk_live_your_project_key", "message": err.Error(), "environment": "production", "url": route })\n  http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))\n}',
-  rust: '// Rust / Axum / Actix-web\nasync fn capture_snaptrace(err: &str, route: &str) {\n    let payload = serde_json::json!({ "apiKey": "sk_live_your_project_key", "message": err, "url": route, "environment": "production" });\n    let _ = reqwest::Client::new().post("https://snaptrace-dashboard.vercel.app/api/v1/log").json(&payload).send().await;\n}',
-  csharp: '// C# / ASP.NET Core\npublic static async Task CaptureSnapTrace(Exception ex, string url = "API Service") {\n    var payload = new { apiKey = "sk_live_your_project_key", message = ex.Message, stackTrace = ex.StackTrace, url = url, environment = "production" };\n    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);\n}',
-  php: '<?php\n// PHP / Laravel / WordPress\nset_exception_handler(function ($e) {\n    $ch = curl_init(\'https://snaptrace-dashboard.vercel.app/api/v1/log\');\n    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([\'apiKey\' => \'sk_live_your_project_key\', \'message\' => $e->getMessage(), \'stackTrace\' => $e->getTraceAsString(), \'environment\' => \'production\']));\n    curl_setopt($ch, CURLOPT_HTTPHEADER, [\'Content-Type: application/json\']);\n    curl_exec($ch);\n});\n?>',
-  ruby: '# Ruby on Rails / Sinatra\ndef send_snaptrace_alert(exception)\n  uri = URI(\'https://snaptrace-dashboard.vercel.app/api/v1/log\')\n  Net::HTTP.post(uri, { apiKey: \'sk_live_your_project_key\', message: exception.message, stackTrace: exception.backtrace&.join("\\n"), environment: \'production\' }.to_json, "Content-Type" => "application/json") rescue nil\nend',
-  kotlin: '// Kotlin / Android / Java (OkHttp)\nfun sendSnapTrace(e: Throwable, context: String = "Android App") {\n    val json = JSONObject().apply {\n        put("apiKey", "sk_live_your_project_key")\n        put("message", e.localizedMessage ?: "Unknown Error")\n        put("environment", "production")\n        put("url", context)\n    }\n}',
-  flutter: '// Flutter / Dart Crash Handler\nvoid captureSnapTrace(Object error, StackTrace stack) {\n  http.post(Uri.parse(\'https://snaptrace-dashboard.vercel.app/api/v1/log\'), headers: {\'Content-Type\': \'application/json\'}, body: jsonEncode({\'apiKey\': \'sk_live_your_project_key\', \'message\': error.toString(), \'stackTrace\': stack.toString(), \'environment\': \'production\'}));\n}',
-  cloudflare: '// Cloudflare Workers / Serverless Edge\nexport default {\n  async fetch(req: Request, env: any, ctx: any) {\n    try {\n      return await handleRequest(req);\n    } catch (err: any) {\n      ctx.waitUntil(fetch(\'https://snaptrace-dashboard.vercel.app/api/v1/log\', {\n        method: \'POST\',\n        headers: { \'Content-Type\': \'application/json\' },\n        body: JSON.stringify({ apiKey: \'sk_live_your_project_key\', message: err.message, stackTrace: err.stack, environment: \'production\' })\n      }));\n      return new Response(\'Edge Execution Error\', { status: 500 });\n    }\n  }\n};'
-};
-
-/* ============================================================================
-   MAIN COMPONENT
+   PAGE IMPLEMENTATION
 ============================================================================ */
 
 export default function WelcomeLandingPage() {
@@ -2194,7 +2051,7 @@ export default function WelcomeLandingPage() {
             </div>
           </section>
 
-          {/* ---------------------------------- 15. FOOTER ---------------------------------- */}
+          {/* ---------------------------------- 15. FOOTER (INTEGRATED SOCIAL LINKS) ---------------------------------- */}
           <footer className="relative overflow-hidden border-t border-slate-800/70 bg-[#060911] pb-28 pt-16 sm:pb-10 sm:pt-20">
             <div className="pointer-events-none absolute -bottom-52 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(250,204,21,0.08),transparent)] blur-[90px]" />
 
@@ -2293,15 +2150,44 @@ export default function WelcomeLandingPage() {
                   <Link href="/about" className="transition hover:text-yellow-300">ABOUT</Link>
                 </div>
 
+                {/* 🌟 VERIFIED REAL SOCIAL MEDIA LINKS */}
                 <div className="flex items-center gap-2">
-                  <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X" className="p-2 text-slate-500 hover:text-white transition">
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                  {/* Twitter / X */}
+                  <a
+                    href="https://x.com/Arslan009a"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="SnapTrace on X (Twitter)"
+                    className="p-2 text-slate-500 hover:text-white transition cursor-pointer"
+                  >
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
                   </a>
-                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub" className="p-2 text-slate-500 hover:text-white transition">
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+
+                  {/* GitHub Repository */}
+                  <a
+                    href="https://github.com/arxu009-alt/snaptrace-dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="SnapTrace GitHub Repository"
+                    className="p-2 text-slate-500 hover:text-white transition cursor-pointer"
+                  >
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                    </svg>
                   </a>
-                  <a href="https://discord.com" target="_blank" rel="noopener noreferrer" aria-label="Discord" className="p-2 text-slate-500 hover:text-white transition">
-                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.894.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+
+                  {/* Discord Community */}
+                  <a
+                    href="https://discord.gg/eUkeFDpRU"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="SnapTrace Discord Community"
+                    className="p-2 text-slate-500 hover:text-white transition cursor-pointer"
+                  >
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.894.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
                   </a>
                 </div>
               </div>
@@ -2404,7 +2290,7 @@ export default function WelcomeLandingPage() {
               value={feedbackName}
               onChange={(e) => setFeedbackName(e.target.value)}
               placeholder="Your email or @handle (optional)"
-              className="w-full rounded-xl border border-slate-800 bg-[#05070E] p-3 text-base text-slate-200 placeholder-slate-600 transition focus:border-yellow-400/50 focus:outline-none sm:text-[13px] font-mono"
+              className="w-full rounded-xl border border-slate-800 bg-[#05070E] p-3 text-base text-slate-200 placeholder-slate-600 focus:outline-none focus:border-yellow-400 font-mono sm:text-[13px]"
             />
 
             <div className="space-y-2 font-mono">
