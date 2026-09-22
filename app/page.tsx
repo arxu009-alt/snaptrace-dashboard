@@ -96,6 +96,7 @@ button, a { touch-action: manipulation; }
 .st-mobile-nav[data-open='true'] { opacity: 1; visibility: visible; }
 .st-safe-b { padding-bottom: max(0.85rem, env(safe-area-inset-bottom)); }
 .st-safe-t { padding-top: env(safe-area-inset-top); }
+html, body { overflow-x: hidden; max-width: 100%; width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .st-marquee-track { animation: none; }
   .st-ring::before { animation: none; opacity: 0; }
@@ -778,7 +779,7 @@ export default function WelcomeLandingPage() {
             <button
               onClick={toggleMarketingMode}
               title="Switch between the marketing site and the developer terminal"
-              className="hidden cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-white/20 hover:text-white sm:inline-flex"
+             className="hidden cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-white/20 hover:text-white xl:inline-flex"
             >
               <IconTerminal className={'h-3.5 w-3.5 ' + (marketingMode ? 'text-slate-500' : 'text-emerald-400')} />
               <span className="hidden md:inline">{marketingMode ? 'Raw Dev Mode' : 'Marketing Site'}</span>
