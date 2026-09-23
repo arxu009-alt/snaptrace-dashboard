@@ -332,7 +332,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
   };
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-150">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans selection:bg-zinc-700 selection:text-zinc-100 animate-in fade-in duration-150">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Page Header */}
@@ -340,7 +340,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
           <div className="space-y-1">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
               <span>Telemetry Overview</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 font-mono font-semibold">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono font-semibold">
                 {selectedProjectLabel}
               </span>
             </h1>
@@ -353,7 +353,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
             <button
               onClick={handleSendTestPing}
               disabled={firingPing || !projectKey}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               title="Send an immediate live test crash to your dashboard"
             >
               <span>{firingPing ? '⚡ Dispatching...' : '⚡ Fire Test Crash'}</span>
@@ -363,8 +363,8 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
               onClick={toggleDemoMode}
               className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition flex items-center gap-1.5 cursor-pointer border ${
                 demoMode
-                  ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                  : 'bg-[#0B101D] text-slate-300 border-slate-800 hover:border-yellow-400/40'
+                  ? 'bg-zinc-800 text-zinc-100 border-zinc-700'
+                  : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700'
               }`}
             >
               <span>{demoMode ? '✕ Clear Demo' : '⚡ Load Demo'}</span>
@@ -388,15 +388,15 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
         {/* Onboarding Quickstart Card */}
         {!loading && totalErrors === 0 && !demoMode && (
-          <div className="bg-gradient-to-b from-[#0B101D] to-[#070b14] border border-yellow-400/40 rounded-2xl p-6 shadow-xl space-y-5 animate-in fade-in duration-200">
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-5 animate-in fade-in duration-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
               <div className="space-y-0.5">
-                <div className="inline-flex items-center gap-2 text-yellow-400 text-xs font-mono font-bold uppercase tracking-wider">
+                <div className="inline-flex items-center gap-2 text-zinc-300 text-xs font-mono font-bold uppercase tracking-wider">
                   <span>🚀</span> Quickstart Setup (Step 1 of 2)
                 </div>
                 <h2 className="text-base font-bold text-white">Connect your application in 30 seconds</h2>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-300 text-xs font-mono">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-mono">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>Listening for first event...</span>
               </div>
@@ -407,7 +407,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                 <div className="space-y-1">
                   <span className="text-[11px] text-slate-400 font-bold uppercase">1. Active Project API Key</span>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 p-2 bg-[#05070E] border border-slate-800 rounded-lg text-xs text-yellow-300 truncate font-mono">
+                    <code className="flex-1 p-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 truncate font-mono">
                       {projectKey}
                     </code>
                     <button
@@ -424,7 +424,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                   <button
                     onClick={handleSendTestPing}
                     disabled={firingPing}
-                    className="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>{firingPing ? '⚡ Dispatching Ping...' : '⚡ Send Live Test Crash (1-Click)'}</span>
                   </button>
@@ -447,8 +447,8 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                         onClick={() => setQuickTab(tab)}
                         className={`px-2 py-0.5 rounded text-xs font-semibold transition uppercase ${
                           quickTab === tab
-                            ? 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/30'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
+                            : 'text-zinc-400 hover:text-white'
                         }`}
                       >
                         {tab === 'nextjs' ? 'Next.js' : tab === 'js' ? 'HTML / JS' : tab}
@@ -457,7 +457,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                   </div>
                 </div>
 
-                <pre className="text-xs text-yellow-300 overflow-x-auto leading-relaxed p-1">
+                <pre className="text-xs text-zinc-300 overflow-x-auto leading-relaxed p-1">
                   <code>{quickstartSnippets[quickTab]}</code>
                 </pre>
               </div>
@@ -563,8 +563,8 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                         onClick={() => setTimeRange(range)}
                         className={`px-2.5 py-1 rounded text-[11px] font-semibold transition uppercase cursor-pointer ${
                           timeRange === range
-                            ? 'bg-slate-800 text-yellow-300 font-bold border border-slate-700'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-zinc-800 text-zinc-100 font-semibold border border-zinc-700'
+                            : 'text-zinc-400 hover:text-white'
                         }`}
                       >
                         {range}
@@ -596,7 +596,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                             style={{ height: `${hasErrors ? Math.max(heightPercent, 20) : 4}%` }}
                             className={`w-full rounded-sm transition-all duration-300 ${
                               hasErrors
-                                ? 'bg-gradient-to-t from-amber-500 to-yellow-400 shadow-sm shadow-yellow-500/20'
+                                ? 'bg-gradient-to-t from-zinc-400 to-zinc-200 shadow-sm shadow-black/40'
                                 : 'bg-slate-800/40'
                             }`}
                           />
@@ -631,7 +631,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                   </div>
                   <Link
                     href="/dashboard/errors"
-                    className="text-xs text-yellow-300 hover:text-yellow-200 font-semibold transition font-mono"
+                    className="text-xs text-zinc-300 hover:text-zinc-100 font-semibold transition font-mono"
                   >
                     View All →
                   </Link>
@@ -642,7 +642,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                     <p>No exceptions logged for this account yet.</p>
                     <button
                       onClick={handleSendTestPing}
-                      className="text-yellow-300 underline font-bold"
+                      className="text-zinc-200 underline font-semibold"
                     >
                       Click here to fire your first live test crash!
                     </button>
@@ -656,7 +656,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                         className="w-full text-left flex items-center justify-between p-3 bg-[#05070E] border border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/50 rounded-xl text-xs transition cursor-pointer group"
                       >
                         <div className="space-y-0.5 truncate max-w-md">
-                          <p className="font-medium text-slate-200 group-hover:text-yellow-300 truncate font-mono text-[12px] transition">
+                          <p className="font-medium text-zinc-200 group-hover:text-zinc-100 truncate font-mono text-[12px] transition">
                             {err.message}
                           </p>
                           <p className="text-slate-500 font-mono text-[10px]">
@@ -673,7 +673,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                           >
                             {err.environment}
                           </span>
-                          <span className="text-slate-600 group-hover:text-yellow-300 transition font-mono text-xs">
+                          <span className="text-zinc-600 group-hover:text-zinc-300 transition font-mono text-xs">
                             →
                           </span>
                         </div>
@@ -697,17 +697,17 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                     <button
                       onClick={handleSendTestPing}
                       disabled={firingPing}
-                      className="w-full p-2.5 bg-gradient-to-r from-yellow-400/10 to-amber-500/10 hover:from-yellow-400/20 hover:to-amber-500/20 border border-yellow-400/30 rounded-xl text-xs font-bold text-yellow-300 transition flex items-center justify-between cursor-pointer"
+                      className="w-full p-2.5 bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-xs font-semibold text-zinc-100 transition flex items-center justify-between cursor-pointer"
                     >
                       <span>⚡ Fire Live Crash Ping</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-yellow-400/20 text-yellow-300">
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-700 text-zinc-200">
                         1-Click Test →
                       </span>
                     </button>
 
                     <Link
                       href="/test"
-                      className="block p-2.5 bg-[#05070E] hover:bg-slate-900 border border-slate-800 hover:border-yellow-400/30 rounded-xl text-xs font-semibold text-slate-300 transition flex items-center justify-between"
+                      className="block p-2.5 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl text-xs font-semibold text-zinc-300 transition flex items-center justify-between"
                     >
                       <span>🧪 Open Test Playground</span>
                       <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
@@ -742,7 +742,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono block">
                     ACTIVE INGESTION TOKEN
                   </span>
-                  <code className="text-[11px] font-mono text-yellow-300 block truncate bg-[#05070E] p-2 rounded-lg border border-slate-800">
+                  <code className="text-[11px] font-mono text-zinc-100 block truncate bg-zinc-950 p-2 rounded-lg border border-zinc-800">
                     {projectKey || 'Loading...'}
                   </code>
                 </div>
