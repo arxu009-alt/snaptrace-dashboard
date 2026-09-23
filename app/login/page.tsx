@@ -71,7 +71,7 @@ export default function LoginPage() {
       }
 
       setForgotSuccess(
-        `✓ A password reset link has been dispatched to ${forgotEmail}. Please check your inbox and spam folder.`
+        `A password reset link has been dispatched to ${forgotEmail}. Please check your inbox and spam folder.`
       );
     } catch (err: any) {
       setForgotError(err.message || 'Failed to send password reset email.');
@@ -90,68 +90,83 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans flex flex-col justify-between selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-300">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col justify-between selection:bg-zinc-800 selection:text-zinc-100 relative overflow-hidden">
       
-      {/* Background Ambient Glows */}
-      <div className="fixed top-0 left-1/4 w-[600px] h-[400px] bg-gradient-to-tr from-yellow-500/10 via-purple-500/10 to-emerald-500/10 blur-[140px] pointer-events-none" />
+      {/* Subtle Grid Pattern Overlay */}
+      <div 
+        className="pointer-events-none absolute inset-0 opacity-[0.035] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]"
+        aria-hidden="true" 
+      />
+
+      {/* Subtle Radial Glow */}
+      <div 
+        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-zinc-800/20 blur-[130px] rounded-full" 
+        aria-hidden="true" 
+      />
 
       {/* Main Split Grid */}
-      <div className="flex-1 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 items-center p-6 sm:p-10 gap-12 relative z-10">
+      <div className="flex-1 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 items-center p-6 sm:p-12 gap-12 sm:gap-16 relative z-10">
         
-        {/* Left Column: Product Value Showcase */}
-        <div className="lg:col-span-7 space-y-8 py-6">
+        {/* Left Column: Sentry/Vercel Developer Showcase */}
+        <div className="lg:col-span-7 space-y-8 py-4">
           <Link href="/" className="inline-block transition hover:opacity-90">
             <SnapTraceLogo size="lg" showText={true} />
           </Link>
 
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D16] border border-slate-800 text-[11px] font-semibold text-yellow-300">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-zinc-900/80 border border-zinc-800 text-[11px] font-mono text-zinc-400">
+              <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Real-Time Crash Telemetry</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15]">
-              Welcome back to{' '}
-              <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
-                SnapTrace.
-              </span>
+            <h1 className="text-3xl sm:text-5xl lg:text-5xl font-semibold tracking-tight text-zinc-100 leading-[1.15]">
+              Developer observability built for speed.
             </h1>
 
-            <p className="text-base text-slate-400 max-w-xl leading-relaxed">
-              Your real-time crash monitor, zero-noise alert dispatcher, and BYOK AI diagnostic engine are ready.
+            <p className="text-sm sm:text-base text-zinc-400 max-w-xl leading-relaxed">
+              Real-time exception ingestion, sub-millisecond alerting, and automated stack trace diagnostics across your entire modern web architecture.
             </p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#090D16]/80 border border-slate-800/80 max-w-xl space-y-2">
-            <div className="text-xs text-yellow-400 font-bold font-mono">⚡ LIVE METRICS ENGINE</div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Seamlessly monitor exceptions across JavaScript, Next.js, Python, Node, PHP, Ruby, and Kotlin with zero performance overhead.
-            </p>
+          {/* Metric cards / Feature highlights */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl pt-2">
+            <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 space-y-1.5">
+              <div className="text-[11px] font-mono text-zinc-300 font-medium">SUB-MILLI INGESTION</div>
+              <p className="text-xs text-zinc-500 leading-relaxed">
+                Async edge workers capture exceptions without impacting application latency or CPU cycles.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/80 space-y-1.5">
+              <div className="text-[11px] font-mono text-zinc-300 font-medium">BYOK COPILOT</div>
+              <p className="text-xs text-zinc-500 leading-relaxed">
+                Plug your own OpenAI or Gemini API key to pinpoint root causes directly on the stack trace.
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Right Column: Sign In Card */}
         <div className="lg:col-span-5 w-full max-w-md mx-auto">
-          <div className="bg-[#090D16]/95 border border-slate-800/90 rounded-3xl p-8 shadow-2xl backdrop-blur-xl space-y-6">
+          <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-7 sm:p-8 shadow-2xl backdrop-blur-md space-y-6">
             
-            <div className="space-y-1 text-center sm:text-left">
-              <h2 className="text-xl font-bold text-white">Sign In to Dashboard</h2>
-              <p className="text-xs text-slate-400">Enter your credentials to manage your telemetry</p>
+            <div className="space-y-1.5">
+              <h2 className="text-lg font-semibold text-zinc-100">Sign In to Dashboard</h2>
+              <p className="text-xs text-zinc-400">Enter your credentials to manage your telemetry and crash streams</p>
             </div>
 
             {error && (
-              <div className="p-3.5 bg-red-950/60 border border-red-500/40 text-red-300 rounded-2xl text-xs animate-in zoom-in-95 font-mono">
+              <div className="p-3 bg-red-950/40 border border-red-800/50 text-red-300 rounded-lg text-xs font-mono">
                 {error}
               </div>
             )}
 
-            {/* Authentic Vector Google Button */}
+            {/* Google OAuth Button */}
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 py-3 bg-[#05070E] hover:bg-slate-800 border border-slate-800 rounded-xl font-semibold text-xs text-white transition cursor-pointer shadow-md group"
+              className="w-full flex items-center justify-center gap-3 py-2.5 bg-zinc-900 hover:bg-zinc-800/80 border border-zinc-800 rounded-lg font-medium text-xs text-zinc-200 transition-colors cursor-pointer shadow-sm group font-mono"
             >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -174,17 +189,17 @@ export default function LoginPage() {
 
             {/* Divider */}
             <div className="flex items-center gap-3">
-              <div className="h-px bg-slate-800/80 flex-1" />
-              <span className="text-[10px] uppercase tracking-widest text-slate-500 font-mono font-semibold">
-                or with email
+              <div className="h-px bg-zinc-800 flex-1" />
+              <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-mono">
+                or email
               </span>
-              <div className="h-px bg-slate-800/80 flex-1" />
+              <div className="h-px bg-zinc-800 flex-1" />
             </div>
 
             {/* Form */}
-            <form onSubmit={handleEmailLogin} className="space-y-3.5">
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider font-mono block">
                   Work Email
                 </label>
                 <input
@@ -193,21 +208,21 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="developer@company.com"
-                  className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition font-mono"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono transition"
                 />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+                  <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider font-mono block">
                     Password
                   </label>
                   
-                  {/* 🌟 NEW: FORGOT PASSWORD TRIGGER */}
+                  {/* Forgot Password Trigger */}
                   <button
                     type="button"
                     onClick={openForgotModalWithCurrentEmail}
-                    className="text-[11px] text-yellow-400 hover:text-yellow-300 hover:underline font-mono transition cursor-pointer"
+                    className="text-[11px] text-zinc-400 hover:text-zinc-200 hover:underline font-mono transition cursor-pointer"
                   >
                     Forgot password?
                   </button>
@@ -219,22 +234,22 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer font-mono"
+                className="w-full py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition-colors disabled:opacity-50 cursor-pointer font-mono shadow-sm"
               >
-                {loading ? 'Authenticating...' : 'Sign In to Dashboard →'}
+                {loading ? 'Authenticating...' : 'Sign In'}
               </button>
             </form>
 
-            <p className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800/60 font-sans">
+            <p className="text-center text-xs text-zinc-400 pt-3 border-t border-zinc-800/80 font-sans">
               Don't have an account?{' '}
-              <Link href="/signup" className="text-yellow-400 hover:underline font-bold">
+              <Link href="/signup" className="text-zinc-200 hover:underline font-medium">
                 Create Account
               </Link>
             </p>
@@ -244,7 +259,7 @@ export default function LoginPage() {
 
       </div>
 
-      {/* 🌟 PASSWORD RESET REQUEST MODAL */}
+      {/* Password Reset Request Modal */}
       {showForgotModal && (
         <div 
           onClick={(e) => {
@@ -252,39 +267,39 @@ export default function LoginPage() {
           }}
           className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans"
         >
-          <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl relative">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
             <button
               onClick={() => setShowForgotModal(false)}
-              className="absolute right-5 top-5 text-slate-400 hover:text-white text-xs cursor-pointer font-mono"
+              className="absolute right-4 top-4 text-zinc-500 hover:text-zinc-300 text-xs cursor-pointer font-mono"
             >
               ✕
             </button>
 
             <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 text-[10px] font-mono font-bold uppercase">
-                <span>🔐</span> Account Recovery
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 text-[10px] font-mono uppercase tracking-wider">
+                Account Recovery
               </div>
-              <h3 className="text-lg font-bold text-white tracking-tight">
+              <h3 className="text-base font-semibold text-zinc-100">
                 Reset your password
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-zinc-400 leading-relaxed">
                 Enter your account email. We will send you a secure verification link to reset your password with zero loss of project telemetry data.
               </p>
             </div>
 
             {forgotError && (
-              <div className="p-3 bg-red-950/60 border border-red-500/40 text-red-300 rounded-xl text-xs font-mono">
+              <div className="p-3 bg-red-950/40 border border-red-800/50 text-red-300 rounded-lg text-xs font-mono">
                 {forgotError}
               </div>
             )}
 
             {forgotSuccess ? (
-              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-2xl text-xs font-mono space-y-3 leading-relaxed animate-in zoom-in-95">
+              <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-xl text-xs font-mono space-y-3 leading-relaxed animate-in zoom-in-95">
                 <p>{forgotSuccess}</p>
                 <button
                   type="button"
                   onClick={() => setShowForgotModal(false)}
-                  className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition font-mono cursor-pointer"
+                  className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg text-xs font-medium transition font-mono cursor-pointer border border-zinc-700"
                 >
                   Return to Sign In
                 </button>
@@ -292,7 +307,7 @@ export default function LoginPage() {
             ) : (
               <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
                 <div className="space-y-1.5 font-mono">
-                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                  <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider block">
                     Account Email Address
                   </label>
                   <input
@@ -301,7 +316,7 @@ export default function LoginPage() {
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
                     placeholder="developer@company.com"
-                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition"
                     autoFocus
                   />
                 </div>
@@ -310,16 +325,16 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
-                    className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl transition cursor-pointer"
+                    className="px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 rounded-lg transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={forgotLoading}
-                    className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-md disabled:opacity-50 cursor-pointer"
+                    className="px-4 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition disabled:opacity-50 cursor-pointer"
                   >
-                    {forgotLoading ? 'Sending Link...' : 'Send Recovery Link →'}
+                    {forgotLoading ? 'Sending Link...' : 'Send Recovery Link'}
                   </button>
                 </div>
               </form>
@@ -330,13 +345,13 @@ export default function LoginPage() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/60 p-6 text-xs text-slate-500 relative z-10 max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
+      <footer className="border-t border-zinc-850 border-zinc-800/60 p-6 text-xs text-zinc-500 relative z-10 max-w-6xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
         <span>© {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform.</span>
-        <div className="flex items-center space-x-6 text-slate-400">
-          <Link href="/privacy" className="hover:text-yellow-400 transition">
+        <div className="flex items-center space-x-6 text-zinc-400 font-mono text-[11px]">
+          <Link href="/privacy" className="hover:text-zinc-200 transition">
             Privacy Policy
           </Link>
-          <Link href="/terms" className="hover:text-yellow-400 transition">
+          <Link href="/terms" className="hover:text-zinc-200 transition">
             Terms of Service
           </Link>
         </div>
