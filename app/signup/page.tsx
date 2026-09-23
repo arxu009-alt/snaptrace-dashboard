@@ -57,14 +57,11 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 font-sans flex flex-col justify-between selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-300">
-      
-      {/* Ambient Glows */}
-      <div className="fixed top-0 left-1/4 w-[600px] h-[400px] bg-gradient-to-tr from-yellow-500/10 via-purple-500/10 to-emerald-500/10 blur-[140px] pointer-events-none" />
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans flex flex-col justify-between selection:bg-zinc-800 selection:text-zinc-100 animate-in fade-in duration-300">
 
       {/* Main Split Grid */}
       <div className="flex-1 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 items-center p-6 sm:p-10 gap-12 relative z-10">
-        
+
         {/* Left Column: Sentry-Inspired Product Value Showcase */}
         <div className="lg:col-span-7 space-y-8 py-6">
           <Link href="/" className="inline-block transition hover:opacity-90">
@@ -72,58 +69,85 @@ export default function SignUpPage() {
           </Link>
 
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#090D16] border border-slate-800 text-[11px] font-semibold text-yellow-300">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>v1.0 Public Beta • Next-Gen Telemetry</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-[11px] font-medium font-mono text-zinc-400">
+              <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>v1.0 Public Beta &middot; Telemetry Infrastructure</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15]">
-              Code <span className="text-red-400 underline decoration-red-500/50 decoration-wavy">breaks</span>, fix it in a{' '}
-              <span className="bg-gradient-to-r from-yellow-400 via-amber-300 to-yellow-500 bg-clip-text text-transparent">
-                snap.
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-100 leading-[1.15]">
+              Code <span className="text-red-400">breaks</span>. Fix it in a{' '}
+              <span className="text-zinc-100 underline decoration-zinc-700 underline-offset-8">
+                snap
               </span>
+              .
             </h1>
 
-            <p className="text-base text-slate-400 max-w-xl leading-relaxed">
-              Join thousands of developers tracking exceptions without bloated SDKs, surprise overage bills, or 10,000 alert flood spam.
+            <p className="text-base text-zinc-400 max-w-xl leading-relaxed">
+              Track exceptions with zero Core Web Vitals penalty, deterministic crash deduplication, and direct AI diagnostics.
             </p>
           </div>
 
           {/* Feature Highlight Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl pt-2">
-            <div className="p-4 rounded-2xl bg-[#090D16]/80 border border-slate-800/80 space-y-1 hover:border-yellow-400/30 transition">
-              <div className="text-yellow-400 font-bold text-xs flex items-center gap-1.5">
-                <span>🪶</span> &lt;5KB Featherweight SDK
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-w-xl pt-2">
+            <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-1 transition hover:border-zinc-700">
+              <div className="text-zinc-200 font-medium text-xs flex items-center gap-2">
+                <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                  <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                  <path d="M7 21h10" />
+                  <path d="M12 3v18" />
+                  <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+                </svg>
+                <span>&lt;5KB Featherweight SDK</span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Zero impact on your Google PageSpeed scores and Lighthouse Core Web Vitals.
+              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                Zero impact on PageSpeed scores and Google Lighthouse Core Web Vitals.
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#090D16]/80 border border-slate-800/80 space-y-1 hover:border-emerald-400/30 transition">
-              <div className="text-emerald-400 font-bold text-xs flex items-center gap-1.5">
-                <span>🔇</span> Noise Deduplication
+            <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-1 transition hover:border-zinc-700">
+              <div className="text-zinc-200 font-medium text-xs flex items-center gap-2">
+                <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                  <line x1="22" x2="16" y1="9" y2="15" />
+                  <line x1="16" x2="22" y1="9" y2="15" />
+                </svg>
+                <span>Noise Deduplication</span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Infinite loops group into 1 clean alert tag <code className="text-yellow-300 font-mono">[x500]</code>. Zero alert fatigue.
+              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                Repetitive failure loops group into 1 summary alert <code className="text-zinc-300 font-mono">[x500]</code> to eliminate fatigue.
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#090D16]/80 border border-slate-800/80 space-y-1 hover:border-purple-400/30 transition">
-              <div className="text-purple-400 font-bold text-xs flex items-center gap-1.5">
-                <span>🤖</span> BYOK AI Root-Cause Copilot
+            <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-1 transition hover:border-zinc-700">
+              <div className="text-zinc-200 font-medium text-xs flex items-center gap-2">
+                <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2v4" />
+                  <path d="m16.2 7.8 2.9-2.9" />
+                  <path d="M18 12h4" />
+                  <path d="m16.2 16.2 2.9 2.9" />
+                  <path d="M12 18v4" />
+                  <path d="m4.9 19.1 2.9-2.9" />
+                  <path d="M2 12h4" />
+                  <path d="m4.9 4.9 2.9 2.9" />
+                </svg>
+                <span>BYOK AI Copilot</span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Use your own OpenAI key for instant bug diagnostics and 1-click Cursor prompts.
+              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                Bring your own Gemini or OpenAI API keys with zero platform markups and 1-click Cursor exports.
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#090D16]/80 border border-slate-800/80 space-y-1 hover:border-blue-400/30 transition">
-              <div className="text-blue-400 font-bold text-xs flex items-center gap-1.5">
-                <span>🔒</span> Client-Side PII Firewall
+            <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-1 transition hover:border-zinc-700">
+              <div className="text-zinc-200 font-medium text-xs flex items-center gap-2">
+                <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span>Client-Side PII Firewall</span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Passwords and sensitive tokens are scrubbed directly on the user's browser.
+              <p className="text-[11px] text-zinc-400 leading-relaxed">
+                Passwords, credit cards, and authorization tokens are scrubbed in the browser before network transmission.
               </p>
             </div>
           </div>
@@ -131,33 +155,33 @@ export default function SignUpPage() {
 
         {/* Right Column: High-End Auth Card */}
         <div className="lg:col-span-5 w-full max-w-md mx-auto">
-          <div className="bg-[#090D16]/95 border border-slate-800/90 rounded-3xl p-8 shadow-2xl backdrop-blur-xl space-y-6">
-            
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-8 shadow-2xl backdrop-blur-xl space-y-6">
+
             <div className="space-y-1 text-center sm:text-left">
-              <h2 className="text-xl font-bold text-white">Create your developer account</h2>
-              <p className="text-xs text-slate-400">Start monitoring in 60 seconds • Free forever tier</p>
+              <h2 className="text-xl font-bold text-zinc-100">Create your developer account</h2>
+              <p className="text-xs text-zinc-400 font-mono">Telemetry ingest setup &middot; Free tier included</p>
             </div>
 
             {/* Success Banner */}
             {successMsg && (
-              <div className="p-4 bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 rounded-2xl text-xs space-y-1 animate-in zoom-in-95">
-                <span className="font-bold block">✓ Verification Email Dispatched</span>
+              <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 rounded-lg text-xs space-y-1 font-mono animate-in zoom-in-95">
+                <span className="font-semibold block">Confirmation Link Dispatched</span>
                 <span>{successMsg}</span>
               </div>
             )}
 
             {/* Error Banner */}
             {errorMsg && (
-              <div className="p-3.5 bg-red-950/60 border border-red-500/40 text-red-300 rounded-2xl text-xs animate-in zoom-in-95">
+              <div className="p-3.5 bg-red-950/40 border border-red-500/40 text-red-300 rounded-lg text-xs font-mono animate-in zoom-in-95">
                 {errorMsg}
               </div>
             )}
 
-            {/* Authentic Vector Google Button */}
+            {/* Google OAuth Button */}
             <button
               type="button"
               onClick={handleGoogleSignUp}
-              className="w-full flex items-center justify-center gap-3 py-3 bg-[#05070E] hover:bg-slate-800 border border-slate-800 rounded-xl font-semibold text-xs text-white transition cursor-pointer shadow-md group"
+              className="w-full flex items-center justify-center gap-3 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 rounded-lg font-medium text-xs text-zinc-200 transition-colors cursor-pointer"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -182,19 +206,19 @@ export default function SignUpPage() {
 
             {/* Divider */}
             <div className="flex items-center gap-3">
-              <div className="h-px bg-slate-800/80 flex-1" />
-              <span className="text-[10px] uppercase tracking-widest text-slate-500 font-mono font-semibold">
-                or with email
+              <div className="h-px bg-zinc-800 flex-1" />
+              <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-mono">
+                or email
               </span>
-              <div className="h-px bg-slate-800/80 flex-1" />
+              <div className="h-px bg-zinc-800 flex-1" />
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSignUp} className="space-y-3.5">
-              
+            <form onSubmit={handleSignUp} className="space-y-4">
+
               {/* Full Name Input */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider font-mono block">
                   Developer Name
                 </label>
                 <input
@@ -203,13 +227,13 @@ export default function SignUpPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Arslan Dev"
-                  className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-600 focus:border-zinc-600 font-mono transition-colors"
                 />
               </div>
 
               {/* Work Email */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider font-mono block">
                   Work Email
                 </label>
                 <input
@@ -218,13 +242,13 @@ export default function SignUpPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="developer@company.com"
-                  className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-600 focus:border-zinc-600 font-mono transition-colors"
                 />
               </div>
 
               {/* Password */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider font-mono block">
                   Password
                 </label>
                 <input
@@ -232,34 +256,34 @@ export default function SignUpPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                  placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-600 focus:border-zinc-600 font-mono transition-colors"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer"
+                className="w-full py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
               >
-                {loading ? 'Creating Account...' : 'Create Developer Account →'}
+                {loading ? 'Creating Account...' : 'Create Account'}
               </button>
 
-              <p className="text-[11px] text-slate-500 text-center leading-relaxed pt-1">
+              <p className="text-[11px] text-zinc-500 text-center leading-relaxed pt-1">
                 By signing up, you agree to our{' '}
-                <Link href="/terms" className="text-slate-400 underline hover:text-yellow-400">
+                <Link href="/terms" className="text-zinc-400 underline hover:text-zinc-200">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="text-slate-400 underline hover:text-yellow-400">
+                <Link href="/privacy" className="text-zinc-400 underline hover:text-zinc-200">
                   Privacy Policy
                 </Link>.
               </p>
             </form>
 
-            <p className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800/60">
+            <p className="text-center text-xs text-zinc-400 pt-3 border-t border-zinc-800/80">
               Already have an account?{' '}
-              <Link href="/login" className="text-yellow-400 hover:underline font-bold">
+              <Link href="/login" className="text-zinc-200 hover:text-white font-medium underline underline-offset-4">
                 Sign In
               </Link>
             </p>
@@ -270,13 +294,13 @@ export default function SignUpPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/60 p-6 text-xs text-slate-500 relative z-10 max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4">
-        <span>© {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform.</span>
-        <div className="flex items-center space-x-6 text-slate-400">
-          <Link href="/privacy" className="hover:text-yellow-400 transition">
+      <footer className="border-t border-zinc-800/80 p-6 text-xs text-zinc-500 relative z-10 max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 font-mono">
+        <span>&copy; {new Date().getFullYear()} SnapTrace. All rights reserved.</span>
+        <div className="flex items-center space-x-6 text-zinc-400">
+          <Link href="/privacy" className="hover:text-zinc-200 transition-colors">
             Privacy Policy
           </Link>
-          <Link href="/terms" className="hover:text-yellow-400 transition">
+          <Link href="/terms" className="hover:text-zinc-200 transition-colors">
             Terms of Service
           </Link>
         </div>
