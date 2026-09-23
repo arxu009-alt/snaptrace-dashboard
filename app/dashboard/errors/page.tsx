@@ -419,89 +419,89 @@ export default function ExceptionLogsPage() {
   const resolvedCount = logs.filter((l) => l.status === 'resolved').length;
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans animate-in fade-in duration-200">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-5 gap-4">
-          <div className="space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5 flex-wrap">
-              <span>Exception Logs Stream</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800/80 pb-5 gap-4">
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold tracking-tight text-zinc-100 flex items-center gap-2.5 flex-wrap">
+              <span>Exception Logs</span>
 
               {isUrlFiltered ? (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 text-xs font-mono font-bold">
-                  <span>📁 {currentProjectName}</span>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs font-mono">
+                  <span>{currentProjectName}</span>
                   <button
                     onClick={handleClearUrlFilter}
-                    className="ml-1 hover:text-white bg-yellow-400/20 rounded-full w-4 h-4 flex items-center justify-center text-[10px] cursor-pointer"
+                    className="ml-1 hover:text-zinc-100 text-zinc-500 w-3.5 h-3.5 flex items-center justify-center text-[10px] cursor-pointer"
                     title="Clear filter"
                   >
                     ✕
                   </button>
                 </div>
               ) : (
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 font-mono font-bold">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono uppercase tracking-wider">
                   {currentProjectName}
                 </span>
               )}
             </h1>
-            <p className="text-xs text-slate-400 font-mono">
+            <p className="text-xs text-zinc-500 font-mono">
               Live telemetry feed with issue triage, date filters, fingerprint deduplication, and AI fixes.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap self-start sm:self-auto">
+          <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
             <button
               onClick={toggleDemoMode}
               className={
-                'px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer border ' +
+                'px-2.5 py-1.5 rounded-md text-xs font-mono transition flex items-center gap-1.5 cursor-pointer border ' +
                 (demoMode
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm'
-                  : 'bg-[#090D16] text-slate-300 border-slate-800 hover:border-yellow-400/40')
+                  ? 'bg-zinc-800 text-zinc-200 border-zinc-700'
+                  : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700')
               }
             >
-              <span>{demoMode ? '✕ Clear Demo Crashes' : '⚡ Load Demo Crashes'}</span>
+              <span>{demoMode ? '✕ Clear Demo' : 'Load Demo Crashes'}</span>
             </button>
 
-            <div className="flex items-center gap-2 bg-[#090D16] border border-slate-800 px-3.5 py-1.5 rounded-full shadow-sm">
-              <span className="relative flex h-2.5 w-2.5">
+            <div className="flex items-center gap-2 bg-zinc-900/60 border border-zinc-800 px-3 py-1 rounded-full">
+              <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <span className="text-xs text-emerald-400 font-bold tracking-wide uppercase font-mono">
-                Live Stream Active
+              <span className="text-[10px] text-emerald-400 font-medium tracking-wide uppercase font-mono">
+                Live
               </span>
             </div>
           </div>
         </div>
 
         {/* Filter Controls Bar with Search, View Mode, Date Filter, & Environment Pills */}
-        <div className="bg-gradient-to-b from-[#0B101D] to-[#060911] border border-slate-800/90 rounded-3xl p-4 space-y-4 shadow-xl">
+        <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-3 space-y-3">
           
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5">
             <div className="flex-1 relative">
-              <span className="absolute left-3.5 top-2.5 text-slate-500 text-xs">🔍</span>
+              <svg className="absolute left-2.5 top-2 w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               <input
                 type="text"
                 placeholder="Search error messages, URLs, or file paths..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#05070E] border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-yellow-400 transition font-mono"
+                className="w-full bg-zinc-900/60 border border-zinc-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-zinc-700 transition font-mono"
               />
             </div>
 
-            <div className="flex items-center space-x-2 flex-wrap gap-y-2">
-              {/* 🌟 1. INTERACTIVE DATE RANGE SELECTOR */}
-              <div className="flex items-center bg-[#05070E] border border-slate-800 p-1 rounded-xl font-mono text-xs">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Date Range Selector */}
+              <div className="flex items-center bg-zinc-900/40 border border-zinc-800 p-0.5 rounded-lg font-mono text-xs">
                 {(['all', 'today', '7d', '30d'] as const).map((range) => (
                   <button
                     key={range}
                     onClick={() => setDateFilter(range)}
                     className={
-                      'px-2.5 py-1 text-xs font-semibold rounded-lg transition cursor-pointer ' +
+                      'px-2.5 py-1 text-xs rounded-md transition cursor-pointer ' +
                       (dateFilter === range
-                        ? 'bg-slate-800 text-yellow-300 font-bold shadow-sm'
-                        : 'text-slate-400 hover:text-white')
+                        ? 'bg-zinc-800 text-zinc-100 font-medium'
+                        : 'text-zinc-400 hover:text-zinc-200')
                     }
                   >
                     {range === 'all' ? 'All Time' : range === 'today' ? 'Today' : range === '7d' ? '7 Days' : '30 Days'}
@@ -510,46 +510,44 @@ export default function ExceptionLogsPage() {
               </div>
 
               {/* View Mode Toggle */}
-              <div className="flex items-center bg-[#05070E] border border-slate-800 p-1 rounded-xl font-mono text-xs">
+              <div className="flex items-center bg-zinc-900/40 border border-zinc-800 p-0.5 rounded-lg font-mono text-xs">
                 <button
                   onClick={() => setViewMode('grouped')}
                   className={
-                    'px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ' +
+                    'px-2.5 py-1 rounded-md transition cursor-pointer ' +
                     (viewMode === 'grouped'
-                      ? 'bg-yellow-400 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-white')
+                      ? 'bg-zinc-800 text-zinc-100 font-medium'
+                      : 'text-zinc-400 hover:text-zinc-200')
                   }
                   title="Group identical crashes by fingerprint"
                 >
-                  <span>🎯</span>
-                  <span>Grouped</span>
+                  Grouped
                 </button>
                 <button
                   onClick={() => setViewMode('raw')}
                   className={
-                    'px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ' +
+                    'px-2.5 py-1 rounded-md transition cursor-pointer ' +
                     (viewMode === 'raw'
-                      ? 'bg-yellow-400 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-white')
+                      ? 'bg-zinc-800 text-zinc-100 font-medium'
+                      : 'text-zinc-400 hover:text-zinc-200')
                   }
                   title="Show every individual crash event"
                 >
-                  <span>📋</span>
-                  <span>Raw</span>
+                  Raw
                 </button>
               </div>
 
-              {/* Environment Filter Pills */}
-              <div className="flex items-center space-x-1 bg-[#05070E] border border-slate-800 p-1 rounded-xl font-mono">
+              {/* Environment Filter */}
+              <div className="flex items-center bg-zinc-900/40 border border-zinc-800 p-0.5 rounded-lg font-mono text-xs">
                 {(['all', 'production', 'development'] as const).map((env) => (
                   <button
                     key={env}
                     onClick={() => setEnvFilter(env)}
                     className={
-                      'px-2.5 py-1.5 text-xs font-semibold rounded-lg capitalize transition cursor-pointer ' +
+                      'px-2.5 py-1 text-xs rounded-md capitalize transition cursor-pointer ' +
                       (envFilter === env
-                        ? 'bg-slate-800 text-yellow-300 font-bold'
-                        : 'text-slate-400 hover:text-white')
+                        ? 'bg-zinc-800 text-zinc-100 font-medium'
+                        : 'text-zinc-400 hover:text-zinc-200')
                     }
                   >
                     {env}
@@ -560,19 +558,19 @@ export default function ExceptionLogsPage() {
           </div>
 
           {/* Triage Status Tabs + Gated Export Buttons */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-800/80 pt-3 text-xs">
-            <div className="flex items-center gap-2 flex-wrap font-mono">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-t border-zinc-800/60 pt-2.5 text-xs">
+            <div className="flex items-center gap-1 flex-wrap font-mono">
               <button
                 onClick={() => setStatusFilter('unresolved')}
                 className={
-                  'px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ' +
+                  'px-2.5 py-1 rounded-md transition flex items-center gap-1.5 cursor-pointer ' +
                   (statusFilter === 'unresolved'
-                    ? 'bg-red-500/15 text-red-400 border border-red-500/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50')
+                    ? 'bg-zinc-800 text-zinc-100 font-medium'
+                    : 'text-zinc-400 hover:text-zinc-200')
                 }
               >
-                <span>🚨 Unresolved</span>
-                <span className="px-1.5 py-0.2 bg-red-950/60 rounded text-[10px] font-bold">
+                <span>Unresolved</span>
+                <span className="px-1.5 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded text-[10px] font-mono">
                   {unresolvedCount}
                 </span>
               </button>
@@ -580,14 +578,14 @@ export default function ExceptionLogsPage() {
               <button
                 onClick={() => setStatusFilter('resolved')}
                 className={
-                  'px-3.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer ' +
+                  'px-2.5 py-1 rounded-md transition flex items-center gap-1.5 cursor-pointer ' +
                   (statusFilter === 'resolved'
-                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50')
+                    ? 'bg-zinc-800 text-zinc-100 font-medium'
+                    : 'text-zinc-400 hover:text-zinc-200')
                 }
               >
-                <span>✓ Resolved</span>
-                <span className="px-1.5 py-0.2 bg-emerald-950/60 rounded text-[10px] font-bold">
+                <span>Resolved</span>
+                <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[10px] font-mono">
                   {resolvedCount}
                 </span>
               </button>
@@ -595,45 +593,45 @@ export default function ExceptionLogsPage() {
               <button
                 onClick={() => setStatusFilter('all')}
                 className={
-                  'px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer ' +
+                  'px-2.5 py-1 rounded-md transition cursor-pointer ' +
                   (statusFilter === 'all'
-                    ? 'bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50')
+                    ? 'bg-zinc-800 text-zinc-100 font-medium'
+                    : 'text-zinc-400 hover:text-zinc-200')
                 }
               >
-                All Events ({logs.length})
+                All ({logs.length})
               </button>
             </div>
 
             {/* Gated Export Actions & Bulk Resolve Button */}
-            <div className="flex items-center gap-2 self-start sm:self-auto font-mono flex-wrap">
+            <div className="flex items-center gap-1.5 self-start sm:self-auto flex-wrap">
               <button
                 onClick={exportToCSV}
                 disabled={filteredLogs.length === 0}
-                className="px-3 py-1.5 bg-[#05070E] hover:bg-slate-800 text-slate-300 hover:text-yellow-300 border border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer disabled:opacity-40 shadow-sm flex items-center gap-1.5"
+                className="px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 hover:border-zinc-700 rounded-md text-xs font-mono transition cursor-pointer disabled:opacity-40 flex items-center gap-1.5"
                 title={hasExportAccess ? 'Download filtered logs as CSV' : 'Business Scale Feature (Click to unlock)'}
               >
-                <span>{hasExportAccess ? '📥' : '🔒'}</span>
+                <span>{hasExportAccess ? '↓' : '🔒'}</span>
                 <span>CSV</span>
               </button>
 
               <button
                 onClick={exportToJSON}
                 disabled={filteredLogs.length === 0}
-                className="px-3 py-1.5 bg-[#05070E] hover:bg-slate-800 text-slate-300 hover:text-yellow-300 border border-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer disabled:opacity-40 shadow-sm flex items-center gap-1.5"
+                className="px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 hover:border-zinc-700 rounded-md text-xs font-mono transition cursor-pointer disabled:opacity-40 flex items-center gap-1.5"
                 title={hasExportAccess ? 'Download filtered logs as JSON' : 'Business Scale Feature (Click to unlock)'}
               >
-                <span>{hasExportAccess ? '📥' : '🔒'}</span>
+                <span>{hasExportAccess ? '↓' : '🔒'}</span>
                 <span>JSON</span>
               </button>
 
               {unresolvedCount > 0 && (
                 <button
                   onClick={() => setShowBulkResolveModal(true)}
-                  className="px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  className="px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-emerald-400 hover:text-emerald-300 border border-zinc-800 hover:border-emerald-500/30 rounded-md text-xs font-mono transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>✓</span>
-                  <span>Mark All as Resolved</span>
+                  <span>Resolve All</span>
                 </button>
               )}
             </div>
@@ -641,27 +639,26 @@ export default function ExceptionLogsPage() {
         </div>
 
         {/* Table View Container */}
-        <div className="bg-gradient-to-b from-[#0B101D] to-[#060911] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl overflow-hidden">
           {loading ? (
             <div className="p-16 flex flex-col items-center justify-center space-y-3 animate-in fade-in">
               <div className="relative animate-pulse">
                 <SnapTraceLogo size="md" showText={false} />
               </div>
-              <p className="text-xs font-mono text-slate-500 tracking-widest uppercase">Loading stream...</p>
+              <p className="text-xs font-mono text-zinc-500 tracking-widest uppercase">Loading stream...</p>
             </div>
           ) : filteredLogs.length === 0 ? (
-            <div className="p-16 text-center text-slate-500 text-xs font-mono space-y-3">
-              <div className="text-3xl">🎉</div>
-              <p className="font-semibold text-slate-300 text-sm">
+            <div className="p-16 text-center text-zinc-500 text-xs font-mono space-y-3">
+              <p className="font-medium text-zinc-300 text-sm">
                 {logs.length === 0 ? 'No exceptions captured yet.' : 'No matching issues found for this timeframe/filter.'}
               </p>
-              <p className="text-slate-500">Your application runtime is running smoothly.</p>
+              <p className="text-zinc-500">Your application runtime is running cleanly.</p>
               {logs.length === 0 && !demoMode && (
                 <button
                   onClick={toggleDemoMode}
-                  className="mt-2 px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 rounded-xl text-xs font-bold shadow-md cursor-pointer"
+                  className="mt-2 px-3.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 rounded-md text-xs font-mono cursor-pointer transition"
                 >
-                  ⚡ Load Demo Crashes to Test UI
+                  Load Demo Crashes
                 </button>
               )}
             </div>
@@ -670,16 +667,16 @@ export default function ExceptionLogsPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[780px] text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800/90 bg-[#060911] text-slate-400 font-semibold uppercase tracking-wider text-[10px] font-mono">
-                    <th className="py-3.5 px-4 w-12 text-center">Status</th>
-                    <th className="py-3.5 px-4">Issue Description</th>
-                    <th className="py-3.5 px-4 w-28 text-center">Events</th>
-                    <th className="py-3.5 px-4 w-40">Last Seen</th>
-                    <th className="py-3.5 px-4 w-32">Environment</th>
-                    <th className="py-3.5 px-6 w-32 text-right">Actions</th>
+                  <tr className="border-b border-zinc-800/80 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+                    <th className="py-2.5 px-4 w-12 text-center">Status</th>
+                    <th className="py-2.5 px-4">Issue</th>
+                    <th className="py-2.5 px-4 w-24 text-center">Events</th>
+                    <th className="py-2.5 px-4 w-40">Last Seen</th>
+                    <th className="py-2.5 px-4 w-32">Environment</th>
+                    <th className="py-2.5 px-6 w-32 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/70 text-slate-200 font-mono">
+                <tbody className="text-zinc-200 font-mono">
                   {groupedIssues.map((group) => {
                     const isResolved = group.latestLog.status === 'resolved';
 
@@ -687,18 +684,18 @@ export default function ExceptionLogsPage() {
                       <tr
                         key={group.key}
                         className={
-                          'hover:bg-slate-800/40 transition group ' +
-                          (isResolved ? 'opacity-50 bg-[#05070E]/50' : '')
+                          'border-b border-zinc-800/40 hover:bg-zinc-900/40 transition ' +
+                          (isResolved ? 'opacity-50' : '')
                         }
                       >
-                        <td className="py-4 px-4 text-center">
+                        <td className="py-3 px-4 text-center">
                           <button
                             onClick={() => handleResolveGroup(group)}
                             className={
-                              'w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] font-bold transition cursor-pointer ' +
+                              'w-4 h-4 rounded border flex items-center justify-center text-[10px] transition cursor-pointer mx-auto ' +
                               (isResolved
-                                ? 'bg-emerald-500 border-emerald-400 text-slate-950 shadow-sm'
-                                : 'border-slate-700 hover:border-emerald-400 hover:text-emerald-400 text-transparent')
+                                ? 'bg-emerald-500 border-emerald-400 text-zinc-950'
+                                : 'border-zinc-700 hover:border-emerald-500 hover:text-emerald-400 text-transparent')
                             }
                             title={isResolved ? 'Mark as Unresolved' : 'Mark as Resolved'}
                           >
@@ -706,44 +703,44 @@ export default function ExceptionLogsPage() {
                           </button>
                         </td>
 
-                        <td className="py-4 px-4 max-w-md">
+                        <td className="py-3 px-4 max-w-md">
                           <div className="space-y-0.5">
-                            <span className={'font-semibold text-xs block truncate ' + (isResolved ? 'line-through text-slate-400' : 'text-white')}>
+                            <span className={'font-semibold text-xs block truncate font-mono ' + (isResolved ? 'line-through text-zinc-500' : 'text-zinc-200')}>
                               {group.latestLog.message}
                             </span>
-                            <span className="text-[10px] text-slate-500 truncate block">
-                              Route: {group.latestLog.url || 'Universal Background Client'}
+                            <span className="text-[11px] text-zinc-500 truncate block font-mono">
+                              {group.latestLog.url || 'Universal Background Client'}
                             </span>
                           </div>
                         </td>
 
-                        <td className="py-4 px-4 text-center">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 shadow-sm">
+                        <td className="py-3 px-4 text-center">
+                          <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-zinc-800/80 text-zinc-300 border border-zinc-700/60">
                             x{group.count}
                           </span>
                         </td>
 
-                        <td className="py-4 px-4 text-slate-400 text-[11px] whitespace-nowrap">
+                        <td className="py-3 px-4 text-zinc-500 text-[11px] whitespace-nowrap font-mono">
                           {new Date(group.lastSeen).toLocaleTimeString()}
                         </td>
 
-                        <td className="py-4 px-4 whitespace-nowrap">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <span
                             className={
-                              'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ' +
+                              'text-[10px] font-mono px-2 py-0.5 rounded ' +
                               (group.latestLog.environment === 'production'
-                                ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20')
+                                ? 'text-red-400 bg-red-500/10 border border-red-500/20'
+                                : 'text-amber-400 bg-amber-500/10 border border-amber-500/20')
                             }
                           >
                             {group.latestLog.environment || 'production'}
                           </span>
                         </td>
 
-                        <td className="py-4 px-6 text-right whitespace-nowrap">
+                        <td className="py-3 px-6 text-right whitespace-nowrap">
                           <button
                             onClick={() => setSelectedLog(group.latestLog)}
-                            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-yellow-300 hover:text-yellow-200 text-xs font-semibold rounded-xl transition cursor-pointer shadow-sm"
+                            className="border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-zinc-100 text-xs px-2.5 py-1 rounded-md transition cursor-pointer"
                           >
                             Inspect
                           </button>
@@ -759,33 +756,33 @@ export default function ExceptionLogsPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[780px] text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800/90 bg-[#060911] text-slate-400 font-semibold uppercase tracking-wider text-[10px] font-mono">
-                    <th className="py-3.5 px-4 w-12 text-center">Status</th>
-                    <th className="py-3.5 px-4 w-44">Timestamp</th>
-                    <th className="py-3.5 px-4">Exception Message</th>
-                    <th className="py-3.5 px-4 w-32">Environment</th>
-                    <th className="py-3.5 px-6 w-44 text-right">Actions</th>
+                  <tr className="border-b border-zinc-800/80 text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+                    <th className="py-2.5 px-4 w-12 text-center">Status</th>
+                    <th className="py-2.5 px-4 w-44">Timestamp</th>
+                    <th className="py-2.5 px-4">Exception</th>
+                    <th className="py-2.5 px-4 w-32">Environment</th>
+                    <th className="py-2.5 px-6 w-44 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/70 text-slate-200 font-mono">
+                <tbody className="text-zinc-200 font-mono">
                   {filteredLogs.map((log) => {
                     const isResolved = log.status === 'resolved';
                     return (
                       <tr
                         key={log.id}
                         className={
-                          'hover:bg-slate-800/40 transition group ' +
-                          (isResolved ? 'opacity-50 bg-[#05070E]/50' : '')
+                          'border-b border-zinc-800/40 hover:bg-zinc-900/40 transition ' +
+                          (isResolved ? 'opacity-50' : '')
                         }
                       >
-                        <td className="py-4 px-4 text-center">
+                        <td className="py-3 px-4 text-center">
                           <button
                             onClick={() => handleToggleStatus(log.id, log.status)}
                             className={
-                              'w-5 h-5 rounded-lg border flex items-center justify-center text-[10px] font-bold transition cursor-pointer ' +
+                              'w-4 h-4 rounded border flex items-center justify-center text-[10px] transition cursor-pointer mx-auto ' +
                               (isResolved
-                                ? 'bg-emerald-500 border-emerald-400 text-slate-950'
-                                : 'border-slate-700 hover:border-emerald-400 text-transparent')
+                                ? 'bg-emerald-500 border-emerald-400 text-zinc-950'
+                                : 'border-zinc-700 hover:border-emerald-500 text-transparent')
                             }
                             title={isResolved ? 'Mark as Unresolved' : 'Mark as Resolved'}
                           >
@@ -793,39 +790,39 @@ export default function ExceptionLogsPage() {
                           </button>
                         </td>
 
-                        <td className="py-4 px-4 text-slate-400 text-[11px] whitespace-nowrap">
+                        <td className="py-3 px-4 text-zinc-500 text-[11px] whitespace-nowrap font-mono">
                           {new Date(log.created_at).toLocaleString()}
                         </td>
 
-                        <td className="py-4 px-4 font-medium truncate max-w-xs md:max-w-sm">
-                          <span className={isResolved ? 'line-through text-slate-400' : 'text-slate-100 font-semibold'}>
+                        <td className="py-3 px-4 truncate max-w-xs md:max-w-sm">
+                          <span className={isResolved ? 'line-through text-zinc-500 font-mono text-xs' : 'text-zinc-200 font-semibold font-mono text-xs'}>
                             {log.message || log.stack || log.stack_trace || 'Unknown exception'}
                           </span>
                         </td>
 
-                        <td className="py-4 px-4 whitespace-nowrap">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <span
                             className={
-                              'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ' +
+                              'text-[10px] font-mono px-2 py-0.5 rounded ' +
                               (log.environment === 'production'
-                                ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20')
+                                ? 'text-red-400 bg-red-500/10 border border-red-500/20'
+                                : 'text-amber-400 bg-amber-500/10 border border-amber-500/20')
                             }
                           >
                             {log.environment || 'production'}
                           </span>
                         </td>
 
-                        <td className="py-4 px-6 text-right whitespace-nowrap space-x-2">
+                        <td className="py-3 px-6 text-right whitespace-nowrap space-x-2">
                           <button
                             onClick={() => setSelectedLog(log)}
-                            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer"
+                            className="border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-zinc-100 text-xs px-2.5 py-1 rounded-md transition cursor-pointer"
                           >
                             Inspect
                           </button>
                           <button
                             onClick={() => handleDeleteLog(log.id)}
-                            className="px-2.5 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-semibold rounded-xl transition cursor-pointer"
+                            className="px-2.5 py-1 text-red-400 hover:text-red-300 border border-zinc-800 hover:border-red-500/30 text-xs rounded-md transition cursor-pointer"
                           >
                             Delete
                           </button>
@@ -859,33 +856,33 @@ export default function ExceptionLogsPage() {
             onClick={(e) => {
               if (e.target === e.currentTarget) setShowBulkResolveModal(false);
             }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans"
           >
-            <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
               <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-xl">
+                <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400 text-sm">
                   ✓
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-white tracking-tight">
+                  <h3 className="text-sm font-semibold text-zinc-100">
                     Mark All Exceptions as Resolved?
                   </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    This will mark all <strong className="text-yellow-400 font-mono">{unresolvedCount}</strong> active exception(s) in <span className="text-white font-semibold">{currentProjectName}</span> as resolved.
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    This will mark all <strong className="text-zinc-200 font-mono">{unresolvedCount}</strong> active exception(s) in <span className="text-zinc-200 font-medium">{currentProjectName}</span> as resolved.
                   </p>
                 </div>
               </div>
 
-              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 text-[11px] text-slate-400 font-mono">
-                💡 You can still access them anytime under the <strong>Resolved</strong> tab.
+              <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800 text-[11px] text-zinc-400 font-mono">
+                You can still access them anytime under the <strong className="text-zinc-300">Resolved</strong> tab.
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-1">
+              <div className="flex justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setShowBulkResolveModal(false)}
                   disabled={bulkResolving}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl transition cursor-pointer"
+                  className="px-3.5 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 rounded-lg transition cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -893,9 +890,9 @@ export default function ExceptionLogsPage() {
                   type="button"
                   onClick={handleBulkResolveConfirm}
                   disabled={bulkResolving}
-                  className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition disabled:opacity-50 cursor-pointer"
                 >
-                  {bulkResolving ? 'Resolving All...' : 'Confirm & Mark Resolved →'}
+                  {bulkResolving ? 'Resolving All...' : 'Confirm & Mark Resolved'}
                 </button>
               </div>
             </div>
@@ -908,52 +905,52 @@ export default function ExceptionLogsPage() {
             onClick={(e) => {
               if (e.target === e.currentTarget) setShowExportLockModal(false);
             }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans"
           >
-            <div className="bg-[#090D16] border-2 border-emerald-500/40 rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl relative">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl relative">
               <button
                 onClick={() => setShowExportLockModal(false)}
-                className="absolute right-5 top-5 text-slate-400 hover:text-white text-xs cursor-pointer font-mono"
+                className="absolute right-4 top-4 text-zinc-500 hover:text-zinc-200 text-xs cursor-pointer font-mono"
               >
                 ✕
               </button>
 
               <div className="space-y-1.5">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-bold uppercase">
-                  <span>🔒</span> Business Scale Feature
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700 text-[10px] font-mono uppercase tracking-wider">
+                  🔒 Business Scale Feature
                 </div>
-                <h3 className="text-lg font-bold text-white tracking-tight">
+                <h3 className="text-sm font-semibold text-zinc-100">
                   Raw Log Export is Locked
                 </h3>
-                <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                  Exporting filtered telemetry to raw <strong className="text-slate-200">CSV spreadsheets</strong> and <strong className="text-slate-200">JSON data payloads</strong> is an exclusive capability of the <strong className="text-emerald-400">Business Scale</strong> tier.
+                <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                  Exporting filtered telemetry to raw <strong className="text-zinc-200">CSV spreadsheets</strong> and <strong className="text-zinc-200">JSON data payloads</strong> is an exclusive capability of the <strong className="text-emerald-400">Business Scale</strong> tier.
                 </p>
               </div>
 
-              <div className="bg-[#05070E] border border-slate-800 rounded-2xl p-4 space-y-2 font-mono text-xs">
-                <div className="flex items-center justify-between text-slate-400">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3.5 space-y-2 font-mono text-xs">
+                <div className="flex items-center justify-between text-zinc-400">
                   <span>Your Current Plan:</span>
-                  <span className="text-yellow-300 font-bold uppercase">
+                  <span className="text-zinc-200 font-medium uppercase">
                     {isOwner ? 'Owner' : userPlanTier.toUpperCase()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-slate-400">
+                <div className="flex items-center justify-between text-zinc-400">
                   <span>Required Plan:</span>
-                  <span className="text-emerald-400 font-bold uppercase">Business Scale</span>
+                  <span className="text-emerald-400 font-medium uppercase">Business Scale</span>
                 </div>
               </div>
 
-              <div className="space-y-2 pt-1 font-mono">
+              <div className="space-y-2 pt-1">
                 <a
                   href="mailto:hello.snaptrace@gmail.com?subject=SnapTrace%20Business%20Scale%20CSV%20Export%20Upgrade"
-                  className="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
+                  className="w-full py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer text-center"
                 >
-                  <span>Contact to Upgrade to Scale →</span>
+                  Contact to Upgrade to Scale →
                 </a>
                 <button
                   type="button"
                   onClick={() => setShowExportLockModal(false)}
-                  className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer text-center"
+                  className="w-full py-1.5 text-zinc-400 hover:text-zinc-200 text-xs transition cursor-pointer text-center"
                 >
                   Close
                 </button>
