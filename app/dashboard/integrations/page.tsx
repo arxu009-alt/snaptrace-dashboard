@@ -39,34 +39,34 @@ function CodeHighlighter({ code }: { code: string }) {
         const isComment = trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('<!--') || trimmed.startsWith('/*');
 
         return (
-          <div key={lineIdx} className="table-row hover:bg-slate-800/20">
-            <span className="table-cell pr-4 text-right text-[11px] text-slate-600 select-none font-mono w-8">
+          <div key={lineIdx} className="table-row hover:bg-zinc-800/20">
+            <span className="table-cell pr-4 text-right text-[11px] text-zinc-600 select-none font-mono w-8">
               {lineIdx + 1}
             </span>
             <span className="table-cell whitespace-pre">
               {isComment ? (
-                <span className="text-slate-500 italic">{line}</span>
+                <span className="text-zinc-500 italic">{line}</span>
               ) : (
                 line
                   .split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|\/\/.*|\#.*|\b(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|true|false|null|nil|None|if|else)\b|<\/?[a-zA-Z0-9_\-]+(?:\s|>|\/)|<\/?>)/g)
                   .map((part, partIdx) => {
                     if (!part) return null;
                     if (part.startsWith('//') || part.startsWith('#')) {
-                      return <span key={partIdx} className="text-slate-500 italic">{part}</span>;
+                      return <span key={partIdx} className="text-zinc-500 italic">{part}</span>;
                     }
                     if (part.startsWith('"') || part.startsWith("'") || part.startsWith('`')) {
-                      return <span key={partIdx} className="text-emerald-300 font-medium">{part}</span>;
+                      return <span key={partIdx} className="text-emerald-400/90 font-medium">{part}</span>;
                     }
                     if (/^(?:import|export|default|function|return|from|const|let|var|def|try|except|catch|finally|package|async|await|public|static|void|class|new|if|else)$/.test(part)) {
-                      return <span key={partIdx} className="text-sky-400 font-bold">{part}</span>;
+                      return <span key={partIdx} className="text-sky-400 font-semibold">{part}</span>;
                     }
                     if (/^(?:true|false|null|nil|None)$/.test(part)) {
-                      return <span key={partIdx} className="text-amber-300 font-bold">{part}</span>;
+                      return <span key={partIdx} className="text-amber-300 font-semibold">{part}</span>;
                     }
                     if (/^<\/?[a-zA-Z0-9_\-]+/.test(part) || part === '>' || part === '/>' || part === '</>') {
-                      return <span key={partIdx} className="text-rose-400 font-semibold">{part}</span>;
+                      return <span key={partIdx} className="text-rose-400 font-medium">{part}</span>;
                     }
-                    return <span key={partIdx} className="text-slate-200">{part}</span>;
+                    return <span key={partIdx} className="text-zinc-200">{part}</span>;
                   })
               )}
             </span>
@@ -466,40 +466,40 @@ end`,
   };
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans animate-in fade-in duration-200">
+      <div className="max-w-5xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="border-b border-slate-800/80 pb-5">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
-            <span>Language & Framework Integrations</span>
+        <div className="border-b border-zinc-800/80 pb-5">
+          <h1 className="text-xl font-semibold tracking-tight text-zinc-100">
+            Language Integrations
           </h1>
-          <p className="text-xs text-slate-400 font-mono mt-1">
-            Production-ready drop-in code snippets with your active project credentials pre-injected.
+          <p className="text-xs text-zinc-500 font-mono mt-1">
+            Production-ready code snippets with your active project credentials pre-injected.
           </p>
         </div>
 
         {/* Active Ingestion Key Banner */}
-        <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl backdrop-blur-md">
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-yellow-400 uppercase tracking-widest font-mono block">
+        <div className="bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">
               Active Ingestion Key
             </span>
-            <p className="text-xs text-slate-400">
-              All snippets below are automatically populated with this project token.
+            <p className="text-xs text-zinc-400">
+              All snippets below use this project token.
             </p>
           </div>
-          <code className="bg-[#05070E] px-4 py-2 rounded-xl border border-slate-800 font-mono text-xs text-yellow-300 truncate max-w-md">
+          <code className="bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800 font-mono text-xs text-zinc-300 truncate max-w-md">
             {loading ? 'Fetching active key...' : apiKey}
           </code>
         </div>
 
         {/* Grid: Language Selector + Code Box */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           
           {/* Left: Language Tabs */}
-          <div className="lg:col-span-1 space-y-1.5 max-h-[620px] overflow-y-auto pr-1">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2 px-1 font-mono">
+          <div className="lg:col-span-1 space-y-1 max-h-[620px] overflow-y-auto pr-1">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-2 px-1">
               Supported Stacks ({Object.keys(integrations).length})
             </span>
 
@@ -510,16 +510,16 @@ end`,
                 <button
                   key={lang}
                   onClick={() => setActiveTab(lang)}
-                  className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition text-left cursor-pointer ${
+                  className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-medium transition text-left cursor-pointer ${
                     isActive
-                      ? 'border-l-4 border-l-yellow-400 bg-gradient-to-r from-yellow-400/15 via-yellow-400/5 to-transparent text-yellow-300 font-bold shadow-sm'
-                      : 'bg-[#090D16] text-slate-400 border border-slate-800/80 hover:bg-slate-800/60 hover:text-slate-200 border-l-4 border-l-transparent'
+                      ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
+                      : 'text-zinc-400 border border-transparent hover:bg-zinc-900 hover:text-zinc-200'
                   }`}
                 >
-                  <span className="text-base">{item.icon}</span>
+                  <span className="text-sm shrink-0">{item.icon}</span>
                   <div className="truncate">
                     <div className="truncate">{item.name}</div>
-                    <span className="text-[9px] text-slate-500 font-mono block">{item.category}</span>
+                    <span className="text-[9px] text-zinc-600 font-mono block">{item.category}</span>
                   </div>
                 </button>
               );
@@ -527,48 +527,51 @@ end`,
           </div>
 
           {/* Right: Code Viewer & Setup Guide */}
-          <div className="lg:col-span-3 bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 space-y-6 shadow-2xl flex flex-col justify-between">
-            <div className="space-y-5">
+          <div className="lg:col-span-3 bg-zinc-950 border border-zinc-800/80 rounded-xl p-5 space-y-5 flex flex-col justify-between">
+            <div className="space-y-4">
               
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl p-2 bg-yellow-400/10 border border-yellow-400/20 rounded-xl text-yellow-400">
+              {/* Integration Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/60 pb-3.5">
+                <div className="flex items-center space-x-2.5">
+                  <span className="text-lg p-1.5 bg-zinc-900 border border-zinc-800 rounded-lg">
                     {current.icon}
                   </span>
                   <div>
-                    <h2 className="text-base font-bold text-white">
-                      {current.name} Integration
+                    <h2 className="text-sm font-semibold text-zinc-100">
+                      {current.name}
                     </h2>
-                    <span className="text-[10px] text-yellow-400 font-mono uppercase">{current.category}</span>
+                    <span className="text-[10px] text-zinc-500 font-mono">{current.category}</span>
                   </div>
                 </div>
                 <button
                   onClick={handleCopy}
-                  className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 rounded-xl text-xs font-black transition flex items-center justify-center space-x-1.5 shadow-lg shadow-yellow-500/20 cursor-pointer self-start sm:self-auto font-mono"
+                  className="px-3 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 rounded-lg text-xs font-medium transition flex items-center justify-center space-x-1.5 cursor-pointer self-start sm:self-auto font-mono"
                 >
-                  <span>{copied ? '✓ Snippet Copied!' : '📋 Copy Snippet'}</span>
+                  <span>{copied ? '✓ Copied!' : 'Copy Snippet'}</span>
                 </button>
               </div>
 
+              {/* Install Command */}
               {current.installCmd && (
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
-                    Installation / Dependency
+                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                    Installation
                   </span>
-                  <pre className="bg-[#05070E] border border-slate-800 p-3 rounded-xl text-xs font-mono text-emerald-400 overflow-x-auto">
+                  <pre className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg text-xs font-mono text-emerald-400/90 overflow-x-auto">
                     {current.installCmd}
                   </pre>
                 </div>
               )}
 
-              <div className="space-y-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
+              {/* Setup Guide */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
                   Setup Instructions
                 </span>
-                <ul className="space-y-2 text-xs text-slate-300 bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 font-mono">
+                <ul className="space-y-1.5 text-xs text-zinc-400 bg-zinc-900 p-3.5 rounded-lg border border-zinc-800 font-mono">
                   {current.guide.map((step, idx) => (
-                    <li key={idx} className="flex items-start space-x-2.5">
-                      <span className="text-yellow-400 font-bold">•</span>
+                    <li key={idx} className="flex items-start space-x-2">
+                      <span className="text-zinc-500">•</span>
                       <span>{step}</span>
                     </li>
                   ))}
@@ -577,24 +580,24 @@ end`,
 
               {/* Code Snippet Editor */}
               <div className="space-y-1.5 pt-1">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">
-                    Production Code Snippet
+                <div className="flex items-center justify-between px-0.5">
+                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                    Code Snippet
                   </span>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    File: <span className="text-yellow-400">{current.filename}</span>
+                  <span className="text-[10px] font-mono text-zinc-600">
+                    {current.filename}
                   </span>
                 </div>
 
-                <div className="bg-[#05070E] border border-slate-800/90 rounded-2xl overflow-hidden shadow-inner">
-                  <div className="px-4 py-2.5 bg-[#080C16] border-b border-slate-800/80 flex items-center justify-between">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                  <div className="px-3.5 py-2 bg-zinc-900 border-b border-zinc-800/80 flex items-center justify-between">
                     <div className="flex items-center space-x-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-                      <span className="text-[11px] font-mono text-slate-400 ml-2 font-medium">{current.filename}</span>
+                      <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
+                      <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
+                      <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
+                      <span className="text-[11px] font-mono text-zinc-500 ml-2">{current.filename}</span>
                     </div>
-                    <span className="text-[10px] font-mono text-slate-500 uppercase">UTF-8</span>
+                    <span className="text-[10px] font-mono text-zinc-600 uppercase">UTF-8</span>
                   </div>
 
                   <div className="p-4 max-h-[380px] overflow-y-auto">
@@ -605,9 +608,9 @@ end`,
 
             </div>
 
-            <div className="pt-4 border-t border-slate-800/80 text-right">
-              <span className="text-[11px] text-slate-500 font-mono">
-                Ingestion Endpoint: <code className="text-yellow-400">POST /api/v1/log</code>
+            <div className="pt-3 border-t border-zinc-800/60 text-right">
+              <span className="text-[11px] text-zinc-600 font-mono">
+                Endpoint: <code className="text-zinc-400">POST /api/v1/log</code>
               </span>
             </div>
           </div>
