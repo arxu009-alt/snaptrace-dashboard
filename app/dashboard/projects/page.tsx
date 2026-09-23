@@ -257,29 +257,29 @@ export default function ProjectsPage() {
     : '5 Projects (Beta Pro)';
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans">
+      <div className="max-w-5xl mx-auto space-y-6">
         
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-5 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800/80 pb-5 gap-4">
           <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5 flex-wrap">
-              <span>Projects & Credentials</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 font-mono font-semibold">
+            <h1 className="text-xl font-semibold tracking-tight text-zinc-100 flex items-center gap-2.5 flex-wrap">
+              <span>API Keys & Projects</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono uppercase tracking-wider">
                 {projects.length} / {projectCapLabel}
               </span>
             </h1>
-            <p className="text-xs text-slate-400 font-mono">
+            <p className="text-xs text-zinc-500 font-mono">
               Manage telemetry tokens, rename repositories, rotate credentials, and verify endpoints.
             </p>
           </div>
 
           <button
             onClick={handleOpenCreateModal}
-            className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition transform hover:-translate-y-0.5 cursor-pointer flex items-center gap-1.5 self-start sm:self-auto font-mono"
+            className="px-3 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition cursor-pointer flex items-center gap-1.5 self-start sm:self-auto font-mono shrink-0"
           >
             <span>+</span>
-            <span>Create New Project</span>
+            <span>New Project</span>
           </button>
         </div>
 
@@ -288,26 +288,25 @@ export default function ProjectsPage() {
             <div className="relative animate-pulse">
               <SnapTraceLogo size="lg" showText={false} />
             </div>
-            <p className="text-xs font-mono text-slate-500 tracking-widest uppercase">Loading Projects...</p>
+            <p className="text-xs font-mono text-zinc-500 tracking-widest uppercase">Loading Projects...</p>
           </div>
         ) : projects.length === 0 ? (
-          <div className="bg-[#0B101D] border border-slate-800 rounded-3xl p-12 text-center space-y-4 shadow-xl">
-            <div className="text-3xl">📁</div>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-12 text-center space-y-4">
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-white">No Projects Found</h3>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              <h3 className="text-sm font-semibold text-zinc-100">No Projects Found</h3>
+              <p className="text-xs text-zinc-400 max-w-sm mx-auto">
                 Create your first project to generate a secret key and start ingesting crash telemetry.
               </p>
             </div>
             <button
               onClick={handleOpenCreateModal}
-              className="px-5 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer font-mono"
+              className="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition cursor-pointer font-mono"
             >
               + Create First Project
             </button>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-3">
             {projects.map((project) => {
               const isRevealed = Boolean(revealedKeys[project.id]);
               const displayKey = isRevealed
@@ -317,13 +316,13 @@ export default function ProjectsPage() {
               return (
                 <div
                   key={project.id}
-                  className="bg-[#0B101D]/90 border border-slate-800/80 hover:border-slate-700 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg transition backdrop-blur-sm group"
+                  className="bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 rounded-xl p-4 sm:p-5 space-y-4 transition group"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3.5">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2.5 flex-wrap">
-                        <span className="text-lg">📁</span>
-                        <h2 className="text-base font-bold text-white group-hover:text-yellow-300 transition">
+                  {/* Project Header Row */}
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-zinc-800/60 pb-3.5">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="text-sm font-semibold text-zinc-100 group-hover:text-white transition">
                           {project.name}
                         </h2>
 
@@ -332,16 +331,16 @@ export default function ProjectsPage() {
                             setRenameData({ id: project.id, name: project.name });
                             setRenameInput(project.name);
                           }}
-                          className="px-2 py-0.5 rounded-lg bg-slate-800/70 hover:bg-slate-800 text-slate-400 hover:text-yellow-300 text-xs font-mono transition border border-slate-700/60 flex items-center gap-1 cursor-pointer"
+                          className="px-1.5 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 text-[10px] font-mono transition border border-zinc-800 flex items-center gap-1 cursor-pointer"
                           title="Rename Project"
                         >
                           <span>✎</span>
-                          <span className="text-[10px]">Rename</span>
+                          <span>Rename</span>
                         </button>
-                        
+
                         <button
                           onClick={() => handleJumpToErrors(project.id)}
-                          className="text-[11px] font-mono px-3 py-0.5 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 transition flex items-center gap-1 cursor-pointer"
+                          className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition flex items-center gap-1 cursor-pointer"
                           title="Click to view all live exceptions for this project"
                         >
                           <span>{project.error_count} {project.error_count === 1 ? 'event' : 'events'}</span>
@@ -349,30 +348,30 @@ export default function ProjectsPage() {
                         </button>
 
                         {pingSuccessId === project.id && (
-                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full animate-in fade-in">
+                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded animate-in fade-in">
                             ✓ Test Crash Captured!
                           </span>
                         )}
                       </div>
 
-                      <p className="text-[11px] text-slate-500 font-mono">
-                        Project ID: <span className="text-slate-400">{project.id}</span> • Created {new Date(project.created_at).toLocaleDateString()}
+                      <p className="text-[11px] text-zinc-600 font-mono">
+                        <span className="text-zinc-500">{project.id}</span> · Created {new Date(project.created_at).toLocaleDateString()}
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2 font-mono flex-wrap">
+                    <div className="flex items-center gap-1.5 font-mono flex-wrap shrink-0">
                       <button
                         onClick={() => handleTestPingForProject(project)}
                         disabled={pingingId === project.id}
-                        className="px-3 py-1.5 bg-[#05070E] hover:bg-slate-800 text-yellow-300 border border-yellow-400/30 text-xs font-semibold rounded-xl transition cursor-pointer shadow-sm disabled:opacity-50"
+                        className="px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-zinc-100 border border-zinc-800 hover:border-zinc-700 text-xs rounded-md transition cursor-pointer disabled:opacity-50"
                         title="Send a live test crash to verify this specific project token"
                       >
-                        <span>{pingingId === project.id ? '⚡ Pinging...' : '⚡ Test Ping'}</span>
+                        {pingingId === project.id ? 'Pinging...' : 'Test Ping'}
                       </button>
 
                       <button
                         onClick={() => handleRotateKey(project.id)}
-                        className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold rounded-xl transition cursor-pointer"
+                        className="px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 hover:border-zinc-700 text-xs rounded-md transition cursor-pointer"
                         title="Rotate API Key if compromised"
                       >
                         Rotate Key
@@ -380,53 +379,55 @@ export default function ProjectsPage() {
 
                       <button
                         onClick={() => handleDeleteProject(project.id)}
-                        className="px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-semibold rounded-xl transition cursor-pointer"
+                        className="px-2.5 py-1 text-red-400 hover:text-red-300 border border-zinc-800 hover:border-red-500/30 text-xs rounded-md transition cursor-pointer"
                       >
-                        Delete Project
+                        Delete
                       </button>
                     </div>
                   </div>
 
+                  {/* API Key Row */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                        Active Ingestion Token
+                      <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                        Ingestion Token
                       </label>
                       <button
                         onClick={() => toggleKeyVisibility(project.id)}
-                        className="text-[10px] font-mono text-slate-400 hover:text-yellow-300 transition cursor-pointer"
+                        className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
                       >
-                        {isRevealed ? '🙈 Hide Token' : '👁️ Reveal Full Token'}
+                        {isRevealed ? 'Hide' : 'Reveal'}
                       </button>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <div className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-yellow-300 font-mono flex items-center justify-between">
+                      <div className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-300 font-mono flex items-center justify-between">
                         <span className="truncate">{displayKey}</span>
                       </div>
                       <button
                         onClick={() => copyToClipboard(project.api_key, project.id)}
-                        className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition min-w-[85px] cursor-pointer shadow-sm font-mono shrink-0"
+                        className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white text-xs font-mono rounded-lg transition min-w-[80px] cursor-pointer shrink-0"
                       >
-                        {copiedId === project.id ? '✓ Copied' : 'Copy Key'}
+                        {copiedId === project.id ? '✓ Copied' : 'Copy'}
                       </button>
                     </div>
                   </div>
 
-                  <div className="bg-[#05070E] border border-slate-800/80 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-sans">
+                  {/* SDK Snippets CTA */}
+                  <div className="bg-zinc-900/50 border border-zinc-800/60 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <div className="space-y-0.5">
-                      <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                        <span className="text-yellow-400">⚡</span> Multi-Language SDK Snippets Available
+                      <span className="text-xs font-medium text-zinc-300">
+                        Multi-Language SDK Snippets
                       </span>
-                      <p className="text-[11px] text-slate-400">
-                        Pre-configured with this key for JavaScript, Next.js, Python, Node, PHP, Ruby, Kotlin, and cURL.
+                      <p className="text-[11px] text-zinc-500">
+                        JavaScript, Next.js, Python, Node, PHP, Ruby, Kotlin, cURL — pre-configured with this key.
                       </p>
                     </div>
                     <Link
                       href="/dashboard/integrations"
-                      className="px-4 py-1.5 bg-gradient-to-r from-purple-600/20 to-indigo-600/20 hover:from-purple-600/30 hover:to-indigo-600/30 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-semibold transition self-start sm:self-auto cursor-pointer font-mono whitespace-nowrap"
+                      className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-zinc-100 border border-zinc-800 hover:border-zinc-700 rounded-lg text-xs font-mono transition self-start sm:self-auto cursor-pointer whitespace-nowrap"
                     >
-                      View Code Snippets →
+                      View Snippets →
                     </Link>
                   </div>
                 </div>
@@ -437,42 +438,42 @@ export default function ProjectsPage() {
 
         {/* PROJECT LIMIT MODAL */}
         {limitErrorModal && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
-            <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl relative">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150 font-sans">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl relative">
               <button
                 onClick={() => setLimitErrorModal(null)}
-                className="absolute right-5 top-5 text-slate-400 hover:text-white text-xs cursor-pointer font-mono"
+                className="absolute right-4 top-4 text-zinc-500 hover:text-zinc-200 text-xs cursor-pointer font-mono"
               >
                 ✕
               </button>
 
               <div className="space-y-1.5">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 text-[10px] font-mono font-bold uppercase">
-                  <span>⚡</span> Plan Quota Notice
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700 text-[10px] font-mono uppercase tracking-wider">
+                  Plan Quota
                 </div>
-                <h3 className="text-base font-bold text-white tracking-tight">
+                <h3 className="text-sm font-semibold text-zinc-100">
                   Pro Beta Project Limit
                 </h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p className="text-xs text-zinc-400 leading-relaxed">
                   {limitErrorModal}
                 </p>
               </div>
 
-              <div className="p-3 bg-[#05070E] rounded-xl border border-slate-800 text-[11px] text-slate-400 font-mono">
-                💡 Need unlimited client projects for an agency? Contact our team at <strong className="text-yellow-300">hello.snaptrace@gmail.com</strong>.
+              <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800 text-[11px] text-zinc-400 font-mono">
+                Need unlimited client projects? Contact <strong className="text-zinc-200">hello.snaptrace@gmail.com</strong>.
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-1 font-mono">
+              <div className="flex items-center justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setLimitErrorModal(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl transition cursor-pointer"
+                  className="px-3.5 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 rounded-lg transition cursor-pointer"
                 >
                   Close
                 </button>
                 <Link
                   href="/dashboard/settings"
-                  className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold text-xs rounded-xl transition shadow-md font-mono"
+                  className="px-4 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition font-mono"
                 >
                   View Plan Settings →
                 </Link>
@@ -483,44 +484,44 @@ export default function ProjectsPage() {
 
         {/* MODAL: RENAME PROJECT */}
         {renameData && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-            <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <span>✎</span> Rename Project
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+              <div className="space-y-0.5">
+                <h3 className="text-sm font-semibold text-zinc-100">
+                  Rename Project
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-zinc-400">
                   Update the display name of this project repository.
                 </p>
               </div>
 
               <form onSubmit={handleRenameSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 block font-mono">Project Name</label>
+                  <label className="text-xs font-medium text-zinc-400 block font-mono">Project Name</label>
                   <input
                     type="text"
                     required
                     value={renameInput}
                     onChange={(e) => setRenameInput(e.target.value)}
-                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-yellow-400 font-mono transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-600 font-mono transition"
                     autoFocus
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-1 font-mono">
+                <div className="flex justify-end gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setRenameData(null)}
-                    className="px-4 py-2 text-slate-400 hover:text-white text-xs font-semibold rounded-xl transition cursor-pointer"
+                    className="px-3.5 py-1.5 text-zinc-400 hover:text-zinc-200 text-xs rounded-lg transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={renaming}
-                    className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-md disabled:opacity-50 cursor-pointer"
+                    className="px-4 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition disabled:opacity-50 cursor-pointer"
                   >
-                    {renaming ? 'Saving...' : 'Save Name →'}
+                    {renaming ? 'Saving...' : 'Save Name'}
                   </button>
                 </div>
               </form>
@@ -530,45 +531,45 @@ export default function ProjectsPage() {
 
         {/* MODAL: CREATE NEW PROJECT */}
         {isCreateModalOpen && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-            <div className="bg-[#090D16] border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl">
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <span>⚡</span> Create New Project
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+              <div className="space-y-0.5">
+                <h3 className="text-sm font-semibold text-zinc-100">
+                  Create New Project
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-zinc-400">
                   Enter a project name to generate a dedicated API key and telemetry endpoint.
                 </p>
               </div>
 
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 block font-mono">Project Name</label>
+                  <label className="text-xs font-medium text-zinc-400 block font-mono">Project Name</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Python Backend API, Next.js Store"
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
-                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition font-mono"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-600 transition font-mono"
                     autoFocus
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-1 font-mono">
+                <div className="flex justify-end gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(false)}
-                    className="px-4 py-2 text-slate-400 hover:text-white text-xs font-semibold rounded-xl transition cursor-pointer"
+                    className="px-3.5 py-1.5 text-zinc-400 hover:text-zinc-200 text-xs rounded-lg transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={creating}
-                    className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-md disabled:opacity-50 cursor-pointer"
+                    className="px-4 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition disabled:opacity-50 cursor-pointer"
                   >
-                    {creating ? 'Generating...' : 'Create Project →'}
+                    {creating ? 'Generating...' : 'Create Project'}
                   </button>
                 </div>
               </form>
