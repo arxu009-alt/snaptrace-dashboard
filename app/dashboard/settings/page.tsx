@@ -322,15 +322,15 @@ export default function SettingsPage() {
     : (apiKey.slice(0, 10) + '••••••••••••••••' + apiKey.slice(-8));
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-8 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans">
+      <div className="max-w-5xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="border-b border-slate-800/80 pb-5">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2.5">
+        <div className="border-b border-zinc-800/80 pb-5">
+          <h1 className="text-xl font-semibold tracking-tight text-zinc-100 flex items-center gap-2.5">
             <span>Project Settings & Developer Profile</span>
           </h1>
-          <p className="text-xs text-slate-400 font-mono mt-1">
+          <p className="text-xs text-zinc-500 font-mono mt-1">
             Manage your developer identity, security credentials, notification webhooks, and BYOK AI keys.
           </p>
         </div>
@@ -340,84 +340,83 @@ export default function SettingsPage() {
             <div className="relative animate-pulse">
               <SnapTraceLogo size="lg" showText={false} />
             </div>
-            <p className="text-xs font-mono text-slate-500 tracking-widest uppercase">Loading Settings...</p>
+            <p className="text-xs font-mono text-zinc-500 tracking-widest uppercase">Loading Settings...</p>
           </div>
         ) : (
           <div className="space-y-6">
 
             {/* 1. Subscription & Plan Status */}
-            <div className="bg-gradient-to-b from-[#0e1424] to-[#070b14] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-5 relative">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-800/80 gap-3">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="text-xl">💎</span>
-                    <h2 className="text-base font-bold text-white">Subscription & Plan Status</h2>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-sm font-semibold text-zinc-100">Subscription & Plan Status</h2>
                     {isOwner ? (
-                      <span className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black rounded-full text-xs font-mono uppercase tracking-wider shadow-sm">
-                        👑 OWNER PRO (Unlimited)
+                      <span className="px-2 py-0.5 bg-zinc-800 text-zinc-200 border border-zinc-700 font-medium rounded text-[10px] font-mono uppercase tracking-wider">
+                        Owner Pro (Unlimited)
                       </span>
                     ) : (
-                      <span className="px-3 py-1 bg-yellow-400/15 text-yellow-300 border border-yellow-400/30 rounded-full text-xs font-bold font-mono uppercase">
-                        ⚡ FOUNDER BETA PASS (PRO UNLOCKED)
+                      <span className="px-2 py-0.5 bg-zinc-800/70 text-zinc-300 border border-zinc-700/80 rounded text-[10px] font-medium font-mono uppercase tracking-wider">
+                        Founder Beta Pass (Pro Unlocked)
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-zinc-400">
                     {isOwner
                       ? 'Owner account with full unlimited access to all features.'
-                      : 'All Starter Pro features are 100% unlocked for early builders with full access to AI diagnostics and high-capacity monitoring.'}
+                      : 'All Starter Pro features are unlocked for early builders with full access to AI diagnostics and high-capacity monitoring.'}
                   </p>
                 </div>
 
-                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl font-bold self-start sm:self-auto">
-                  ✓ Free Pro Tier Active ($0/mo)
+                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded font-medium self-start sm:self-auto">
+                  Free Pro Tier Active ($0/mo)
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-                <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Monthly Event Cap</span>
-                  <span className="text-slate-200 font-semibold">100,000 events</span>
+                <div className="p-3 bg-zinc-900/40 rounded-lg border border-zinc-800/80 space-y-1">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider block font-medium">Monthly Event Cap</span>
+                  <span className="text-zinc-200 font-semibold">100,000 events</span>
                 </div>
-                <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">Data Retention</span>
-                  <span className="text-slate-200 font-semibold">30 Days</span>
+                <div className="p-3 bg-zinc-900/40 rounded-lg border border-zinc-800/80 space-y-1">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider block font-medium">Data Retention</span>
+                  <span className="text-zinc-200 font-semibold">30 Days</span>
                 </div>
-                <div className="p-3 bg-[#05070E] rounded-2xl border border-slate-800 space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold">In-Dashboard AI</span>
-                  <span className="text-emerald-400 font-bold">✓ Unlimited Copilot Unlocked</span>
+                <div className="p-3 bg-zinc-900/40 rounded-lg border border-zinc-800/80 space-y-1">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider block font-medium">In-Dashboard AI</span>
+                  <span className="text-emerald-400 font-semibold">Unlimited Copilot Unlocked</span>
                 </div>
               </div>
             </div>
 
             {/* 2. Developer Account Profile */}
-            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-sm flex items-center justify-center shadow-md font-mono">
+                  <div className="h-8 w-8 rounded-lg bg-zinc-800 text-zinc-200 font-semibold text-xs flex items-center justify-center border border-zinc-700 font-mono">
                     {userInitial}
                   </div>
                   <div>
-                    <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                    <h2 className="text-sm font-semibold text-zinc-100">
                       Developer Account Profile
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Your authenticated developer identity & credentials</p>
+                    <p className="text-xs text-zinc-400 mt-0.5">Your authenticated developer identity & credentials</p>
                   </div>
                 </div>
 
-                <span className="px-2.5 py-1 bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 rounded-full text-[10px] font-bold uppercase font-mono">
+                <span className="px-2 py-0.5 bg-zinc-900 text-zinc-400 border border-zinc-800 rounded text-[10px] font-medium uppercase font-mono">
                   Active Session
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <form onSubmit={handleSaveDisplayName} className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <form onSubmit={handleSaveDisplayName} className="bg-zinc-900/40 p-3.5 rounded-lg border border-zinc-800/80 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">
+                    <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium font-mono">
                       Developer Display Name
                     </span>
                     {nameSavedMsg && (
-                      <span className="text-[10px] text-emerald-400 font-bold font-mono animate-in fade-in">
+                      <span className="text-[10px] text-emerald-400 font-medium font-mono animate-in fade-in">
                         {nameSavedMsg}
                       </span>
                     )}
@@ -430,24 +429,24 @@ export default function SettingsPage() {
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="e.g. Muhammad Arslan"
-                      className="flex-1 bg-[#090D16] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 font-mono transition"
+                      className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono transition"
                     />
                     <button
                       type="submit"
                       disabled={savingName}
-                      className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-yellow-300 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer font-mono shadow-sm disabled:opacity-50"
+                      className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer font-mono border border-zinc-700 disabled:opacity-50"
                     >
                       {savingName ? 'Saving...' : 'Save Name'}
                     </button>
                   </div>
                 </form>
 
-                <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-1 flex flex-col justify-center">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-bold font-mono">
+                <div className="bg-zinc-900/40 p-3.5 rounded-lg border border-zinc-800/80 space-y-1 flex flex-col justify-center">
+                  <span className="text-[10px] text-zinc-400 uppercase tracking-wider block font-medium font-mono">
                     Account Email Address
                   </span>
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-slate-200 font-mono font-semibold truncate">{userEmail}</span>
+                    <span className="text-zinc-200 font-mono text-xs font-medium truncate">{userEmail}</span>
                     <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                       Verified
                     </span>
@@ -455,28 +454,28 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="bg-[#05070E] p-4 rounded-2xl border border-slate-800/80 space-y-2">
+              <div className="bg-zinc-900/40 p-3.5 rounded-lg border border-zinc-800/80 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">
+                  <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium font-mono">
                     Active Project API Key
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowApiKey(!showApiKey)}
-                    className="text-[10px] font-mono text-slate-400 hover:text-yellow-300 transition cursor-pointer"
+                    className="text-[10px] font-mono text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
                   >
-                    {showApiKey ? '🙈 Hide Token' : '👁️ Reveal Full Token'}
+                    {showApiKey ? 'Hide Token' : 'Reveal Full Token'}
                   </button>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-[#090D16] border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-yellow-300 font-mono truncate">
+                  <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300 font-mono truncate select-all">
                     {displayToken}
                   </div>
                   <button
                     type="button"
                     onClick={handleCopyKey}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition shrink-0 cursor-pointer font-mono shadow-sm"
+                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg transition shrink-0 cursor-pointer font-mono border border-zinc-700"
                   >
                     {copiedKey ? '✓ Copied' : 'Copy Key'}
                   </button>
@@ -485,25 +484,25 @@ export default function SettingsPage() {
             </div>
 
             {/* 3. Security & Update Password */}
-            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                 <div>
-                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>🔐</span> Security & Update Password
+                  <h2 className="text-sm font-semibold text-zinc-100">
+                    Security & Update Password
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                  <p className="text-xs text-zinc-400 mt-0.5 font-sans">
                     Change your account password directly without logging out.
                   </p>
                 </div>
-                <span className="px-2.5 py-1 bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 rounded-full text-[10px] font-bold uppercase font-mono">
+                <span className="px-2 py-0.5 bg-zinc-900 text-zinc-400 border border-zinc-800 rounded text-[10px] font-medium uppercase font-mono">
                   Encrypted
                 </span>
               </div>
 
               <form onSubmit={handleUpdatePassword} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5 font-mono">
-                    <label className="text-xs font-semibold text-slate-300 block">
+                    <label className="text-xs font-medium text-zinc-300 block">
                       NEW PASSWORD
                     </label>
                     <input
@@ -513,12 +512,12 @@ export default function SettingsPage() {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="At least 6 characters"
-                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition"
                     />
                   </div>
 
                   <div className="space-y-1.5 font-mono">
-                    <label className="text-xs font-semibold text-slate-300 block">
+                    <label className="text-xs font-medium text-zinc-300 block">
                       CONFIRM NEW PASSWORD
                     </label>
                     <input
@@ -528,7 +527,7 @@ export default function SettingsPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Repeat new password"
-                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition"
                     />
                   </div>
                 </div>
@@ -538,7 +537,7 @@ export default function SettingsPage() {
                     {passwordMsg && (
                       <span
                         className={
-                          'text-xs font-mono font-bold ' +
+                          'text-xs font-mono font-medium ' +
                           (passwordMsg.type === 'success' ? 'text-emerald-400' : 'text-red-400')
                         }
                       >
@@ -550,29 +549,29 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updatingPassword}
-                    className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer font-mono shrink-0"
+                    className="px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition disabled:opacity-50 cursor-pointer font-mono shrink-0"
                   >
-                    {updatingPassword ? 'Updating...' : 'Update Password →'}
+                    {updatingPassword ? 'Updating...' : 'Update Password'}
                   </button>
                 </div>
               </form>
             </div>
 
             {/* 4. Notification Channels & Alert Rules Form */}
-            <form onSubmit={handleSaveNotifications} className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800/80 gap-3">
+            <form onSubmit={handleSaveNotifications} className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-800/80 gap-3">
                 <div>
-                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>🔔</span> Notification Channels & Alert Rules
+                  <h2 className="text-sm font-semibold text-zinc-100">
+                    Notification Channels & Alert Rules
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                  <p className="text-xs text-zinc-400 mt-0.5 font-sans">
                     Real-time exception alerts, webhook destinations, and environment filtering.
                   </p>
                 </div>
 
                 <div className="flex items-center gap-2 self-start sm:self-auto">
                   {testAlertMsg && (
-                    <span className={'text-xs font-mono font-bold ' + (testAlertMsg.type === 'success' ? 'text-emerald-400' : 'text-red-400')}>
+                    <span className={'text-xs font-mono font-medium ' + (testAlertMsg.type === 'success' ? 'text-emerald-400' : 'text-red-400')}>
                       {testAlertMsg.text}
                     </span>
                   )}
@@ -580,57 +579,57 @@ export default function SettingsPage() {
                     type="button"
                     onClick={handleSendTestAlert}
                     disabled={testingAlert}
-                    className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-yellow-400 border border-yellow-400/30 text-xs font-bold rounded-xl transition cursor-pointer shadow-sm font-mono"
+                    className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/80 text-xs font-medium rounded-lg transition cursor-pointer font-mono"
                   >
-                    {testingAlert ? 'Firing Test...' : '🧪 Send Test Alert'}
+                    {testingAlert ? 'Firing Test...' : 'Send Test Alert'}
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3.5">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 block font-mono">ALERT EMAIL ADDRESS</label>
+                  <label className="text-xs font-medium text-zinc-300 block font-mono">ALERT EMAIL ADDRESS</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@company.com"
-                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono transition"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 block font-mono">DISCORD WEBHOOK URL</label>
+                  <label className="text-xs font-medium text-zinc-300 block font-mono">DISCORD WEBHOOK URL</label>
                   <input
                     type="url"
                     value={discordWebhook}
                     onChange={(e) => setDiscordWebhook(e.target.value)}
                     placeholder="https://discord.com/api/webhooks/..."
-                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 font-mono transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono transition"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-300 block font-mono">SLACK WEBHOOK URL</label>
-                    <span className="text-[10px] font-mono text-slate-500">Incoming Webhook</span>
+                    <label className="text-xs font-medium text-zinc-300 block font-mono">SLACK WEBHOOK URL</label>
+                    <span className="text-[10px] font-mono text-zinc-500">Incoming Webhook</span>
                   </div>
                   <input
                     type="url"
                     value={slackWebhook}
                     onChange={(e) => setSlackWebhook(e.target.value)}
                     placeholder="https://hooks.slack.com/services/T.../B.../..."
-                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-yellow-400 font-mono transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono transition"
                   />
                 </div>
 
-                {/* 🌟 NEW: ONLY ALERT ON PRODUCTION TOGGLE SWITCH */}
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-4">
+                {/* ONLY ALERT ON PRODUCTION TOGGLE SWITCH */}
+                <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between gap-4">
                   <div className="space-y-0.5">
-                    <span className="text-xs font-semibold text-slate-200 block font-mono flex items-center gap-1.5">
-                      <span>🔇</span> ONLY ALERT ON PRODUCTION
+                    <span className="text-xs font-medium text-zinc-200 block font-mono">
+                      ONLY ALERT ON PRODUCTION
                     </span>
-                    <p className="text-[11px] text-slate-400 font-sans">
+                    <p className="text-[11px] text-zinc-400 font-sans">
                       Mutes Discord, Slack, and Email notifications from development & localhost. Errors will still be visible in your dashboard stream.
                     </p>
                   </div>
@@ -638,15 +637,15 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => setOnlyProdAlerts(!onlyProdAlerts)}
                     className={
-                      'w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ' +
-                      (onlyProdAlerts ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-slate-800 border border-slate-700')
+                      'w-10 h-5 rounded-full transition-colors relative cursor-pointer shrink-0 ' +
+                      (onlyProdAlerts ? 'bg-zinc-200' : 'bg-zinc-800 border border-zinc-700')
                     }
                     title="Toggle production-only alert filter"
                   >
                     <div
                       className={
-                        'w-4 h-4 rounded-full bg-slate-950 absolute top-1 transition-all ' +
-                        (onlyProdAlerts ? 'right-1' : 'left-1')
+                        'w-3.5 h-3.5 rounded-full absolute top-[2px] transition-all ' +
+                        (onlyProdAlerts ? 'bg-zinc-950 right-[3px]' : 'bg-zinc-400 left-[3px]')
                       }
                     />
                   </button>
@@ -655,43 +654,43 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-end gap-3 pt-2">
                 {notifSavedMsg && (
-                  <span className="text-xs font-bold text-emerald-400 font-mono animate-in fade-in">
+                  <span className="text-xs font-medium text-emerald-400 font-mono animate-in fade-in">
                     {notifSavedMsg}
                   </span>
                 )}
                 <button
                   type="submit"
                   disabled={savingNotif}
-                  className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg shadow-yellow-500/20 disabled:opacity-50 cursor-pointer font-mono"
+                  className="px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition disabled:opacity-50 cursor-pointer font-mono"
                 >
-                  {savingNotif ? 'Saving...' : 'Save Notification Channels →'}
+                  {savingNotif ? 'Saving...' : 'Save Notification Channels'}
                 </button>
               </div>
             </form>
 
             {/* 5. BYOK AI Copilot */}
-            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-slate-800/90 rounded-3xl p-6 shadow-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                 <div>
-                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>✨</span> BYOK AI Copilot Configuration
+                  <h2 className="text-sm font-semibold text-zinc-100">
+                    BYOK AI Copilot Configuration
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                  <p className="text-xs text-zinc-400 mt-0.5 font-sans">
                     Powers the "Analyze with AI" button inside the Exception Inspect Modal.
                   </p>
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  {aiKeySaved ? '✓ AI Key Active' : '● Pro Unlocked'}
+                <span className="px-2 py-0.5 rounded text-[10px] font-medium uppercase font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  {aiKeySaved ? 'AI Key Active' : 'Pro Unlocked'}
                 </span>
               </div>
 
               <form onSubmit={handleSaveAiKey} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 block font-mono">SELECT AI MODEL PROVIDER</label>
+                  <label className="text-xs font-medium text-zinc-300 block font-mono">SELECT AI MODEL PROVIDER</label>
                   <select
                     value={aiProvider}
                     onChange={(e) => setAiProvider(e.target.value as any)}
-                    className="w-full bg-[#05070E] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-yellow-300 font-bold focus:outline-none focus:border-yellow-400 cursor-pointer font-mono"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-200 font-medium focus:outline-none focus:border-zinc-500 cursor-pointer font-mono"
                   >
                     <option value="gemini">Google Gemini (Gemini 2.5 Flash Lite - Free)</option>
                     <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
@@ -699,7 +698,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300 block font-mono">
+                  <label className="text-xs font-medium text-zinc-300 block font-mono">
                     {aiProvider === 'gemini' ? 'GOOGLE GEMINI API KEY (AQ... / AIza...)' : 'OPENAI API KEY (sk-...)'}
                   </label>
                   
@@ -709,64 +708,64 @@ export default function SettingsPage() {
                       value={aiKey}
                       onChange={(e) => setAiKey(e.target.value)}
                       placeholder={aiProvider === 'gemini' ? 'Paste your Google Gemini Key here' : 'sk-proj-...'}
-                      className="w-full bg-[#05070E] border border-slate-800 rounded-xl pl-4 pr-12 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 font-mono transition"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-3 pr-16 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono transition"
                     />
                     <button
                       type="button"
                       onClick={() => setShowAiKey(!showAiKey)}
-                      className="absolute right-3.5 top-2.5 text-slate-400 hover:text-white text-xs cursor-pointer font-mono"
+                      className="absolute right-2.5 top-2 text-zinc-400 hover:text-zinc-200 text-xs cursor-pointer font-mono"
                     >
-                      {showAiKey ? '🙈 Hide' : '👁️ Show'}
+                      {showAiKey ? 'Hide' : 'Show'}
                     </button>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-end gap-3 pt-1">
                   {aiSavedMsg && (
-                    <span className="text-xs font-bold text-emerald-400 font-mono animate-in fade-in">
+                    <span className="text-xs font-medium text-emerald-400 font-mono animate-in fade-in">
                       {aiSavedMsg}
                     </span>
                   )}
                   <button
                     type="submit"
                     disabled={savingAi}
-                    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-lg shadow-purple-600/20 font-mono"
+                    className="px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 rounded-lg text-xs font-medium transition cursor-pointer font-mono"
                   >
-                    {savingAi ? 'Saving...' : 'Save AI Configuration →'}
+                    {savingAi ? 'Saving...' : 'Save AI Configuration'}
                   </button>
                 </div>
               </form>
             </div>
 
             {/* 6. Database Maintenance & Purge */}
-            <div className="bg-gradient-to-b from-[#0B0F19] to-[#060911] border border-red-900/30 rounded-3xl p-6 shadow-xl space-y-4">
-              <div className="border-b border-slate-800/80 pb-3">
-                <h2 className="text-sm font-bold text-red-400 flex items-center gap-2">
-                  <span>🧹</span> Database Maintenance & Purge
+            <div className="bg-zinc-950 border border-red-950/40 rounded-xl p-5 space-y-4">
+              <div className="border-b border-zinc-800/80 pb-3">
+                <h2 className="text-sm font-semibold text-red-400">
+                  Database Maintenance & Purge
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5 font-mono">
+                <p className="text-xs text-zinc-500 mt-0.5 font-mono">
                   Permanently deletes all exceptions that have been marked as resolved.
                 </p>
               </div>
 
-              <div className="flex items-center justify-between gap-4 pt-1">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
                 <div className="space-y-0.5">
-                  <p className="text-xs text-slate-200 font-semibold font-mono">Purge Resolved Errors</p>
-                  <p className="text-[11px] text-slate-500 font-sans">
+                  <p className="text-xs text-zinc-300 font-medium font-mono">Purge Resolved Errors</p>
+                  <p className="text-[11px] text-zinc-500 font-sans">
                     Permanently deletes all exceptions that have been marked as resolved.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 self-start sm:self-auto">
                   {purgeMsg && (
-                    <span className="text-xs font-bold text-emerald-400 font-mono animate-in fade-in">
+                    <span className="text-xs font-medium text-emerald-400 font-mono animate-in fade-in">
                       {purgeMsg}
                     </span>
                   )}
                   <button
                     onClick={handlePurgeResolved}
                     disabled={purging}
-                    className="px-4 py-2 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-800/40 text-xs font-bold rounded-xl transition cursor-pointer whitespace-nowrap font-mono"
+                    className="px-3 py-1.5 bg-red-950/30 hover:bg-red-950/60 text-red-400 border border-red-900/50 text-xs font-medium rounded-lg transition cursor-pointer whitespace-nowrap font-mono"
                   >
                     {purging ? 'Purging...' : 'Purge Resolved Logs'}
                   </button>
