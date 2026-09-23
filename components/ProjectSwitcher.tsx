@@ -12,12 +12,14 @@ interface Project {
 export default function ProjectSwitcher() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchUserProjects() {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         setLoading(false);
@@ -33,8 +35,11 @@ export default function ProjectSwitcher() {
       if (!error && data && data.length > 0) {
         setProjects(data);
 
-        // Check if there's a previously selected project, otherwise default to 'all'
-        const savedId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
+        const savedId =
+          typeof window !== 'undefined'
+            ? localStorage.getItem('snaptrace_selected_project_id')
+            : null;
+
         if (savedId && (savedId === 'all' || data.some((p) => p.id === savedId))) {
           setSelectedProjectId(savedId);
         } else {
@@ -53,33 +58,82 @@ export default function ProjectSwitcher() {
     setSelectedProjectId(projectId);
     localStorage.setItem('snaptrace_selected_project_id', projectId);
 
-    // Broadcast the change across all dashboard pages
     window.dispatchEvent(new Event('snaptrace_project_change'));
   };
 
   if (loading) {
-    return <div className="text-xs text-slate-500 font-mono">Loading projects...</div>;
+    return (
+      <div className="flex flex-col gap-1.5 w-full">
+        <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider font-mono">
+          Active Project
+        </span>
+        <div className="w-full h-8 bg-zinc-900/60 border border-zinc-800 rounded-lg animate-pulse" />
+      </div>
+    );
   }
 
   if (projects.length === 0) {
-    return <span className="text-xs text-slate-500 font-mono">No Projects Yet</span>;
+    return (
+      <div className="flex flex-col gap-1.5 w-full">
+        <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider font-mono">
+          Active Project
+        </span>
+        <div className="w-full bg-zinc-900/40 border border-zinc-800/80 text-zinc-500 text-xs rounded-lg px-2.5 py-1.5 font-mono">
+          No projects found
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col gap-1.5 w-full">
-      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Active Project</span>
-      <select
-        value={selectedProjectId}
-        onChange={handleChange}
-        className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500 font-medium cursor-pointer"
-      >
-        <option value="all">⚡ All Projects (Combined)</option>
-        {projects.map((project) => (
-          <option key={project.id} value={project.id}>
-            📁 {project.name || 'Untitled Project'}
+      <div className="flex items-center justify-between">
+        <label
+          htmlFor="project-switcher-select"
+          className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider font-mono"
+        >
+          Active Project
+        </label>
+        <span className="text-[10px] font-mono text-zinc-500">
+          {selectedProjectId === 'all' ? `${projects.length} Scope` : 'Filtered'}
+        </span>
+      </div>
+      <div className="relative w-full">
+        <select
+          id="project-switcher-select"
+          value={selectedProjectId}
+          onChange={handleChange}
+          className="w-full appearance-none bg-zinc-900/80 border border-zinc-800 text-zinc-200 text-xs rounded-lg pl-2.5 pr-8 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-600 focus:border-zinc-600 font-mono transition-colors cursor-pointer"
+        >
+          <option value="all" className="bg-zinc-900 text-zinc-200">
+            All Projects (Combined)
           </option>
-        ))}
-      </select>
+          {projects.map((project) => (
+            <option
+              key={project.id}
+              value={project.id}
+              className="bg-zinc-900 text-zinc-200"
+            >
+              {project.name || 'Untitled Project'}
+            </option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-400">
+          <svg
+            className="w-3.5 h-3.5"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </div>
     </div>
   );
 }
