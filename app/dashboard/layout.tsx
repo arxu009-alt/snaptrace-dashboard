@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import ProjectSwitcher from '@/components/ProjectSwitcher';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
+import SnapTraceLoading from '@/components/SnapTraceLoading';
 import FeedbackModal from '@/components/FeedbackModal';
 import DashboardOnboardingTour from '@/components/DashboardOnboardingTour';
 
@@ -168,14 +169,7 @@ export default function DashboardLayout({
   if (authChecking) {
     return (
       <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center font-sans">
-        <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-200">
-          <div className="relative animate-pulse">
-            <SnapTraceLogo size="lg" showText={false} />
-          </div>
-          <p className="text-xs text-zinc-400 font-mono tracking-widest uppercase">
-            Loading Dashboard...
-          </p>
-        </div>
+        <SnapTraceLoading size="lg" text="Loading Dashboard..." />
       </div>
     );
   }
