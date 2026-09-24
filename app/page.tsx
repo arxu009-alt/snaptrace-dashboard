@@ -18,11 +18,22 @@ type IconProps = { className?: string };
 const SUPPORT_EMAIL = 'hello.snaptrace@gmail.com';
 
 const GLOBAL_CSS = `
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  position: relative;
+  scroll-behavior: smooth;
+  scroll-padding-top: 110px;
+}
+section[id] {
+  scroll-margin-top: 110px;
+}
 .st-display { font-size: clamp(2.35rem, 1.15rem + 5vw, 4.75rem); line-height: 1.04; letter-spacing: -0.035em; font-weight: 700; }
 .st-h2 { font-size: clamp(1.65rem, 1.1rem + 2vw, 2.5rem); line-height: 1.14; letter-spacing: -0.025em; font-weight: 700; }
 .st-h3 { font-size: clamp(1.08rem, 0.96rem + 0.45vw, 1.25rem); line-height: 1.3; letter-spacing: -0.015em; font-weight: 600; }
 .st-lead { font-size: clamp(0.95rem, 0.88rem + 0.25vw, 1.05rem); line-height: 1.65; }
-.st-section { padding-top: clamp(3.5rem, 2.8rem + 2.5vw, 6rem); padding-bottom: clamp(3.5rem, 2.8rem + 2.5vw, 6rem); }
+.st-section { padding-top: clamp(2.75rem, 2rem + 2vw, 4.5rem); padding-bottom: clamp(2.75rem, 2rem + 2vw, 4.5rem); }
 .st-intro > * + * { margin-top: 0.75rem; }
 .st-intro .st-eyebrow-row + .st-h2 { margin-top: 0.9rem; }
 button, a { touch-action: manipulation; }
@@ -96,7 +107,6 @@ button, a { touch-action: manipulation; }
 .st-mobile-nav[data-open='true'] { opacity: 1; visibility: visible; }
 .st-safe-b { padding-bottom: max(0.85rem, env(safe-area-inset-bottom)); }
 .st-safe-t { padding-top: env(safe-area-inset-top); }
-html, body { overflow-x: hidden; max-width: 100%; width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .st-marquee-track { animation: none; }
   .st-ring::before { animation: none; opacity: 0; }
@@ -656,22 +666,27 @@ export default function WelcomeLandingPage() {
       >
         <span className="inline-flex items-center gap-1.5 font-semibold text-yellow-300">
           <IconBolt className="h-3.5 w-3.5" />
-          {marketingMode ? 'Early Adopter Beta Launch' : 'Architecture Spec'}
+          {marketingMode ? 'Public Beta Live' : 'Architecture Spec'}
         </span>
-        <span className="hidden text-slate-600 sm:inline">/</span>
+        <span className="text-slate-500">·</span>
         <span className="text-slate-300">
-          {marketingMode
-            ? 'Lifetime Starter Pro pass ($0 forever) is open. 0.0ms hydration penalty, under 3.4KB gzipped.'
-            : 'RFC-9110 asynchronous ingestion engine active · Zero hydration penalty · under 3.4KB gzipped'}
+          {marketingMode ? 'Sub-5KB Telemetry' : 'RFC-9110 asynchronous ingestion engine active'}
         </span>
-        {marketingMode && (
+        <span className="text-slate-500">·</span>
+        <span className="text-slate-300">
+          {marketingMode ? 'Zero Hydration Delay' : 'Zero hydration penalty'}
+        </span>
+        <span className="text-slate-500">·</span>
+        {marketingMode ? (
           <Link
             href="/signup"
             className="inline-flex items-center gap-1 font-semibold text-yellow-300 underline decoration-yellow-400/40 underline-offset-4 transition hover:text-yellow-200"
           >
-            Claim a seat
+            Free Beta Pass Open
             <IconArrow className="h-3 w-3" />
           </Link>
+        ) : (
+          <span className="text-slate-400">under 3.4KB gzipped</span>
         )}
       </div>
 
@@ -684,7 +699,7 @@ export default function WelcomeLandingPage() {
             : 'border-transparent bg-[#05070E]/70 backdrop-blur-md')
         }
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-5 sm:px-6">
+        <div className="mx-auto flex h-16 w-full max-w-7xl xl:max-w-[1400px] items-center justify-between gap-3 sm:gap-4 lg:gap-5 px-4 sm:px-6">
           <Link href="/" onClick={scrollToTop} className="flex shrink-0 items-center gap-2.5 rounded-md transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={true} />
             <span className="st-beta-pill">
@@ -693,10 +708,10 @@ export default function WelcomeLandingPage() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-0.5 text-[13px] font-medium text-slate-300 lg:flex font-mono">
+          <nav className="hidden items-center gap-0.5 xl:gap-1 text-[12.5px] xl:text-[13px] font-medium text-slate-300 lg:flex font-mono">
             {/* Platform Dropdown */}
             <div className="relative" onMouseEnter={() => setOpenDropdown('platform')} onMouseLeave={() => setOpenDropdown(null)}>
-              <button className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 transition hover:bg-white/[0.05] hover:text-white">
+              <button className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white">
                 Platform
                 <IconChevron className={'h-3.5 w-3.5 text-slate-500 transition-transform duration-200 ' + (openDropdown === 'platform' ? 'rotate-180' : '')} />
               </button>
@@ -733,7 +748,7 @@ export default function WelcomeLandingPage() {
 
             {/* AI Diagnostics Dropdown */}
             <div className="relative" onMouseEnter={() => setOpenDropdown('ai')} onMouseLeave={() => setOpenDropdown(null)}>
-              <button className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-purple-200 transition hover:bg-white/[0.05] hover:text-white">
+              <button className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 text-purple-200 transition hover:bg-white/[0.05] hover:text-white">
                 <IconSparkle className="h-3.5 w-3.5 text-purple-300" />
                 AI Copilot
                 <IconChevron className={'h-3.5 w-3.5 text-purple-400/70 transition-transform duration-200 ' + (openDropdown === 'ai' ? 'rotate-180' : '')} />
@@ -762,43 +777,43 @@ export default function WelcomeLandingPage() {
               )}
             </div>
 
-            <a href="#quickstart" className="rounded-lg px-3 py-2 transition hover:bg-white/[0.05] hover:text-white">SDK setup</a>
-            <a href="#comparison" className="rounded-lg px-3 py-2 transition hover:bg-white/[0.05] hover:text-white">Why SnapTrace</a>
-            <a href="#pricing" className="rounded-lg px-3 py-2 transition hover:bg-white/[0.05] hover:text-yellow-400 font-bold text-yellow-300">Pricing</a>
+            <a href="#quickstart" className="rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white">SDK setup</a>
+            <a href="#comparison" className="rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white">Why SnapTrace</a>
+            <a href="#pricing" className="rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-yellow-400 font-bold text-yellow-300">Pricing</a>
             <button
               onClick={() => setShowFeedbackModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 transition hover:bg-white/[0.05] hover:text-white cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white cursor-pointer"
             >
               Feedback
-              <span className="font-mono text-[9px] bg-slate-800 px-1 py-0.2 rounded border border-slate-700 text-slate-400">⌘F</span>
+              <span className="hidden xl:inline font-mono text-[9px] bg-slate-800 px-1 py-0.2 rounded border border-slate-700 text-slate-400">⌘F</span>
             </button>
-            <a href="#faq" className="rounded-lg px-3 py-2 transition hover:bg-white/[0.05] hover:text-white">FAQ</a>
+            <a href="#faq" className="rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white">FAQ</a>
           </nav>
 
-          <div className="flex shrink-0 items-center gap-2 font-mono">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 font-mono">
             <button
               onClick={toggleMarketingMode}
               title="Switch between the marketing site and the developer terminal"
               className="hidden cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-white/20 hover:text-white xl:inline-flex"
             >
               <IconTerminal className={'h-3.5 w-3.5 ' + (marketingMode ? 'text-slate-500' : 'text-emerald-400')} />
-              <span className="hidden md:inline">{marketingMode ? 'Raw Dev Mode' : 'Marketing Site'}</span>
+              <span className="hidden 2xl:inline">{marketingMode ? 'Raw Dev Mode' : 'Marketing Site'}</span>
               <span className={'relative h-4 w-7 rounded-full transition-colors ' + (marketingMode ? 'bg-slate-700' : 'bg-emerald-500/80')}>
                 <span className={'absolute top-0.5 h-3 w-3 rounded-full bg-[#05070E] transition-all ' + (marketingMode ? 'left-0.5' : 'left-3.5')} />
               </span>
             </button>
 
-            <Link href="/login" className="hidden rounded-lg px-3 py-2 text-[13px] font-medium text-slate-300 transition hover:bg-white/[0.05] hover:text-white sm:inline-flex">
+            <Link href="/login" className="hidden rounded-lg px-2.5 xl:px-3 py-1.5 text-[12.5px] font-medium text-slate-300 transition hover:bg-white/[0.05] hover:text-white sm:inline-flex">
               Sign in
             </Link>
 
-            <Link href="/demo" className="hidden items-center gap-1.5 rounded-xl border border-yellow-400/35 bg-yellow-400/[0.05] px-3.5 py-2 text-[12.5px] font-bold text-yellow-300 transition hover:border-yellow-400 hover:bg-yellow-400/10 md:inline-flex shadow-sm">
+            <Link href="/demo" className="hidden items-center gap-1.5 rounded-xl border border-yellow-400/35 bg-yellow-400/[0.05] px-3 py-1.5 text-[12px] font-bold text-yellow-300 transition hover:border-yellow-400 hover:bg-yellow-400/10 md:inline-flex shadow-sm whitespace-nowrap">
               Live Demo
             </Link>
 
             <Link
               href="/signup"
-              className="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-4 py-2 text-[12.5px] font-black text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_22px_-12px_rgba(250,204,21,0.8)] transition hover:brightness-[1.06]"
+              className="inline-flex min-h-[38px] shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-black text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_22px_-12px_rgba(250,204,21,0.8)] transition hover:brightness-[1.06]"
             >
               <span>CLAIM PRO PASS</span>
               <span>→</span>
@@ -1019,7 +1034,9 @@ export default function WelcomeLandingPage() {
           <section className="st-grain relative overflow-hidden pb-14 pt-12 sm:pb-20 sm:pt-16">
             <TelemetryBeamBackground />
             <div className="st-grid pointer-events-none absolute inset-0" />
-            <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(250,204,21,0.12),rgba(147,51,234,0.08),transparent)] blur-[110px]" />
+            <div className="pointer-events-none absolute inset-0 overflow-hidden w-full max-w-full">
+              <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(250,204,21,0.12),rgba(147,51,234,0.08),transparent)] blur-[110px]" />
+            </div>
 
             <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6">
               <div className="text-center max-w-4xl mx-auto space-y-4">
@@ -1040,7 +1057,7 @@ export default function WelcomeLandingPage() {
                 </h1>
 
                 <p className="st-lead text-slate-300 max-w-2xl mx-auto">
-                  SnapTrace collapses cascading multi-error outages into a single root-cause incident in <strong className="text-yellow-300 font-mono">&lt;3.4KB</strong>, with on-device PII masking and instant <strong>Bring Your Own Key (BYOK)</strong> AI diffs.
+                  SnapTrace collapses cascading multi-error outages into a single root-cause incident in under 3.4KB, with on-device PII masking and 1-click AI code fixes for Cursor and Claude.
                 </p>
 
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -1260,7 +1277,7 @@ export default function WelcomeLandingPage() {
           </section>
 
           {/* 4. STACK MARQUEE */}
-          <div className="border-y border-slate-800/70 bg-[#070B13]/60 py-5">
+          <div className="border-y border-slate-800/70 bg-[#070B13]/60 py-5 overflow-hidden w-full max-w-full">
             <p className="mb-4 text-center font-mono text-[10px] tracking-[0.14em] text-slate-500 uppercase font-bold">
               ONE UNIVERSAL REST INGESTION PROTOCOL · ZERO DEPENDENCY CONFLICTS
             </p>
@@ -1795,7 +1812,7 @@ export default function WelcomeLandingPage() {
 
           {/* 12. PRICING (#pricing) */}
           <section id="pricing" className="st-section st-cv border-t border-slate-800/70 bg-[#060911]/70">
-            <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-8">
+            <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-6">
               <SmoothReveal>
                 <SectionIntro
                   center
@@ -1849,7 +1866,7 @@ export default function WelcomeLandingPage() {
               </SmoothReveal>
 
               <SmoothReveal delay={100} className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3">
-                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6 sm:p-7">
+                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6">
                   <div>
                     <span className="font-mono text-[11px] tracking-[0.1em] text-slate-500 font-bold">DEVELOPER FREE</span>
                     <div className="mt-3 flex items-baseline gap-1.5">
@@ -1858,13 +1875,13 @@ export default function WelcomeLandingPage() {
                     </div>
                     <p className="mt-1 text-[13px] text-slate-400">For side projects and personal experiments.</p>
 
-                    <ul className="mt-6 space-y-2.5 border-t border-slate-800/80 pt-5 text-[13px] text-slate-300 font-mono">
+                    <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-5 text-[13px] text-slate-300 font-mono">
                       {[
                         '2,000 events / month',
-                        '7-day data retention',
+                        '7-day retention',
                         '1 active project',
-                        'Sub-5KB SDK, 0ms main-thread delay',
-                        'In-dashboard error inspection',
+                        'Sub-5KB SDK, 0ms delay',
+                        'In-dashboard inspection',
                         'Client-side regex PII firewall',
                         'Email and in-app alerts (no webhooks)',
                       ].map((f: string) => (
@@ -1876,12 +1893,12 @@ export default function WelcomeLandingPage() {
                     </ul>
                   </div>
 
-                  <Link href="/signup" className={BTN_SECONDARY + ' mt-7 w-full font-mono'}>
-                    Start free forever →
+                  <Link href="/signup" className={BTN_SECONDARY + ' mt-6 w-full font-mono'}>
+                    Start Free Forever →
                   </Link>
                 </div>
 
-                <div className="st-glow-amber relative flex flex-col justify-between rounded-2xl border-2 border-yellow-400/50 bg-[linear-gradient(180deg,rgba(250,204,21,0.06),rgba(11,16,29,1)_45%)] p-6 sm:p-7 lg:-translate-y-2">
+                <div className="st-glow-amber relative flex flex-col justify-between rounded-2xl border-2 border-yellow-400/50 bg-[linear-gradient(180deg,rgba(250,204,21,0.06),rgba(11,16,29,1)_45%)] p-6 lg:-translate-y-1.5">
                   <span className="absolute -top-3 left-6 rounded-full bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3 py-1 font-mono text-[10px] font-black tracking-wider text-slate-950">
                     POPULAR FOR SOLO DEVS
                   </span>
@@ -1898,14 +1915,14 @@ export default function WelcomeLandingPage() {
                       {billingInterval === 'annual' ? 'Billed annually at $180/yr.' : 'For solo developers, freelancers and micro-SaaS.'}
                     </p>
 
-                    <ul className="mt-6 space-y-2.5 border-t border-slate-800/80 pt-5 text-[13px] text-slate-200 font-mono">
+                    <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-5 text-[13px] text-slate-200 font-mono">
                       {[
                         '75,000 events / month',
-                        '30-day telemetry retention',
-                        'Up to 5 active projects',
-                        'Instant Discord, Slack and Telegram alerts',
-                        '1-click Cursor and Claude fix prompts',
-                        '60s loop deduplication ([x50] noise throttling)',
+                        '30-day retention',
+                        'Up to 5 projects',
+                        'Instant Discord & Slack webhooks',
+                        '1-click Cursor/Claude AI prompts',
+                        '60s loop throttling ([x50])',
                         'In-dashboard BYOK AI copilot (Gemini & OpenAI)',
                       ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
@@ -1916,17 +1933,17 @@ export default function WelcomeLandingPage() {
                     </ul>
                   </div>
 
-                  <Link href="/signup" className={BTN_PRIMARY + ' mt-7 w-full font-mono'}>
-                    Claim Pro beta pass →
+                  <Link href="/signup" className={BTN_PRIMARY + ' mt-6 w-full font-mono'}>
+                    Claim Pro Beta Pass →
                   </Link>
                 </div>
 
-                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6 sm:p-7">
+                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6">
                   <div>
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-mono text-[11px] tracking-[0.1em] text-purple-300 font-bold">AGENCY STUDIO</span>
                       <span className="rounded-full border border-purple-400/20 bg-purple-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-purple-300">
-                        Built for agencies
+                        BUILT FOR AGENCIES
                       </span>
                     </div>
                     <div className="mt-3 flex items-baseline gap-1.5">
@@ -1939,15 +1956,15 @@ export default function WelcomeLandingPage() {
                       {billingInterval === 'annual' ? 'Billed annually at $468/yr.' : 'For studios and agencies running multiple client sites.'}
                     </p>
 
-                    <ul className="mt-6 space-y-2.5 border-t border-slate-800/80 pt-5 text-[13px] text-slate-300 font-mono">
+                    <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-5 text-[13px] text-slate-300 font-mono">
                       {[
                         '500,000 events / month',
-                        '90-day telemetry retention',
-                        'Unlimited client projects and keys',
-                        'Multi-seat team and client invites',
-                        'Cascading multi-error outage collapse',
-                        'Priority edge ingestion gateways',
-                        'Raw log CSV / JSON export',
+                        '90-day retention',
+                        'UNLIMITED projects & keys',
+                        'Multi-seat invites',
+                        'Cascading outage collapse',
+                        'Priority ingestion',
+                        'Raw log CSV/JSON exports',
                       ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
                           <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-purple-400" />
@@ -1957,8 +1974,8 @@ export default function WelcomeLandingPage() {
                     </ul>
                   </div>
 
-                  <button type="button" onClick={() => setShowAgencyModal(true)} className={BTN_SECONDARY + ' mt-7 w-full cursor-pointer font-mono'}>
-                    Request agency access →
+                  <button type="button" onClick={() => setShowAgencyModal(true)} className={BTN_SECONDARY + ' mt-6 w-full cursor-pointer font-mono'}>
+                    Start Agency Workspace →
                   </button>
                 </div>
               </SmoothReveal>
@@ -2030,7 +2047,9 @@ export default function WelcomeLandingPage() {
 
           {/* 15. FOOTER */}
           <footer className="relative overflow-hidden border-t border-slate-800/70 bg-[#060911] pb-28 pt-16 sm:pb-10 sm:pt-20">
-            <div className="pointer-events-none absolute -bottom-52 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(250,204,21,0.08),transparent)] blur-[90px]" />
+            <div className="pointer-events-none absolute inset-0 overflow-hidden w-full max-w-full">
+              <div className="pointer-events-none absolute -bottom-52 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(250,204,21,0.08),transparent)] blur-[90px]" />
+            </div>
 
             <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 space-y-12">
               <div className="mx-auto max-w-xl text-center space-y-3">
