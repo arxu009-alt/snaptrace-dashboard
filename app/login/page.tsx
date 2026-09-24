@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
@@ -10,6 +10,18 @@ export const dynamic = 'force-dynamic';
 
 export default function LoginPage() {
   const router = useRouter();
+
+  // Auto-redirect to dashboard if user is already authenticated
+  useEffect(() => {
+    async function checkExistingAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.replace('/dashboard');
+      }
+    }
+    checkExistingAuth();
+  }, [router]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -248,7 +260,7 @@ export default function LoginPage() {
             </form>
 
             <p className="text-center text-xs text-zinc-400 pt-3 border-t border-zinc-800/80 font-sans">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/signup" className="text-zinc-200 hover:underline font-medium">
                 Create Account
               </Link>
@@ -345,7 +357,7 @@ export default function LoginPage() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-zinc-850 border-zinc-800/60 p-6 text-xs text-zinc-500 relative z-10 max-w-6xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
+      <footer className="border-t border-zinc-800/60 p-6 text-xs text-zinc-500 relative z-10 max-w-6xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 font-sans">
         <span>© {new Date().getFullYear()} SnapTrace. The Modern Developer Telemetry Platform.</span>
         <div className="flex items-center space-x-6 text-zinc-400 font-mono text-[11px]">
           <Link href="/privacy" className="hover:text-zinc-200 transition">
