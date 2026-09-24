@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
@@ -8,6 +9,19 @@ import SnapTraceLogo from '@/components/SnapTraceLogo';
 export const dynamic = 'force-dynamic';
 
 export default function SignUpPage() {
+  const router = useRouter();
+
+  // Auto-redirect to dashboard if user is already authenticated
+  useEffect(() => {
+    async function checkExistingAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.replace('/dashboard');
+      }
+    }
+    checkExistingAuth();
+  }, [router]);
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
