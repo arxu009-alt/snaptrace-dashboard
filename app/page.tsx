@@ -18,13 +18,20 @@ type IconProps = { className?: string };
 const SUPPORT_EMAIL = 'hello.snaptrace@gmail.com';
 
 const GLOBAL_CSS = `
-html, body {
-  overflow-x: hidden !important;
-  max-width: 100vw !important;
-  width: 100% !important;
-  position: relative;
+html {
+  overflow-x: clip;
+  max-width: 100%;
+  width: 100%;
   scroll-behavior: smooth;
   scroll-padding-top: 110px;
+  box-sizing: border-box;
+}
+body {
+  overflow-x: clip;
+  max-width: 100%;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
 }
 section[id] {
   scroll-margin-top: 110px;
@@ -652,24 +659,24 @@ export default function WelcomeLandingPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#05070E] font-sans text-slate-100 antialiased selection:bg-yellow-400 selection:text-slate-950">
+    <div className="relative min-h-screen w-full max-w-full overflow-x-clip bg-[#05070E] font-sans text-slate-100 antialiased selection:bg-yellow-400 selection:text-slate-950">
       <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
 
       {/* ANNOUNCEMENT BAR */}
       <div
         className={
-          'relative z-50 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b px-4 py-2 text-center font-mono text-[11px] transition-colors ' +
+          'relative z-50 flex w-full max-w-full overflow-hidden flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3 gap-y-1 border-b px-3 sm:px-4 py-2 text-center font-mono text-[10.5px] sm:text-[11px] transition-colors ' +
           (marketingMode
             ? 'border-yellow-400/25 bg-[linear-gradient(90deg,rgba(250,204,21,0.08),rgba(245,158,11,0.14),rgba(250,204,21,0.08))] text-yellow-100'
             : 'border-slate-800/80 bg-[#080C15] text-slate-300')
         }
       >
-        <span className="inline-flex items-center gap-1.5 font-semibold text-yellow-300">
+        <span className="inline-flex items-center gap-1.5 font-semibold text-yellow-300 shrink-0">
           <IconBolt className="h-3.5 w-3.5" />
           {marketingMode ? 'Public Beta Live' : 'Architecture Spec'}
         </span>
-        <span className="text-slate-500">·</span>
-        <span className="text-slate-300">
+        <span className="hidden sm:inline text-slate-500">·</span>
+        <span className="hidden sm:inline text-slate-300">
           {marketingMode ? 'Sub-5KB Telemetry' : 'RFC-9110 asynchronous ingestion engine active'}
         </span>
         <span className="text-slate-500">·</span>
@@ -680,13 +687,13 @@ export default function WelcomeLandingPage() {
         {marketingMode ? (
           <Link
             href="/signup"
-            className="inline-flex items-center gap-1 font-semibold text-yellow-300 underline decoration-yellow-400/40 underline-offset-4 transition hover:text-yellow-200"
+            className="inline-flex items-center gap-1 font-semibold text-yellow-300 underline decoration-yellow-400/40 underline-offset-4 transition hover:text-yellow-200 shrink-0"
           >
             Free Beta Pass Open
             <IconArrow className="h-3 w-3" />
           </Link>
         ) : (
-          <span className="text-slate-400">under 3.4KB gzipped</span>
+          <span className="text-slate-400 shrink-0">under 3.4KB gzipped</span>
         )}
       </div>
 
@@ -813,9 +820,10 @@ export default function WelcomeLandingPage() {
 
             <Link
               href="/signup"
-              className="inline-flex min-h-[38px] shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-black text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_22px_-12px_rgba(250,204,21,0.8)] transition hover:brightness-[1.06]"
+              className="inline-flex min-h-[36px] sm:min-h-[38px] shrink-0 whitespace-nowrap items-center gap-1 sm:gap-1.5 rounded-xl bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-[12.5px] font-black text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_22px_-12px_rgba(250,204,21,0.8)] transition hover:brightness-[1.06]"
             >
-              <span>CLAIM PRO PASS</span>
+              <span className="hidden sm:inline">CLAIM PRO PASS</span>
+              <span className="sm:hidden">PRO PASS</span>
               <span>→</span>
             </Link>
 
@@ -1042,11 +1050,11 @@ export default function WelcomeLandingPage() {
               <div className="text-center max-w-4xl mx-auto space-y-4">
                 <a
                   href="#ai-agent"
-                  className="group inline-flex items-center gap-2.5 rounded-full border border-purple-400/25 bg-purple-500/[0.08] py-1.5 pl-2.5 pr-4 text-[12px] text-purple-200 backdrop-blur-sm transition hover:border-purple-400/50 hover:bg-purple-500/[0.14]"
+                  className="group inline-flex max-w-full items-center gap-2 rounded-full border border-purple-400/25 bg-purple-500/[0.08] py-1.5 pl-2.5 pr-3.5 text-[11.5px] sm:text-[12px] text-purple-200 backdrop-blur-sm transition hover:border-purple-400/50 hover:bg-purple-500/[0.14]"
                 >
-                  <span className="rounded-full bg-purple-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-purple-200">NEW</span>
-                  <span>Autonomous AI patches ready for Cursor, Claude Code, & Copilot</span>
-                  <IconArrow className="h-3.5 w-3.5 opacity-60 transition-transform group-hover:translate-x-0.5" />
+                  <span className="rounded-full bg-purple-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-purple-200 shrink-0">NEW</span>
+                  <span className="truncate">Autonomous AI patches ready for Cursor, Claude Code, & Copilot</span>
+                  <IconArrow className="h-3.5 w-3.5 shrink-0 opacity-60 transition-transform group-hover:translate-x-0.5" />
                 </a>
 
                 <h1 className="st-display text-white">
@@ -1071,10 +1079,10 @@ export default function WelcomeLandingPage() {
                   </Link>
                 </div>
 
-                <div className="pt-4 max-w-xl mx-auto">
-                  <div className="st-card flex items-center gap-3 rounded-xl p-2 pl-3.5 border-slate-800">
+                <div className="pt-4 max-w-xl mx-auto w-full">
+                  <div className="st-card flex items-center gap-2 sm:gap-3 rounded-xl p-2 pl-3 sm:pl-3.5 border-slate-800 w-full min-w-0 max-w-full">
                     <IconCode className="h-4 w-4 shrink-0 text-yellow-400/80 hidden sm:block" />
-                    <code className="flex-1 truncate text-left font-mono text-[11.5px] text-slate-400">
+                    <code className="flex-1 min-w-0 truncate text-left font-mono text-[11px] sm:text-[11.5px] text-slate-400">
                       &lt;script src=&quot;.../snaptrace.js&quot; data-api-key=&quot;<span className="text-yellow-300 font-bold">YOUR_KEY</span>&quot; async&gt;&lt;/script&gt;
                     </code>
                     <button onClick={handleCopyHeroScript} className={BTN_GHOST_SM + ' shrink-0 cursor-pointer font-mono'}>
@@ -1685,7 +1693,7 @@ export default function WelcomeLandingPage() {
               <SmoothReveal delay={80}>
                 <div className="st-card overflow-hidden rounded-2xl shadow-2xl">
                   <div className="st-window-topbar flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
-                    <div className="st-scroll -mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-1 md:pb-0">
+                    <div className="st-scroll flex w-full min-w-0 max-w-full items-center gap-1 overflow-x-auto pb-1 md:pb-0">
                       {STACK_TABS.map((tab: { id: StackKey; label: string }) => (
                         <button
                           key={tab.id}
@@ -1720,7 +1728,7 @@ export default function WelcomeLandingPage() {
 
           {/* 10. COMPARISON MATRIX (#comparison) */}
           <section id="comparison" className="st-section st-cv border-t border-slate-800/70 bg-[#060911]/70">
-            <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 space-y-8">
               <SmoothReveal>
                 <SectionIntro
                   center
@@ -1732,8 +1740,8 @@ export default function WelcomeLandingPage() {
               </SmoothReveal>
 
               <SmoothReveal delay={80} className="hidden md:block">
-                <div className="st-card st-scroll overflow-x-auto rounded-2xl shadow-xl">
-                  <table className="w-full min-w-[720px] border-collapse text-left">
+                <div className="st-card st-scroll overflow-x-auto rounded-2xl shadow-xl w-full max-w-full">
+                  <table className="w-full min-w-[660px] border-collapse text-left">
                     <thead>
                       <tr className="border-b border-slate-800 bg-[#070B13]">
                         <th className="px-5 py-4 font-mono text-[11px] font-bold tracking-[0.1em] text-slate-500">FEATURE MATRIX</th>
@@ -1812,22 +1820,22 @@ export default function WelcomeLandingPage() {
 
           {/* 12. PRICING (#pricing) */}
           <section id="pricing" className="st-section st-cv border-t border-slate-800/70 bg-[#060911]/70">
-            <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-6">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 space-y-6">
               <SmoothReveal>
                 <SectionIntro
                   center
                   eyebrowIcon={<IconLayers className="h-3.5 w-3.5" />}
                   eyebrowLabel="Pricing"
                   heading="Simple, developer-first plans"
-                  lead="No surprise overage bills. Generous headroom for solo builders and client studios."
+                  lead="No surprise overage bills. Generous headroom for solo builders, micro-SaaS, and client studios."
                 />
 
-                <div className="mt-6 flex justify-center">
-                  <div className="inline-flex items-center gap-1 rounded-xl border border-slate-800 bg-[#0B101D] p-1 font-mono">
+                <div className="mt-6 flex justify-center px-2">
+                  <div className="inline-flex max-w-full items-center gap-1 rounded-xl border border-slate-800 bg-[#0B101D] p-1 font-mono text-xs">
                     <button
                       onClick={() => setBillingInterval('monthly')}
                       className={
-                        'cursor-pointer rounded-lg px-4 py-2 text-[12.5px] font-bold transition ' +
+                        'cursor-pointer rounded-lg px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-bold transition ' +
                         (billingInterval === 'monthly'
                           ? 'bg-white/[0.08] text-white shadow-sm'
                           : 'text-slate-400 hover:text-slate-200')
@@ -1838,145 +1846,189 @@ export default function WelcomeLandingPage() {
                     <button
                       onClick={() => setBillingInterval('annual')}
                       className={
-                        'inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-[12.5px] font-bold transition ' +
+                        'inline-flex cursor-pointer items-center gap-1.5 sm:gap-2 rounded-lg px-3.5 sm:px-4 py-2 text-[12px] sm:text-[12.5px] font-bold transition ' +
                         (billingInterval === 'annual'
                           ? 'bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] text-slate-950 font-black'
                           : 'text-slate-400 hover:text-yellow-300')
                       }
                     >
-                      Annual
+                      <span>Annual</span>
                       <span
                         className={
-                          'rounded-md px-1.5 py-0.5 font-mono text-[10px] ' +
+                          'rounded-md px-1.5 py-0.5 font-mono text-[9.5px] sm:text-[10px] whitespace-nowrap ' +
                           (billingInterval === 'annual' ? 'bg-slate-950/80 text-yellow-300' : 'bg-slate-800 text-slate-400')
                         }
                       >
-                        Save 20% + 2 Mo Free ⚡
+                        <span className="inline sm:hidden">Save 20% ⚡</span>
+                        <span className="hidden sm:inline">Save 20% + 2 Mo Free ⚡</span>
                       </span>
                     </button>
                   </div>
                 </div>
 
                 {billingInterval === 'annual' && (
-                  <p className="mt-2.5 flex items-center justify-center gap-1.5 font-mono text-[11.5px] text-emerald-400 font-semibold">
-                    <IconCheck className="h-3.5 w-3.5" />
-                    Billed annually, two months completely free
+                  <p className="mt-2.5 flex items-center justify-center gap-1.5 font-mono text-[11.5px] text-emerald-400 font-semibold text-center px-4">
+                    <IconCheck className="h-3.5 w-3.5 shrink-0" />
+                    <span>Billed annually — two months completely free applied at checkout</span>
                   </p>
                 )}
               </SmoothReveal>
 
-              <SmoothReveal delay={100} className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3">
-                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6">
+              <SmoothReveal delay={100} className="grid grid-cols-1 md:grid-cols-3 items-stretch gap-4.5 lg:gap-6 pt-2">
+                {/* 1. DEVELOPER FREE */}
+                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-5 sm:p-6 lg:p-7 h-full">
                   <div>
-                    <span className="font-mono text-[11px] tracking-[0.1em] text-slate-500 font-bold">DEVELOPER FREE</span>
-                    <div className="mt-3 flex items-baseline gap-1.5">
-                      <span className="text-[38px] font-black tracking-tight text-white">$0</span>
+                    <div className="flex items-center justify-between gap-2 min-h-[26px]">
+                      <span className="font-mono text-[11px] tracking-[0.1em] text-slate-400 font-bold uppercase">DEVELOPER FREE</span>
+                      <span className="rounded-full border border-slate-700/60 bg-slate-800/60 px-2 py-0.5 font-mono text-[9.5px] font-semibold text-slate-400">
+                        SIDE PROJECTS
+                      </span>
+                    </div>
+
+                    <div className="mt-3.5 flex items-baseline gap-1.5">
+                      <span className="text-[34px] sm:text-[36px] lg:text-[40px] font-black tracking-tight text-white">$0</span>
                       <span className="font-mono text-[12px] text-slate-500">/ month</span>
                     </div>
-                    <p className="mt-1 text-[13px] text-slate-400">For side projects and personal experiments.</p>
 
-                    <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-5 text-[13px] text-slate-300 font-mono">
+                    <p className="mt-1 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
+                      For side projects, indie hack experiments, and personal sites.
+                    </p>
+
+                    <ul className="mt-5 space-y-2.5 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-300 font-mono">
                       {[
                         '2,000 events / month',
-                        '7-day retention',
+                        '7-day log retention',
                         '1 active project',
                         'Sub-5KB SDK, 0ms delay',
                         'In-dashboard inspection',
                         'Client-side regex PII firewall',
-                        'Email and in-app alerts (no webhooks)',
+                        'Email & in-app alerts (no webhooks)',
                       ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
                           <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
-                          <span>{f}</span>
+                          <span className="leading-snug">{f}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <Link href="/signup" className={BTN_SECONDARY + ' mt-6 w-full font-mono'}>
+                  <Link href="/signup" className={BTN_SECONDARY + ' mt-6 w-full font-mono text-center justify-center'}>
                     Start Free Forever →
                   </Link>
                 </div>
 
-                <div className="st-glow-amber relative flex flex-col justify-between rounded-2xl border-2 border-yellow-400/50 bg-[linear-gradient(180deg,rgba(250,204,21,0.06),rgba(11,16,29,1)_45%)] p-6 lg:-translate-y-1.5">
-                  <span className="absolute -top-3 left-6 rounded-full bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3 py-1 font-mono text-[10px] font-black tracking-wider text-slate-950">
+                {/* 2. PRO BUILDER */}
+                <div className="st-glow-amber relative flex flex-col justify-between rounded-2xl border-2 border-yellow-400/60 bg-[linear-gradient(180deg,rgba(250,204,21,0.07),rgba(11,16,29,1)_45%)] p-5 sm:p-6 lg:p-7 h-full mt-3 md:mt-0 md:-translate-y-1 lg:-translate-y-2">
+                  <span className="absolute -top-3 left-5 sm:left-6 rounded-full bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3 py-0.5 sm:py-1 font-mono text-[9.5px] sm:text-[10px] font-black tracking-wider text-slate-950 shadow-md">
                     POPULAR FOR SOLO DEVS
                   </span>
 
                   <div>
-                    <span className="font-mono text-[11px] tracking-[0.1em] text-yellow-400 font-bold">PRO BUILDER</span>
-                    <div className="mt-3 flex items-baseline gap-1.5">
-                      <span className="text-[38px] font-black tracking-tight text-white">
+                    <div className="flex items-center justify-between gap-2 min-h-[26px]">
+                      <span className="font-mono text-[11px] tracking-[0.1em] text-yellow-400 font-bold uppercase">PRO BUILDER</span>
+                      <span className="rounded-full border border-yellow-400/30 bg-yellow-400/10 px-2 py-0.5 font-mono text-[9.5px] font-bold text-yellow-300">
+                        SOLO DEVS & SAAS
+                      </span>
+                    </div>
+
+                    <div className="mt-3.5 flex items-baseline gap-1.5">
+                      <span className="text-[34px] sm:text-[36px] lg:text-[40px] font-black tracking-tight text-white">
                         {billingInterval === 'annual' ? '$15' : '$19'}
                       </span>
                       <span className="font-mono text-[12px] text-slate-400">/ month</span>
                     </div>
-                    <p className="mt-1 text-[13px] text-slate-400">
-                      {billingInterval === 'annual' ? 'Billed annually at $180/yr.' : 'For solo developers, freelancers and micro-SaaS.'}
+
+                    <p className="mt-1 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
+                      {billingInterval === 'annual' ? 'Billed annually at $180/yr (save $48).' : 'For solo developers, freelancers & production micro-SaaS.'}
                     </p>
 
-                    <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-5 text-[13px] text-slate-200 font-mono">
+                    <ul className="mt-5 space-y-2.5 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-200 font-mono">
                       {[
                         '75,000 events / month',
-                        '30-day retention',
-                        'Up to 5 projects',
+                        '30-day log retention',
+                        'Up to 5 active projects',
                         'Instant Discord & Slack webhooks',
-                        '1-click Cursor/Claude AI prompts',
+                        '1-click Cursor & Claude AI prompts',
                         '60s loop throttling ([x50])',
-                        'In-dashboard BYOK AI copilot (Gemini & OpenAI)',
+                        'BYOK AI Copilot (Gemini & OpenAI)',
                       ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
                           <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-yellow-400" />
-                          <span>{f}</span>
+                          <span className="leading-snug">{f}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <Link href="/signup" className={BTN_PRIMARY + ' mt-6 w-full font-mono'}>
+                  <Link href="/signup" className={BTN_PRIMARY + ' mt-6 w-full font-mono text-center justify-center'}>
                     Claim Pro Beta Pass →
                   </Link>
                 </div>
 
-                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6">
+                {/* 3. AGENCY STUDIO */}
+                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-5 sm:p-6 lg:p-7 h-full">
                   <div>
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-[11px] tracking-[0.1em] text-purple-300 font-bold">AGENCY STUDIO</span>
-                      <span className="rounded-full border border-purple-400/20 bg-purple-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-purple-300">
-                        BUILT FOR AGENCIES
+                    <div className="flex items-center justify-between gap-2 min-h-[26px]">
+                      <span className="font-mono text-[11px] tracking-[0.1em] text-purple-300 font-bold uppercase">AGENCY STUDIO</span>
+                      <span className="rounded-full border border-purple-400/25 bg-purple-500/15 px-2 py-0.5 font-mono text-[9.5px] font-bold text-purple-300">
+                        CLIENT STUDIOS
                       </span>
                     </div>
-                    <div className="mt-3 flex items-baseline gap-1.5">
-                      <span className="text-[38px] font-black tracking-tight text-white">
+
+                    <div className="mt-3.5 flex items-baseline gap-1.5">
+                      <span className="text-[34px] sm:text-[36px] lg:text-[40px] font-black tracking-tight text-white">
                         {billingInterval === 'annual' ? '$39' : '$49'}
                       </span>
                       <span className="font-mono text-[12px] text-slate-500">/ month</span>
                     </div>
-                    <p className="mt-1 text-[13px] text-slate-400">
-                      {billingInterval === 'annual' ? 'Billed annually at $468/yr.' : 'For studios and agencies running multiple client sites.'}
+
+                    <p className="mt-1 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
+                      {billingInterval === 'annual' ? 'Billed annually at $468/yr (save $120).' : 'For agencies and teams managing multiple client sites.'}
                     </p>
 
-                    <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-5 text-[13px] text-slate-300 font-mono">
+                    <ul className="mt-5 space-y-2.5 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-300 font-mono">
                       {[
                         '500,000 events / month',
-                        '90-day retention',
-                        'UNLIMITED projects & keys',
-                        'Multi-seat invites',
+                        '90-day telemetry retention',
+                        'UNLIMITED projects & API keys',
+                        'Multi-seat client invites',
                         'Cascading outage collapse',
-                        'Priority ingestion',
-                        'Raw log CSV/JSON exports',
+                        'Priority edge ingestion',
+                        'Raw log CSV & JSON exports',
                       ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
                           <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-purple-400" />
-                          <span>{f}</span>
+                          <span className="leading-snug">{f}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <button type="button" onClick={() => setShowAgencyModal(true)} className={BTN_SECONDARY + ' mt-6 w-full cursor-pointer font-mono'}>
+                  <button type="button" onClick={() => setShowAgencyModal(true)} className={BTN_SECONDARY + ' mt-6 w-full cursor-pointer font-mono text-center justify-center'}>
                     Start Agency Workspace →
                   </button>
+                </div>
+              </SmoothReveal>
+
+              {/* Trust assurance strip */}
+              <SmoothReveal delay={140} className="mt-6 rounded-xl border border-slate-800/80 bg-[#070B13]/70 p-4 font-mono text-[11px] sm:text-[12px] text-slate-400">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <IconCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                    <span>No credit card needed</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <IconCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                    <span>0.0ms main thread delay</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <IconCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                    <span>Cancel or switch anytime</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <IconCheck className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                    <span>Zero surprise bills</span>
+                  </div>
                 </div>
               </SmoothReveal>
             </div>
