@@ -23,7 +23,7 @@ html {
   max-width: 100%;
   width: 100%;
   scroll-behavior: smooth;
-  scroll-padding-top: 110px;
+  scroll-padding-top: 115px;
   box-sizing: border-box;
 }
 body {
@@ -34,7 +34,7 @@ body {
   box-sizing: border-box;
 }
 section[id] {
-  scroll-margin-top: 110px;
+  scroll-margin-top: 115px;
 }
 .st-display { font-size: clamp(2.35rem, 1.15rem + 5vw, 4.75rem); line-height: 1.04; letter-spacing: -0.035em; font-weight: 700; }
 .st-h2 { font-size: clamp(1.65rem, 1.1rem + 2vw, 2.5rem); line-height: 1.14; letter-spacing: -0.025em; font-weight: 700; }
@@ -665,7 +665,7 @@ export default function WelcomeLandingPage() {
       {/* ANNOUNCEMENT BAR */}
       <div
         className={
-          'relative z-50 flex w-full max-w-full overflow-hidden flex-wrap items-center justify-center gap-x-2.5 sm:gap-x-3 gap-y-1 border-b px-3 sm:px-4 py-2 text-center font-mono text-[10.5px] sm:text-[11px] transition-colors ' +
+          'relative z-50 flex w-full max-w-full overflow-hidden flex-wrap items-center justify-center gap-x-2 sm:gap-x-3 gap-y-1 border-b px-2 sm:px-4 py-2 text-center font-mono text-[10.5px] sm:text-[11px] transition-colors ' +
           (marketingMode
             ? 'border-yellow-400/25 bg-[linear-gradient(90deg,rgba(250,204,21,0.08),rgba(245,158,11,0.14),rgba(250,204,21,0.08))] text-yellow-100'
             : 'border-slate-800/80 bg-[#080C15] text-slate-300')
@@ -706,16 +706,16 @@ export default function WelcomeLandingPage() {
             : 'border-transparent bg-[#05070E]/70 backdrop-blur-md')
         }
       >
-        <div className="mx-auto flex h-16 w-full max-w-7xl xl:max-w-[1400px] items-center justify-between gap-3 sm:gap-4 lg:gap-5 px-4 sm:px-6">
-          <Link href="/" onClick={scrollToTop} className="flex shrink-0 items-center gap-2.5 rounded-md transition hover:opacity-90">
+        <div className="mx-auto flex h-16 w-full max-w-7xl xl:max-w-[1400px] items-center justify-between gap-2 xl:gap-6 px-3 sm:px-6">
+          <Link href="/" onClick={scrollToTop} className="flex shrink-0 items-center gap-2 rounded-md transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={true} />
-            <span className="st-beta-pill">
+            <span className="st-beta-pill shrink-0">
               <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
               BETA
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-0.5 xl:gap-1 text-[12.5px] xl:text-[13px] font-medium text-slate-300 lg:flex font-mono">
+          <nav className="hidden items-center gap-0.5 xl:gap-1 text-xs xl:text-[13px] font-medium text-slate-300 xl:flex font-mono">
             {/* Platform Dropdown */}
             <div className="relative" onMouseEnter={() => setOpenDropdown('platform')} onMouseLeave={() => setOpenDropdown(null)}>
               <button className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white">
