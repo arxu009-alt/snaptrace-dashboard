@@ -830,9 +830,9 @@ export default function WelcomeLandingPage() {
           </div>
         </div>
       </header>
-{/* SENTRY-STYLE FLOATING MARKETING MODE CARD (Matches Sentry Screenshot Exactly) */}
-      <div className="fixed top-20 right-4 sm:right-6 z-30 hidden sm:block">
-        <div className="bg-[#161228]/90 border border-purple-500/35 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1 font-mono">
+{/* SENTRY-STYLE FLOATING MARKETING MODE CARD (Positioned safely below header) */}
+      <div className="fixed top-[118px] right-4 sm:right-6 z-30 hidden sm:block">
+        <div className="bg-[#161228]/95 border border-purple-500/35 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1 font-mono">
           <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider select-none">
             Marketing Mode
           </span>
@@ -915,24 +915,24 @@ export default function WelcomeLandingPage() {
         </div>
       </div>
 
-      {/* VIEW 1: RAW DEV TERMINAL */}
+     {/* VIEW 1: RAW DEV TERMINAL */}
       {!marketingMode ? (
-        <section className="st-grain relative min-h-[calc(100vh-6.5rem)]">
+        <section className="st-grain relative min-h-[calc(100vh-7rem)] w-full max-w-full overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
           <div className="st-grid pointer-events-none absolute inset-0" />
-          <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-start gap-10 px-5 py-12 sm:px-6 lg:grid-cols-12 lg:py-16">
-            <div className="space-y-6 lg:col-span-5">
+          <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-start gap-8 lg:gap-12 px-5 sm:px-6 lg:grid-cols-12">
+            <div className="space-y-6 lg:col-span-5 pt-2">
               <div className="space-y-3">
-                <span className="inline-flex items-center gap-2 font-mono text-[11px] text-emerald-400">
+                <span className="inline-flex items-center gap-2 font-mono text-[11px] text-emerald-400 font-semibold">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   </span>
-                  marketing.js terminated · 0.0ms main thread blocking
+                  architecture.spec · 0.0ms main thread blocking
                 </span>
 
-                <h1 className="st-display font-mono text-white">
+                <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-mono font-bold tracking-tight text-white leading-[1.25]">
                   No 100KB bundles.<br />
-                  No 2 AM spam alerts.<br />
+                  No 2 AM alert floods.<br />
                   <span className="text-yellow-400">No Sunday log hunting.</span>
                 </h1>
               </div>
