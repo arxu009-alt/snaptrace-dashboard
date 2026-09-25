@@ -825,15 +825,31 @@ export default function WelcomeLandingPage() {
           </div>
         </div>
       </header>
-{/* Dev Mode toggle — subtle icon button, not visible in consumer navbar */}
-      <button
-        onClick={toggleMarketingMode}
-        title={marketingMode ? 'Switch to Dev Spec Mode' : 'Back to Marketing Site'}
-        aria-label={marketingMode ? 'Switch to Dev Spec Mode' : 'Back to Marketing Site'}
-        className="fixed bottom-[5.5rem] sm:bottom-[1.75rem] right-[4.25rem] z-30 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-zinc-800/70 bg-zinc-900/80 text-zinc-600 shadow-lg backdrop-blur-md transition hover:border-zinc-700 hover:text-zinc-300"
-      >
-        <IconTerminal className="h-4 w-4" />
-      </button>
+      {/* SENTRY-STYLE FLOATING MARKETING MODE CARD (Positioned safely below header) */}
+      <div className="fixed top-[74px] sm:top-[80px] right-4 sm:right-6 z-30 hidden sm:block">
+        <div className="bg-[#0f1422]/95 border border-zinc-700/60 hover:border-yellow-400/40 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1 font-mono transition-colors">
+          <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider select-none">
+            Marketing Mode
+          </span>
+          <button
+            onClick={toggleMarketingMode}
+            className={`w-11 h-5.5 rounded-full transition-colors relative cursor-pointer ${
+              marketingMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-zinc-700'
+            }`}
+            title="Toggle between Marketing Mode and Dev Spec Mode"
+            aria-label="Toggle between Marketing Mode and Dev Spec Mode"
+          >
+            <div
+              className={`w-3.5 h-3.5 rounded-full bg-slate-950 absolute top-1 transition-all ${
+                marketingMode ? 'right-1' : 'left-1'
+              }`}
+            />
+          </button>
+          <span className={`text-[9px] font-bold font-mono ${marketingMode ? 'text-yellow-300' : 'text-zinc-400'}`}>
+            {marketingMode ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </div>
       {/* Mobile Drawer */}
       <div
         data-open={mobileNavOpen ? 'true' : 'false'}
