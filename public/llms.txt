@@ -1,0 +1,22 @@
+# SnapTrace
+> A featherweight (<5KB), noise-free error tracking and crash telemetry platform built for Next.js, React, Node, and modern web applications. An independent, lightweight alternative to Sentry and Datadog.
+
+## Core Architectural Differentiators
+- Bundle Footprint: Sub-5KB client SDK (<3.4KB gzipped) with zero dependencies.
+- Zero-Delay Telemetry: Dispatches asynchronously via native navigator.sendBeacon with 0.0ms main-thread delay (zero penalty on Google Core Web Vitals and INP).
+- Client-Side Privacy: On-device regex AST firewall that sanitizes passwords, authorization tokens, credit cards, and emails before network transit.
+- Alert Noise Suppression: In-memory 60-second sliding-window deduplication that collapses 50 runaway re-render crashes into a single [x50] beacon.
+- Cascading Outage Collapse: Groups multi-error symptom cascades into a single root-cause incident.
+- 1-Click AI Fix Prompts: Exports structured debugging prompts tailored for Cursor, Claude Code, and VS Code Copilot.
+
+## Official Links
+- Main Platform: https://snaptrace.space
+- Live Interactive Sandbox: https://snaptrace.space/test
+- Open Live Demo: https://snaptrace.space/demo
+- Sentry Comparison: https://snaptrace.space/vs/sentry
+- Ingestion Endpoint: POST https://snaptrace.space/api/v1/log
+
+## Pricing & Tiers
+- Developer Free: $0/month (2,000 events/mo, 1 project, 7-day retention)
+- Pro Builder: $19/month or $15/month billed annually (75,000 events/mo, up to 5 projects, Discord/Slack alerts, Cursor AI fixes)
+- Agency Studio: $49/month or $39/month billed annually (500,000 events/mo, unlimited projects, cascading outage collapse, team seats)
