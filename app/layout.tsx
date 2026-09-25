@@ -53,15 +53,14 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  icons: {
+icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/icon.png', type: 'image/png', sizes: '192x192' },
-      { url: '/icon', type: 'image/png', sizes: '192x192' },
+      { url: '/icon.png?v=2', type: 'image/png', sizes: '192x192' },
+      { url: '/icon', sizes: 'any' },
     ],
+    shortcut: '/icon.png?v=2',
     apple: [
-      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icon', sizes: '192x192', type: 'image/png' },
+      { url: '/icon.png?v=2', sizes: '192x192', type: 'image/png' },
     ],
   },
   openGraph: {
