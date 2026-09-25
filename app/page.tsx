@@ -797,15 +797,24 @@ export default function WelcomeLandingPage() {
             <a href="#comparison" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white hidden xl:inline-block">Why Us</a>
           </nav>
 
-          {/* Right Action Group: ml-auto & shrink-0 guarantee it will NEVER be clipped */}
-          <div className="ml-auto flex shrink-0 items-center gap-3 font-mono">
-            <Link href="/login" className="text-[12.5px] font-medium text-slate-300 transition hover:bg-white/[0.05] hover:text-white px-2 py-1.5 rounded-lg hidden sm:inline-flex">
+   {/* Right Action Group: Sentry 3-Button Alignment (Sign in | Live Demo | CLAIM PRO PASS) */}
+          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2.5 font-mono">
+            <Link href="/login" className="text-[12px] sm:text-[12.5px] font-medium text-slate-300 transition hover:bg-white/[0.05] hover:text-white px-2 py-1.5 rounded-lg hidden sm:inline-flex">
               Sign in
             </Link>
 
+            {/* Sentry GET DEMO Style (Outline Button) */}
+            <Link
+              href="/demo"
+              className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-yellow-400/40 bg-yellow-400/[0.05] hover:border-yellow-400 hover:bg-yellow-400/15 text-yellow-300 px-3 py-1.5 text-[12px] font-bold transition shadow-sm shrink-0 whitespace-nowrap"
+            >
+              Live Demo
+            </Link>
+
+            {/* Sentry GET STARTED Style (Filled Gold Button) */}
             <Link
               href="/signup"
-              className="inline-flex min-h-[38px] shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-4 py-2 text-[12.5px] font-black text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_22px_-12px_rgba(250,204,21,0.8)] transition hover:brightness-[1.06]"
+              className="inline-flex min-h-[36px] sm:min-h-[38px] shrink-0 whitespace-nowrap items-center gap-1 sm:gap-1.5 rounded-xl bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3 sm:px-4 py-1.5 sm:py-2 text-[11.5px] sm:text-[12.5px] font-black text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_22px_-12px_rgba(250,204,21,0.8)] transition hover:brightness-[1.06]"
             >
               <span>CLAIM PRO PASS</span>
               <span>→</span>
@@ -819,9 +828,31 @@ export default function WelcomeLandingPage() {
               <IconMenu />
             </button>
           </div>
-        </div>
       </header>
-
+{/* SENTRY-STYLE FLOATING MARKETING MODE CARD (Matches Sentry Screenshot Exactly) */}
+      <div className="fixed top-20 right-4 sm:right-6 z-30 hidden sm:block">
+        <div className="bg-[#161228]/90 border border-purple-500/35 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1 font-mono">
+          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider select-none">
+            Marketing Mode
+          </span>
+          <button
+            onClick={toggleMarketingMode}
+            className={`w-11 h-5.5 rounded-full transition-colors relative cursor-pointer ${
+              marketingMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-slate-700'
+            }`}
+            title="Toggle between Marketing Mode and Dev Spec Mode"
+          >
+            <div
+              className={`w-3.5 h-3.5 rounded-full bg-slate-950 absolute top-1 transition-all ${
+                marketingMode ? 'right-1' : 'left-1'
+              }`}
+            />
+          </button>
+          <span className={`text-[9px] font-bold font-mono ${marketingMode ? 'text-yellow-300' : 'text-slate-400'}`}>
+            {marketingMode ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </div>
       {/* Mobile Drawer */}
       <div
         data-open={mobileNavOpen ? 'true' : 'false'}
