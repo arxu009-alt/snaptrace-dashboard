@@ -20,7 +20,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://snaptrace-dashboard.vercel.app'),
+  metadataBase: new URL('https://snaptrace.space'),
   title: {
     default: 'SnapTrace | The Featherweight Error Tracker & Sentry Alternative',
     template: '%s | SnapTrace',
@@ -56,16 +56,18 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '192x192' },
       { url: '/icon', type: 'image/png', sizes: '192x192' },
     ],
     apple: [
+      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon', sizes: '192x192', type: 'image/png' },
     ],
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://snaptrace-dashboard.vercel.app',
+    url: 'https://snaptrace.space',
     siteName: 'SnapTrace',
     title: 'SnapTrace | Code breaks, fix it in a snap',
     description:
@@ -105,7 +107,7 @@ export default function RootLayout({
       '@type': 'WebSite',
       name: 'SnapTrace',
       alternateName: ['SnapTrace Telemetry', 'SnapTrace APM'],
-      url: 'https://snaptrace-dashboard.vercel.app',
+      url: 'https://snaptrace.space',
     },
     {
       '@context': 'https://schema.org',
@@ -120,7 +122,7 @@ export default function RootLayout({
       },
       description:
         'Featherweight error tracking and crash telemetry platform with noise deduplication and BYOK AI diagnostics.',
-      url: 'https://snaptrace-dashboard.vercel.app',
+      url: 'https://snaptrace.space',
     },
   ];
 
