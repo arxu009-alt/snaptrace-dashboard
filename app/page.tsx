@@ -34,7 +34,7 @@ body {
   box-sizing: border-box;
 }
 section[id] {
-  scroll-margin-top: 115px;
+  scroll-margin-top: 80px;
 }
 .st-display { font-size: clamp(2.35rem, 1.15rem + 5vw, 4.75rem); line-height: 1.04; letter-spacing: -0.035em; font-weight: 700; }
 .st-h2 { font-size: clamp(1.65rem, 1.1rem + 2vw, 2.5rem); line-height: 1.14; letter-spacing: -0.025em; font-weight: 700; }
@@ -53,7 +53,7 @@ button, a { touch-action: manipulation; }
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
 }
-.st-cv { content-visibility: auto; contain-intrinsic-size: 1px 780px; }
+.st-cv { } { content-visibility: auto; contain-intrinsic-size: 1px 780px; }
 .st-card {
   background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.005) 100%), #0A0E1A;
   border: 1px solid rgba(255,255,255,0.08);
@@ -787,6 +787,13 @@ export default function WelcomeLandingPage() {
 
             <a href="#quickstart" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white">SDK setup</a>
             <a href="#pricing" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-yellow-400 font-bold text-yellow-300">Pricing</a>
+            <button
+              onClick={() => setShowFeedbackModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white cursor-pointer"
+            >
+              <span>Feedback</span>
+              <span className="hidden xl:inline font-mono text-[9px] bg-slate-800 px-1 py-0.2 rounded border border-slate-700 text-slate-400">⌘F</span>
+            </button>
             <a href="#comparison" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white hidden xl:inline-block">Why Us</a>
           </nav>
 
