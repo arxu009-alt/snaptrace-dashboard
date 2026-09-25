@@ -4,7 +4,7 @@ import React from 'react';
 
 export default function TelemetryBeamBackground() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="absolute inset-0 w-full max-w-full overflow-hidden pointer-events-none z-0">
       {/* 1. Precision Tech Matrix Grid (Linear & Supabase Style) */}
       <div
         className="absolute inset-0 opacity-[0.22]"
