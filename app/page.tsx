@@ -828,6 +828,7 @@ export default function WelcomeLandingPage() {
               <IconMenu />
             </button>
           </div>
+        </div>
       </header>
 {/* SENTRY-STYLE FLOATING MARKETING MODE CARD (Matches Sentry Screenshot Exactly) */}
       <div className="fixed top-20 right-4 sm:right-6 z-30 hidden sm:block">
