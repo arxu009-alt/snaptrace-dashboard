@@ -19,22 +19,22 @@ const SUPPORT_EMAIL = 'hello.snaptrace@gmail.com';
 
 const GLOBAL_CSS = `
 html {
-  overflow-x: clip;
+  overflow-x: hidden;
   max-width: 100%;
   width: 100%;
   scroll-behavior: smooth;
-  scroll-padding-top: 115px;
+  scroll-padding-top: 100px;
   box-sizing: border-box;
 }
 body {
-  overflow-x: clip;
+  overflow-x: hidden;
   max-width: 100%;
   width: 100%;
   position: relative;
   box-sizing: border-box;
 }
 section[id] {
-  scroll-margin-top: 80px;
+  scroll-margin-top: 100px;
 }
 .st-display { font-size: clamp(2.35rem, 1.15rem + 5vw, 4.75rem); line-height: 1.04; letter-spacing: -0.035em; font-weight: 700; }
 .st-h2 { font-size: clamp(1.65rem, 1.1rem + 2vw, 2.5rem); line-height: 1.14; letter-spacing: -0.025em; font-weight: 700; }
@@ -62,8 +62,8 @@ button, a { touch-action: manipulation; }
 }
 @media (hover: hover) {
   .st-card-hover:hover {
-    border-color: rgba(250,204,21,0.35);
-    box-shadow: inset 0 1px 1px 0 rgba(255,255,255,0.1), 0 28px 65px -20px rgba(0,0,0,0.95), 0 0 30px -10px rgba(250,204,21,0.15);
+    border-color: rgba(113,113,122,0.6);
+    box-shadow: inset 0 1px 1px 0 rgba(255,255,255,0.08), 0 24px 55px -20px rgba(0,0,0,0.9);
     transform: translateY(-2px);
   }
 }
@@ -610,7 +610,7 @@ export default function WelcomeLandingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const heroScriptSnippet = '<script src="https://snaptrace.space/snaptrace.js" data-api-key="sk_live_your_project_key" async></script>';
+  const heroScriptSnippet = '<script src="https://snaptrace.space/snaptrace.js" data-api-key="YOUR_KEY" async></script>';
 
   const handleCopyHeroScript = () => {
     navigator.clipboard.writeText(heroScriptSnippet);
@@ -702,11 +702,11 @@ export default function WelcomeLandingPage() {
         className={
           'sticky top-0 z-40 border-b transition-all duration-300 w-full ' +
           (scrolled
-            ? 'border-slate-800/90 bg-[#070B13]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_18px_40px_-30px_rgba(0,0,0,1)] backdrop-blur-xl'
-            : 'border-transparent bg-[#05070E]/70 backdrop-blur-md')
+            ? 'border-zinc-800/90 bg-zinc-950/95 shadow-[inset_0_-1px_0_rgba(255,255,255,0.04),0_8px_32px_-8px_rgba(0,0,0,0.8)] backdrop-blur-xl'
+            : 'border-transparent bg-zinc-950/80 backdrop-blur-md')
         }
       >
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link href="/" onClick={scrollToTop} className="flex shrink-0 items-center gap-2.5 rounded-md transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={true} />
             <span className="st-beta-pill">
@@ -715,38 +715,38 @@ export default function WelcomeLandingPage() {
             </span>
           </Link>
 
-          {/* Clean Nav: Never exceeds 350px width */}
-          <nav className="hidden items-center gap-1.5 text-[12.5px] font-medium text-slate-300 lg:flex font-mono">
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-0.5 text-[12.5px] font-medium text-zinc-400 lg:flex" aria-label="Main navigation">
             {/* Platform Dropdown */}
             <div className="relative" onMouseEnter={() => setOpenDropdown('platform')} onMouseLeave={() => setOpenDropdown(null)}>
-              <button className="inline-flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white">
+              <button className="inline-flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1.5 transition hover:bg-zinc-800/60 hover:text-zinc-100">
                 Platform
-                <IconChevron className={'h-3.5 w-3.5 text-slate-500 transition-transform duration-200 ' + (openDropdown === 'platform' ? 'rotate-180' : '')} />
+                <IconChevron className={'h-3.5 w-3.5 text-zinc-600 transition-transform duration-200 ' + (openDropdown === 'platform' ? 'rotate-180' : '')} />
               </button>
 
               {openDropdown === 'platform' && (
                 <div className="absolute left-0 top-full z-50 pt-2">
-                  <div className="st-card w-[350px] max-w-[calc(100vw-2rem)] rounded-xl p-2.5 backdrop-blur-xl font-sans">
-                    <div className="px-3 pb-2 pt-1 font-mono text-[10px] tracking-[0.12em] text-yellow-400 font-bold">HIGH-THROUGHPUT ENGINE</div>
-                    <a href="#features" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-white/[0.05]">
-                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-400"><IconFeather /></span>
+                  <div className="st-card w-[340px] max-w-[calc(100vw-2rem)] rounded-xl p-2 backdrop-blur-xl">
+                    <div className="px-3 pb-1.5 pt-2 font-mono text-[10px] tracking-[0.12em] text-zinc-500 font-semibold uppercase">Engine</div>
+                    <a href="#features" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-zinc-800/50">
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-400"><IconFeather className="h-3.5 w-3.5" /></span>
                       <span>
-                        <span className="block text-[13px] font-semibold text-white">&lt;3.4KB Telemetry SDK</span>
-                        <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-400">Zero Core Web Vitals delay & async beacon transport.</span>
+                        <span className="block text-[12.5px] font-semibold text-zinc-100">&lt;3.4KB Telemetry SDK</span>
+                        <span className="mt-0.5 block text-[11px] leading-relaxed text-zinc-500">Zero CWV delay & async beacon transport.</span>
                       </span>
                     </a>
-                    <a href="#grouping" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-white/[0.05]">
-                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-yellow-400/20 bg-yellow-400/10 text-yellow-300"><IconTarget /></span>
+                    <a href="#grouping" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-zinc-800/50">
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-yellow-400/20 bg-yellow-400/10 text-yellow-300"><IconTarget className="h-3.5 w-3.5" /></span>
                       <span>
-                        <span className="block text-[13px] font-semibold text-white">Sunday 2 AM Outage Collapse</span>
-                        <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-400">Collapses 500 cascade crashes into 1 thread.</span>
+                        <span className="block text-[12.5px] font-semibold text-zinc-100">Outage Collapse Engine</span>
+                        <span className="mt-0.5 block text-[11px] leading-relaxed text-zinc-500">Collapses 500 cascade crashes into 1 root thread.</span>
                       </span>
                     </a>
-                    <a href="#pii" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-white/[0.05]">
-                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-purple-500/20 bg-purple-500/10 text-purple-300"><IconLock /></span>
+                    <a href="#pii" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-zinc-800/50">
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-purple-500/20 bg-purple-500/10 text-purple-300"><IconLock className="h-3.5 w-3.5" /></span>
                       <span>
-                        <span className="block text-[13px] font-semibold text-white">Client-Side PII Firewall</span>
-                        <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-400">On-device regex AST scrubs tokens before transmission.</span>
+                        <span className="block text-[12.5px] font-semibold text-zinc-100">Client-Side PII Firewall</span>
+                        <span className="mt-0.5 block text-[11px] leading-relaxed text-zinc-500">On-device regex AST before transmission.</span>
                       </span>
                     </a>
                   </div>
@@ -754,30 +754,30 @@ export default function WelcomeLandingPage() {
               )}
             </div>
 
-            {/* AI Diagnostics Dropdown */}
+            {/* AI Copilot Dropdown */}
             <div className="relative" onMouseEnter={() => setOpenDropdown('ai')} onMouseLeave={() => setOpenDropdown(null)}>
-              <button className="inline-flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 text-purple-200 transition hover:bg-white/[0.05] hover:text-white">
-                <IconSparkle className="h-3.5 w-3.5 text-purple-300" />
+              <button className="inline-flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1.5 transition hover:bg-zinc-800/60 hover:text-zinc-100">
+                <IconSparkle className="h-3.5 w-3.5 text-purple-400" />
                 AI Copilot
-                <IconChevron className={'h-3.5 w-3.5 text-purple-400/70 transition-transform duration-200 ' + (openDropdown === 'ai' ? 'rotate-180' : '')} />
+                <IconChevron className={'h-3.5 w-3.5 text-zinc-600 transition-transform duration-200 ' + (openDropdown === 'ai' ? 'rotate-180' : '')} />
               </button>
 
               {openDropdown === 'ai' && (
                 <div className="absolute left-0 top-full z-50 pt-2">
-                  <div className="st-card w-[370px] max-w-[calc(100vw-2rem)] rounded-xl p-2.5 backdrop-blur-xl font-sans">
-                    <div className="px-3 pb-2 pt-1 font-mono text-[10px] tracking-[0.12em] text-purple-300 font-bold">AUTONOMOUS DIAGNOSTICS</div>
-                    <a href="#byok" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-white/[0.05]">
-                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-blue-400/20 bg-blue-500/10"><MarkGemini className="h-5 w-5" /></span>
+                  <div className="st-card w-[340px] max-w-[calc(100vw-2rem)] rounded-xl p-2 backdrop-blur-xl">
+                    <div className="px-3 pb-1.5 pt-2 font-mono text-[10px] tracking-[0.12em] text-zinc-500 font-semibold uppercase">Diagnostics</div>
+                    <a href="#byok" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-zinc-800/50">
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-blue-400/20 bg-blue-500/10"><MarkGemini className="h-4 w-4" /></span>
                       <span>
-                        <span className="block text-[13px] font-semibold text-white">BYOK AI Hub (Gemini & OpenAI)</span>
-                        <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-400">Bring your own key for $0 markup & on-device privacy.</span>
+                        <span className="block text-[12.5px] font-semibold text-zinc-100">BYOK AI Hub</span>
+                        <span className="mt-0.5 block text-[11px] leading-relaxed text-zinc-500">Gemini & OpenAI, $0 markup, on-device privacy.</span>
                       </span>
                     </a>
-                    <a href="#ai-agent" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-white/[0.05]">
-                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-purple-400/20 bg-purple-500/10 text-purple-300"><MarkCursor /></span>
+                    <a href="#ai-agent" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-zinc-800/50">
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-purple-400/20 bg-purple-500/10 text-purple-300"><MarkCursor className="h-3.5 w-3.5" /></span>
                       <span>
-                        <span className="block text-[13px] font-semibold text-white">1-Click Cursor & Claude Export</span>
-                        <span className="mt-0.5 block text-[11.5px] leading-relaxed text-slate-400">Formatted markdown prompt with stack trace for local agent fixes.</span>
+                        <span className="block text-[12.5px] font-semibold text-zinc-100">1-Click Cursor & Claude Export</span>
+                        <span className="mt-0.5 block text-[11px] leading-relaxed text-zinc-500">Formatted stack trace prompt for local agent fixes.</span>
                       </span>
                     </a>
                   </div>
@@ -785,75 +785,55 @@ export default function WelcomeLandingPage() {
               )}
             </div>
 
-            <a href="#quickstart" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white">SDK setup</a>
-            <a href="#pricing" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-yellow-400 font-bold text-yellow-300">Pricing</a>
-            <button
-              onClick={() => setShowFeedbackModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white cursor-pointer"
-            >
-              <span>Feedback</span>
-              <span className="hidden xl:inline font-mono text-[9px] bg-slate-800 px-1 py-0.2 rounded border border-slate-700 text-slate-400">⌘F</span>
-            </button>
-            <a href="#comparison" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white hidden xl:inline-block">Why Us</a>
+            <a href="#quickstart" className="rounded-md px-2.5 py-1.5 transition hover:bg-zinc-800/60 hover:text-zinc-100">Docs / SDK</a>
+            <a href="#comparison" className="rounded-md px-2.5 py-1.5 transition hover:bg-zinc-800/60 hover:text-zinc-100">Why SnapTrace</a>
+            <a href="#pricing" className="rounded-md px-2.5 py-1.5 transition hover:bg-zinc-800/60 hover:text-zinc-100">Pricing</a>
+            <a href="#faq" className="rounded-md px-2.5 py-1.5 transition hover:bg-zinc-800/60 hover:text-zinc-100">FAQ</a>
           </nav>
 
-   {/* Right Action Group: Sentry 3-Button Alignment (Sign in | Live Demo | CLAIM PRO PASS) */}
-          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2.5 font-mono">
-            <Link href="/login" className="text-[12px] sm:text-[12.5px] font-medium text-slate-300 transition hover:bg-white/[0.05] hover:text-white px-2 py-1.5 rounded-lg hidden sm:inline-flex">
-              Sign in
+   {/* Right Action Group */}
+          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2.5">
+            <Link
+              href="/login"
+              className="hidden sm:inline-flex text-[12.5px] font-medium text-zinc-400 transition hover:text-zinc-100 px-2.5 py-1.5 rounded-md"
+            >
+              Sign In
             </Link>
 
-            {/* Sentry GET DEMO Style (Outline Button) */}
             <Link
               href="/demo"
-              className="hidden sm:inline-flex items-center gap-1 rounded-xl border border-yellow-400/40 bg-yellow-400/[0.05] hover:border-yellow-400 hover:bg-yellow-400/15 text-yellow-300 px-3 py-1.5 text-[12px] font-bold transition shadow-sm shrink-0 whitespace-nowrap"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-900/60 hover:border-zinc-600 hover:bg-zinc-800/60 text-zinc-200 px-3 py-1.5 text-[12px] font-medium transition shrink-0 whitespace-nowrap"
             >
               Live Demo
             </Link>
 
-            {/* Sentry GET STARTED Style (Filled Gold Button) */}
             <Link
               href="/signup"
-              className="inline-flex min-h-[36px] sm:min-h-[38px] shrink-0 whitespace-nowrap items-center gap-1 sm:gap-1.5 rounded-xl bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3 sm:px-4 py-1.5 sm:py-2 text-[11.5px] sm:text-[12.5px] font-black text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_22px_-12px_rgba(250,204,21,0.8)] transition hover:brightness-[1.06]"
+              className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 px-3.5 py-1.5 text-[12px] font-semibold transition"
             >
-              <span>CLAIM PRO PASS</span>
-              <span>→</span>
+              <span>Claim Beta Pass</span>
+              <span aria-hidden="true">→</span>
             </Link>
 
             <button
               onClick={() => setMobileNavOpen(true)}
               aria-label="Open navigation"
-              className="ml-1 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:text-white lg:hidden"
+              className="ml-1 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/60 text-zinc-400 transition hover:text-zinc-100 lg:hidden"
             >
               <IconMenu />
             </button>
           </div>
         </div>
       </header>
-{/* SENTRY-STYLE FLOATING MARKETING MODE CARD (Positioned safely below header) */}
-      <div className="fixed top-[118px] right-4 sm:right-6 z-30 hidden sm:block">
-        <div className="bg-[#161228]/95 border border-purple-500/35 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1 font-mono">
-          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider select-none">
-            Marketing Mode
-          </span>
-          <button
-            onClick={toggleMarketingMode}
-            className={`w-11 h-5.5 rounded-full transition-colors relative cursor-pointer ${
-              marketingMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-slate-700'
-            }`}
-            title="Toggle between Marketing Mode and Dev Spec Mode"
-          >
-            <div
-              className={`w-3.5 h-3.5 rounded-full bg-slate-950 absolute top-1 transition-all ${
-                marketingMode ? 'right-1' : 'left-1'
-              }`}
-            />
-          </button>
-          <span className={`text-[9px] font-bold font-mono ${marketingMode ? 'text-yellow-300' : 'text-slate-400'}`}>
-            {marketingMode ? 'ON' : 'OFF'}
-          </span>
-        </div>
-      </div>
+{/* Dev Mode toggle — subtle icon button, not visible in consumer navbar */}
+      <button
+        onClick={toggleMarketingMode}
+        title={marketingMode ? 'Switch to Dev Spec Mode' : 'Back to Marketing Site'}
+        aria-label={marketingMode ? 'Switch to Dev Spec Mode' : 'Back to Marketing Site'}
+        className="fixed bottom-[5.5rem] sm:bottom-[1.75rem] right-[4.25rem] z-30 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-zinc-800/70 bg-zinc-900/80 text-zinc-600 shadow-lg backdrop-blur-md transition hover:border-zinc-700 hover:text-zinc-300"
+      >
+        <IconTerminal className="h-4 w-4" />
+      </button>
       {/* Mobile Drawer */}
       <div
         data-open={mobileNavOpen ? 'true' : 'false'}
@@ -902,15 +882,15 @@ export default function WelcomeLandingPage() {
             <Link href="/demo" onClick={() => setMobileNavOpen(false)} className="st-h3 py-3.5 text-slate-200">Live Demo</Link>
           </nav>
 
-          <div className="st-safe-b space-y-3 border-t border-slate-800/70 px-6 pt-5">
-            <button onClick={toggleMarketingMode} className={BTN_SECONDARY + ' w-full cursor-pointer font-mono'}>
-              <IconTerminal className={'h-4 w-4 ' + (marketingMode ? 'text-slate-400' : 'text-emerald-400')} />
-              {marketingMode ? 'Open Raw Dev Terminal' : 'Back to Marketing Site'}
-            </button>
+          <div className="st-safe-b space-y-3 border-t border-zinc-800/70 px-6 pt-5">
             <div className="flex gap-3">
-              <Link href="/login" onClick={() => setMobileNavOpen(false)} className={BTN_SECONDARY + ' flex-1'}>Sign in</Link>
-              <Link href="/signup" onClick={() => setMobileNavOpen(false)} className={BTN_PRIMARY + ' flex-1'}>Get started</Link>
+              <Link href="/login" onClick={() => setMobileNavOpen(false)} className={BTN_SECONDARY + ' flex-1'}>Sign In</Link>
+              <Link href="/signup" onClick={() => setMobileNavOpen(false)} className={BTN_PRIMARY + ' flex-1'}>Get Started</Link>
             </div>
+            <button onClick={() => { setMobileNavOpen(false); toggleMarketingMode(); }} className="w-full flex items-center justify-center gap-2 rounded-lg border border-zinc-800/70 bg-zinc-900/60 text-zinc-500 py-2 text-[11px] font-mono transition hover:text-zinc-300 cursor-pointer">
+              <IconTerminal className="h-3.5 w-3.5" />
+              {marketingMode ? 'Dev Spec Mode' : 'Marketing Site'}
+            </button>
           </div>
         </div>
       </div>
@@ -1080,33 +1060,39 @@ export default function WelcomeLandingPage() {
                   </span>
                 </h1>
 
-                <p className="st-lead text-slate-300 max-w-2xl mx-auto">
-                  SnapTrace collapses cascading multi-error outages into a single root-cause incident in under 3.4KB, with on-device PII masking and 1-click AI code fixes for Cursor and Claude.
+                <p className="st-lead text-zinc-300 max-w-2xl mx-auto">
+                  SnapTrace collapses cascading multi-error outages into a single root-cause incident in &lt;3.4KB, with on-device PII masking and instant BYOK AI diffs.
                 </p>
 
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <Link href="/signup" className={BTN_PRIMARY + ' w-full sm:w-auto font-mono'}>
-                    <span>Claim Lifetime Pro Access ($0 Forever)</span>
+                  <Link
+                    href="/signup"
+                    className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-semibold bg-zinc-100 hover:bg-white text-zinc-950 transition-all duration-200 active:scale-[0.98] w-full sm:w-auto"
+                  >
+                    <span>Start Free (2,000 Events/mo)</span>
                     <IconArrow className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </Link>
-                  <Link href="/demo" className={BTN_SECONDARY + ' w-full sm:w-auto font-mono'}>
-                    <IconTerminal className="h-4 w-4 text-yellow-300" />
-                    Launch Interactive Demo
+                  <Link
+                    href="/demo"
+                    className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-800 text-zinc-200 px-5 py-3 text-[13px] font-medium transition-all duration-200 active:scale-[0.98] w-full sm:w-auto"
+                  >
+                    <IconTerminal className="h-4 w-4 text-zinc-400" />
+                    Open Live Demo (No Signup)
                   </Link>
                 </div>
 
                 <div className="pt-4 max-w-xl mx-auto w-full">
-                  <div className="st-card flex items-center gap-2 sm:gap-3 rounded-xl p-2 pl-3 sm:pl-3.5 border-slate-800 w-full min-w-0 max-w-full">
-                    <IconCode className="h-4 w-4 shrink-0 text-yellow-400/80 hidden sm:block" />
-                    <code className="flex-1 min-w-0 truncate text-left font-mono text-[11px] sm:text-[11.5px] text-slate-400">
-                      &lt;script src=&quot;.../snaptrace.js&quot; data-api-key=&quot;<span className="text-yellow-300 font-bold">YOUR_KEY</span>&quot; async&gt;&lt;/script&gt;
+                  <div className="flex items-center gap-2 sm:gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-2 pl-3 sm:pl-3.5 w-full min-w-0 max-w-full">
+                    <IconCode className="h-4 w-4 shrink-0 text-zinc-600 hidden sm:block" />
+                    <code className="flex-1 min-w-0 truncate text-left font-mono text-[11px] sm:text-[11.5px] text-zinc-400">
+                      &lt;script src=&quot;https://snaptrace.space/snaptrace.js&quot; data-api-key=&quot;<span className="text-yellow-300 font-bold">YOUR_KEY</span>&quot; async&gt;&lt;/script&gt;
                     </code>
                     <button onClick={handleCopyHeroScript} className={BTN_GHOST_SM + ' shrink-0 cursor-pointer font-mono'}>
                       {copiedHeroScript ? <IconCheck className="h-3.5 w-3.5 text-emerald-400" /> : <IconCopy className="h-3.5 w-3.5" />}
                       {copiedHeroScript ? 'Copied' : 'Copy'}
                     </button>
                   </div>
-                  <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[11px] text-slate-500">
+                  <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[11px] text-zinc-500">
                     <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />Drop into HTML head</span>
                     <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />0.0ms hydration penalty</span>
                     <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />&lt;3.4KB gzipped</span>
