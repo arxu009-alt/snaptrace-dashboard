@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
@@ -475,6 +475,15 @@ export default function WelcomeLandingPage() {
   const [activeIdeTab, setActiveIdeTab] = useState<'cursor' | 'claude' | 'vscode'>('cursor');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [heroMouse, setHeroMouse] = useState({ x: 0, y: 0 });
+  const heroRef = useRef<HTMLElement>(null);
+
+  const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = heroRef.current?.getBoundingClientRect();
+    if (rect) {
+      setHeroMouse({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
+  }, []);
 
   const [activeTriageTab, setActiveTriageTab] = useState<TriageTab>('stack');
   const [simulatedResolved, setSimulatedResolved] = useState(false);
@@ -659,7 +668,7 @@ export default function WelcomeLandingPage() {
   }
 
   return (
-    <div className="relative min-h-screen w-full max-w-full overflow-x-clip bg-[#05070E] font-sans text-slate-100 antialiased selection:bg-yellow-400 selection:text-slate-950">
+    <div className="relative min-h-screen w-full max-w-full overflow-x-clip bg-[#05050A] font-sans text-slate-100 antialiased selection:bg-yellow-400 selection:text-slate-950">
       <style dangerouslySetInnerHTML={{ __html: GLOBAL_CSS }} />
 
       {/* ANNOUNCEMENT BAR */}
@@ -791,7 +800,31 @@ export default function WelcomeLandingPage() {
             <a href="#faq" className="rounded-md px-2.5 py-1.5 transition hover:bg-zinc-800/60 hover:text-zinc-100">FAQ</a>
           </nav>
 
-   {/* Right Action Group */}
+          {/* Dev / UI Mode segmented pill — clean, inline, not floating */}
+          <div className="hidden xl:flex items-center border border-zinc-800 bg-zinc-900/80 rounded-lg p-0.5 font-mono text-[11px] shrink-0 ml-1">
+            <button
+              onClick={() => { if (!marketingMode) toggleMarketingMode(); }}
+              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-1 transition-all ${
+                marketingMode ? 'bg-zinc-800 text-zinc-100 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+              title="Marketing Site"
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" className="h-3 w-3" aria-hidden="true"><path d="M2 3.5h12M2 8h12M2 12.5h7" strokeLinecap="round" /></svg>
+              UI
+            </button>
+            <button
+              onClick={() => { if (marketingMode) toggleMarketingMode(); }}
+              className={`inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-1 transition-all ${
+                !marketingMode ? 'bg-zinc-800 text-emerald-300 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+              title="Dev Spec Mode"
+            >
+              <IconTerminal className="h-3 w-3" />
+              Dev
+            </button>
+          </div>
+
+          {/* Right Action Group */}
           <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-2.5">
             <Link
               href="/login"
@@ -825,31 +858,7 @@ export default function WelcomeLandingPage() {
           </div>
         </div>
       </header>
-      {/* SENTRY-STYLE FLOATING MARKETING MODE CARD (Positioned safely below header) */}
-      <div className="fixed top-[74px] sm:top-[80px] right-4 sm:right-6 z-30 hidden sm:block">
-        <div className="bg-[#0f1422]/95 border border-zinc-700/60 hover:border-yellow-400/40 rounded-2xl p-2 px-3 shadow-2xl backdrop-blur-xl flex flex-col items-center gap-1 font-mono transition-colors">
-          <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider select-none">
-            Marketing Mode
-          </span>
-          <button
-            onClick={toggleMarketingMode}
-            className={`w-11 h-5.5 rounded-full transition-colors relative cursor-pointer ${
-              marketingMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-zinc-700'
-            }`}
-            title="Toggle between Marketing Mode and Dev Spec Mode"
-            aria-label="Toggle between Marketing Mode and Dev Spec Mode"
-          >
-            <div
-              className={`w-3.5 h-3.5 rounded-full bg-slate-950 absolute top-1 transition-all ${
-                marketingMode ? 'right-1' : 'left-1'
-              }`}
-            />
-          </button>
-          <span className={`text-[9px] font-bold font-mono ${marketingMode ? 'text-yellow-300' : 'text-zinc-400'}`}>
-            {marketingMode ? 'ON' : 'OFF'}
-          </span>
-        </div>
-      </div>
+      {/* Marketing Mode pill now lives inside the header — no floating card */}
       {/* Mobile Drawer */}
       <div
         data-open={mobileNavOpen ? 'true' : 'false'}
@@ -1051,11 +1060,22 @@ export default function WelcomeLandingPage() {
         /* ======================== VIEW 2: MARKETING SITE ======================== */
         <>
           {/* 3. HERO SECTION */}
-          <section className="st-grain relative overflow-hidden pb-14 pt-12 sm:pb-20 sm:pt-16">
+          <section
+              ref={heroRef}
+              onMouseMove={handleHeroMouseMove}
+              className="st-grain relative overflow-hidden pb-14 pt-12 sm:pb-20 sm:pt-16"
+            >
             <TelemetryBeamBackground />
             <div className="st-grid pointer-events-none absolute inset-0" />
+            {/* Vercel-style mouse-follow spotlight */}
+            <div
+              className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-300"
+              style={{
+                background: `radial-gradient(650px circle at ${heroMouse.x}px ${heroMouse.y}px, rgba(250,204,21,0.08), rgba(139,92,246,0.03), transparent 70%)`,
+              }}
+            />
             <div className="pointer-events-none absolute inset-0 overflow-hidden w-full max-w-full">
-              <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(250,204,21,0.12),rgba(147,51,234,0.08),transparent)] blur-[110px]" />
+              <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(250,204,21,0.10),rgba(147,51,234,0.06),transparent)] blur-[110px]" />
             </div>
 
             <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6">
@@ -1077,7 +1097,7 @@ export default function WelcomeLandingPage() {
                 </h1>
 
                 <p className="st-lead text-zinc-300 max-w-2xl mx-auto">
-                  SnapTrace collapses cascading multi-error outages into a single root-cause incident in &lt;3.4KB, with on-device PII masking and instant BYOK AI diffs.
+                  SnapTrace collapses cascading multi-error outages into a single root-cause incident in under 3.4KB, with on-device PII masking and instant BYOK AI code fixes.
                 </p>
 
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -1146,13 +1166,15 @@ export default function WelcomeLandingPage() {
                       <button
                         onClick={() => setSimulatedResolved(!simulatedResolved)}
                         className={
-                          'px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 border ' +
+                          'px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 border ' +
                           (simulatedResolved
                             ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                             : 'bg-yellow-400/15 text-yellow-300 border-yellow-400/30 hover:bg-yellow-400/25')
                         }
                       >
-                        {simulatedResolved ? '✓ Resolved' : '⚡ Simulate AI Resolution'}
+                        {simulatedResolved
+                          ? <><IconCheck className="h-3.5 w-3.5" /> Resolved</>
+                          : <><IconBolt className="h-3.5 w-3.5" /> Simulate AI Resolution</>}
                       </button>
                     </div>
                   </div>
@@ -1184,15 +1206,17 @@ export default function WelcomeLandingPage() {
                           </button>
                           <button
                             onClick={() => setActiveTriageTab('pii')}
-                            className={'px-3 py-1.5 rounded-lg font-bold transition cursor-pointer whitespace-nowrap ' + (activeTriageTab === 'pii' ? 'bg-slate-800 text-emerald-300 border border-emerald-500/30' : 'text-slate-400 hover:text-white')}
+                            className={'px-3 py-1.5 rounded-lg font-bold transition cursor-pointer whitespace-nowrap inline-flex items-center gap-1.5 ' + (activeTriageTab === 'pii' ? 'bg-slate-800 text-emerald-300 border border-emerald-500/30' : 'text-slate-400 hover:text-white')}
                           >
-                            🔒 PII Scrubbing
+                            <IconLock className="h-3 w-3" />
+                            PII Scrubbing
                           </button>
                           <button
                             onClick={() => setActiveTriageTab('aifix')}
-                            className={'px-3 py-1.5 rounded-lg font-bold transition cursor-pointer whitespace-nowrap ' + (activeTriageTab === 'aifix' ? 'bg-purple-900/40 text-purple-300 border border-purple-500/40' : 'text-purple-400 hover:text-purple-200')}
+                            className={'px-3 py-1.5 rounded-lg font-bold transition cursor-pointer whitespace-nowrap inline-flex items-center gap-1.5 ' + (activeTriageTab === 'aifix' ? 'bg-purple-900/40 text-purple-300 border border-purple-500/40' : 'text-purple-400 hover:text-purple-200')}
                           >
-                            ✨ BYOK AI Patch
+                            <IconSparkle className="h-3 w-3" />
+                            BYOK AI Patch
                           </button>
                         </div>
 
@@ -1598,7 +1622,7 @@ export default function WelcomeLandingPage() {
                     </div>
                     <div className="p-2.5 bg-[#05070E] rounded-xl border border-slate-800 font-mono text-[11px] text-slate-400 flex items-center justify-between">
                       <span>Model: <strong className="text-white">gemini-2.5-flash-lite</strong></span>
-                      <span className="text-emerald-400 font-bold">⚡ ~180ms</span>
+                      <span className="inline-flex items-center gap-1 text-emerald-400 font-bold"><IconBolt className="h-3 w-3" /> ~180ms</span>
                     </div>
                   </div>
 
@@ -1676,9 +1700,11 @@ export default function WelcomeLandingPage() {
                 </SmoothReveal>
               </div>
 
-              <div className="p-4.5 rounded-2xl bg-[#0B101D] border border-yellow-400/20 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs">
+              <div className="p-4 rounded-2xl bg-[#0B101D] border border-yellow-400/20 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs">
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">🛡️</span>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-yellow-400/20 bg-yellow-400/[0.08] text-yellow-300">
+                    <IconShield className="h-4 w-4" />
+                  </span>
                   <div>
                     <strong className="text-white">Zero-Trust Local Key Storage Guarantee:</strong>
                     <span className="text-slate-400 block sm:inline sm:ml-1">
@@ -1877,8 +1903,8 @@ export default function WelcomeLandingPage() {
                           (billingInterval === 'annual' ? 'bg-slate-950/80 text-yellow-300' : 'bg-slate-800 text-slate-400')
                         }
                       >
-                        <span className="inline sm:hidden">Save 20% ⚡</span>
-                        <span className="hidden sm:inline">Save 20% + 2 Mo Free ⚡</span>
+                        <span className="inline sm:hidden">Save 20%</span>
+                        <span className="hidden sm:inline">Save 20% + 2 Mo Free</span>
                       </span>
                     </button>
                   </div>
@@ -2318,10 +2344,10 @@ export default function WelcomeLandingPage() {
               <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Category</span>
               <div className="grid grid-cols-2 gap-1.5 text-[11px]">
                 {[
-                  { id: 'feature', label: '💡 Feature Request' },
-                  { id: 'bug', label: '🐞 Bug Report' },
-                  { id: 'ux', label: '⚡ Developer UX' },
-                  { id: 'general', label: '💬 General Vibe' },
+                  { id: 'feature', label: 'Feature Request' },
+                  { id: 'bug', label: 'Bug Report' },
+                  { id: 'ux', label: 'Developer UX' },
+                  { id: 'general', label: 'General Feedback' },
                 ].map((cat: { id: string; label: string }) => (
                   <button
                     type="button"
