@@ -697,35 +697,36 @@ export default function WelcomeLandingPage() {
         )}
       </div>
 
-      {/* HEADER */}
+     {/* HEADER */}
       <header
         className={
-          'sticky top-0 z-40 border-b transition-all duration-300 ' +
+          'sticky top-0 z-40 border-b transition-all duration-300 w-full ' +
           (scrolled
             ? 'border-slate-800/90 bg-[#070B13]/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_18px_40px_-30px_rgba(0,0,0,1)] backdrop-blur-xl'
             : 'border-transparent bg-[#05070E]/70 backdrop-blur-md')
         }
       >
-        <div className="mx-auto flex h-16 w-full max-w-7xl xl:max-w-[1400px] items-center justify-between gap-2 xl:gap-6 px-3 sm:px-6">
-          <Link href="/" onClick={scrollToTop} className="flex shrink-0 items-center gap-2 rounded-md transition hover:opacity-90">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+          <Link href="/" onClick={scrollToTop} className="flex shrink-0 items-center gap-2.5 rounded-md transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={true} />
-            <span className="st-beta-pill shrink-0">
+            <span className="st-beta-pill">
               <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
               BETA
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-0.5 xl:gap-1 text-xs xl:text-[13px] font-medium text-slate-300 xl:flex font-mono">
+          {/* Clean Nav: Never exceeds 350px width */}
+          <nav className="hidden items-center gap-1.5 text-[12.5px] font-medium text-slate-300 lg:flex font-mono">
             {/* Platform Dropdown */}
             <div className="relative" onMouseEnter={() => setOpenDropdown('platform')} onMouseLeave={() => setOpenDropdown(null)}>
-              <button className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white">
+              <button className="inline-flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white">
                 Platform
                 <IconChevron className={'h-3.5 w-3.5 text-slate-500 transition-transform duration-200 ' + (openDropdown === 'platform' ? 'rotate-180' : '')} />
               </button>
 
               {openDropdown === 'platform' && (
                 <div className="absolute left-0 top-full z-50 pt-2">
-                  <div className="st-card w-[350px] rounded-xl p-2.5 backdrop-blur-xl font-sans">
+                  <div className="st-card w-[350px] max-w-[calc(100vw-2rem)] rounded-xl p-2.5 backdrop-blur-xl font-sans">
                     <div className="px-3 pb-2 pt-1 font-mono text-[10px] tracking-[0.12em] text-yellow-400 font-bold">HIGH-THROUGHPUT ENGINE</div>
                     <a href="#features" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-white/[0.05]">
                       <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-400"><IconFeather /></span>
@@ -755,7 +756,7 @@ export default function WelcomeLandingPage() {
 
             {/* AI Diagnostics Dropdown */}
             <div className="relative" onMouseEnter={() => setOpenDropdown('ai')} onMouseLeave={() => setOpenDropdown(null)}>
-              <button className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 text-purple-200 transition hover:bg-white/[0.05] hover:text-white">
+              <button className="inline-flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 text-purple-200 transition hover:bg-white/[0.05] hover:text-white">
                 <IconSparkle className="h-3.5 w-3.5 text-purple-300" />
                 AI Copilot
                 <IconChevron className={'h-3.5 w-3.5 text-purple-400/70 transition-transform duration-200 ' + (openDropdown === 'ai' ? 'rotate-180' : '')} />
@@ -763,7 +764,7 @@ export default function WelcomeLandingPage() {
 
               {openDropdown === 'ai' && (
                 <div className="absolute left-0 top-full z-50 pt-2">
-                  <div className="st-card w-[370px] rounded-xl p-2.5 backdrop-blur-xl font-sans">
+                  <div className="st-card w-[370px] max-w-[calc(100vw-2rem)] rounded-xl p-2.5 backdrop-blur-xl font-sans">
                     <div className="px-3 pb-2 pt-1 font-mono text-[10px] tracking-[0.12em] text-purple-300 font-bold">AUTONOMOUS DIAGNOSTICS</div>
                     <a href="#byok" className="flex items-start gap-3 rounded-lg p-2.5 transition hover:bg-white/[0.05]">
                       <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-blue-400/20 bg-blue-500/10"><MarkGemini className="h-5 w-5" /></span>
@@ -784,53 +785,29 @@ export default function WelcomeLandingPage() {
               )}
             </div>
 
-            <a href="#quickstart" className="rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white">SDK setup</a>
-            <a href="#comparison" className="rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white">Why SnapTrace</a>
-            <a href="#pricing" className="rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-yellow-400 font-bold text-yellow-300">Pricing</a>
-            <button
-              onClick={() => setShowFeedbackModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white cursor-pointer"
-            >
-              Feedback
-              <span className="hidden xl:inline font-mono text-[9px] bg-slate-800 px-1 py-0.2 rounded border border-slate-700 text-slate-400">⌘F</span>
-            </button>
-            <a href="#faq" className="rounded-lg px-2.5 xl:px-3 py-1.5 xl:py-2 transition hover:bg-white/[0.05] hover:text-white">FAQ</a>
+            <a href="#quickstart" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white">SDK setup</a>
+            <a href="#pricing" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-yellow-400 font-bold text-yellow-300">Pricing</a>
+            <a href="#comparison" className="rounded-lg px-2.5 py-1.5 transition hover:bg-white/[0.05] hover:text-white hidden xl:inline-block">Why Us</a>
           </nav>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 font-mono">
-            <button
-              onClick={toggleMarketingMode}
-              title="Switch between the marketing site and the developer terminal"
-              className="hidden cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 font-mono text-[11px] text-slate-300 transition hover:border-white/20 hover:text-white xl:inline-flex"
-            >
-              <IconTerminal className={'h-3.5 w-3.5 ' + (marketingMode ? 'text-slate-500' : 'text-emerald-400')} />
-              <span className="hidden 2xl:inline">{marketingMode ? 'Raw Dev Mode' : 'Marketing Site'}</span>
-              <span className={'relative h-4 w-7 rounded-full transition-colors ' + (marketingMode ? 'bg-slate-700' : 'bg-emerald-500/80')}>
-                <span className={'absolute top-0.5 h-3 w-3 rounded-full bg-[#05070E] transition-all ' + (marketingMode ? 'left-0.5' : 'left-3.5')} />
-              </span>
-            </button>
-
-            <Link href="/login" className="hidden rounded-lg px-2.5 xl:px-3 py-1.5 text-[12.5px] font-medium text-slate-300 transition hover:bg-white/[0.05] hover:text-white sm:inline-flex">
+          {/* Right Action Group: ml-auto & shrink-0 guarantee it will NEVER be clipped */}
+          <div className="ml-auto flex shrink-0 items-center gap-3 font-mono">
+            <Link href="/login" className="text-[12.5px] font-medium text-slate-300 transition hover:bg-white/[0.05] hover:text-white px-2 py-1.5 rounded-lg hidden sm:inline-flex">
               Sign in
-            </Link>
-
-            <Link href="/demo" className="hidden items-center gap-1.5 rounded-xl border border-yellow-400/35 bg-yellow-400/[0.05] px-3 py-1.5 text-[12px] font-bold text-yellow-300 transition hover:border-yellow-400 hover:bg-yellow-400/10 md:inline-flex shadow-sm whitespace-nowrap">
-              Live Demo
             </Link>
 
             <Link
               href="/signup"
-              className="inline-flex min-h-[36px] sm:min-h-[38px] shrink-0 whitespace-nowrap items-center gap-1 sm:gap-1.5 rounded-xl bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-[12.5px] font-black text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_22px_-12px_rgba(250,204,21,0.8)] transition hover:brightness-[1.06]"
+              className="inline-flex min-h-[38px] shrink-0 whitespace-nowrap items-center gap-1.5 rounded-xl bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-4 py-2 text-[12.5px] font-black text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_22px_-12px_rgba(250,204,21,0.8)] transition hover:brightness-[1.06]"
             >
-              <span className="hidden sm:inline">CLAIM PRO PASS</span>
-              <span className="sm:hidden">PRO PASS</span>
+              <span>CLAIM PRO PASS</span>
               <span>→</span>
             </Link>
 
             <button
               onClick={() => setMobileNavOpen(true)}
               aria-label="Open navigation"
-              className="ml-1 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:text-white lg:hidden"
+              className="ml-1 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-300 transition hover:text-white lg:hidden"
             >
               <IconMenu />
             </button>
