@@ -682,7 +682,7 @@ export default function WelcomeLandingPage() {
       >
         <span className="inline-flex items-center gap-1.5 font-semibold text-yellow-300 shrink-0">
           <IconBolt className="h-3.5 w-3.5" />
-          {marketingMode ? 'Public Beta Live' : 'Architecture Spec'}
+          {marketingMode ? 'v1.0 General Availability Active' : 'Architecture Spec'}
         </span>
         <span className="hidden sm:inline text-slate-500">·</span>
         <span className="hidden sm:inline text-slate-300">
@@ -698,7 +698,7 @@ export default function WelcomeLandingPage() {
             href="/signup"
             className="inline-flex items-center gap-1 font-semibold text-yellow-300 underline decoration-yellow-400/40 underline-offset-4 transition hover:text-yellow-200 shrink-0"
           >
-            Free Beta Pass Open
+            Free Starter Tier Included
             <IconArrow className="h-3 w-3" />
           </Link>
         ) : (
@@ -718,9 +718,8 @@ export default function WelcomeLandingPage() {
         <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
           <Link href="/" onClick={scrollToTop} className="flex shrink-0 items-center gap-2.5 rounded-md transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={true} />
-            <span className="st-beta-pill">
-              <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
-              BETA
+            <span className="font-mono text-[10px] text-zinc-400 border border-zinc-800 bg-zinc-900/60 px-2 py-0.5 rounded-md">
+              v1.0
             </span>
           </Link>
 
@@ -872,7 +871,7 @@ export default function WelcomeLandingPage() {
           <div className="flex h-16 items-center justify-between px-5 border-b border-slate-800/80">
             <span className="flex items-center gap-2">
               <SnapTraceLogo size="md" showText={true} />
-              <span className="st-beta-pill">BETA</span>
+              <span className="font-mono text-[10px] text-zinc-400 border border-zinc-800 bg-zinc-900/60 px-2 py-0.5 rounded-md">v1.0</span>
             </span>
             <button
               onClick={() => setMobileNavOpen(false)}
@@ -2004,9 +2003,14 @@ export default function WelcomeLandingPage() {
                     </ul>
                   </div>
 
-                  <Link href="/signup" className={BTN_PRIMARY + ' mt-6 w-full font-mono text-center justify-center'}>
-                    Claim Pro Beta Pass →
-                  </Link>
+                  <a
+                    href="https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={BTN_PRIMARY + " mt-7 w-full font-mono text-center justify-center"}
+                  >
+                    Upgrade to Pro ($19/mo) →
+                  </a>
                 </div>
 
                 {/* 3. AGENCY STUDIO */}
@@ -2048,9 +2052,14 @@ export default function WelcomeLandingPage() {
                     </ul>
                   </div>
 
-                  <button type="button" onClick={() => setShowAgencyModal(true)} className={BTN_SECONDARY + ' mt-6 w-full cursor-pointer font-mono text-center justify-center'}>
-                    Start Agency Workspace →
-                  </button>
+                  <a
+                    href="https://buy.polar.sh/polar_cl_jtE6KA0k5GWeMhuFWQGB9fsDhRt8rdTwDteFS0Qr44g"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={BTN_PRIMARY + " mt-7 w-full font-mono text-center justify-center"}
+                  >
+                    Start Agency Studio ($49/mo) →
+                  </a>
                 </div>
               </SmoothReveal>
 
