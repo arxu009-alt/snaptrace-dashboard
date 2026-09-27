@@ -103,12 +103,9 @@ export async function POST(req) {
       project.alert_email_address ||
       project.email ||
       project.owner_email;
-
-    const ownerEmails = ["arxu1045@gmail.com", "arxu009@gmail.com"];
-    const isOwner = recipientEmail && ownerEmails.includes(recipientEmail.toLowerCase());
-
-    // Resolve tier: Owner has unlimited access; others resolve to plan_tier or 'pro' during beta
-    const projectTier = isOwner ? "agency" : (project.plan_tier || "pro");
+      
+    // Resolve tier strictly from database plan_tier (defaults to 'pro' during public beta)
+const projectTier = project.plan_tier || "pro";
     const activePlan = (PLANS && PLANS[projectTier]) ? PLANS[projectTier] : { monthlyEventCap: 75000 };
 
     if (!isOwner) {

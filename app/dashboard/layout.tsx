@@ -6,11 +6,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import {
   LayoutDashboard,
-  AlertTriangle,
+  AlertCircle,
   KeyRound,
-  Blocks,
+  Code2,
+  Bell,
+  Cpu,
+  CreditCard,
   Settings,
-  MessageSquare,
   PanelLeftClose,
   PanelLeft,
   ChevronDown,
@@ -150,20 +152,46 @@ export default function DashboardLayout({
     window.dispatchEvent(new Event('snaptrace_replay_tour'));
   };
 
-  const navItems: NavItem[] = [
-    { id: 'tour-nav-overview', name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { id: 'tour-nav-errors', name: 'Exception Logs', href: '/dashboard/errors', icon: AlertTriangle, hasBadge: true },
-    { id: 'tour-nav-projects', name: 'API Keys & Projects', href: '/dashboard/projects', icon: KeyRound },
-    { id: 'tour-nav-integrations', name: 'Language Integrations', href: '/dashboard/integrations', icon: Blocks },
-    { id: 'tour-nav-settings', name: 'Alert & AI Settings', href: '/dashboard/settings', icon: Settings },
+  type NavGroup = {
+    label: string;
+    items: NavItem[];
+  };
+
+  const navGroups: NavGroup[] = [
+    {
+      label: 'Observability',
+      items: [
+        { id: 'tour-nav-overview',  name: 'Overview',       href: '/dashboard',            icon: LayoutDashboard },
+        { id: 'tour-nav-errors',   name: 'Exception Logs', href: '/dashboard/errors',     icon: AlertCircle, hasBadge: true },
+      ],
+    },
+    {
+      label: 'Config & Telemetry',
+      items: [
+        { id: 'tour-nav-projects',      name: 'Projects & API Keys', href: '/dashboard/projects',     icon: KeyRound },
+        { id: 'tour-nav-integrations',  name: 'SDK Integrations',    href: '/dashboard/integrations', icon: Code2 },
+        { id: 'tour-nav-alerts',        name: 'Alert Destinations',  href: '/dashboard/alerts',       icon: Bell },
+        { id: 'tour-nav-ai',            name: 'AI Copilot (BYOK)',   href: '/dashboard/ai',           icon: Cpu },
+      ],
+    },
+    {
+      label: 'Account & Workspace',
+      items: [
+        { id: 'tour-nav-billing',  name: 'Billing & Usage',  href: '/dashboard/billing',  icon: CreditCard },
+        { id: 'tour-nav-settings', name: 'Account Settings', href: '/dashboard/settings', icon: Settings },
+      ],
+    },
   ];
 
   const getPageTitle = () => {
-    if (pathname === '/dashboard') return 'System Overview';
-    if (pathname === '/dashboard/errors') return 'Exception Logs Stream';
-    if (pathname === '/dashboard/projects') return 'API Keys & Projects';
-    if (pathname === '/dashboard/integrations') return 'Language & SDK Integrations';
-    if (pathname === '/dashboard/settings') return 'Settings & AI Copilot';
+    if (pathname === '/dashboard')             return 'System Overview';
+    if (pathname === '/dashboard/errors')      return 'Exception Logs Stream';
+    if (pathname === '/dashboard/projects')    return 'Projects & API Keys';
+    if (pathname === '/dashboard/integrations') return 'SDK Integrations';
+    if (pathname === '/dashboard/alerts')      return 'Alert Destinations';
+    if (pathname === '/dashboard/ai')          return 'AI Copilot (BYOK)';
+    if (pathname === '/dashboard/billing')     return 'Billing & Usage';
+    if (pathname === '/dashboard/settings')    return 'Account Settings';
     return 'Dashboard';
   };
 
@@ -192,7 +220,7 @@ export default function DashboardLayout({
           </Link>
           {!sidebarCollapsed && (
             <span className="text-[10px] font-mono text-zinc-400 border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 rounded uppercase tracking-wider">
-              BETA
+              v1.0
             </span>
           )}
         </div>
@@ -203,35 +231,44 @@ export default function DashboardLayout({
           </div>
         )}
 
-        <nav className="flex-1 p-3 space-y-1 min-w-[240px]">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                id={item.id}
-                href={item.href}
-                className={`flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors duration-150 ${
-                  isActive
-                    ? 'bg-zinc-900 text-zinc-100 font-medium border-l-2 border-zinc-200'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40 border-l-2 border-transparent'
-                }`}
-              >
-                <div className="flex items-center space-x-2.5">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-zinc-100' : 'text-zinc-400'}`} />
-                  {!sidebarCollapsed && <span>{item.name}</span>}
-                </div>
-
-                {/* Live Realtime Error Count Badge */}
-                {!sidebarCollapsed && item.hasBadge && activeErrorCount > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-red-500/10 text-red-400 border border-red-500/20">
-                    {activeErrorCount}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 py-2 min-w-[240px] overflow-y-auto">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              {!sidebarCollapsed && (
+                <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold px-3 pt-4 pb-1.5 block">
+                  {group.label}
+                </span>
+              )}
+              <div className="px-2 space-y-0.5">
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      id={item.id}
+                      href={item.href}
+                      className={`flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors duration-150 ${
+                        isActive
+                          ? 'bg-zinc-900 text-zinc-100 font-medium border-l-2 border-zinc-200'
+                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40 border-l-2 border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2.5">
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-zinc-100' : 'text-zinc-400'}`} />
+                        {!sidebarCollapsed && <span>{item.name}</span>}
+                      </div>
+                      {!sidebarCollapsed && item.hasBadge && activeErrorCount > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                          {activeErrorCount}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {!sidebarCollapsed && (
