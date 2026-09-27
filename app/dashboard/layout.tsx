@@ -13,6 +13,7 @@ import {
   Cpu,
   CreditCard,
   Settings,
+  MessageSquare,
   PanelLeftClose,
   PanelLeft,
   ChevronDown,
