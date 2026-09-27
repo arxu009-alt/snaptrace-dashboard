@@ -285,7 +285,7 @@ export default function DashboardOverviewPage() {
     setTimeout(() => setCopiedKey(false), 2000);
   };
 
-  const curlCommand = `curl -X POST https://snaptrace-dashboard.vercel.app/api/v1/log -H "Content-Type: application/json" -d '{"apiKey":"${projectKey || 'YOUR_KEY'}","message":"Test ping from terminal","environment":"production"}'`;
+  const curlCommand = `curl -X POST https://snaptrace.space/api/v1/log -H "Content-Type: application/json" -d '{"apiKey":"${projectKey || 'YOUR_API_KEY'}","message":"Test Incident from Terminal"}'`;
 
   const handleCopyCurl = () => {
     navigator.clipboard.writeText(curlCommand);
@@ -768,6 +768,23 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                     >
                       Rotate & Manage Project Keys
                     </Link>
+                  </div>
+                </div>
+
+                {/* Terminal cURL Snippet */}
+                <div className="pt-2 border-t border-zinc-800/80 space-y-1.5">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold block">
+                    TEST VIA TERMINAL (cURL)
+                  </span>
+                  <div className="relative group">
+                    <pre className="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-xs font-mono text-zinc-300 overflow-x-auto whitespace-pre leading-relaxed pr-20 scrollbar-none">{curlCommand}</pre>
+                    <button
+                      type="button"
+                      onClick={handleCopyCurl}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 border border-zinc-700 bg-zinc-900/60 text-zinc-200 text-xs px-2.5 py-1 rounded hover:bg-zinc-800 transition font-mono shrink-0 cursor-pointer whitespace-nowrap"
+                    >
+                      {copiedCurl ? '✓ Copied!' : 'Copy cURL'}
+                    </button>
                   </div>
                 </div>
 
