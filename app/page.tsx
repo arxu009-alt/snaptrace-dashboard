@@ -379,7 +379,7 @@ function getDevBotAnswer(prompt: string): string {
     return 'Our on-device regex AST engine automatically scrubs emails, credit cards, passwords, bearer tokens, and secrets in the browser before the payload touches the network. Raw secrets never reach our servers.';
   }
   if (p.includes('price') || p.includes('cost') || p.includes('plan') || p.includes('tier')) {
-    return 'We offer Developer Free (2,000 events/mo, 1 project), Pro Builder ($19/mo, 75k events, 5 projects, Discord/Slack alerts, Cursor AI fixes), and Agency Studio ($49/mo, 500k events, unlimited projects). Early beta passes are currently available.';
+    return 'We offer Developer Free (2,000 events/mo, 1 project), Pro Builder ($19/mo, 75k events, 5 projects, Discord/Slack alerts, Cursor AI fixes), and Agency Studio ($49/mo, 500k events, unlimited projects). Get started completely free with no credit card required.';
   }
   return 'SnapTrace is a featherweight, noise-free crash telemetry platform. It runs asynchronously on navigator.sendBeacon (<3.4KB gzipped) and exports 1-click AI prompts for Cursor, Claude Code, and Copilot.';
 }
@@ -427,8 +427,8 @@ const FAQS: Array<{ q: string; a: string }> = [
     a: 'Unlike legacy APMs that bundle 100KB+ of heavy performance profilers and session serializers, SnapTrace is focused strictly on crash telemetry, client-side PII regex scrubbing, and asynchronous beacon delivery via navigator.sendBeacon. It never delays page hydration or blocks Google Core Web Vitals.',
   },
   {
-    q: 'How does the limited-time Beta promotion work?',
-    a: 'Early developers claim grandfathered Lifetime Starter Pro with 75,000 monthly events, 30-day retention, and full in-dashboard AI diagnostics for $0 forever. No credit card required.',
+    q: 'Does a SnapTrace free account require a credit card?',
+    a: 'No credit card is required. You can sign up for the Developer Free tier in under 60 seconds and immediately start catching exceptions with 2,000 events/month, client-side PII scrubbing, and full Cursor/Claude AI prompt exports.',
   },
 ];
 
@@ -843,7 +843,7 @@ export default function WelcomeLandingPage() {
               href="/signup"
               className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 px-3.5 py-1.5 text-[12px] font-semibold transition"
             >
-              <span>Claim Beta Pass</span>
+              <span>Start for free</span>
               <span aria-hidden="true">→</span>
             </Link>
 
@@ -976,7 +976,7 @@ export default function WelcomeLandingPage() {
 
               <div className="flex flex-wrap items-center gap-3">
                 <Link href="/signup" className={BTN_PRIMARY}>
-                  Get a free beta key
+                  Start for free
                   <IconArrow className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>
                 <Link href="/demo" className={BTN_SECONDARY}>
@@ -994,7 +994,7 @@ export default function WelcomeLandingPage() {
                     <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" />
                     <span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" />
                     <span className="ml-3 font-mono text-[12px] text-slate-300">/snappy-cli</span>
-                    <span className="font-mono text-[10px] text-slate-600">v1.0-beta</span>
+                    <span className="font-mono text-[10px] text-slate-600">v1.0</span>
                   </div>
                   <span className="hidden font-mono text-[10px] text-slate-600 sm:inline">autonomous diagnostics</span>
                 </div>
@@ -2164,7 +2164,7 @@ export default function WelcomeLandingPage() {
                 </p>
                 <div className="pt-2 font-mono">
                   <Link href="/signup" className={BTN_PRIMARY}>
-                    Claim your free beta pass in 60s
+                    Start for free in 60s
                     <IconArrow className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </Link>
                 </div>
@@ -2299,7 +2299,7 @@ export default function WelcomeLandingPage() {
           {/* Mobile Bottom CTA */}
           <div className="st-safe-b fixed inset-x-0 bottom-0 z-30 border-t border-slate-800/80 bg-[#070B13]/95 px-4 pt-3 backdrop-blur-xl sm:hidden">
             <Link href="/signup" className={BTN_PRIMARY + ' w-full font-mono'}>
-              Claim Lifetime Pro Pass ($0) →
+              Start for free ($0) →
             </Link>
           </div>
         </>
