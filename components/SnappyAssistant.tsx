@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Message {
   sender: 'snappy' | 'user';
@@ -12,6 +12,88 @@ export default function SnappyAssistant() {
   const [inputQuery, setInputQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Dragging state
+  // Position stores { x, y } in pixels from top-left, or null for default bottom-right placement
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<{
+    startX: number;
+    startY: number;
+    initialX: number;
+    initialY: number;
+    hasMoved: boolean;
+  }>({
+    startX: 0,
+    startY: 0,
+    initialX: 0,
+    initialY: 0,
+    hasMoved: false,
+  });
+
+  // Docked / minimized side state ('right' | 'left')
+  const [dockedSide, setDockedSide] = useState<'right' | 'left'>('right');
+  const [isMinimized, setIsMinimized] = useState(false);
+
+  // Auto-hide inactivity timer (4 seconds)
+  const autoHideTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const resetAutoHideTimer = useCallback(() => {
+    if (autoHideTimerRef.current) {
+      clearTimeout(autoHideTimerRef.current);
+    }
+    // Only auto-hide if chat window is NOT currently open
+    if (!isOpen) {
+      autoHideTimerRef.current = setTimeout(() => {
+        setIsMinimized(true);
+      }, 4000);
+    }
+  }, [isOpen]);
+
+  // When isOpen changes, clear or restart timer
+  useEffect(() => {
+    if (isOpen) {
+      setIsMinimized(false);
+      if (autoHideTimerRef.current) {
+        clearTimeout(autoHideTimerRef.current);
+      }
+    } else {
+      resetAutoHideTimer();
+    }
+    return () => {
+      if (autoHideTimerRef.current) {
+        clearTimeout(autoHideTimerRef.current);
+      }
+    };
+  }, [isOpen, resetAutoHideTimer]);
+
+  // Initialize position on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const defaultX = Math.max(20, window.innerWidth - 80);
+      const defaultY = Math.max(20, window.innerHeight - 88);
+      setPosition({ x: defaultX, y: defaultY });
+    }
+    resetAutoHideTimer();
+  }, [resetAutoHideTimer]);
+
+  // Handle window resize to clamp within screen
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition((prev) => {
+        if (!prev) return prev;
+        const buttonWidth = 56;
+        const buttonHeight = 56;
+        const maxX = window.innerWidth - buttonWidth - 10;
+        const maxY = window.innerHeight - buttonHeight - 10;
+        const clampedX = Math.min(Math.max(10, prev.x), maxX);
+        const clampedY = Math.min(Math.max(10, prev.y), maxY);
+        return { x: clampedX, y: clampedY };
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const initialGreeting: Message = {
     sender: 'snappy',
     text: "⚡ Hi! I'm Snappy, your SnapTrace AI copilot. Ask me anything about setting up SDKs, the Incident Velocity graph, Discord alerts, or using BYOK AI!",
@@ -19,69 +101,58 @@ export default function SnappyAssistant() {
 
   const [messages, setMessages] = useState<Message[]>([initialGreeting]);
 
-  // 1. Auto-scroll to bottom on every new message
+  // Auto-scroll to bottom on every new message
   useEffect(() => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isOpen]);
 
-  // Comprehensive Knowledge Base
+  // Knowledge Base
   const knowledgeBase = [
-    // Greetings & Casual
     {
       keywords: ['hi', 'hello', 'hey', 'how are you', 'how r u', 'who are you', 'what is snappy'],
       answer: "⚡ I'm doing great and ready to assist! I'm Snappy, your in-app telemetry assistant. I know everything about your SnapTrace dashboard, SDK installations, alert channels, and incident analysis.",
     },
-    // Incident Velocity Pulse
     {
       keywords: ['velocity', 'pulse', 'graph', 'chart', 'bars', '12 hours', 'hourly', 'frequency'],
       answer: "📈 The Incident Velocity Pulse tracks error frequency over the last 12 hours. It breaks crashes into hourly buckets. When an error spikes right now, the rightmost bar ('Current Hour / Now') lights up in Snap Yellow so you immediately spot active server outages.",
     },
-    // Exception Logs & Triage
     {
       keywords: ['exception', 'logs', 'stream', 'triage', 'resolved', 'unresolved', 'mark as resolved', 'checkbox', 'inspect'],
       answer: "🚨 In Exception Logs: All runtime crashes stream live via WebSockets. Filter between Unresolved and Resolved tabs, click the checkbox on the left to mark a bug as fixed, or click 'Inspect' to see line-by-line stack frames and copy AI prompts for Cursor/Claude!",
     },
-    // Settings, Alerts & Test Button
     {
       keywords: ['settings', 'discord', 'webhook', 'email', 'alert', 'notification', 'test alert', 'purge'],
       answer: "⚙️ In Settings: Enter your Discord Webhook URL and Alert Email, then click 'Save Notification Channels'. You can click the '🧪 Send Test Alert' button anytime to test your channels without terminal commands, or use 'Purge Resolved Logs' to clean your database.",
     },
-    // BYOK AI & Cursor Prompts
     {
       keywords: ['ai', 'byok', 'openai', 'claude', 'cursor', 'prompt', 'code fix', 'analyze with ai'],
-      answer: "🤖 BYOK (Bring Your Own Key) AI: Add your OpenAI API key in Settings. Then on any error in Exception Logs, click 'Inspect' and hit '✨ Analyze with AI' for an instant root-cause explanation and code fix, or click '📋 Copy for Cursor / AI' to export a ready-to-paste prompt!",
+      answer: "🤖 BYOK (Bring Your Own Key) AI: Add your OpenAI or Anthropic API key in Settings. Then on any error in Exception Logs, click 'Inspect' and hit '✨ Analyze with AI' for an instant root-cause explanation and code fix, or click '📋 Copy for Cursor / AI' to export a ready-to-paste prompt!",
     },
-    // PII Firewall & Privacy
     {
       keywords: ['pii', 'password', 'privacy', 'credit card', 'firewall', 'token', 'gdpr', 'scrub'],
       answer: "🔒 Zero-Trust PII Firewall: Passwords (password=...), auth tokens (apiKey=...), emails, and credit cards are scrubbed directly on the user's browser before telemetry payloads ever touch our servers.",
     },
-    // Noise Deduplication
     {
       keywords: ['loop', 'noise', 'spam', 'throttle', 'dedup', 'x50', 'x500', 'deduplication'],
       answer: "🔇 Noise Deduplication: If a broken React loop or failing database throws 500 errors in 10 seconds, SnapTrace sends the 1st crash instantly, drops the duplicate spam, and delivers 1 clean summary alert tagged [x500].",
     },
-    // Projects & API Keys
     {
       keywords: ['project', 'api key', 'token', 'create project', 'delete project', 'sk_live', 'credentials'],
-      answer: "📁 In API Keys & Projects: Create separate projects for different apps (e.g., Next.js Web App vs Python Backend). Each gets a unique sk_live_... key. Click the event badge (e.g. '11 events →') to jump straight to filtered logs for that project!",
+      answer: "📁 In API Keys & Projects: Create separate projects for different apps (e.g., Next.js Web App vs Python Backend). Each gets a unique sk_live_... key. Click the event badge to jump straight to filtered logs for that project!",
     },
-    // Test Playground
     {
       keywords: ['test', 'playground', 'simulate', 'trigger crash', 'demo', 'simulation'],
       answer: "🧪 Test Playground: Click '🧪 Open Test Playground' in Overview Quick Actions (or visit /test) to simulate synchronous crashes, async promise rejections, fake PII leaks, and 50x loop floods live with 1 click!",
     },
-    // Supported Languages
     {
       keywords: ['languages', 'python', 'nextjs', 'node', 'php', 'ruby', 'kotlin', 'curl', 'html', 'sdk'],
       answer: "💻 Supported Stacks: Open the 'Language Integrations' tab in the sidebar to get pre-configured, copy-paste snippets for Next.js App Router, JavaScript, Python, Node.js, PHP, Ruby, Kotlin, and direct cURL APIs with your live key injected.",
     },
-    // Pricing
     {
-      keywords: ['price', 'pricing', 'plan', 'free', 'pro', '$9', '$29', 'cost', 'subscription'],
-      answer: "💎 Plans: 1. Developer Free ($0/mo - 10k events, Cursor prompt export), 2. Starter Pro ($9/mo - 150k events, In-Dashboard BYOK AI Copilot, unlimited projects), and 3. Team Scale ($29/mo - 1M events, 90-day retention, priority delivery).",
+      keywords: ['price', 'pricing', 'plan', 'free', 'pro', '$19', '$49', 'cost', 'subscription'],
+      answer: "💎 Plans: 1. Developer Free ($0/mo - 2,000 events, 1 project, Cursor/Claude AI prompts), 2. Pro Builder ($19/mo - 75,000 events, 5 projects, Discord/Slack alerts), and 3. Agency Studio ($49/mo - 500,000 events, unlimited projects).",
     },
   ];
 
@@ -94,7 +165,6 @@ export default function SnappyAssistant() {
 
     const q = queryText.toLowerCase();
 
-    // Match best answer
     const matched = knowledgeBase.find((item) =>
       item.keywords.some((kw) => q.includes(kw))
     );
@@ -118,30 +188,179 @@ export default function SnappyAssistant() {
     setMessages([initialGreeting]);
   };
 
+  // --- DRAGGING & CURSOR HANDLERS ---
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // If chat window is open, let the user interact normally or close
+    const target = e.target as HTMLElement;
+    if (target.closest('input') || target.closest('textarea') || target.closest('button.chat-control')) {
+      return;
+    }
+
+    setIsDragging(true);
+    setIsMinimized(false);
+    if (autoHideTimerRef.current) clearTimeout(autoHideTimerRef.current);
+
+    const currentX = position?.x ?? (window.innerWidth - 80);
+    const currentY = position?.y ?? (window.innerHeight - 88);
+
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: currentX,
+      initialY: currentY,
+      hasMoved: false,
+    };
+
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - dragRef.current.startX;
+    const deltaY = e.clientY - dragRef.current.startY;
+
+    if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+      dragRef.current.hasMoved = true;
+    }
+
+    const buttonWidth = 56;
+    const buttonHeight = 56;
+    const newX = Math.min(Math.max(8, dragRef.current.initialX + deltaX), window.innerWidth - buttonWidth - 8);
+    const newY = Math.min(Math.max(8, dragRef.current.initialY + deltaY), window.innerHeight - buttonHeight - 8);
+
+    setPosition({ x: newX, y: newY });
+
+    // Update docked side based on nearest edge
+    if (newX < window.innerWidth / 2) {
+      setDockedSide('left');
+    } else {
+      setDockedSide('right');
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      // Ignore if pointer capture already lost
+    }
+
+    // If it was just a click (not a drag), toggle open/close
+    if (!dragRef.current.hasMoved) {
+      setIsOpen((prev) => !prev);
+    } else {
+      // Snapped / released: start auto-hide countdown if closed
+      resetAutoHideTimer();
+    }
+  };
+
+  // When hovering on minimized pill, wake it up
+  const handleMouseEnter = () => {
+    setIsMinimized(false);
+    if (autoHideTimerRef.current) clearTimeout(autoHideTimerRef.current);
+  };
+
+  const handleMouseLeave = () => {
+    if (!isOpen) {
+      resetAutoHideTimer();
+    }
+  };
+
+  // Compute transform when minimized into edge
+  const getDockedTransform = () => {
+    if (!isMinimized) return 'translate(0, 0)';
+    return dockedSide === 'right' ? 'translate(36px, 0)' : 'translate(-36px, 0)';
+  };
+
+  // Compute chat window popup position relative to current button position
+  const getChatWindowStyle = () => {
+    if (!position) return { bottom: '96px', right: '24px' };
+
+    const buttonX = position.x;
+    const buttonY = position.y;
+    const chatWidth = 360;
+    const chatHeight = 440;
+
+    // Prefer above the button, clamp inside viewport
+    let top = buttonY - chatHeight - 12;
+    if (top < 16) {
+      top = Math.min(buttonY + 68, window.innerHeight - chatHeight - 16);
+    }
+
+    let left = buttonX - chatWidth + 56;
+    if (dockedSide === 'left') {
+      left = buttonX;
+    }
+    // Clamp horizontal
+    left = Math.max(16, Math.min(left, window.innerWidth - chatWidth - 16));
+
+    return {
+      top: `${top}px`,
+      left: `${left}px`,
+    };
+  };
+
   return (
     <>
-      {/* 1. High-Contrast Snappy Floating Button */}
-      <div className="fixed bottom-6 right-6 z-50 group">
-        <div className="absolute right-16 top-2 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none bg-[#090D16] border border-yellow-400/40 text-yellow-300 text-xs font-bold font-mono px-3 py-1.5 rounded-xl shadow-2xl whitespace-nowrap">
-          Ask Snappy AI ✨
-        </div>
+      {/* Moveable & Auto-Hideable Floating Button */}
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          position: 'fixed',
+          left: position ? `${position.x}px` : 'auto',
+          top: position ? `${position.y}px` : 'auto',
+          right: position ? 'auto' : '24px',
+          bottom: position ? 'auto' : '24px',
+          transform: getDockedTransform(),
+          touchAction: 'none',
+        }}
+        className={`z-50 select-none transition-transform duration-300 ease-out group ${
+          isDragging ? 'cursor-grabbing scale-105' : 'cursor-grab'
+        }`}
+      >
+        {/* Tooltip on Hover */}
+        {!isDragging && !isOpen && (
+          <div
+            className={`absolute top-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-[#090D16] border border-yellow-400/40 text-yellow-300 text-[11px] font-bold font-mono px-3 py-1 rounded-xl shadow-2xl whitespace-nowrap ${
+              dockedSide === 'right' ? 'right-16' : 'left-16'
+            }`}
+          >
+            {isMinimized ? 'Click to show Snappy' : '⚡ Drag or Click Snappy'}
+          </div>
+        )}
 
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="relative h-14 w-14 rounded-2xl bg-gradient-to-br from-[#1c2333] via-[#0e1424] to-[#060911] border-2 border-yellow-400 text-yellow-400 flex items-center justify-center font-black shadow-2xl shadow-yellow-500/25 transition-all duration-300 transform hover:scale-110 cursor-pointer"
-          title="Ask Snappy AI Copilot"
+          type="button"
+          aria-label="Snappy AI Copilot"
+          className={`relative h-14 w-14 rounded-2xl bg-gradient-to-br from-[#1c2333] via-[#0e1424] to-[#060911] border-2 text-yellow-400 flex items-center justify-center font-black shadow-2xl transition-all duration-300 ${
+            isOpen
+              ? 'border-yellow-300 shadow-yellow-500/40'
+              : isMinimized
+              ? 'border-yellow-400/50 opacity-60 hover:opacity-100 hover:border-yellow-400 shadow-yellow-500/20'
+              : 'border-yellow-400 shadow-yellow-500/25 hover:scale-105'
+          }`}
+          title="Drag anywhere or click to chat with Snappy"
         >
           {/* Active Emerald Pulse Dot */}
-          <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+          <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 pointer-events-none">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-[#05070E]" />
           </span>
 
           {isOpen ? (
-            <span className="text-white text-base font-mono font-bold">✕</span>
+            <span className="text-white text-base font-mono font-bold pointer-events-none">✕</span>
           ) : (
             <svg
-              className="w-7 h-7 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.7)]"
+              className="w-7 h-7 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.7)] pointer-events-none"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -157,17 +376,30 @@ export default function SnappyAssistant() {
               <path d="M9 19h6" stroke="#10B981" />
             </svg>
           )}
+
+          {/* Minimized Peek Indicator */}
+          {isMinimized && !isOpen && (
+            <span
+              className={`absolute top-1/2 -translate-y-1/2 text-[9px] font-mono font-black text-yellow-400 bg-yellow-400/20 px-1 py-0.5 rounded ${
+                dockedSide === 'right' ? 'left-1' : 'right-1'
+              }`}
+            >
+              {dockedSide === 'right' ? '◀' : '▶'}
+            </span>
+          )}
         </button>
       </div>
 
       {/* 2. Snappy Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 w-full max-w-[380px] bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl shadow-2xl shadow-yellow-500/15 overflow-hidden flex flex-col font-sans animate-in fade-in zoom-in-95 duration-150">
-          
+        <div
+          style={getChatWindowStyle()}
+          className="fixed z-50 w-[360px] max-w-[calc(100vw-32px)] bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl shadow-2xl shadow-yellow-500/20 overflow-hidden flex flex-col font-sans animate-in fade-in zoom-in-95 duration-150"
+        >
           {/* Header */}
-          <div className="p-4 bg-[#060911] border-b border-slate-800 flex items-center justify-between">
+          <div className="p-3.5 bg-[#060911] border-b border-slate-800 flex items-center justify-between cursor-default">
             <div className="flex items-center space-x-2.5">
-              <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md">
+              <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md">
                 ⚡
               </div>
               <div>
@@ -175,23 +407,25 @@ export default function SnappyAssistant() {
                   <span>Snappy AI Copilot</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 </h3>
-                <p className="text-[10px] text-slate-400 font-mono">SnapTrace Knowledge Assistant</p>
+                <p className="text-[9.5px] text-slate-400 font-mono">Moveable Telemetry Assistant</p>
               </div>
             </div>
 
             <div className="flex items-center space-x-1.5">
               {messages.length > 1 && (
                 <button
+                  type="button"
                   onClick={handleResetChat}
-                  className="text-[10px] text-slate-400 hover:text-yellow-300 px-2 py-1 bg-slate-800/80 rounded-lg transition"
+                  className="chat-control text-[10px] text-slate-400 hover:text-yellow-300 px-2 py-1 bg-slate-800/80 rounded-lg transition"
                   title="Reset conversation"
                 >
                   Clear ↺
                 </button>
               )}
               <button
+                type="button"
                 onClick={() => setIsOpen(false)}
-                className="text-slate-400 hover:text-white text-xs bg-slate-800 px-2 py-1 rounded-lg transition cursor-pointer"
+                className="chat-control text-slate-400 hover:text-white text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg transition cursor-pointer"
               >
                 ✕
               </button>
@@ -199,16 +433,16 @@ export default function SnappyAssistant() {
           </div>
 
           {/* Messages Feed (Auto-Scrolling) */}
-          <div className="p-4 space-y-3 max-h-[320px] overflow-y-auto text-xs leading-relaxed bg-[#05070E]/90">
+          <div className="p-3.5 space-y-3 max-h-[290px] overflow-y-auto text-xs leading-relaxed bg-[#05070E]/90 st-scroll">
             {messages.map((m, idx) => (
               <div
                 key={idx}
                 className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`p-3.5 rounded-2xl max-w-[85%] leading-relaxed ${
+                  className={`p-3 rounded-2xl max-w-[85%] leading-relaxed ${
                     m.sender === 'user'
-                      ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold shadow-md'
+                      ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-semibold shadow-md'
                       : 'bg-[#090D16] border border-slate-800 text-slate-200 shadow-sm'
                   }`}
                 >
@@ -216,24 +450,24 @@ export default function SnappyAssistant() {
                 </div>
               </div>
             ))}
-            {/* Auto-scroll anchor */}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Smart FAQ Chips (Hides automatically once user starts chatting) */}
+          {/* Quick Questions */}
           {messages.length <= 1 && (
-            <div className="px-3.5 py-2.5 bg-[#060911] border-t border-slate-800/80 flex flex-wrap gap-1.5 animate-in fade-in">
+            <div className="px-3 py-2 bg-[#060911] border-t border-slate-800/80 flex flex-wrap gap-1.5">
               {[
-                'How does Velocity Pulse work?',
-                'How to connect Next.js?',
+                'Incident Velocity Pulse',
+                'Connect Next.js SDK',
                 'Setup Discord Alerts',
-                'How BYOK AI works?',
-                'What is PII Scrubbing?',
+                'BYOK AI & Cursor',
+                'Zero-Trust PII',
               ].map((chip, i) => (
                 <button
                   key={i}
+                  type="button"
                   onClick={() => handleAsk(chip)}
-                  className="px-2.5 py-1 bg-[#090D16] hover:bg-slate-800 border border-slate-800 hover:border-yellow-400/30 rounded-lg text-[10px] text-yellow-300 font-medium transition cursor-pointer"
+                  className="chat-control px-2 py-1 bg-[#090D16] hover:bg-slate-800 border border-slate-800 hover:border-yellow-400/30 rounded-lg text-[10px] text-yellow-300 font-medium transition cursor-pointer"
                 >
                   {chip}
                 </button>
@@ -247,23 +481,22 @@ export default function SnappyAssistant() {
               e.preventDefault();
               handleAsk(inputQuery);
             }}
-            className="p-3 bg-[#090D16] border-t border-slate-800 flex items-center gap-2"
+            className="p-2.5 bg-[#090D16] border-t border-slate-800 flex items-center gap-2"
           >
             <input
               type="text"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               placeholder="Ask Snappy anything..."
-              className="flex-1 bg-[#05070E] border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition font-mono"
+              className="flex-1 bg-[#05070E] border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition font-mono"
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
+              className="chat-control px-3.5 py-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
             >
               Send
             </button>
           </form>
-
         </div>
       )}
     </>
