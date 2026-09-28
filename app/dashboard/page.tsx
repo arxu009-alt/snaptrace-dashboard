@@ -12,10 +12,63 @@ interface ErrorLog {
   created_at: string;
   project_id?: string;
   occurrence_count?: number;
+  url?: string;
+  stack_trace?: string;
+  route?: string;
 }
 
 type TimeRange = '12h' | '24h' | '7d';
 type QuickstartTab = 'curl' | 'nextjs' | 'js' | 'python';
+
+function extractRoute(err: ErrorLog): string {
+  if (err.url) {
+    try {
+      const parsed = new URL(err.url);
+      if (parsed.pathname && parsed.pathname !== '/') return parsed.pathname;
+    } catch {
+      if (err.url.startsWith('/')) {
+        return err.url.split('?')[0].split('#')[0];
+      }
+    }
+  }
+
+  if (err.route) return err.route;
+
+  const pathMatch = err.message.match(/(\/(?:api|dashboard|v1|auth|login|checkout|users|settings|webhook)[a-zA-Z0-9_\-\/]*)/i);
+  if (pathMatch && pathMatch[1]) {
+    return pathMatch[1];
+  }
+
+  const genericMatch = err.message.match(/(\/[a-zA-Z0-9_\-\/]{2,})/);
+  if (genericMatch && genericMatch[1] && !genericMatch[1].match(/\.(js|ts|tsx|jsx|json)$/i)) {
+    return genericMatch[1];
+  }
+
+  return '/api/v1/log';
+}
+
+function computeImpactedRoutes(errList: ErrorLog[]): { route: string; count: number; percentage: number }[] {
+  if (!errList || errList.length === 0) return [];
+
+  const counts: Record<string, number> = {};
+  let totalWeight = 0;
+
+  errList.forEach((e) => {
+    const route = extractRoute(e);
+    const weight = e.occurrence_count && e.occurrence_count > 0 ? e.occurrence_count : 1;
+    counts[route] = (counts[route] || 0) + weight;
+    totalWeight += weight;
+  });
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([route, count]) => ({
+      route,
+      count,
+      percentage: totalWeight > 0 ? Math.round((count / totalWeight) * 100) : 0,
+    }));
+}
 
 const MOCK_DEMO_ERRORS: ErrorLog[] = [
   {
@@ -23,18 +76,40 @@ const MOCK_DEMO_ERRORS: ErrorLog[] = [
     message: 'ReferenceError: Connection pool exhausted at database.js:18',
     environment: 'production',
     created_at: new Date().toISOString(),
+    url: 'https://snaptrace.space/api/checkout',
+    occurrence_count: 5,
   },
   {
     id: 99902,
     message: 'UnhandledPromiseRejection: Stripe API 504 Gateway Timeout on /v1/charge',
     environment: 'production',
     created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+    url: 'https://snaptrace.space/api/v1/charge',
+    occurrence_count: 8,
   },
   {
     id: 99903,
     message: 'RenderLoopError: Maximum update depth exceeded in UserProfile',
     environment: 'development',
     created_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+    url: 'https://snaptrace.space/dashboard',
+    occurrence_count: 3,
+  },
+  {
+    id: 99904,
+    message: 'AuthTokenExpiredError: JWT signature verification failed',
+    environment: 'production',
+    created_at: new Date(Date.now() - 75 * 60 * 1000).toISOString(),
+    url: 'https://snaptrace.space/login',
+    occurrence_count: 12,
+  },
+  {
+    id: 99905,
+    message: 'RateLimitExceeded: 429 Too Many Requests from client worker',
+    environment: 'production',
+    created_at: new Date(Date.now() - 110 * 60 * 1000).toISOString(),
+    url: 'https://snaptrace.space/api/v1/log',
+    occurrence_count: 6,
   },
 ];
 
@@ -44,7 +119,9 @@ export default function DashboardOverviewPage() {
   const [totalErrors, setTotalErrors] = useState(0);
   const [prodErrors, setProdErrors] = useState(0);
   const [devErrors, setDevErrors] = useState(0);
+  const [suppressedCount, setSuppressedCount] = useState(0);
   const [recentErrors, setRecentErrors] = useState<ErrorLog[]>([]);
+  const [impactedRoutes, setImpactedRoutes] = useState<{ route: string; count: number; percentage: number }[]>([]);
   const [projectKey, setProjectKey] = useState<string>('');
   const [selectedProjectLabel, setSelectedProjectLabel] = useState<string>('All Projects');
   
@@ -136,6 +213,14 @@ export default function DashboardOverviewPage() {
       setDevErrors(errors.filter((e) => e.environment === 'development').length);
       setRecentErrors(errors.slice(0, 6));
 
+      const suppressed = errors.reduce((acc, e) => {
+        const occ = e.occurrence_count || 1;
+        return acc + (occ > 1 ? occ - 1 : 0);
+      }, 0);
+      setSuppressedCount(suppressed);
+
+      setImpactedRoutes(computeImpactedRoutes(errors));
+
       // Calculate Real-Time Clock Distribution
       const now = Date.now();
       let numBuckets = 12;
@@ -188,7 +273,9 @@ export default function DashboardOverviewPage() {
       setTotalErrors(0);
       setProdErrors(0);
       setDevErrors(0);
+      setSuppressedCount(0);
       setRecentErrors([]);
+      setImpactedRoutes([]);
       setDistribution(new Array(12).fill({ count: 0, label: '' }));
     }
 
@@ -266,12 +353,14 @@ export default function DashboardOverviewPage() {
   const toggleDemoMode = () => {
     if (!demoMode) {
       setDemoMode(true);
-      setTotalErrors((prev) => prev + 3);
-      setProdErrors((prev) => prev + 2);
+      setTotalErrors((prev) => prev + 5);
+      setProdErrors((prev) => prev + 4);
       setDevErrors((prev) => prev + 1);
+      setSuppressedCount((prev) => prev + 29);
       setRecentErrors(MOCK_DEMO_ERRORS);
+      setImpactedRoutes(computeImpactedRoutes(MOCK_DEMO_ERRORS));
       setDistribution((prev) =>
-        prev.map((d, i) => (i === prev.length - 1 ? { ...d, count: d.count + 3 } : d))
+        prev.map((d, i) => (i === prev.length - 1 ? { ...d, count: d.count + 5 } : d))
       );
     } else {
       setDemoMode(false);
@@ -331,18 +420,18 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 })`,
   };
 
-  const deliveryRate = totalErrors > 0 ? `${((totalErrors / (totalErrors + 0)) * 100).toFixed(1)}% Delivered` : '99.9% Delivered';
+  const deliveryRate = totalErrors > 0 ? `${((totalErrors / (totalErrors + 0)) * 100).toFixed(1)}%` : '99.9%';
 
   return (
     <div className="min-h-screen bg-transparent text-zinc-100 p-6 sm:p-8 font-sans selection:bg-zinc-700 selection:text-zinc-100 animate-in fade-in duration-150">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-4 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800/80 pb-4 gap-4">
           <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100 flex items-center gap-2.5">
               <span>Telemetry Overview</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-md glass-pill text-zinc-300 font-mono font-medium">
+              <span className="text-xs px-2.5 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono font-medium">
                 {selectedProjectLabel}
               </span>
             </h1>
@@ -363,10 +452,10 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
             <button
               onClick={toggleDemoMode}
-              className={`glass-panel text-xs font-semibold px-3.5 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+              className={`text-xs font-semibold px-3.5 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer border ${
                 demoMode
-                  ? 'bg-zinc-800/90 text-white border-zinc-600'
-                  : 'text-zinc-300 hover:text-white hover:border-white/20'
+                  ? 'bg-zinc-800 text-white border-zinc-600'
+                  : 'bg-zinc-900 text-zinc-300 hover:text-white border-zinc-800 hover:border-zinc-700'
               }`}
             >
               <span>{demoMode ? 'Clear Demo' : 'Load Demo'}</span>
@@ -374,7 +463,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
             <Link
               href="/dashboard/errors"
-              className="glass-panel text-zinc-300 hover:text-white hover:border-white/20 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition cursor-pointer"
+              className="bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition cursor-pointer"
             >
               View Stream →
             </Link>
@@ -390,15 +479,15 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
         {/* Onboarding Quickstart Card */}
         {!loading && totalErrors === 0 && !demoMode && (
-          <div className="glass-panel rounded-xl p-6 space-y-5 animate-in fade-in duration-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+          <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-6 space-y-5 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
               <div className="space-y-0.5">
                 <div className="inline-flex items-center gap-2 text-zinc-400 text-xs font-mono font-medium uppercase tracking-wider">
                   Quickstart Setup (Step 1 of 2)
                 </div>
                 <h2 className="text-base font-semibold text-zinc-100">Connect your application in 30 seconds</h2>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full glass-inner text-zinc-300 text-xs font-mono">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>Listening for first event...</span>
               </div>
@@ -409,12 +498,12 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                 <div className="space-y-1">
                   <span className="text-[11px] text-zinc-400 font-medium uppercase">1. Active Project API Key</span>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 p-2 glass-inner rounded-lg text-xs text-zinc-100 truncate font-mono">
+                    <code className="flex-1 p-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-100 truncate font-mono">
                       {projectKey}
                     </code>
                     <button
                       onClick={handleCopyKey}
-                      className="border border-white/[0.08] bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0"
+                      className="border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0 cursor-pointer"
                     >
                       {copiedKey ? 'Copied' : 'Copy'}
                     </button>
@@ -433,21 +522,21 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
                   <button
                     onClick={handleCopyCurl}
-                    className="w-full glass-inner glass-inner-hover text-zinc-300 hover:text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>{copiedCurl ? 'cURL Command Copied' : 'Copy cURL for Terminal'}</span>
                   </button>
                 </div>
               </div>
 
-              <div className="lg:col-span-7 glass-inner rounded-lg p-3.5 space-y-2.5 font-mono">
-                <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
+              <div className="lg:col-span-7 bg-zinc-900/60 border border-zinc-800 rounded-lg p-3.5 space-y-2.5 font-mono">
+                <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
                   <div className="flex items-center space-x-2">
                     {(['curl', 'nextjs', 'js', 'python'] as const).map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setQuickTab(tab)}
-                        className={`px-2 py-0.5 rounded text-xs font-semibold transition uppercase ${
+                        className={`px-2 py-0.5 rounded text-xs font-semibold transition uppercase cursor-pointer ${
                           quickTab === tab
                             ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
                             : 'text-zinc-400 hover:text-white'
@@ -469,133 +558,97 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
         {loading ? (
           <div className="space-y-4 animate-pulse">
-            <div className="h-28 glass-panel rounded-xl" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 glass-panel rounded-xl" />
+                <div key={i} className="h-24 bg-zinc-950/80 border border-zinc-800 rounded-xl" />
               ))}
             </div>
-            <div className="h-48 glass-panel rounded-xl" />
+            <div className="h-56 bg-zinc-950/80 border border-zinc-800 rounded-xl" />
           </div>
         ) : (
           <>
-            {/* Ingestion Gateway Health Card */}
-            <div className="glass-panel rounded-xl p-4 sm:p-5 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-zinc-400 font-mono text-[11px] tracking-wider uppercase font-semibold">
-                    INGESTION GATEWAY
-                  </span>
-                  <span className="text-zinc-600 font-mono text-xs hidden sm:inline">•</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-zinc-300 font-mono text-xs font-medium">
-                      Gateway Operational (0ms UI Thread Blocking)
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-zinc-400 font-mono text-[11px] uppercase tracking-wider">Live Delivery Rate</span>
-                  <span className="text-emerald-400 font-mono text-xs font-semibold tabular-nums">
-                    {deliveryRate}
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="glass-inner rounded-lg p-3.5 space-y-1">
-                  <div className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-300">Accepted Events</div>
-                  <div className="font-mono text-2xl font-bold text-white tabular-nums tracking-tight">{totalErrors}</div>
-                </div>
-                <div className="glass-inner rounded-lg p-3.5 space-y-1">
-                  <div className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-300">Throttled (429 Rate Limited)</div>
-                  <div className="font-mono text-2xl font-bold text-white tabular-nums tracking-tight">0</div>
-                </div>
-                <div className="glass-inner rounded-lg p-3.5 space-y-1">
-                  <div className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-300">Suppressed (Loop Deduplicated)</div>
-                  <div className="font-mono text-2xl font-bold text-white tabular-nums tracking-tight">0</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Stat Cards Grid */}
+            {/* 1. EXECUTIVE KPI STRIP (TOP ROW) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="glass-panel glass-panel-hover rounded-xl p-4.5 space-y-2 transition group">
+              {/* Card 1: Total Ingested */}
+              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-4.5 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-medium uppercase tracking-wider text-zinc-300">
+                  <span className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-400">
                     Total Ingested
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 </div>
-                <div className="font-mono text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight">
+                <div className="font-mono text-2xl font-bold text-zinc-100 tabular-nums tracking-tight">
                   {totalErrors}
                 </div>
-                <p className="text-xs text-zinc-400 font-sans">All-time captured exceptions</p>
+                <p className="text-xs text-zinc-500 font-mono">All-time captured exceptions</p>
               </div>
 
-              <div className="glass-panel glass-panel-hover rounded-xl p-4.5 space-y-2 transition group">
+              {/* Card 2: Production Issues */}
+              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-4.5 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-medium uppercase tracking-wider text-zinc-300">
+                  <span className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-400">
                     Production Issues
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
                 </div>
-                <div className="font-mono text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight">
+                <div className="font-mono text-2xl font-bold text-zinc-100 tabular-nums tracking-tight">
                   {prodErrors}
                 </div>
-                <p className="text-xs text-zinc-400 font-sans">Active live exceptions</p>
+                <p className="text-xs text-zinc-500 font-mono">Active live exceptions</p>
               </div>
 
-              <div className="glass-panel glass-panel-hover rounded-xl p-4.5 space-y-2 transition group">
+              {/* Card 3: Noise Suppressed */}
+              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-4.5 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-medium uppercase tracking-wider text-zinc-300">
-                    Development Logs
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                </div>
-                <div className="font-mono text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight">
-                  {devErrors}
-                </div>
-                <p className="text-xs text-zinc-400 font-sans">Staging & local events</p>
-              </div>
-
-              <div className="glass-panel glass-panel-hover rounded-xl p-4.5 space-y-2 transition group">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-medium uppercase tracking-wider text-zinc-300">
-                    Noise Firewall
+                  <span className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                    Noise Suppressed
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 </div>
-                <div className="font-mono text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  Active
+                <div className="font-mono text-2xl font-bold text-zinc-100 tabular-nums tracking-tight">
+                  {suppressedCount}
                 </div>
-                <p className="text-xs text-zinc-400 font-sans">60s loop throttling active</p>
+                <p className="text-xs text-zinc-500 font-mono">Loop throttled · Spam prevented</p>
+              </div>
+
+              {/* Card 4: Gateway Delivery */}
+              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-4.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                    Gateway Delivery
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                </div>
+                <div className="font-mono text-2xl font-bold text-zinc-100 tabular-nums tracking-tight">
+                  {deliveryRate}
+                </div>
+                <p className="text-xs text-zinc-500 font-mono">0ms UI thread delay</p>
               </div>
             </div>
 
-            {/* Side-by-Side Velocity Pulse & Quick Actions Grid */}
+            {/* 2. COMMAND CENTER (MIDDLE SECTION - 2 COLUMNS) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
               
-              {/* Incident Velocity Pulse */}
-              <div className="lg:col-span-7 glass-panel rounded-xl p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
+              {/* LEFT (7 Cols): Incident Velocity Pulse */}
+              <div className="lg:col-span-7 bg-zinc-950/80 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
                 <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
                     <div>
-                      <h2 className="text-sm font-semibold text-white font-mono tracking-tight">
+                      <h2 className="text-sm font-semibold text-zinc-100 font-mono tracking-tight">
                         Incident Velocity Pulse
                       </h2>
                       <p className="text-xs text-zinc-400 font-sans mt-0.5">Real-time frequency spikes across active window</p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center glass-inner p-0.5 rounded-lg font-mono text-xs">
+                      <div className="flex items-center bg-zinc-900 border border-zinc-800 p-0.5 rounded-lg font-mono text-xs">
                         {(['12h', '24h', '7d'] as const).map((range) => (
                           <button
                             key={range}
                             onClick={() => setTimeRange(range)}
                             className={`px-2.5 py-1 rounded text-[11px] font-semibold transition uppercase cursor-pointer ${
                               timeRange === range
-                                ? 'bg-zinc-800 text-white border border-zinc-600 shadow-xs'
+                                ? 'bg-zinc-800 text-white border border-zinc-700 shadow-xs'
                                 : 'text-zinc-400 hover:text-zinc-100'
                             }`}
                           >
@@ -623,18 +676,18 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                               {item.count} {item.count === 1 ? 'incident' : 'incidents'} ({item.label})
                             </div>
 
-                            <div className="w-full glass-inner rounded-sm h-full flex items-end overflow-hidden p-0.5">
+                            <div className="w-full bg-zinc-900/60 border border-zinc-800/80 rounded-sm h-full flex items-end overflow-hidden p-0.5">
                               <div
                                 style={{ height: `${hasErrors ? Math.max(heightPercent, 20) : 4}%` }}
                                 className={`w-full rounded-xs transition-all duration-300 ${
                                   hasErrors
                                     ? 'bg-zinc-300 hover:bg-white shadow-xs'
-                                    : 'bg-white/[0.04]'
+                                    : 'bg-zinc-800/40'
                                 }`}
                               />
                             </div>
 
-                            <span className="text-[10px] font-mono text-zinc-400 select-none">
+                            <span className="text-[10px] font-mono text-zinc-500 select-none">
                               {item.label}
                             </span>
                           </div>
@@ -644,163 +697,241 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                   </div>
                 </div>
 
-                <div className="flex justify-between text-[10px] font-mono text-zinc-400 pt-2.5 border-t border-white/[0.08] mt-2 px-1">
+                <div className="flex justify-between text-[10px] font-mono text-zinc-500 pt-2.5 border-t border-zinc-800/80 mt-2 px-1">
                   <span>Start ({timeRange.toUpperCase()} ago)</span>
-                  <span className="text-zinc-200 font-semibold">Latest (Now)</span>
+                  <span className="text-zinc-300 font-semibold">Latest (Now)</span>
                 </div>
               </div>
 
-              {/* Quick Actions Card */}
-              <div className="lg:col-span-5 glass-panel rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="border-b border-white/[0.08] pb-2">
-                    <h2 className="text-sm font-semibold text-white font-mono tracking-tight">
-                      Quick Actions
-                    </h2>
-                    <p className="text-xs text-zinc-400 font-mono mt-0.5">Direct developer shortcuts</p>
+              {/* RIGHT (5 Cols): Impacted Endpoints Leaderboard (Datadog Style) */}
+              <div className="lg:col-span-5 bg-zinc-950/80 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-4 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                    <div className="space-y-0.5">
+                      <h2 className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider font-semibold">
+                        MOST IMPACTED ROUTES
+                      </h2>
+                      <p className="text-xs text-zinc-400 font-sans">Failure distribution across endpoints</p>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                      Datadog APM
+                    </span>
                   </div>
 
-                  <div className="space-y-2">
-                    <button
-                      onClick={handleSendTestPing}
-                      disabled={firingPing}
-                      className="w-full p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-semibold text-zinc-100 transition flex items-center justify-between cursor-pointer"
-                    >
-                      <span>Fire Live Crash Ping</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-white/[0.08]">
-                        1-Click Test →
-                      </span>
-                    </button>
-
-                    <Link
-                      href="/test"
-                      className="block p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition flex items-center justify-between"
-                    >
-                      <span>Open Test Playground</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-white/[0.06]">
-                        Sandbox →
-                      </span>
-                    </Link>
-
-                    <Link
-                      href="/dashboard/integrations"
-                      className="block p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition"
-                    >
-                      Multi-Language SDK Snippets
-                    </Link>
-
-                    <Link
-                      href="/dashboard/settings"
-                      className="block p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition"
-                    >
-                      Configure BYOK AI Copilot
-                    </Link>
-
-                    <Link
-                      href="/dashboard/projects"
-                      className="block p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition"
-                    >
-                      Rotate & Manage Project Keys
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Terminal cURL Snippet */}
-                <div className="pt-2 border-t border-white/[0.08] space-y-1.5">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold block">
-                    TEST VIA TERMINAL (cURL)
-                  </span>
-                  <div className="relative group">
-                    <pre className="glass-inner rounded-lg p-2.5 text-xs font-mono text-zinc-200 overflow-x-auto whitespace-pre leading-relaxed pr-20 scrollbar-none">{curlCommand}</pre>
-                    <button
-                      type="button"
-                      onClick={handleCopyCurl}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 glass-pill text-zinc-200 text-xs px-2.5 py-1 rounded-md hover:bg-white/10 hover:text-white transition font-mono shrink-0 cursor-pointer whitespace-nowrap"
-                    >
-                      {copiedCurl ? '✓ Copied!' : 'Copy cURL'}
-                    </button>
+                  <div className="pt-3">
+                    {impactedRoutes.length === 0 ? (
+                      <div className="py-8 text-center text-zinc-500 text-xs font-mono space-y-1">
+                        <p>No impacted routes captured yet.</p>
+                        <p className="text-[11px] text-zinc-600">Events will rank here by endpoint impact.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3.5">
+                        {impactedRoutes.map((item, idx) => (
+                          <div key={item.route} className="space-y-1.5">
+                            <div className="flex items-center justify-between text-xs font-mono">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-[10px] text-zinc-500 font-semibold w-4 shrink-0">
+                                  #{idx + 1}
+                                </span>
+                                <span
+                                  onClick={() => router.push('/dashboard/errors')}
+                                  className="text-zinc-200 truncate font-medium hover:text-white transition cursor-pointer"
+                                  title={item.route}
+                                >
+                                  {item.route}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-[11px] text-zinc-400">
+                                  {item.count} {item.count === 1 ? 'err' : 'errs'}
+                                </span>
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold tabular-nums">
+                                  {item.percentage}%
+                                </span>
+                              </div>
+                            </div>
+                            <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden border border-zinc-800/60">
+                              <div
+                                className="h-full rounded-full transition-all duration-500 bg-red-400/80"
+                                style={{ width: `${Math.max(item.percentage, 4)}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-white/[0.08] space-y-1">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono block">
-                    ACTIVE INGESTION TOKEN
-                  </span>
-                  <code className="text-xs font-mono text-zinc-100 block truncate glass-inner p-2.5 rounded-lg">
-                    {projectKey || 'Loading...'}
-                  </code>
+                <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-3 border-t border-zinc-800/80">
+                  <span>Top Failing Routes</span>
+                  <Link href="/dashboard/errors" className="text-zinc-400 hover:text-zinc-200 transition font-medium">
+                    Deep Trace →
+                  </Link>
                 </div>
               </div>
 
             </div>
 
-            {/* Full-Width Recent Crashes Table */}
-            <div className="w-full glass-panel rounded-xl p-5 space-y-3.5">
-              <div className="flex justify-between items-center border-b border-white/[0.08] pb-2.5">
-                <div>
-                  <h2 className="text-sm font-semibold text-white font-mono tracking-tight">
-                    Recent Captured Crashes
-                  </h2>
-                  <p className="text-xs text-zinc-400 font-mono mt-0.5">Click any exception row to inspect full trace & AI fixes</p>
+            {/* 3. LOWER SECTION (RECENT INCIDENTS & QUICK ACTIONS) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mt-6">
+              
+              {/* LEFT (8 Cols): Recent Captured Crashes Table */}
+              <div className="lg:col-span-8 bg-zinc-950/80 border border-zinc-800 rounded-xl p-5 space-y-3.5 shadow-sm">
+                <div className="flex justify-between items-center border-b border-zinc-800/80 pb-2.5">
+                  <div>
+                    <h2 className="text-sm font-semibold text-zinc-100 font-mono tracking-tight">
+                      Recent Captured Crashes
+                    </h2>
+                    <p className="text-xs text-zinc-400 font-mono mt-0.5">Click any exception row to inspect full trace & AI fixes</p>
+                  </div>
+                  <Link
+                    href="/dashboard/errors"
+                    className="text-xs text-zinc-400 hover:text-white font-medium transition font-mono"
+                  >
+                    View All →
+                  </Link>
                 </div>
-                <Link
-                  href="/dashboard/errors"
-                  className="text-xs text-zinc-300 hover:text-white font-medium transition font-mono"
-                >
-                  View All →
-                </Link>
+
+                {recentErrors.length === 0 ? (
+                  <div className="p-8 text-center text-zinc-400 text-xs font-mono space-y-2">
+                    <p>No exceptions logged for this account yet.</p>
+                    <button
+                      onClick={handleSendTestPing}
+                      className="text-zinc-100 underline font-semibold cursor-pointer"
+                    >
+                      Click here to fire your first live test crash!
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {recentErrors.map((err) => (
+                      <button
+                        key={err.id}
+                        onClick={() => handleRecentErrorClick(err)}
+                        className="w-full text-left flex items-center justify-between p-3.5 bg-zinc-900/40 hover:bg-zinc-900/80 border border-zinc-800/80 hover:border-zinc-700 rounded-lg text-xs transition cursor-pointer group gap-4"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <span
+                            className={`w-2 h-2 rounded-full shrink-0 ${
+                              err.environment === 'production' ? 'bg-red-400' : 'bg-zinc-500'
+                            }`}
+                          />
+                          <div className="space-y-1 min-w-0 flex-1">
+                            <p className="font-mono text-xs sm:text-[13px] text-zinc-200 group-hover:text-white font-medium truncate transition">
+                              {err.message}
+                            </p>
+                            <p className="text-zinc-500 font-mono text-[11px]">
+                              {new Date(err.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          {err.occurrence_count && err.occurrence_count > 1 ? (
+                            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-zinc-800 border border-zinc-700 text-zinc-300 font-medium">
+                              x{err.occurrence_count}
+                            </span>
+                          ) : null}
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
+                              err.environment === 'production'
+                                ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                            }`}
+                          >
+                            {err.environment}
+                          </span>
+                          <span className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 group-hover:text-white group-hover:border-zinc-700 transition font-mono text-xs font-medium">
+                            Inspect
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {recentErrors.length === 0 ? (
-                <div className="p-8 text-center text-zinc-400 text-xs font-mono space-y-2">
-                  <p>No exceptions logged for this account yet.</p>
+              {/* RIGHT (4 Cols): Developer Quickstart & Terminal Verification */}
+              <div className="lg:col-span-4 bg-zinc-950/80 border border-zinc-800 rounded-xl p-5 space-y-4 shadow-sm">
+                <div className="border-b border-zinc-800/80 pb-3">
+                  <h2 className="text-sm font-semibold text-zinc-100 font-mono tracking-tight">
+                    Developer Quickstart
+                  </h2>
+                  <p className="text-xs text-zinc-400 font-mono mt-0.5">Terminal verification & token access</p>
+                </div>
+
+                <div className="space-y-2">
                   <button
                     onClick={handleSendTestPing}
-                    className="text-zinc-100 underline font-semibold cursor-pointer"
+                    disabled={firingPing || !projectKey}
+                    className="w-full bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold py-2 px-3.5 rounded-lg transition cursor-pointer disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
                   >
-                    Click here to fire your first live test crash!
+                    <span>{firingPing ? 'Dispatching...' : 'Fire Test Crash'}</span>
+                  </button>
+
+                  <button
+                    onClick={toggleDemoMode}
+                    className="w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-semibold py-2 px-3.5 rounded-lg transition cursor-pointer"
+                  >
+                    <span>{demoMode ? 'Clear Demo' : 'Load Demo'}</span>
                   </button>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {recentErrors.map((err) => (
+
+                {/* Terminal Verification cURL */}
+                <div className="pt-2 border-t border-zinc-800/80 space-y-1.5">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold block">
+                    TERMINAL VERIFICATION (cURL)
+                  </span>
+                  <div className="relative group">
+                    <pre className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-2.5 text-xs font-mono text-zinc-300 overflow-x-auto whitespace-pre leading-relaxed pr-22 scrollbar-none">{curlCommand}</pre>
                     <button
-                      key={err.id}
-                      onClick={() => handleRecentErrorClick(err)}
-                      className="w-full text-left flex items-center justify-between p-3.5 glass-inner glass-inner-hover rounded-lg text-xs transition cursor-pointer group gap-4"
+                      type="button"
+                      onClick={handleCopyCurl}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1 rounded-md transition font-mono shrink-0 cursor-pointer whitespace-nowrap"
                     >
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <p className="font-mono text-xs sm:text-[13px] text-zinc-200 group-hover:text-white font-medium truncate transition">
-                          {err.message}
-                        </p>
-                        <p className="text-zinc-400 font-mono text-[11px]">
-                          {new Date(err.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2.5 shrink-0">
-                        {err.occurrence_count && err.occurrence_count > 1 ? (
-                          <span className="px-2 py-0.5 rounded text-[11px] font-mono glass-pill text-zinc-200 font-medium">
-                            x{err.occurrence_count}
-                          </span>
-                        ) : null}
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
-                            err.environment === 'production'
-                              ? 'bg-red-500/15 text-red-300 border border-red-500/30'
-                              : 'glass-pill text-zinc-300'
-                          }`}
-                        >
-                          {err.environment}
-                        </span>
-                        <span className="text-zinc-400 group-hover:text-zinc-100 transition font-mono text-xs flex items-center gap-1 font-medium">
-                          <span>Inspect</span>
-                          <span>→</span>
-                        </span>
-                      </div>
+                      {copiedCurl ? 'Copied' : 'Copy cURL'}
                     </button>
-                  ))}
+                  </div>
                 </div>
-              )}
+
+                {/* Active Ingestion Token */}
+                <div className="pt-2 border-t border-zinc-800/80 space-y-1.5">
+                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider font-mono block">
+                    ACTIVE PROJECT TOKEN
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 p-2 bg-zinc-900/60 border border-zinc-800 rounded-lg text-xs text-zinc-200 truncate font-mono">
+                      {projectKey || 'Loading...'}
+                    </code>
+                    <button
+                      onClick={handleCopyKey}
+                      className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-medium px-3 py-2 rounded-lg transition shrink-0 cursor-pointer"
+                    >
+                      {copiedKey ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Developer shortcuts */}
+                <div className="pt-2 border-t border-zinc-800/80 space-y-1.5 font-mono text-xs">
+                  <Link
+                    href="/test"
+                    className="block p-2 rounded-lg bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-800/80 hover:border-zinc-700 text-zinc-300 hover:text-white transition flex items-center justify-between"
+                  >
+                    <span>Test Sandbox</span>
+                    <span className="text-[10px] text-zinc-500">→</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/integrations"
+                    className="block p-2 rounded-lg bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-800/80 hover:border-zinc-700 text-zinc-300 hover:text-white transition flex items-center justify-between"
+                  >
+                    <span>SDK Integrations</span>
+                    <span className="text-[10px] text-zinc-500">→</span>
+                  </Link>
+                </div>
+              </div>
+
             </div>
           </>
         )}
