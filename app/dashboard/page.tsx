@@ -713,8 +713,8 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                       </h2>
                       <p className="text-xs text-zinc-400 font-sans">Failure distribution across endpoints</p>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
-                      Datadog APM
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
+                      Realtime Impact
                     </span>
                   </div>
 
@@ -765,7 +765,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
                 <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-3 border-t border-zinc-800/80">
                   <span>Top Failing Routes</span>
-                  <Link href="/dashboard/errors" className="text-zinc-400 hover:text-zinc-200 transition font-medium">
+                  <Link href="/dashboard/analytics" className="text-zinc-400 hover:text-zinc-200 transition font-medium">
                     Deep Trace →
                   </Link>
                 </div>
