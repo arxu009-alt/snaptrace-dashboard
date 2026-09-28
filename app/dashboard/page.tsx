@@ -334,15 +334,15 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
   const deliveryRate = totalErrors > 0 ? `${((totalErrors / (totalErrors + 0)) * 100).toFixed(1)}% Delivered` : '99.9% Delivered';
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans selection:bg-zinc-700 selection:text-zinc-100 animate-in fade-in duration-150">
+    <div className="min-h-screen bg-transparent text-zinc-100 p-6 sm:p-8 font-sans selection:bg-zinc-700 selection:text-zinc-100 animate-in fade-in duration-150">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800 pb-4 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-4 gap-4">
           <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-zinc-100 flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
               <span>Telemetry Overview</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-md bg-zinc-900 text-zinc-300 border border-zinc-800 font-mono font-medium">
+              <span className="text-xs px-2.5 py-0.5 rounded-md glass-pill text-zinc-300 font-mono font-medium">
                 {selectedProjectLabel}
               </span>
             </h1>
@@ -355,7 +355,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
             <button
               onClick={handleSendTestPing}
               disabled={firingPing || !projectKey}
-              className="bg-zinc-100 text-zinc-950 hover:bg-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="bg-zinc-100 text-zinc-950 hover:bg-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-sm"
               title="Send an immediate live test crash to your dashboard"
             >
               <span>{firingPing ? 'Dispatching...' : 'Fire Test Crash'}</span>
@@ -363,10 +363,10 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
             <button
               onClick={toggleDemoMode}
-              className={`border border-zinc-700 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+              className={`glass-panel text-xs font-semibold px-3.5 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
                 demoMode
-                  ? 'bg-zinc-800 text-zinc-100'
-                  : 'bg-transparent text-zinc-300 hover:bg-zinc-800'
+                  ? 'bg-zinc-800/90 text-white border-zinc-600'
+                  : 'text-zinc-300 hover:text-white hover:border-white/20'
               }`}
             >
               <span>{demoMode ? 'Clear Demo' : 'Load Demo'}</span>
@@ -374,7 +374,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
             <Link
               href="/dashboard/errors"
-              className="border border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition cursor-pointer"
+              className="glass-panel text-zinc-300 hover:text-white hover:border-white/20 text-xs font-semibold px-3.5 py-1.5 rounded-lg transition cursor-pointer"
             >
               View Stream →
             </Link>
@@ -382,7 +382,7 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
         </div>
 
         {pingSuccessMsg && (
-          <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-xs font-mono text-emerald-300 flex items-center justify-between animate-in fade-in duration-150">
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-xs font-mono text-emerald-300 flex items-center justify-between animate-in fade-in duration-150 backdrop-blur-md">
             <span>{pingSuccessMsg}</span>
             <span className="text-[10px] text-zinc-400">WebSocket Ping: 200 Ingested</span>
           </div>
@@ -390,15 +390,15 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
         {/* Onboarding Quickstart Card */}
         {!loading && totalErrors === 0 && !demoMode && (
-          <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 space-y-5 animate-in fade-in duration-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+          <div className="glass-panel rounded-xl p-6 space-y-5 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
               <div className="space-y-0.5">
                 <div className="inline-flex items-center gap-2 text-zinc-400 text-xs font-mono font-medium uppercase tracking-wider">
                   Quickstart Setup (Step 1 of 2)
                 </div>
                 <h2 className="text-base font-semibold text-zinc-100">Connect your application in 30 seconds</h2>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full glass-inner text-zinc-300 text-xs font-mono">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span>Listening for first event...</span>
               </div>
@@ -409,12 +409,12 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                 <div className="space-y-1">
                   <span className="text-[11px] text-zinc-400 font-medium uppercase">1. Active Project API Key</span>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 p-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-100 truncate font-mono">
+                    <code className="flex-1 p-2 glass-inner rounded-lg text-xs text-zinc-100 truncate font-mono">
                       {projectKey}
                     </code>
                     <button
                       onClick={handleCopyKey}
-                      className="border border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0"
+                      className="border border-white/[0.08] bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0"
                     >
                       {copiedKey ? 'Copied' : 'Copy'}
                     </button>
@@ -426,22 +426,22 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                   <button
                     onClick={handleSendTestPing}
                     disabled={firingPing}
-                    className="w-full bg-zinc-100 text-zinc-950 hover:bg-white text-xs font-semibold px-3.5 py-2.5 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full bg-zinc-100 text-zinc-950 hover:bg-white text-xs font-semibold px-3.5 py-2.5 rounded-lg transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-sm"
                   >
                     <span>{firingPing ? 'Dispatching Ping...' : 'Send Live Test Crash (1-Click)'}</span>
                   </button>
 
                   <button
                     onClick={handleCopyCurl}
-                    className="w-full border border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full glass-inner glass-inner-hover text-zinc-300 hover:text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>{copiedCurl ? 'cURL Command Copied' : 'Copy cURL for Terminal'}</span>
                   </button>
                 </div>
               </div>
 
-              <div className="lg:col-span-7 bg-zinc-950 border border-zinc-800 rounded-lg p-3.5 space-y-2.5 font-mono">
-                <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+              <div className="lg:col-span-7 glass-inner rounded-lg p-3.5 space-y-2.5 font-mono">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
                   <div className="flex items-center space-x-2">
                     {(['curl', 'nextjs', 'js', 'python'] as const).map((tab) => (
                       <button
@@ -469,33 +469,33 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
 
         {loading ? (
           <div className="space-y-4 animate-pulse">
-            <div className="h-28 bg-zinc-900/40 border border-zinc-800 rounded-xl" />
+            <div className="h-28 glass-panel rounded-xl" />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 bg-zinc-900/40 border border-zinc-800 rounded-xl" />
+                <div key={i} className="h-24 glass-panel rounded-xl" />
               ))}
             </div>
-            <div className="h-48 bg-zinc-900/40 border border-zinc-800 rounded-xl" />
+            <div className="h-48 glass-panel rounded-xl" />
           </div>
         ) : (
           <>
             {/* Ingestion Gateway Health Card */}
-            <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4 sm:p-5 space-y-3.5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
+            <div className="glass-panel rounded-xl p-4 sm:p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-zinc-500 font-mono text-[10px] tracking-wider uppercase font-semibold">
+                  <span className="text-zinc-400 font-mono text-[11px] tracking-wider uppercase font-semibold">
                     INGESTION GATEWAY
                   </span>
-                  <span className="text-zinc-700 font-mono text-xs hidden sm:inline">•</span>
+                  <span className="text-zinc-600 font-mono text-xs hidden sm:inline">•</span>
                   <div className="flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-zinc-300 font-mono text-xs">
+                    <span className="text-zinc-300 font-mono text-xs font-medium">
                       Gateway Operational (0ms UI Thread Blocking)
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-zinc-500 font-mono text-[11px] uppercase tracking-wider">Live Delivery Rate</span>
+                  <span className="text-zinc-400 font-mono text-[11px] uppercase tracking-wider">Live Delivery Rate</span>
                   <span className="text-emerald-400 font-mono text-xs font-semibold tabular-nums">
                     {deliveryRate}
                   </span>
@@ -503,73 +503,73 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-lg p-3">
-                  <div className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">Accepted Events</div>
-                  <div className="font-mono text-xl font-bold text-zinc-100 tabular-nums mt-1">{totalErrors}</div>
+                <div className="glass-inner rounded-lg p-3.5 space-y-1">
+                  <div className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-300">Accepted Events</div>
+                  <div className="font-mono text-2xl font-bold text-white tabular-nums tracking-tight">{totalErrors}</div>
                 </div>
-                <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-lg p-3">
-                  <div className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">Throttled (429 Rate Limited)</div>
-                  <div className="font-mono text-xl font-bold text-zinc-100 tabular-nums mt-1">0</div>
+                <div className="glass-inner rounded-lg p-3.5 space-y-1">
+                  <div className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-300">Throttled (429 Rate Limited)</div>
+                  <div className="font-mono text-2xl font-bold text-white tabular-nums tracking-tight">0</div>
                 </div>
-                <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-lg p-3">
-                  <div className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">Suppressed (Loop Deduplicated)</div>
-                  <div className="font-mono text-xl font-bold text-zinc-100 tabular-nums mt-1">0</div>
+                <div className="glass-inner rounded-lg p-3.5 space-y-1">
+                  <div className="font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-300">Suppressed (Loop Deduplicated)</div>
+                  <div className="font-mono text-2xl font-bold text-white tabular-nums tracking-tight">0</div>
                 </div>
               </div>
             </div>
 
             {/* Stat Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-4 space-y-1.5 transition group">
+              <div className="glass-panel glass-panel-hover rounded-xl p-4.5 space-y-2 transition group">
                 <div className="flex items-center justify-between">
-                  <span className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                  <span className="font-mono text-xs font-medium uppercase tracking-wider text-zinc-300">
                     Total Ingested
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 </div>
-                <div className="font-mono text-2xl font-bold text-zinc-100 tabular-nums">
+                <div className="font-mono text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight">
                   {totalErrors}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-sans">All-time captured exceptions</p>
+                <p className="text-xs text-zinc-400 font-sans">All-time captured exceptions</p>
               </div>
 
-              <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-4 space-y-1.5 transition group">
+              <div className="glass-panel glass-panel-hover rounded-xl p-4.5 space-y-2 transition group">
                 <div className="flex items-center justify-between">
-                  <span className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                  <span className="font-mono text-xs font-medium uppercase tracking-wider text-zinc-300">
                     Production Issues
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
                 </div>
-                <div className="font-mono text-2xl font-bold text-zinc-100 tabular-nums">
+                <div className="font-mono text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight">
                   {prodErrors}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-sans">Active live exceptions</p>
+                <p className="text-xs text-zinc-400 font-sans">Active live exceptions</p>
               </div>
 
-              <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-4 space-y-1.5 transition group">
+              <div className="glass-panel glass-panel-hover rounded-xl p-4.5 space-y-2 transition group">
                 <div className="flex items-center justify-between">
-                  <span className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                  <span className="font-mono text-xs font-medium uppercase tracking-wider text-zinc-300">
                     Development Logs
                   </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                 </div>
-                <div className="font-mono text-2xl font-bold text-zinc-100 tabular-nums">
+                <div className="font-mono text-2xl sm:text-3xl font-bold text-white tabular-nums tracking-tight">
                   {devErrors}
                 </div>
-                <p className="text-[11px] text-zinc-500 font-sans">Staging & local events</p>
+                <p className="text-xs text-zinc-400 font-sans">Staging & local events</p>
               </div>
 
-              <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-4 space-y-1.5 transition group">
+              <div className="glass-panel glass-panel-hover rounded-xl p-4.5 space-y-2 transition group">
                 <div className="flex items-center justify-between">
-                  <span className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                  <span className="font-mono text-xs font-medium uppercase tracking-wider text-zinc-300">
                     Noise Firewall
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 </div>
-                <div className="font-mono text-2xl font-bold text-zinc-100">
+                <div className="font-mono text-2xl sm:text-3xl font-bold text-white tracking-tight">
                   Active
                 </div>
-                <p className="text-[11px] text-zinc-500 font-sans">60s loop throttling active</p>
+                <p className="text-xs text-zinc-400 font-sans">60s loop throttling active</p>
               </div>
             </div>
 
@@ -577,26 +577,26 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
               
               {/* Incident Velocity Pulse */}
-              <div className="lg:col-span-7 bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-3 flex flex-col justify-between">
+              <div className="lg:col-span-7 glass-panel rounded-xl p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
                 <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
                     <div>
-                      <h2 className="text-sm font-semibold text-zinc-100 font-mono">
+                      <h2 className="text-sm font-semibold text-white font-mono tracking-tight">
                         Incident Velocity Pulse
                       </h2>
-                      <p className="text-[11px] text-zinc-500 font-sans">Real-time frequency spikes across active window</p>
+                      <p className="text-xs text-zinc-400 font-sans mt-0.5">Real-time frequency spikes across active window</p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center bg-zinc-950 p-0.5 rounded-lg border border-zinc-800 font-mono text-xs">
+                      <div className="flex items-center glass-inner p-0.5 rounded-lg font-mono text-xs">
                         {(['12h', '24h', '7d'] as const).map((range) => (
                           <button
                             key={range}
                             onClick={() => setTimeRange(range)}
                             className={`px-2.5 py-1 rounded text-[11px] font-semibold transition uppercase cursor-pointer ${
                               timeRange === range
-                                ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
-                                : 'text-zinc-400 hover:text-zinc-200'
+                                ? 'bg-zinc-800 text-white border border-zinc-600 shadow-xs'
+                                : 'text-zinc-400 hover:text-zinc-100'
                             }`}
                           >
                             {range}
@@ -604,14 +604,14 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                         ))}
                       </div>
 
-                      <span className="text-[11px] font-mono text-emerald-400 hidden sm:flex items-center gap-1.5">
+                      <span className="text-[11px] font-mono text-emerald-400 hidden sm:flex items-center gap-1.5 font-medium">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         Live
                       </span>
                     </div>
                   </div>
 
-                  <div className="pt-2 pb-1">
+                  <div className="pt-3 pb-1">
                     <div className="h-28 w-full flex items-end justify-between gap-1.5 sm:gap-2 px-1">
                       {distribution.map((item, idx) => {
                         const heightPercent = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
@@ -619,22 +619,22 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                         
                         return (
                           <div key={idx} className="flex-1 h-full flex flex-col justify-end items-center gap-1.5 group relative">
-                            <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-zinc-900 border border-zinc-700 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-200 whitespace-nowrap shadow-xl z-20">
+                            <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-md text-[10px] font-mono text-zinc-100 whitespace-nowrap shadow-xl z-20">
                               {item.count} {item.count === 1 ? 'incident' : 'incidents'} ({item.label})
                             </div>
 
-                            <div className="w-full bg-zinc-950 rounded-sm h-full flex items-end overflow-hidden p-0.5 border border-zinc-800/80">
+                            <div className="w-full glass-inner rounded-sm h-full flex items-end overflow-hidden p-0.5">
                               <div
                                 style={{ height: `${hasErrors ? Math.max(heightPercent, 20) : 4}%` }}
                                 className={`w-full rounded-xs transition-all duration-300 ${
                                   hasErrors
-                                    ? 'bg-zinc-500 hover:bg-zinc-400'
-                                    : 'bg-zinc-800/40'
+                                    ? 'bg-zinc-300 hover:bg-white shadow-xs'
+                                    : 'bg-white/[0.04]'
                                 }`}
                               />
                             </div>
 
-                            <span className="text-[9px] font-mono text-zinc-500 select-none">
+                            <span className="text-[10px] font-mono text-zinc-400 select-none">
                               {item.label}
                             </span>
                           </div>
@@ -644,61 +644,61 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                   </div>
                 </div>
 
-                <div className="flex justify-between text-[10px] font-mono text-zinc-500 pt-2 border-t border-zinc-800/80 mt-2 px-1">
+                <div className="flex justify-between text-[10px] font-mono text-zinc-400 pt-2.5 border-t border-white/[0.08] mt-2 px-1">
                   <span>Start ({timeRange.toUpperCase()} ago)</span>
-                  <span className="text-zinc-400 font-semibold">Latest (Now)</span>
+                  <span className="text-zinc-200 font-semibold">Latest (Now)</span>
                 </div>
               </div>
 
               {/* Quick Actions Card */}
-              <div className="lg:col-span-5 bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-5 glass-panel rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="border-b border-zinc-800/80 pb-2">
-                    <h2 className="text-sm font-semibold text-zinc-100 font-mono">
+                  <div className="border-b border-white/[0.08] pb-2">
+                    <h2 className="text-sm font-semibold text-white font-mono tracking-tight">
                       Quick Actions
                     </h2>
-                    <p className="text-[11px] text-zinc-500 font-mono">Direct developer shortcuts</p>
+                    <p className="text-xs text-zinc-400 font-mono mt-0.5">Direct developer shortcuts</p>
                   </div>
 
                   <div className="space-y-2">
                     <button
                       onClick={handleSendTestPing}
                       disabled={firingPing}
-                      className="w-full p-2.5 bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-semibold text-zinc-100 transition flex items-center justify-between cursor-pointer"
+                      className="w-full p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-semibold text-zinc-100 transition flex items-center justify-between cursor-pointer"
                     >
                       <span>Fire Live Crash Ping</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-700 text-zinc-200">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-white/[0.08]">
                         1-Click Test →
                       </span>
                     </button>
 
                     <Link
                       href="/test"
-                      className="block p-2.5 bg-zinc-950/60 hover:bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 rounded-lg text-xs font-medium text-zinc-300 hover:text-zinc-100 transition flex items-center justify-between"
+                      className="block p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition flex items-center justify-between"
                     >
                       <span>Open Test Playground</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-white/[0.06]">
                         Sandbox →
                       </span>
                     </Link>
 
                     <Link
                       href="/dashboard/integrations"
-                      className="block p-2.5 bg-zinc-950/60 hover:bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 rounded-lg text-xs font-medium text-zinc-300 hover:text-zinc-100 transition"
+                      className="block p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition"
                     >
                       Multi-Language SDK Snippets
                     </Link>
 
                     <Link
                       href="/dashboard/settings"
-                      className="block p-2.5 bg-zinc-950/60 hover:bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 rounded-lg text-xs font-medium text-zinc-300 hover:text-zinc-100 transition"
+                      className="block p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition"
                     >
                       Configure BYOK AI Copilot
                     </Link>
 
                     <Link
                       href="/dashboard/projects"
-                      className="block p-2.5 bg-zinc-950/60 hover:bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 rounded-lg text-xs font-medium text-zinc-300 hover:text-zinc-100 transition"
+                      className="block p-2.5 glass-inner glass-inner-hover rounded-lg text-xs font-medium text-zinc-200 hover:text-white transition"
                     >
                       Rotate & Manage Project Keys
                     </Link>
@@ -706,27 +706,27 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                 </div>
 
                 {/* Terminal cURL Snippet */}
-                <div className="pt-2 border-t border-zinc-800/80 space-y-1.5">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold block">
+                <div className="pt-2 border-t border-white/[0.08] space-y-1.5">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold block">
                     TEST VIA TERMINAL (cURL)
                   </span>
                   <div className="relative group">
-                    <pre className="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-xs font-mono text-zinc-300 overflow-x-auto whitespace-pre leading-relaxed pr-20 scrollbar-none">{curlCommand}</pre>
+                    <pre className="glass-inner rounded-lg p-2.5 text-xs font-mono text-zinc-200 overflow-x-auto whitespace-pre leading-relaxed pr-20 scrollbar-none">{curlCommand}</pre>
                     <button
                       type="button"
                       onClick={handleCopyCurl}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 border border-zinc-700 bg-zinc-900/60 text-zinc-200 text-xs px-2.5 py-1 rounded hover:bg-zinc-800 transition font-mono shrink-0 cursor-pointer whitespace-nowrap"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 glass-pill text-zinc-200 text-xs px-2.5 py-1 rounded-md hover:bg-white/10 hover:text-white transition font-mono shrink-0 cursor-pointer whitespace-nowrap"
                     >
                       {copiedCurl ? '✓ Copied!' : 'Copy cURL'}
                     </button>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-zinc-800/80 space-y-1">
+                <div className="pt-2 border-t border-white/[0.08] space-y-1">
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono block">
                     ACTIVE INGESTION TOKEN
                   </span>
-                  <code className="text-[11px] font-mono text-zinc-200 block truncate bg-zinc-950 p-2 rounded-lg border border-zinc-800">
+                  <code className="text-xs font-mono text-zinc-100 block truncate glass-inner p-2.5 rounded-lg">
                     {projectKey || 'Loading...'}
                   </code>
                 </div>
@@ -735,28 +735,28 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
             </div>
 
             {/* Full-Width Recent Crashes Table */}
-            <div className="w-full bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 space-y-3">
-              <div className="flex justify-between items-center border-b border-zinc-800/80 pb-2.5">
+            <div className="w-full glass-panel rounded-xl p-5 space-y-3.5">
+              <div className="flex justify-between items-center border-b border-white/[0.08] pb-2.5">
                 <div>
-                  <h2 className="text-sm font-semibold text-zinc-100 font-mono">
+                  <h2 className="text-sm font-semibold text-white font-mono tracking-tight">
                     Recent Captured Crashes
                   </h2>
-                  <p className="text-[11px] text-zinc-500 font-mono">Click any exception row to inspect full trace & AI fixes</p>
+                  <p className="text-xs text-zinc-400 font-mono mt-0.5">Click any exception row to inspect full trace & AI fixes</p>
                 </div>
                 <Link
                   href="/dashboard/errors"
-                  className="text-xs text-zinc-400 hover:text-zinc-100 font-medium transition font-mono"
+                  className="text-xs text-zinc-300 hover:text-white font-medium transition font-mono"
                 >
                   View All →
                 </Link>
               </div>
 
               {recentErrors.length === 0 ? (
-                <div className="p-8 text-center text-zinc-500 text-xs font-mono space-y-2">
+                <div className="p-8 text-center text-zinc-400 text-xs font-mono space-y-2">
                   <p>No exceptions logged for this account yet.</p>
                   <button
                     onClick={handleSendTestPing}
-                    className="text-zinc-200 underline font-semibold"
+                    className="text-zinc-100 underline font-semibold cursor-pointer"
                   >
                     Click here to fire your first live test crash!
                   </button>
@@ -767,32 +767,32 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                     <button
                       key={err.id}
                       onClick={() => handleRecentErrorClick(err)}
-                      className="w-full text-left flex items-center justify-between p-3 bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/60 rounded-lg text-xs transition cursor-pointer group gap-4"
+                      className="w-full text-left flex items-center justify-between p-3.5 glass-inner glass-inner-hover rounded-lg text-xs transition cursor-pointer group gap-4"
                     >
-                      <div className="space-y-0.5 min-w-0 flex-1">
-                        <p className="font-mono text-xs text-zinc-300 group-hover:text-zinc-100 truncate transition">
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <p className="font-mono text-xs sm:text-[13px] text-zinc-200 group-hover:text-white font-medium truncate transition">
                           {err.message}
                         </p>
-                        <p className="text-zinc-500 font-mono text-[10px]">
+                        <p className="text-zinc-400 font-mono text-[11px]">
                           {new Date(err.created_at).toLocaleString()}
                         </p>
                       </div>
                       <div className="flex items-center gap-2.5 shrink-0">
                         {err.occurrence_count && err.occurrence_count > 1 ? (
-                          <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">
+                          <span className="px-2 py-0.5 rounded text-[11px] font-mono glass-pill text-zinc-200 font-medium">
                             x{err.occurrence_count}
                           </span>
                         ) : null}
                         <span
-                          className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider ${
+                          className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
                             err.environment === 'production'
-                              ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                              : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                              ? 'bg-red-500/15 text-red-300 border border-red-500/30'
+                              : 'glass-pill text-zinc-300'
                           }`}
                         >
                           {err.environment}
                         </span>
-                        <span className="text-zinc-500 group-hover:text-zinc-200 transition font-mono text-xs flex items-center gap-1">
+                        <span className="text-zinc-400 group-hover:text-zinc-100 transition font-mono text-xs flex items-center gap-1 font-medium">
                           <span>Inspect</span>
                           <span>→</span>
                         </span>

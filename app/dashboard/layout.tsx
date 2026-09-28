@@ -207,27 +207,27 @@ export default function DashboardLayout({
   const userInitial = userDisplayName ? userDisplayName.charAt(0).toUpperCase() : 'M';
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col md:flex-row font-sans selection:bg-zinc-800 selection:text-zinc-100">
+    <div className="min-h-screen bg-[#07090e] bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(59,130,246,0.06),rgba(0,0,0,0))] text-zinc-100 flex flex-col md:flex-row font-sans selection:bg-zinc-800 selection:text-zinc-100">
       
       {/* 1. Left Sidebar Navigation */}
       <aside
-        className={`bg-zinc-950 border-r border-zinc-800/80 flex-shrink-0 flex flex-col transition-all duration-200 ${
+        className={`bg-zinc-950/70 backdrop-blur-xl border-r border-white/[0.06] flex-shrink-0 flex flex-col transition-all duration-200 ${
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
-        <div className="p-4 border-b border-zinc-800/80 flex items-center justify-between min-w-[240px]">
+        <div className="p-4 border-b border-white/[0.06] flex items-center justify-between min-w-[240px]">
           <Link href="/dashboard" className="transition hover:opacity-90 active:scale-95">
             <SnapTraceLogo size="md" showText={!sidebarCollapsed} />
           </Link>
           {!sidebarCollapsed && (
-            <span className="text-[10px] font-mono text-zinc-400 border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 rounded uppercase tracking-wider">
+            <span className="text-[10px] font-mono text-zinc-400 border border-white/[0.08] bg-zinc-900/60 px-1.5 py-0.5 rounded uppercase tracking-wider">
               v1.0
             </span>
           )}
         </div>
 
         {!sidebarCollapsed && (
-          <div id="tour-project-switcher" className="px-3.5 py-3 border-b border-zinc-800/80 bg-zinc-950 min-w-[240px]">
+          <div id="tour-project-switcher" className="px-3.5 py-3 border-b border-white/[0.06] bg-transparent min-w-[240px]">
             <ProjectSwitcher />
           </div>
         )}
@@ -236,7 +236,7 @@ export default function DashboardLayout({
           {navGroups.map((group) => (
             <div key={group.label}>
               {!sidebarCollapsed && (
-                <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold px-3 pt-4 pb-1.5 block">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold px-3 pt-4 pb-1.5 block">
                   {group.label}
                 </span>
               )}
@@ -249,10 +249,10 @@ export default function DashboardLayout({
                       key={item.href}
                       id={item.id}
                       href={item.href}
-                      className={`flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors duration-150 ${
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors duration-150 ${
                         isActive
-                          ? 'bg-zinc-900 text-zinc-100 font-medium border-l-2 border-zinc-200'
-                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40 border-l-2 border-transparent'
+                          ? 'bg-zinc-800/80 text-white font-medium border-l-2 border-zinc-200 shadow-sm'
+                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] border-l-2 border-transparent'
                       }`}
                     >
                       <div className="flex items-center space-x-2.5">
@@ -273,7 +273,7 @@ export default function DashboardLayout({
         </nav>
 
         {!sidebarCollapsed && (
-          <div className="p-3.5 border-t border-zinc-800/80 text-[11px] text-zinc-500 flex items-center justify-between min-w-[240px] font-mono">
+          <div className="p-3.5 border-t border-white/[0.06] text-[11px] text-zinc-400 flex items-center justify-between min-w-[240px] font-mono">
             <span>Featherweight APM</span>
             <span className="text-emerald-400 text-[10px] flex items-center gap-1.5 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -284,10 +284,10 @@ export default function DashboardLayout({
       </aside>
 
       {/* 2. Main Content View */}
-      <div className="flex-1 flex flex-col min-w-0 bg-zinc-950">
+      <div className="flex-1 flex flex-col min-w-0 bg-transparent">
         
         {/* Top Header */}
-        <header className="h-14 border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md px-5 flex items-center justify-between z-40">
+        <header className="h-14 border-b border-white/[0.06] bg-zinc-950/70 backdrop-blur-xl px-5 flex items-center justify-between z-40">
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}

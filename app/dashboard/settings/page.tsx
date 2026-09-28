@@ -135,19 +135,19 @@ export default function SettingsPage() {
     ? apiKey
     : (apiKey.slice(0, 10) + '••••••••••••••••' + apiKey.slice(-8));
 
-  const inputCls = 'w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono transition';
+  const inputCls = 'w-full glass-inner rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 font-mono transition';
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans">
+    <div className="min-h-screen bg-transparent text-zinc-100 p-6 sm:p-8 font-sans">
       <div className="max-w-3xl mx-auto space-y-6">
 
         {/* Header */}
-        <div className="border-b border-zinc-800/80 pb-5">
+        <div className="border-b border-white/[0.08] pb-5">
           <div className="flex items-center gap-2.5 mb-1">
-            <Settings className="w-4 h-4 text-zinc-400" />
-            <h1 className="text-xl font-semibold tracking-tight text-zinc-100">Account Settings</h1>
+            <Settings className="w-4 h-4 text-zinc-300" />
+            <h1 className="text-xl font-bold tracking-tight text-white">Account Settings</h1>
           </div>
-          <p className="text-xs text-zinc-500 font-mono">
+          <p className="text-xs text-zinc-400 font-mono">
             Manage your developer identity, security credentials, and active API key.
           </p>
         </div>
@@ -157,30 +157,30 @@ export default function SettingsPage() {
             <div className="relative animate-pulse">
               <SnapTraceLogo size="lg" showText={false} />
             </div>
-            <p className="text-xs font-mono text-zinc-500 tracking-widest uppercase">Loading settings...</p>
+            <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase">Loading settings...</p>
           </div>
         ) : (
           <div className="space-y-6">
 
             {/* Developer Account Profile */}
-            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+            <div className="glass-panel rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-zinc-800 text-zinc-200 font-semibold text-xs flex items-center justify-center border border-zinc-700 font-mono">
+                  <div className="h-8 w-8 rounded-lg glass-inner text-zinc-100 font-semibold text-xs flex items-center justify-center font-mono">
                     {userInitial}
                   </div>
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-100">Developer Profile</h2>
+                    <h2 className="text-sm font-semibold text-white">Developer Profile</h2>
                     <p className="text-xs text-zinc-400 mt-0.5">Your authenticated developer identity</p>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 bg-zinc-900 text-zinc-400 border border-zinc-800 rounded text-[10px] font-medium uppercase font-mono">
+                <span className="px-2 py-0.5 glass-pill text-zinc-300 rounded text-[10px] font-medium uppercase font-mono">
                   Active Session
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <form onSubmit={handleSaveDisplayName} className="bg-zinc-900/40 p-3.5 rounded-lg border border-zinc-800/80 space-y-2">
+                <form onSubmit={handleSaveDisplayName} className="glass-inner p-3.5 rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium font-mono">Developer Display Name</span>
                     {nameSavedMsg && (
@@ -194,19 +194,19 @@ export default function SettingsPage() {
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="e.g. Muhammad Arslan"
-                      className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono transition"
+                      className="flex-1 glass-inner rounded-lg px-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 font-mono transition"
                     />
                     <button
                       type="submit"
                       disabled={savingName}
-                      className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs font-medium transition shrink-0 cursor-pointer font-mono border border-zinc-700 disabled:opacity-50"
+                      className="px-3 py-1.5 glass-inner glass-inner-hover text-zinc-200 hover:text-white rounded-lg text-xs font-medium transition shrink-0 cursor-pointer font-mono disabled:opacity-50"
                     >
                       {savingName ? 'Saving...' : 'Save'}
                     </button>
                   </div>
                 </form>
 
-                <div className="bg-zinc-900/40 p-3.5 rounded-lg border border-zinc-800/80 space-y-1 flex flex-col justify-center">
+                <div className="glass-inner p-3.5 rounded-lg space-y-1 flex flex-col justify-center">
                   <span className="text-[10px] text-zinc-400 uppercase tracking-wider block font-medium font-mono">Account Email Address</span>
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-zinc-200 font-mono text-xs font-medium truncate">{userEmail}</span>
@@ -218,7 +218,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Active API Key */}
-              <div className="bg-zinc-900/40 p-3.5 rounded-lg border border-zinc-800/80 space-y-2">
+              <div className="glass-inner p-3.5 rounded-lg space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium font-mono">Active Project API Key</span>
                   <button
@@ -230,13 +230,13 @@ export default function SettingsPage() {
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-300 font-mono truncate select-all">
+                  <div className="flex-1 glass-inner rounded-lg px-3 py-1.5 text-xs text-zinc-200 font-mono truncate select-all">
                     {displayToken}
                   </div>
                   <button
                     type="button"
                     onClick={handleCopyKey}
-                    className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium rounded-lg transition shrink-0 cursor-pointer font-mono border border-zinc-700"
+                    className="px-3 py-1.5 glass-pill hover:bg-white/10 text-zinc-200 hover:text-white text-xs font-medium rounded-lg transition shrink-0 cursor-pointer font-mono"
                   >
                     {copiedKey ? 'Copied' : 'Copy Key'}
                   </button>
@@ -245,13 +245,13 @@ export default function SettingsPage() {
             </div>
 
             {/* Security & Password */}
-            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+            <div className="glass-panel rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                 <div>
-                  <h2 className="text-sm font-semibold text-zinc-100">Security &amp; Update Password</h2>
+                  <h2 className="text-sm font-semibold text-white">Security &amp; Update Password</h2>
                   <p className="text-xs text-zinc-400 mt-0.5">Change your account password without logging out.</p>
                 </div>
-                <span className="px-2 py-0.5 bg-zinc-900 text-zinc-400 border border-zinc-800 rounded text-[10px] font-medium uppercase font-mono">
+                <span className="px-2 py-0.5 glass-pill text-zinc-300 rounded text-[10px] font-medium uppercase font-mono">
                   Encrypted
                 </span>
               </div>
@@ -294,7 +294,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={updatingPassword}
-                    className="px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition disabled:opacity-50 cursor-pointer font-mono shrink-0"
+                    className="px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg transition disabled:opacity-50 cursor-pointer font-mono shrink-0 shadow-sm"
                   >
                     {updatingPassword ? 'Updating...' : 'Update Password'}
                   </button>
@@ -303,20 +303,20 @@ export default function SettingsPage() {
             </div>
 
             {/* Database Maintenance */}
-            <div className="bg-zinc-950 border border-red-950/40 rounded-xl p-5 space-y-4">
-              <div className="border-b border-zinc-800/80 pb-3">
+            <div className="glass-panel border-red-500/20 rounded-xl p-5 space-y-4">
+              <div className="border-b border-red-500/20 pb-3">
                 <h2 className="text-sm font-semibold text-red-400 flex items-center gap-2">
                   <Trash2 className="w-4 h-4" />
                   Database Maintenance
                 </h2>
-                <p className="text-xs text-zinc-500 mt-0.5 font-mono">
+                <p className="text-xs text-zinc-400 mt-0.5 font-mono">
                   Permanently deletes all exceptions marked as resolved.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-0.5">
-                  <p className="text-xs text-zinc-300 font-medium font-mono">Purge Resolved Errors</p>
-                  <p className="text-[11px] text-zinc-500">This action is irreversible. Unresolved errors are not affected.</p>
+                  <p className="text-xs text-zinc-200 font-medium font-mono">Purge Resolved Errors</p>
+                  <p className="text-[11px] text-zinc-400">This action is irreversible. Unresolved errors are not affected.</p>
                 </div>
                 <div className="flex items-center gap-3 self-start sm:self-auto">
                   {purgeMsg && (
