@@ -45,6 +45,7 @@ export default function DashboardLayout({
   const [authChecking, setAuthChecking] = useState<boolean>(true);
   const [userDisplayName, setUserDisplayName] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState<boolean>(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -101,10 +102,15 @@ export default function DashboardLayout({
       if (!session) {
         router.replace('/login');
       } else {
-        const name = session.user?.user_metadata?.full_name;
+        const meta = session.user?.user_metadata;
+        const name = meta?.full_name || meta?.name || meta?.user_name || meta?.preferred_username;
+        const avatar = meta?.avatar_url || meta?.picture;
         const email = session.user?.email || '';
         setUserDisplayName(name || email.split('@')[0] || 'Developer');
         setUserEmail(email);
+        if (avatar) {
+          setUserAvatarUrl(avatar);
+        }
 
         if (email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com') {
           setIsOwner(true);
@@ -140,6 +146,16 @@ export default function DashboardLayout({
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         router.replace('/login');
+      } else if (session?.user) {
+        const meta = session.user.user_metadata;
+        const name = meta?.full_name || meta?.name || meta?.user_name || meta?.preferred_username;
+        const avatar = meta?.avatar_url || meta?.picture;
+        const email = session.user.email || '';
+        setUserDisplayName(name || email.split('@')[0] || 'Developer');
+        setUserEmail(email);
+        if (avatar) {
+          setUserAvatarUrl(avatar);
+        }
       }
     });
 
@@ -343,8 +359,17 @@ export default function DashboardLayout({
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="flex items-center space-x-2 p-1.5 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition cursor-pointer shadow-sm"
               >
-                <div className="h-6 w-6 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-semibold text-xs flex items-center justify-center">
-                  {userInitial}
+                <div className="h-6 w-6 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-semibold text-xs flex items-center justify-center overflow-hidden shrink-0">
+                  {userAvatarUrl ? (
+                    <img
+                      src={userAvatarUrl}
+                      alt={userDisplayName}
+                      className="h-full w-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    userInitial
+                  )}
                 </div>
                 
                 <span className="hidden lg:inline text-xs text-zinc-300 font-medium max-w-[120px] truncate">
@@ -363,9 +388,23 @@ export default function DashboardLayout({
                   className="absolute right-0 mt-2 w-56 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 font-sans"
                   onMouseLeave={() => setProfileDropdownOpen(false)}
                 >
-                  <div className="px-3 py-2 border-b border-zinc-800/80 mb-1 space-y-0.5">
-                    <p className="text-xs text-zinc-100 font-medium truncate">{userDisplayName}</p>
-                    <p className="text-[10px] text-zinc-400 font-mono truncate">{userEmail}</p>
+                  <div className="flex items-center gap-2.5 px-3 py-2 border-b border-zinc-800/80 mb-1">
+                    <div className="h-8 w-8 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-200 font-semibold text-xs flex items-center justify-center overflow-hidden shrink-0">
+                      {userAvatarUrl ? (
+                        <img
+                          src={userAvatarUrl}
+                          alt={userDisplayName}
+                          className="h-full w-full object-cover rounded-full"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        userInitial
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <p className="text-xs text-zinc-100 font-medium truncate">{userDisplayName}</p>
+                      <p className="text-[10px] text-zinc-400 font-mono truncate">{userEmail}</p>
+                    </div>
                   </div>
 
                   <button

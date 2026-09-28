@@ -23,10 +23,10 @@ export default function SettingsPage() {
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
   const [copiedKey, setCopiedKey] = useState<boolean>(false);
 
-  // Purge State
   const [purging, setPurging] = useState<boolean>(false);
   const [purgeMsg, setPurgeMsg] = useState<string | null>(null);
 
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -39,8 +39,12 @@ export default function SettingsPage() {
       const uEmail = user.email || '';
       setUserEmail(uEmail);
 
-      const currentName = user.user_metadata?.full_name || user.user_metadata?.name || uEmail.split('@')[0] || '';
+      const meta = user.user_metadata;
+      const currentName = meta?.full_name || meta?.name || meta?.user_name || uEmail.split('@')[0] || '';
       setDisplayName(currentName);
+
+      const avatar = meta?.avatar_url || meta?.picture;
+      setUserAvatarUrl(avatar || null);
 
       const { data: userProjects } = await supabase
         .from('projects')
@@ -166,8 +170,17 @@ export default function SettingsPage() {
             <div className="glass-panel rounded-xl p-5 space-y-4">
               <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg glass-inner text-zinc-100 font-semibold text-xs flex items-center justify-center font-mono">
-                    {userInitial}
+                  <div className="h-8 w-8 rounded-lg glass-inner text-zinc-100 font-semibold text-xs flex items-center justify-center font-mono overflow-hidden shrink-0">
+                    {userAvatarUrl ? (
+                      <img
+                        src={userAvatarUrl}
+                        alt={displayName}
+                        className="h-full w-full object-cover rounded-lg"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      userInitial
+                    )}
                   </div>
                   <div>
                     <h2 className="text-sm font-semibold text-white">Developer Profile</h2>
