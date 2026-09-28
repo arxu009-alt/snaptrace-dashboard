@@ -573,69 +573,75 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
               </div>
             </div>
 
-            {/* Velocity Pulse Chart */}
-            <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
+            {/* Side-by-Side Velocity Pulse & Quick Actions Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              
+              {/* Incident Velocity Pulse */}
+              <div className="lg:col-span-7 bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-3 flex flex-col justify-between">
                 <div>
-                  <h2 className="text-sm font-semibold text-zinc-100 font-mono">
-                    Incident Velocity Pulse
-                  </h2>
-                  <p className="text-[11px] text-zinc-500 font-sans">Real-time frequency spikes across active window</p>
-                </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
+                    <div>
+                      <h2 className="text-sm font-semibold text-zinc-100 font-mono">
+                        Incident Velocity Pulse
+                      </h2>
+                      <p className="text-[11px] text-zinc-500 font-sans">Real-time frequency spikes across active window</p>
+                    </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center bg-zinc-950 p-0.5 rounded-lg border border-zinc-800 font-mono text-xs">
-                    {(['12h', '24h', '7d'] as const).map((range) => (
-                      <button
-                        key={range}
-                        onClick={() => setTimeRange(range)}
-                        className={`px-2.5 py-1 rounded text-[11px] font-semibold transition uppercase cursor-pointer ${
-                          timeRange === range
-                            ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
-                            : 'text-zinc-400 hover:text-zinc-200'
-                        }`}
-                      >
-                        {range}
-                      </button>
-                    ))}
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center bg-zinc-950 p-0.5 rounded-lg border border-zinc-800 font-mono text-xs">
+                        {(['12h', '24h', '7d'] as const).map((range) => (
+                          <button
+                            key={range}
+                            onClick={() => setTimeRange(range)}
+                            className={`px-2.5 py-1 rounded text-[11px] font-semibold transition uppercase cursor-pointer ${
+                              timeRange === range
+                                ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
+                                : 'text-zinc-400 hover:text-zinc-200'
+                            }`}
+                          >
+                            {range}
+                          </button>
+                        ))}
+                      </div>
+
+                      <span className="text-[11px] font-mono text-emerald-400 hidden sm:flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Live
+                      </span>
+                    </div>
                   </div>
 
-                  <span className="text-[11px] font-mono text-emerald-400 hidden sm:flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Live
-                  </span>
-                </div>
-              </div>
+                  <div className="pt-2 pb-1">
+                    <div className="h-28 w-full flex items-end justify-between gap-1.5 sm:gap-2 px-1">
+                      {distribution.map((item, idx) => {
+                        const heightPercent = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
+                        const hasErrors = item.count > 0;
+                        
+                        return (
+                          <div key={idx} className="flex-1 h-full flex flex-col justify-end items-center gap-1.5 group relative">
+                            <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-zinc-900 border border-zinc-700 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-200 whitespace-nowrap shadow-xl z-20">
+                              {item.count} {item.count === 1 ? 'incident' : 'incidents'} ({item.label})
+                            </div>
 
-              <div className="pt-2 pb-1">
-                <div className="h-28 w-full flex items-end justify-between gap-1.5 sm:gap-2 px-1">
-                  {distribution.map((item, idx) => {
-                    const heightPercent = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
-                    const hasErrors = item.count > 0;
-                    
-                    return (
-                      <div key={idx} className="flex-1 h-full flex flex-col justify-end items-center gap-1.5 group relative">
-                        <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-zinc-900 border border-zinc-700 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-200 whitespace-nowrap shadow-xl z-20">
-                          {item.count} {item.count === 1 ? 'incident' : 'incidents'} ({item.label})
-                        </div>
+                            <div className="w-full bg-zinc-950 rounded-sm h-full flex items-end overflow-hidden p-0.5 border border-zinc-800/80">
+                              <div
+                                style={{ height: `${hasErrors ? Math.max(heightPercent, 20) : 4}%` }}
+                                className={`w-full rounded-xs transition-all duration-300 ${
+                                  hasErrors
+                                    ? 'bg-zinc-500 hover:bg-zinc-400'
+                                    : 'bg-zinc-800/40'
+                                }`}
+                              />
+                            </div>
 
-                        <div className="w-full bg-zinc-950 rounded-sm h-full flex items-end overflow-hidden p-0.5 border border-zinc-800/80">
-                          <div
-                            style={{ height: `${hasErrors ? Math.max(heightPercent, 20) : 4}%` }}
-                            className={`w-full rounded-xs transition-all duration-300 ${
-                              hasErrors
-                                ? 'bg-zinc-500 hover:bg-zinc-400'
-                                : 'bg-zinc-800/40'
-                            }`}
-                          />
-                        </div>
-
-                        <span className="text-[9px] font-mono text-zinc-500 select-none">
-                          {item.label}
-                        </span>
-                      </div>
-                    );
-                  })}
+                            <span className="text-[9px] font-mono text-zinc-500 select-none">
+                              {item.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex justify-between text-[10px] font-mono text-zinc-500 pt-2 border-t border-zinc-800/80 mt-2 px-1">
@@ -643,81 +649,9 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                   <span className="text-zinc-400 font-semibold">Latest (Now)</span>
                 </div>
               </div>
-            </div>
-
-            {/* Recent Crashes & Shortcuts Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              {/* Recent Captured Crashes */}
-              <div className="lg:col-span-2 bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 space-y-3">
-                <div className="flex justify-between items-center border-b border-zinc-800/80 pb-2.5">
-                  <div>
-                    <h2 className="text-sm font-semibold text-zinc-100 font-mono">
-                      Recent Captured Crashes
-                    </h2>
-                    <p className="text-[11px] text-zinc-500 font-mono">Click any exception row to inspect full trace & AI fixes</p>
-                  </div>
-                  <Link
-                    href="/dashboard/errors"
-                    className="text-xs text-zinc-400 hover:text-zinc-100 font-medium transition font-mono"
-                  >
-                    View All →
-                  </Link>
-                </div>
-
-                {recentErrors.length === 0 ? (
-                  <div className="p-8 text-center text-zinc-500 text-xs font-mono space-y-2">
-                    <p>No exceptions logged for this account yet.</p>
-                    <button
-                      onClick={handleSendTestPing}
-                      className="text-zinc-200 underline font-semibold"
-                    >
-                      Click here to fire your first live test crash!
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {recentErrors.map((err) => (
-                      <button
-                        key={err.id}
-                        onClick={() => handleRecentErrorClick(err)}
-                        className="w-full text-left flex items-center justify-between p-2.5 bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/60 rounded-lg text-xs transition cursor-pointer group"
-                      >
-                        <div className="space-y-0.5 truncate max-w-md">
-                          <p className="font-mono text-xs text-zinc-300 group-hover:text-zinc-100 truncate transition">
-                            {err.message}
-                          </p>
-                          <p className="text-zinc-500 font-mono text-[10px]">
-                            {new Date(err.created_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {err.occurrence_count && err.occurrence_count > 1 ? (
-                            <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">
-                              x{err.occurrence_count}
-                            </span>
-                          ) : null}
-                          <span
-                            className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider ${
-                              err.environment === 'production'
-                                ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
-                            }`}
-                          >
-                            {err.environment}
-                          </span>
-                          <span className="text-zinc-600 group-hover:text-zinc-300 transition font-mono text-xs">
-                            →
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
 
               {/* Quick Actions Card */}
-              <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
+              <div className="lg:col-span-5 bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="border-b border-zinc-800/80 pb-2">
                     <h2 className="text-sm font-semibold text-zinc-100 font-mono">
@@ -798,6 +732,75 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                 </div>
               </div>
 
+            </div>
+
+            {/* Full-Width Recent Crashes Table */}
+            <div className="w-full bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 space-y-3">
+              <div className="flex justify-between items-center border-b border-zinc-800/80 pb-2.5">
+                <div>
+                  <h2 className="text-sm font-semibold text-zinc-100 font-mono">
+                    Recent Captured Crashes
+                  </h2>
+                  <p className="text-[11px] text-zinc-500 font-mono">Click any exception row to inspect full trace & AI fixes</p>
+                </div>
+                <Link
+                  href="/dashboard/errors"
+                  className="text-xs text-zinc-400 hover:text-zinc-100 font-medium transition font-mono"
+                >
+                  View All →
+                </Link>
+              </div>
+
+              {recentErrors.length === 0 ? (
+                <div className="p-8 text-center text-zinc-500 text-xs font-mono space-y-2">
+                  <p>No exceptions logged for this account yet.</p>
+                  <button
+                    onClick={handleSendTestPing}
+                    className="text-zinc-200 underline font-semibold"
+                  >
+                    Click here to fire your first live test crash!
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {recentErrors.map((err) => (
+                    <button
+                      key={err.id}
+                      onClick={() => handleRecentErrorClick(err)}
+                      className="w-full text-left flex items-center justify-between p-3 bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/60 rounded-lg text-xs transition cursor-pointer group gap-4"
+                    >
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <p className="font-mono text-xs text-zinc-300 group-hover:text-zinc-100 truncate transition">
+                          {err.message}
+                        </p>
+                        <p className="text-zinc-500 font-mono text-[10px]">
+                          {new Date(err.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        {err.occurrence_count && err.occurrence_count > 1 ? (
+                          <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">
+                            x{err.occurrence_count}
+                          </span>
+                        ) : null}
+                        <span
+                          className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider ${
+                            err.environment === 'production'
+                              ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                              : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                          }`}
+                        >
+                          {err.environment}
+                        </span>
+                        <span className="text-zinc-500 group-hover:text-zinc-200 transition font-mono text-xs flex items-center gap-1">
+                          <span>Inspect</span>
+                          <span>→</span>
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}
