@@ -4,10 +4,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 type LanguageKey =
-  | 'js'
   | 'nextjs'
-  | 'python'
+  | 'js'
+  | 'curl'
   | 'node'
+  | 'python'
   | 'go'
   | 'rust'
   | 'csharp'
@@ -16,17 +17,17 @@ type LanguageKey =
   | 'kotlin'
   | 'flutter'
   | 'cloudflare'
-  | 'curl'
   | 'html';
 
 interface IntegrationSnippet {
   name: string;
-  icon: string;
+  badge: string;
   category: string;
   filename: string;
   installCmd?: string;
   guide: string[];
   code: (apiKey: string) => string;
+  isNpm?: boolean;
 }
 
 function CodeHighlighter({ code }: { code: string }) {
@@ -81,6 +82,9 @@ export default function LanguageIntegrationsPage() {
   const [apiKey, setApiKey] = useState<string>('YOUR_SNAPTRACE_API_KEY');
   const [activeTab, setActiveTab] = useState<LanguageKey>('nextjs');
   const [copied, setCopied] = useState<boolean>(false);
+  const [copiedInstall, setCopiedInstall] = useState<boolean>(false);
+  const [copiedInit, setCopiedInit] = useState<boolean>(false);
+  const [copiedCatch, setCopiedCatch] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchApiKey = useCallback(async () => {
@@ -114,56 +118,114 @@ export default function LanguageIntegrationsPage() {
     };
   }, [fetchApiKey]);
 
+  const nextJsInitCode = `'use client';
+import { initSnapTrace } from 'snaptrace';
+
+initSnapTrace({
+  apiKey: '${apiKey}',
+});`;
+
+  const nextJsCatchCode = `import { captureException } from 'snaptrace';
+
+try {
+  // your business logic
+} catch (error) {
+  captureException(error);
+}`;
+
   const integrations: Record<LanguageKey, IntegrationSnippet> = {
     nextjs: {
-      name: 'Next.js (App Router)',
-      icon: '▲',
-      category: 'Fullstack Framework',
+      name: 'Next.js / React',
+      badge: 'NPM',
+      category: 'Official npm Package',
       filename: 'app/layout.tsx',
-      installCmd: '// Zero dependencies. Drop into your root layout:',
+      isNpm: true,
+      installCmd: 'npm install snaptrace',
       guide: [
-        'Place this script tag inside your root `app/layout.tsx` file inside `<head>`.',
-        'Automatically intercepts client-side uncaught exceptions, hydration errors, and unhandled promise rejections.',
-        'Uses `navigator.sendBeacon` for zero impact on Core Web Vitals.',
+        'Install the official `snaptrace` package via npm or pnpm.',
+        'Initialize once inside your root client layout (`app/layout.tsx` or `providers.tsx`).',
+        'Captures uncaught runtime exceptions, React render boundaries, and promise rejections.',
+        'Featherweight (<3.4KB gzipped) with 0ms hydration latency and non-blocking beacon delivery.',
       ],
-      code: (key) => `// app/layout.tsx
-import Script from 'next/script';
+      code: (key) => `'use client';
+import { initSnapTrace } from 'snaptrace';
+
+initSnapTrace({
+  apiKey: '${key}',
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <Script
-          src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
-          strategy="beforeInteractive"
-          data-api-key="${key}"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );
 }`,
     },
     js: {
-      name: 'JavaScript / React / Vue',
-      icon: '🟨',
-      category: 'Frontend Client',
+      name: 'JavaScript / CDN',
+      badge: 'CDN',
+      category: 'Browser Script Tag',
       filename: 'index.html',
       installCmd: '<!-- Paste into your HTML head before other scripts -->',
       guide: [
-        'Works with React, Vue, Svelte, Angular, Vite, and Vanilla JavaScript.',
+        'Drop-in script tag for React, Vue, Svelte, Angular, Vite, and Vanilla JavaScript.',
         'Automatically captures `window.onerror` and `window.onunhandledrejection`.',
-        'Sanitizes passwords, tokens, and credit cards directly on the client.',
+        'Sanitizes passwords, tokens, and credit cards directly in the browser.',
       ],
       code: (key) => `<script 
-  src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
+  src="https://snaptrace.space/snaptrace.js"
   data-api-key="${key}"
   async
 ></script>`,
     },
+    curl: {
+      name: 'cURL / REST API',
+      badge: 'cURL',
+      category: 'DevOps & CI/CD',
+      filename: 'terminal.sh',
+      installCmd: 'curl -X POST https://snaptrace.space/api/v1/log ...',
+      guide: [
+        'Send raw JSON payloads directly via HTTP POST.',
+        'Ideal for GitHub Actions, Bash scripts, and cron monitors.',
+      ],
+      code: (key) => `curl -X POST https://snaptrace.space/api/v1/log \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "apiKey": "${key}",
+    "message": "Critical process crash on worker-01",
+    "stackTrace": "ProcessExitedError: Signal SIGSEGV",
+    "environment": "production",
+    "url": "https://worker-01.internal/jobs"
+  }'`,
+    },
+    node: {
+      name: 'Node.js (Express / NestJS)',
+      badge: 'Node',
+      category: 'Backend Runtime',
+      filename: 'server.js',
+      installCmd: '// Uses standard native fetch in Node 18+',
+      guide: [
+        'Hook into `process.on("uncaughtException")` or Express error middleware.',
+        'Dispatches backend telemetry without external heavy dependencies.',
+      ],
+      code: (key) => `// server.js
+process.on('uncaughtException', (err) => {
+  fetch('https://snaptrace.space/api/v1/log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      apiKey: '${key}',
+      message: err.message,
+      stackTrace: err.stack,
+      environment: process.env.NODE_ENV || 'production'
+    })
+  }).catch(() => {});
+});`,
+    },
     python: {
       name: 'Python (Django / FastAPI)',
-      icon: '🐍',
+      badge: 'Python',
       category: 'Backend Language',
       filename: 'client.py',
       installCmd: 'pip install requests',
@@ -177,7 +239,7 @@ import requests, traceback
 
 def capture_snaptrace(exception, route="https://api.mycompany.com"):
     try:
-        requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
+        requests.post("https://snaptrace.space/api/v1/log", json={
             "apiKey": "${key}",
             "message": str(exception),
             "stackTrace": traceback.format_exc(),
@@ -187,33 +249,9 @@ def capture_snaptrace(exception, route="https://api.mycompany.com"):
     except Exception:
         pass`,
     },
-    node: {
-      name: 'Node.js (Express / NestJS)',
-      icon: '🟩',
-      category: 'Backend Runtime',
-      filename: 'server.js',
-      installCmd: '// Uses standard native fetch in Node 18+',
-      guide: [
-        'Hook into `process.on("uncaughtException")` or Express error middleware.',
-        'Dispatches backend telemetry without external npm dependencies.',
-      ],
-      code: (key) => `// server.js
-process.on('uncaughtException', (err) => {
-  fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      apiKey: '${key}',
-      message: err.message,
-      stackTrace: err.stack,
-      environment: process.env.NODE_ENV || 'production'
-    })
-  }).catch(() => {});
-});`,
-    },
     go: {
       name: 'Go (Golang)',
-      icon: '🐹',
+      badge: 'Go',
       category: 'Backend Language',
       filename: 'main.go',
       installCmd: '// Uses standard library net/http and encoding/json',
@@ -236,12 +274,12 @@ func SendSnapTrace(err error, route string) {
     "environment": "production",
     "url":         route,
   })
-  go http.Post("https://snaptrace-dashboard.vercel.app/api/v1/log", "application/json", bytes.NewBuffer(payload))
+  go http.Post("https://snaptrace.space/api/v1/log", "application/json", bytes.NewBuffer(payload))
 }`,
     },
     rust: {
       name: 'Rust (Axum / Actix)',
-      icon: '🦀',
+      badge: 'Rust',
       category: 'Systems Language',
       filename: 'telemetry.rs',
       installCmd: 'cargo add reqwest serde_json',
@@ -257,7 +295,7 @@ func SendSnapTrace(err error, route string) {
         "environment": "production"
     });
     let _ = reqwest::Client::new()
-        .post("https://snaptrace-dashboard.vercel.app/api/v1/log")
+        .post("https://snaptrace.space/api/v1/log")
         .json(&payload)
         .send()
         .await;
@@ -265,7 +303,7 @@ func SendSnapTrace(err error, route string) {
     },
     csharp: {
       name: 'C# / .NET Core',
-      icon: '🔷',
+      badge: 'C#',
       category: 'Backend / Enterprise',
       filename: 'SnapTraceClient.cs',
       installCmd: '// Uses System.Net.Http.Json',
@@ -281,12 +319,12 @@ func SendSnapTrace(err error, route string) {
         url = url,
         environment = "production"
     };
-    await new HttpClient().PostAsJsonAsync("https://snaptrace-dashboard.vercel.app/api/v1/log", payload);
+    await new HttpClient().PostAsJsonAsync("https://snaptrace.space/api/v1/log", payload);
 }`,
     },
     php: {
       name: 'PHP (Laravel / WordPress)',
-      icon: '🐘',
+      badge: 'PHP',
       category: 'Backend Language',
       filename: 'handler.php',
       installCmd: '// Uses native PHP cURL extension',
@@ -296,7 +334,7 @@ func SendSnapTrace(err error, route string) {
       ],
       code: (key) => `<?php
 set_exception_handler(function ($e) {
-    $ch = curl_init('https://snaptrace-dashboard.vercel.app/api/v1/log');
+    $ch = curl_init('https://snaptrace.space/api/v1/log');
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
         'apiKey' => '${key}',
         'message' => $e->getMessage(),
@@ -310,7 +348,7 @@ set_exception_handler(function ($e) {
     },
     ruby: {
       name: 'Ruby on Rails',
-      icon: '💎',
+      badge: 'Ruby',
       category: 'Backend Framework',
       filename: 'snaptrace.rb',
       installCmd: '// Uses standard library Net::HTTP and JSON',
@@ -319,7 +357,7 @@ set_exception_handler(function ($e) {
         'Formats backtrace into structured telemetry.',
       ],
       code: (key) => `def send_snaptrace_alert(exception)
-  uri = URI('https://snaptrace-dashboard.vercel.app/api/v1/log')
+  uri = URI('https://snaptrace.space/api/v1/log')
   Net::HTTP.post(uri, {
     apiKey: '${key}',
     message: exception.message,
@@ -330,7 +368,7 @@ end`,
     },
     kotlin: {
       name: 'Kotlin / Android / Java',
-      icon: '☕',
+      badge: 'Kotlin',
       category: 'Mobile & JVM',
       filename: 'SnapTrace.kt',
       installCmd: 'implementation("com.squareup.okhttp3:okhttp:4.12.0")',
@@ -347,7 +385,7 @@ end`,
         put("url", context)
     }
     val body = json.toString().toRequestBody("application/json".toMediaType())
-    OkHttpClient().newCall(Request.Builder().url("https://snaptrace-dashboard.vercel.app/api/v1/log").post(body).build()).enqueue(object: Callback {
+    OkHttpClient().newCall(Request.Builder().url("https://snaptrace.space/api/v1/log").post(body).build()).enqueue(object: Callback {
         override fun onFailure(call: Call, e: IOException) {}
         override fun onResponse(call: Call, response: Response) { response.close() }
     })
@@ -355,7 +393,7 @@ end`,
     },
     flutter: {
       name: 'Flutter / Dart',
-      icon: '📱',
+      badge: 'Flutter',
       category: 'Mobile Framework',
       filename: 'main.dart',
       installCmd: 'flutter pub add http',
@@ -365,7 +403,7 @@ end`,
       ],
       code: (key) => `void captureSnapTrace(Object error, StackTrace stack) {
   http.post(
-    Uri.parse('https://snaptrace-dashboard.vercel.app/api/v1/log'),
+    Uri.parse('https://snaptrace.space/api/v1/log'),
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode({
       'apiKey': '${key}',
@@ -378,7 +416,7 @@ end`,
     },
     cloudflare: {
       name: 'Cloudflare Workers / Edge',
-      icon: '☁️',
+      badge: 'Edge',
       category: 'Serverless Edge',
       filename: 'worker.js',
       installCmd: '// Uses standard Fetch & ExecutionContext.waitUntil',
@@ -391,7 +429,7 @@ end`,
     try {
       return await handleRequest(req);
     } catch (err) {
-      ctx.waitUntil(fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
+      ctx.waitUntil(fetch('https://snaptrace.space/api/v1/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -406,29 +444,9 @@ end`,
   }
 };`,
     },
-    curl: {
-      name: 'cURL / REST API',
-      icon: '🌐',
-      category: 'DevOps & CI/CD',
-      filename: 'terminal.sh',
-      installCmd: 'curl -X POST ...',
-      guide: [
-        'Send raw JSON payloads directly via HTTP POST.',
-        'Ideal for GitHub Actions, Bash scripts, and cron monitors.',
-      ],
-      code: (key) => `curl -X POST https://snaptrace-dashboard.vercel.app/api/v1/log \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "apiKey": "${key}",
-    "message": "Critical process crash on worker-01",
-    "stackTrace": "ProcessExitedError: Signal SIGSEGV",
-    "environment": "production",
-    "url": "https://worker-01.internal/jobs"
-  }'`,
-    },
     html: {
       name: 'HTML5 Resource Catcher',
-      icon: '🎨',
+      badge: 'HTML5',
       category: 'Asset Monitoring',
       filename: 'index.html',
       installCmd: '<!-- Paste in HTML head -->',
@@ -440,7 +458,7 @@ end`,
   document.addEventListener('error', function(e) {
     var target = e.target;
     if (target && (target.tagName === 'IMG' || target.tagName === 'LINK' || target.tagName === 'SCRIPT')) {
-      fetch('https://snaptrace-dashboard.vercel.app/api/v1/log', {
+      fetch('https://snaptrace.space/api/v1/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -465,18 +483,51 @@ end`,
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyInstall = () => {
+    navigator.clipboard.writeText('npm install snaptrace');
+    setCopiedInstall(true);
+    setTimeout(() => setCopiedInstall(false), 2000);
+  };
+
+  const handleCopyInit = () => {
+    navigator.clipboard.writeText(nextJsInitCode);
+    setCopiedInit(true);
+    setTimeout(() => setCopiedInit(false), 2000);
+  };
+
+  const handleCopyCatch = () => {
+    navigator.clipboard.writeText(nextJsCatchCode);
+    setCopiedCatch(true);
+    setTimeout(() => setCopiedCatch(false), 2000);
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans animate-in fade-in duration-200">
       <div className="max-w-5xl mx-auto space-y-6">
         
         {/* Header */}
         <div className="border-b border-zinc-800/80 pb-5">
-          <h1 className="text-xl font-semibold tracking-tight text-zinc-100">
-            Language Integrations
-          </h1>
-          <p className="text-xs text-zinc-500 font-mono mt-1">
-            Production-ready code snippets with your active project credentials pre-injected.
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight text-zinc-100">
+                Language Integrations
+              </h1>
+              <p className="text-xs text-zinc-500 font-mono mt-1">
+                Official NPM package & drop-in snippets with your active project credentials pre-injected.
+              </p>
+            </div>
+            <a
+              href="https://www.npmjs.com/package/snaptrace"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/15 text-xs font-mono transition cursor-pointer self-start sm:self-auto"
+            >
+              <span className="font-bold">npm</span>
+              <span className="text-zinc-600">•</span>
+              <span>snaptrace v1.0.0</span>
+              <span className="text-zinc-500 font-mono text-[10px]">↗</span>
+            </a>
+          </div>
         </div>
 
         {/* Active Ingestion Key Banner */}
@@ -498,7 +549,7 @@ end`,
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           
           {/* Left: Language Tabs */}
-          <div className="lg:col-span-1 space-y-1 max-h-[620px] overflow-y-auto pr-1">
+          <div className="lg:col-span-1 space-y-1 max-h-[660px] overflow-y-auto pr-1">
             <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-2 px-1">
               Supported Stacks ({Object.keys(integrations).length})
             </span>
@@ -506,6 +557,7 @@ end`,
             {(Object.keys(integrations) as LanguageKey[]).map((lang) => {
               const item = integrations[lang];
               const isActive = activeTab === lang;
+              const isPrimary = lang === 'nextjs';
               return (
                 <button
                   key={lang}
@@ -516,10 +568,16 @@ end`,
                       : 'text-zinc-400 border border-transparent hover:bg-zinc-900 hover:text-zinc-200'
                   }`}
                 >
-                  <span className="text-sm shrink-0">{item.icon}</span>
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border shrink-0 ${
+                    isPrimary 
+                      ? 'bg-red-500/10 border-red-500/30 text-red-400 font-bold' 
+                      : 'bg-zinc-800/80 border-zinc-700/80 text-zinc-400'
+                  }`}>
+                    {item.badge}
+                  </span>
                   <div className="truncate">
-                    <div className="truncate">{item.name}</div>
-                    <span className="text-[9px] text-zinc-600 font-mono block">{item.category}</span>
+                    <div className="truncate font-sans font-medium">{item.name}</div>
+                    <span className="text-[9px] text-zinc-500 font-mono block">{item.category}</span>
                   </div>
                 </button>
               );
@@ -533,13 +591,24 @@ end`,
               {/* Integration Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/60 pb-3.5">
                 <div className="flex items-center space-x-2.5">
-                  <span className="text-lg p-1.5 bg-zinc-900 border border-zinc-800 rounded-lg">
-                    {current.icon}
+                  <span className={`text-xs font-mono px-2 py-1 rounded-lg border font-bold ${
+                    current.isNpm
+                      ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                      : 'bg-zinc-900 border-zinc-800 text-zinc-300'
+                  }`}>
+                    {current.badge}
                   </span>
                   <div>
-                    <h2 className="text-sm font-semibold text-zinc-100">
-                      {current.name}
-                    </h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-semibold text-zinc-100">
+                        {current.name}
+                      </h2>
+                      {current.isNpm && (
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-medium">
+                          Official SDK
+                        </span>
+                      )}
+                    </div>
                     <span className="text-[10px] text-zinc-500 font-mono">{current.category}</span>
                   </div>
                 </div>
@@ -547,68 +616,167 @@ end`,
                   onClick={handleCopy}
                   className="px-3 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 rounded-lg text-xs font-medium transition flex items-center justify-center space-x-1.5 cursor-pointer self-start sm:self-auto font-mono"
                 >
-                  <span>{copied ? '✓ Copied!' : 'Copy Snippet'}</span>
+                  <span>{copied ? '✓ Copied' : 'Copy Snippet'}</span>
                 </button>
               </div>
 
-              {/* Install Command */}
-              {current.installCmd && (
-                <div className="space-y-1.5">
-                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-                    Installation
-                  </span>
-                  <pre className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg text-xs font-mono text-emerald-400/90 overflow-x-auto">
-                    {current.installCmd}
-                  </pre>
-                </div>
-              )}
-
-              {/* Setup Guide */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-                  Setup Instructions
-                </span>
-                <ul className="space-y-1.5 text-xs text-zinc-400 bg-zinc-900 p-3.5 rounded-lg border border-zinc-800 font-mono">
-                  {current.guide.map((step, idx) => (
-                    <li key={idx} className="flex items-start space-x-2">
-                      <span className="text-zinc-500">•</span>
-                      <span>{step}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Code Snippet Editor */}
-              <div className="space-y-1.5 pt-1">
-                <div className="flex items-center justify-between px-0.5">
-                  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-                    Code Snippet
-                  </span>
-                  <span className="text-[10px] font-mono text-zinc-600">
-                    {current.filename}
-                  </span>
-                </div>
-
-                <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-                  <div className="px-3.5 py-2 bg-zinc-900 border-b border-zinc-800/80 flex items-center justify-between">
-                    <div className="flex items-center space-x-1.5">
-                      <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
-                      <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
-                      <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
-                      <span className="text-[11px] font-mono text-zinc-500 ml-2">{current.filename}</span>
+              {/* Next.js / React Featured 3-Step NPM Integration */}
+              {current.isNpm ? (
+                <div className="space-y-4">
+                  {/* Step 1: Install official package */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-4 h-4 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-mono font-bold flex items-center justify-center">1</span>
+                        <span className="text-xs font-medium text-zinc-200 font-sans">Install official package</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-zinc-500">&lt;3.4KB gzipped</span>
                     </div>
-                    <span className="text-[10px] font-mono text-zinc-600 uppercase">UTF-8</span>
+
+                    <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-lg p-2.5 font-mono text-xs text-zinc-200">
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="text-zinc-600 select-none">$</span>
+                        <code className="text-emerald-400 font-semibold truncate">npm install snaptrace</code>
+                      </div>
+                      <button
+                        onClick={handleCopyInstall}
+                        className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1 rounded transition font-mono shrink-0 cursor-pointer"
+                      >
+                        {copiedInstall ? '✓ Copied' : 'Copy'}
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="p-4 max-h-[380px] overflow-y-auto">
-                    <CodeHighlighter code={current.code(apiKey)} />
+                  {/* Step 2: Client initialization */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-4 h-4 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-mono font-bold flex items-center justify-center">2</span>
+                        <span className="text-xs font-medium text-zinc-200 font-sans">Initialize in <code className="text-zinc-300 font-mono text-[11px]">app/layout.tsx</code> or <code className="text-zinc-300 font-mono text-[11px]">providers.tsx</code></span>
+                      </div>
+                      <button
+                        onClick={handleCopyInit}
+                        className="text-[11px] font-mono text-zinc-400 hover:text-zinc-200 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 transition cursor-pointer"
+                      >
+                        {copiedInit ? '✓ Copied' : 'Copy Init'}
+                      </button>
+                    </div>
+
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                      <div className="px-3.5 py-1.5 bg-zinc-900/80 border-b border-zinc-800/80 flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-zinc-500">app/layout.tsx</span>
+                        <span className="text-[10px] font-mono text-zinc-600">TypeScript</span>
+                      </div>
+                      <div className="p-3.5">
+                        <CodeHighlighter code={nextJsInitCode} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 3: Optional manual exception catch */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-4 h-4 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-mono font-bold flex items-center justify-center">3</span>
+                        <span className="text-xs font-medium text-zinc-200 font-sans">Manual exception catch <span className="text-zinc-500 text-[11px] font-normal">(Optional)</span></span>
+                      </div>
+                      <button
+                        onClick={handleCopyCatch}
+                        className="text-[11px] font-mono text-zinc-400 hover:text-zinc-200 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 transition cursor-pointer"
+                      >
+                        {copiedCatch ? '✓ Copied' : 'Copy Catch'}
+                      </button>
+                    </div>
+
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                      <div className="px-3.5 py-1.5 bg-zinc-900/80 border-b border-zinc-800/80 flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-zinc-500">Manual Error Capture</span>
+                        <span className="text-[10px] font-mono text-zinc-600">TypeScript</span>
+                      </div>
+                      <div className="p-3.5">
+                        <CodeHighlighter code={nextJsCatchCode} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bullet Highlights */}
+                  <div className="pt-2">
+                    <ul className="space-y-1.5 text-xs text-zinc-400 bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/80 font-mono text-[11.5px]">
+                      {current.guide.map((step, idx) => (
+                        <li key={idx} className="flex items-start space-x-2">
+                          <span className="text-zinc-600 select-none">•</span>
+                          <span>{step}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-              </div>
+              ) : (
+                /* Standard layout for secondary alternatives (CDN script, cURL, and backend languages) */
+                <>
+                  {/* Install Command */}
+                  {current.installCmd && (
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                        Installation
+                      </span>
+                      <pre className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg text-xs font-mono text-emerald-400/90 overflow-x-auto">
+                        {current.installCmd}
+                      </pre>
+                    </div>
+                  )}
+
+                  {/* Setup Guide */}
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                      Setup Instructions
+                    </span>
+                    <ul className="space-y-1.5 text-xs text-zinc-400 bg-zinc-900 p-3.5 rounded-lg border border-zinc-800 font-mono">
+                      {current.guide.map((step, idx) => (
+                        <li key={idx} className="flex items-start space-x-2">
+                          <span className="text-zinc-500 select-none">•</span>
+                          <span>{step}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Code Snippet Editor */}
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex items-center justify-between px-0.5">
+                      <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                        Code Snippet
+                      </span>
+                      <span className="text-[10px] font-mono text-zinc-600">
+                        {current.filename}
+                      </span>
+                    </div>
+
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                      <div className="px-3.5 py-2 bg-zinc-900 border-b border-zinc-800/80 flex items-center justify-between">
+                        <div className="flex items-center space-x-1.5">
+                          <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
+                          <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
+                          <span className="w-2 h-2 rounded-full bg-zinc-700 inline-block" />
+                          <span className="text-[11px] font-mono text-zinc-500 ml-2">{current.filename}</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-zinc-600 uppercase">UTF-8</span>
+                      </div>
+
+                      <div className="p-4 max-h-[380px] overflow-y-auto">
+                        <CodeHighlighter code={current.code(apiKey)} />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
 
             </div>
 
-            <div className="pt-3 border-t border-zinc-800/60 text-right">
+            <div className="pt-3 border-t border-zinc-800/60 flex items-center justify-between">
+              <span className="text-[11px] text-zinc-500 font-mono">
+                Package: <a href="https://www.npmjs.com/package/snaptrace" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-200 underline">npmjs.com/package/snaptrace</a>
+              </span>
               <span className="text-[11px] text-zinc-600 font-mono">
                 Endpoint: <code className="text-zinc-400">POST /api/v1/log</code>
               </span>

@@ -385,7 +385,7 @@ function getDevBotAnswer(prompt: string): string {
 }
 
 const STACK_TABS: Array<{ id: StackKey; label: string }> = [
-  { id: 'nextjs', label: 'Next.js' },
+  { id: 'nextjs', label: 'Next.js (npm)' },
   { id: 'js', label: 'JavaScript' },
   { id: 'python', label: 'Python' },
   { id: 'node', label: 'Node.js' },
@@ -442,7 +442,24 @@ const COMPARISON_ROWS: Array<{ f: string; st: string; sentry: string; glitch: st
 ];
 
 const SNIPPETS: Record<StackKey, string> = {
-  nextjs: '// app/layout.tsx (Next.js App Router)\nimport Script from \'next/script\';\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang="en">\n      <head>\n        <Script\n          src="https://snaptrace.space/snaptrace.js"\n          strategy="beforeInteractive"\n          data-api-key="sk_live_your_project_key"\n        />\n      </head>\n      <body>{children}</body>\n    </html>\n  );\n}',
+  nextjs: `// 1. Install via npm:
+// npm install snaptrace
+
+// 2. app/layout.tsx (Next.js App Router)
+'use client';
+import { initSnapTrace } from 'snaptrace';
+
+initSnapTrace({
+  apiKey: 'sk_live_your_project_key',
+});
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}`,
   js: '<!-- React, Vue, Svelte, or Vanilla JavaScript -->\n<script \n  src="https://snaptrace.space/snaptrace.js"\n  data-api-key="sk_live_your_project_key"\n  async\n></script>',
   python: '# Python / Django / FastAPI / Flask\nimport traceback, requests\n\ndef log_to_snaptrace(exception, url="https://api.mycompany.com"):\n    try:\n        requests.post("https://snaptrace.space/api/v1/log", json={\n            "apiKey": "sk_live_your_project_key",\n            "message": str(exception),\n            "stackTrace": traceback.format_exc(),\n            "url": url,\n            "environment": "production"\n        }, timeout=2)\n    except Exception:\n        pass',
   node: '// Node.js / Express / NestJS\nprocess.on(\'uncaughtException\', (err) => {\n  fetch(\'https://snaptrace.space/api/v1/log\', {\n    method: \'POST\',\n    headers: { \'Content-Type\': \'application/json\' },\n    body: JSON.stringify({ apiKey: \'sk_live_your_project_key\', message: err.message, stackTrace: err.stack, environment: process.env.NODE_ENV || \'production\' })\n  }).catch(() => {});\n});',
@@ -620,6 +637,13 @@ export default function WelcomeLandingPage() {
   };
 
   const heroScriptSnippet = '<script src="https://snaptrace.space/snaptrace.js" data-api-key="YOUR_KEY" async></script>';
+
+  const [copiedNpmInstall, setCopiedNpmInstall] = useState(false);
+  const handleCopyNpmInstall = () => {
+    navigator.clipboard.writeText('npm install snaptrace');
+    setCopiedNpmInstall(true);
+    setTimeout(() => setCopiedNpmInstall(false), 2000);
+  };
 
   const handleCopyHeroScript = () => {
     navigator.clipboard.writeText(heroScriptSnippet);
@@ -1116,21 +1140,60 @@ export default function WelcomeLandingPage() {
                   </Link>
                 </div>
 
-                <div className="pt-4 max-w-xl mx-auto w-full">
-                  <div className="flex items-center gap-2 sm:gap-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-2 pl-3 sm:pl-3.5 w-full min-w-0 max-w-full">
-                    <IconCode className="h-4 w-4 shrink-0 text-zinc-600 hidden sm:block" />
-                    <code className="flex-1 min-w-0 truncate text-left font-mono text-[11px] sm:text-[11.5px] text-zinc-400">
-                      &lt;script src=&quot;https://snaptrace.space/snaptrace.js&quot; data-api-key=&quot;<span className="text-yellow-300 font-bold">YOUR_KEY</span>&quot; async&gt;&lt;/script&gt;
+                <div className="pt-5 max-w-xl mx-auto w-full space-y-3">
+                  {/* NPM Registry Badge & Link */}
+                  <div className="flex items-center justify-center gap-2 flex-wrap font-mono text-[11px]">
+                    <a
+                      href="https://www.npmjs.com/package/snaptrace"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 font-mono text-[11px] text-red-300 hover:border-red-500/50 hover:bg-red-500/15 transition cursor-pointer"
+                    >
+                      <span className="font-bold">npm</span>
+                      <span className="text-zinc-600">•</span>
+                      <span>v1.0.0</span>
+                      <span className="text-zinc-600">•</span>
+                      <span className="text-zinc-200">npmjs.com/package/snaptrace</span>
+                      <IconArrow className="h-3 w-3" />
+                    </a>
+                  </div>
+
+                  {/* 1-Click NPM Install Box */}
+                  <div className="flex items-center gap-2 sm:gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-2 pl-3 sm:pl-3.5 w-full min-w-0 max-w-full">
+                    <span className="text-zinc-500 font-mono text-xs select-none">$</span>
+                    <code className="flex-1 min-w-0 truncate text-left font-mono text-[12px] text-zinc-100 font-semibold">
+                      npm install snaptrace
                     </code>
-                    <button onClick={handleCopyHeroScript} className={BTN_GHOST_SM + ' shrink-0 cursor-pointer font-mono'}>
-                      {copiedHeroScript ? <IconCheck className="h-3.5 w-3.5 text-emerald-400" /> : <IconCopy className="h-3.5 w-3.5" />}
-                      {copiedHeroScript ? 'Copied' : 'Copy'}
+                    <button
+                      onClick={handleCopyNpmInstall}
+                      className={BTN_GHOST_SM + ' shrink-0 cursor-pointer font-mono'}
+                      title="Copy install command"
+                    >
+                      {copiedNpmInstall ? <IconCheck className="h-3.5 w-3.5 text-emerald-400" /> : <IconCopy className="h-3.5 w-3.5" />}
+                      {copiedNpmInstall ? 'Copied' : 'Copy'}
                     </button>
                   </div>
+
+                  {/* Next.js App Router Initialization Snippet */}
+                  <div className="rounded-xl border border-zinc-800 bg-zinc-950/80 p-3.5 text-left font-mono text-xs space-y-2">
+                    <div className="flex items-center justify-between text-[10px] text-zinc-500 border-b border-zinc-800/80 pb-2">
+                      <span className="uppercase tracking-wider">Next.js App Router (app/layout.tsx)</span>
+                      <span className="text-zinc-400 font-semibold">&lt;3.4KB</span>
+                    </div>
+                    <pre className="text-[11.5px] leading-relaxed text-zinc-300 overflow-x-auto">
+                      <code>{`import { initSnapTrace } from 'snaptrace';
+
+initSnapTrace({
+  apiKey: 'your_api_key',
+});`}</code>
+                    </pre>
+                  </div>
+
+                  {/* Feature Badges */}
                   <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[11px] text-zinc-500">
-                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />Drop into HTML head</span>
-                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />0.0ms hydration penalty</span>
+                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />Official npm SDK</span>
                     <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />&lt;3.4KB gzipped</span>
+                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />0.0ms hydration penalty</span>
                   </div>
                 </div>
               </div>
@@ -1758,6 +1821,33 @@ export default function WelcomeLandingPage() {
                       {copiedSnippet ? 'Copied' : 'Copy snippet'}
                     </button>
                   </div>
+
+                  {activeQuickTab === 'nextjs' && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 bg-zinc-900/60 px-4 py-2.5 font-mono text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded bg-red-500/10 border border-red-500/30 text-red-400 px-1.5 py-0.5 text-[10px] font-bold">npm</span>
+                        <code className="text-zinc-200 font-semibold">npm install snaptrace</code>
+                        <span className="text-[10px] text-zinc-500 font-mono">&lt;3.4KB</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <a
+                          href="https://www.npmjs.com/package/snaptrace"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-zinc-400 hover:text-zinc-200 inline-flex items-center gap-1 transition"
+                        >
+                          <span>npmjs.com/package/snaptrace</span>
+                          <IconArrow className="h-3 w-3" />
+                        </a>
+                        <button
+                          onClick={handleCopyNpmInstall}
+                          className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1 rounded transition cursor-pointer"
+                        >
+                          {copiedNpmInstall ? 'Copied' : 'Copy npm install'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="st-scroll overflow-x-auto bg-[#070B13] p-5 sm:p-6">
                     <pre className="select-text font-mono text-[12.5px] leading-[1.7] text-slate-300">

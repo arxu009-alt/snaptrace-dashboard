@@ -136,6 +136,9 @@ export default function DashboardOverviewPage() {
   const [copiedCurl, setCopiedCurl] = useState(false);
   const [firingPing, setFiringPing] = useState(false);
   const [pingSuccessMsg, setPingSuccessMsg] = useState<string | null>(null);
+  const [quickstartMode, setQuickstartMode] = useState<'npm' | 'curl'>('npm');
+  const [copiedNpmInstall, setCopiedNpmInstall] = useState(false);
+  const [copiedNpmSnippet, setCopiedNpmSnippet] = useState(false);
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
@@ -390,19 +393,20 @@ export default function DashboardOverviewPage() {
 
   const quickstartSnippets: Record<QuickstartTab, string> = {
     curl: curlCommand,
-    nextjs: `// app/layout.tsx
-import Script from 'next/script';
+    nextjs: `// 1. Install via npm:
+npm install snaptrace
+
+// 2. app/layout.tsx (Next.js App Router)
+'use client';
+import { initSnapTrace } from 'snaptrace';
+
+initSnapTrace({
+  apiKey: "${projectKey || 'YOUR_API_KEY'}",
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
-      <head>
-        <Script
-          src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
-          strategy="beforeInteractive"
-          data-api-key="${projectKey}"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );
@@ -878,21 +882,88 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                   </button>
                 </div>
 
-                {/* Terminal Verification cURL */}
-                <div className="pt-2 border-t border-zinc-800/80 space-y-1.5">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold block">
-                    TERMINAL VERIFICATION (cURL)
-                  </span>
-                  <div className="relative group">
-                    <pre className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-2.5 text-xs font-mono text-zinc-300 overflow-x-auto whitespace-pre leading-relaxed pr-22 scrollbar-none">{curlCommand}</pre>
-                    <button
-                      type="button"
-                      onClick={handleCopyCurl}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1 rounded-md transition font-mono shrink-0 cursor-pointer whitespace-nowrap"
-                    >
-                      {copiedCurl ? 'Copied' : 'Copy cURL'}
-                    </button>
+                {/* Official SDK & Verification Box */}
+                <div className="pt-2 border-t border-zinc-800/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold block">
+                      QUICK INTEGRATION
+                    </span>
+                    <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-0.5 rounded-md font-mono text-[10px]">
+                      <button
+                        type="button"
+                        onClick={() => setQuickstartMode('npm')}
+                        className={`px-2 py-0.5 rounded transition cursor-pointer font-semibold ${
+                          quickstartMode === 'npm'
+                            ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
+                            : 'text-zinc-400 hover:text-zinc-200'
+                        }`}
+                      >
+                        npm SDK
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setQuickstartMode('curl')}
+                        className={`px-2 py-0.5 rounded transition cursor-pointer font-semibold ${
+                          quickstartMode === 'curl'
+                            ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
+                            : 'text-zinc-400 hover:text-zinc-200'
+                        }`}
+                      >
+                        cURL
+                      </button>
+                    </div>
                   </div>
+
+                  {quickstartMode === 'npm' ? (
+                    <div className="space-y-2">
+                      {/* npm install box with 1-click copy */}
+                      <div className="flex items-center justify-between bg-zinc-900/80 border border-zinc-800 rounded-lg px-2.5 py-1.5 font-mono text-xs text-zinc-200">
+                        <code className="text-zinc-100 font-semibold">npm i snaptrace</code>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText('npm i snaptrace');
+                            setCopiedNpmInstall(true);
+                            setTimeout(() => setCopiedNpmInstall(false), 2000);
+                          }}
+                          className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1 rounded-md transition font-mono shrink-0 cursor-pointer"
+                        >
+                          {copiedNpmInstall ? 'Copied' : 'Copy'}
+                        </button>
+                      </div>
+
+                      {/* Code snippet with active project API key */}
+                      <div className="relative group">
+                        <pre className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-2.5 text-[11px] font-mono text-zinc-300 overflow-x-auto whitespace-pre leading-relaxed pr-16 scrollbar-none">{`import { initSnapTrace } from 'snaptrace';
+
+initSnapTrace({
+  apiKey: '${projectKey || 'YOUR_API_KEY'}',
+});`}</pre>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`import { initSnapTrace } from 'snaptrace';\n\ninitSnapTrace({\n  apiKey: '${projectKey || 'YOUR_API_KEY'}',\n});`);
+                            setCopiedNpmSnippet(true);
+                            setTimeout(() => setCopiedNpmSnippet(false), 2000);
+                          }}
+                          className="absolute right-2 top-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[10px] px-2 py-0.5 rounded transition font-mono shrink-0 cursor-pointer"
+                        >
+                          {copiedNpmSnippet ? 'Copied' : 'Copy'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative group">
+                      <pre className="bg-zinc-900/60 border border-zinc-800 rounded-lg p-2.5 text-xs font-mono text-zinc-300 overflow-x-auto whitespace-pre leading-relaxed pr-22 scrollbar-none">{curlCommand}</pre>
+                      <button
+                        type="button"
+                        onClick={handleCopyCurl}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] px-2.5 py-1 rounded-md transition font-mono shrink-0 cursor-pointer whitespace-nowrap"
+                      >
+                        {copiedCurl ? 'Copied' : 'Copy cURL'}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Active Ingestion Token */}
