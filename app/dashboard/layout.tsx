@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
   LayoutDashboard,
   AlertCircle,
+  BarChart3,
   KeyRound,
   Code2,
   Bell,
@@ -168,23 +169,24 @@ export default function DashboardLayout({
 
   const navGroups: NavGroup[] = [
     {
-      label: 'Observability',
+      label: 'OBSERVABILITY',
       items: [
-        { id: 'tour-nav-overview',  name: 'Overview',       href: '/dashboard',            icon: LayoutDashboard },
-        { id: 'tour-nav-errors',   name: 'Exception Logs', href: '/dashboard/errors',     icon: AlertCircle, hasBadge: true },
+        { id: 'tour-nav-overview',  name: 'Overview',        href: '/dashboard',           icon: LayoutDashboard },
+        { id: 'tour-nav-errors',    name: 'Exception Logs',  href: '/dashboard/errors',    icon: AlertCircle, hasBadge: true },
+        { id: 'tour-nav-analytics', name: 'Crash Analytics', href: '/dashboard/analytics', icon: BarChart3 },
       ],
     },
     {
-      label: 'Config & Telemetry',
+      label: 'CONFIG & TELEMETRY',
       items: [
-        { id: 'tour-nav-projects',      name: 'Projects & API Keys', href: '/dashboard/projects',     icon: KeyRound },
-        { id: 'tour-nav-integrations',  name: 'SDK Integrations',    href: '/dashboard/integrations', icon: Code2 },
-        { id: 'tour-nav-alerts',        name: 'Alert Destinations',  href: '/dashboard/alerts',       icon: Bell },
-        { id: 'tour-nav-ai',            name: 'AI Copilot (BYOK)',   href: '/dashboard/ai',           icon: Cpu },
+        { id: 'tour-nav-projects',     name: 'Projects & API Keys', href: '/dashboard/projects',     icon: KeyRound },
+        { id: 'tour-nav-integrations', name: 'SDK Integrations',    href: '/dashboard/integrations', icon: Code2 },
+        { id: 'tour-nav-alerts',       name: 'Alert Destinations',  href: '/dashboard/alerts',       icon: Bell },
+        { id: 'tour-nav-ai',           name: 'AI Copilot (BYOK)',   href: '/dashboard/ai',           icon: Cpu },
       ],
     },
     {
-      label: 'Account & Workspace',
+      label: 'WORKSPACE & ACCOUNT',
       items: [
         { id: 'tour-nav-billing',  name: 'Billing & Usage',  href: '/dashboard/billing',  icon: CreditCard },
         { id: 'tour-nav-settings', name: 'Account Settings', href: '/dashboard/settings', icon: Settings },
@@ -195,6 +197,7 @@ export default function DashboardLayout({
   const getPageTitle = () => {
     if (pathname === '/dashboard')             return 'System Overview';
     if (pathname === '/dashboard/errors')      return 'Exception Logs Stream';
+    if (pathname === '/dashboard/analytics')   return 'Crash & Endpoint Analytics';
     if (pathname === '/dashboard/projects')    return 'Projects & API Keys';
     if (pathname === '/dashboard/integrations') return 'SDK Integrations';
     if (pathname === '/dashboard/alerts')      return 'Alert Destinations';
@@ -244,7 +247,7 @@ export default function DashboardLayout({
           {navGroups.map((group) => (
             <div key={group.label}>
               {!sidebarCollapsed && (
-                <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold px-3 pt-4 pb-1.5 block">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold px-3 pt-4 pb-1 block">
                   {group.label}
                 </span>
               )}
@@ -259,8 +262,8 @@ export default function DashboardLayout({
                       href={item.href}
                       className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors duration-150 ${
                         isActive
-                          ? 'bg-zinc-800/80 text-white font-medium border-l-2 border-zinc-200 shadow-sm'
-                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] border-l-2 border-transparent'
+                          ? 'bg-zinc-900 text-zinc-100 font-medium'
+                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
                       }`}
                     >
                       <div className="flex items-center space-x-2.5">
