@@ -130,24 +130,30 @@ export default function TestPlaygroundPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 p-6 sm:p-12 font-sans selection:bg-yellow-400 selection:text-slate-950 animate-in fade-in duration-200">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-12 font-sans selection:bg-zinc-700 selection:text-zinc-100 animate-in fade-in duration-200">
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Navigation Bar */}
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-6">
+        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-6">
           <Link href="/" className="transition hover:opacity-90">
             <SnapTraceLogo size="md" showText={true} />
           </Link>
           <div className="flex items-center gap-3 font-mono text-xs">
             <Link
               href="/"
-              className="text-slate-400 hover:text-white transition"
+              className="text-zinc-400 hover:text-zinc-200 transition"
             >
               ← Homepage
             </Link>
             <Link
+              href="/dashboard"
+              className="border border-zinc-700 bg-transparent text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 text-xs font-semibold px-3 py-1.5 rounded-lg transition"
+            >
+              Dashboard
+            </Link>
+            <Link
               href="/signup"
-              className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black rounded-xl shadow-lg shadow-yellow-500/20"
+              className="bg-zinc-100 text-zinc-950 hover:bg-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition"
             >
               Start Free Beta →
             </Link>
@@ -156,23 +162,23 @@ export default function TestPlaygroundPage() {
 
         {/* Header */}
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold font-mono">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono font-medium">
             <span>🧪</span> Interactive Telemetry Sandbox
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-100">
             Live Telemetry Test Suite
           </h1>
-          <p className="text-xs text-slate-400 font-mono">
+          <p className="text-xs text-zinc-400 font-mono">
             Click any button below to watch SnapTrace intercept exceptions, scrub credentials, and throttle noise live.
           </p>
         </div>
 
         {/* Action Status Log Alert */}
         {lastAction && (
-          <div className="p-4 rounded-2xl bg-yellow-400/10 border border-yellow-400/30 text-yellow-300 text-xs font-mono animate-in fade-in duration-150 flex items-center justify-between">
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs font-mono text-emerald-300 flex items-center justify-between animate-in fade-in duration-150">
             <span>⚡ {lastAction}</span>
             {loopProgress > 0 && loopProgress < 50 && (
-              <span className="text-white font-bold">{loopProgress} / 50</span>
+              <span className="text-zinc-100 font-bold">{loopProgress} / 50</span>
             )}
           </div>
         )}
@@ -181,128 +187,140 @@ export default function TestPlaygroundPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           
           {/* Card 1: Sync Crash */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl flex flex-col justify-between hover:border-red-500/40 transition">
-            <div className="space-y-1.5">
+          <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between transition group">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-lg">💥</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-950 text-red-400">UNCAUGHT</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 font-medium">
+                  UNCAUGHT
+                </span>
               </div>
-              <h3 className="text-sm font-bold text-white">Synchronous Runtime Crash</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed font-mono">
+              <h3 className="text-sm font-semibold text-zinc-100">Synchronous Runtime Crash</h3>
+              <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
                 Simulates an unhandled JavaScript exception to test automatic file and line-number capture.
               </p>
             </div>
             <button
               onClick={handleSyncCrash}
-              className="w-full py-2.5 bg-red-950/50 hover:bg-red-900/70 border border-red-800/60 text-red-200 text-xs font-bold rounded-xl transition cursor-pointer font-mono"
+              className="w-full py-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 hover:border-zinc-600 text-zinc-200 hover:text-white text-xs font-semibold rounded-lg transition cursor-pointer font-mono flex items-center justify-center gap-1.5"
             >
-              Trigger Sync Crash →
+              <span>Trigger Sync Crash</span>
+              <span>→</span>
             </button>
           </div>
 
           {/* Card 2: Async Promise Rejection */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl flex flex-col justify-between hover:border-amber-400/40 transition">
-            <div className="space-y-1.5">
+          <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between transition group">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-lg">⚡</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-400">PROMISE</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
+                  PROMISE
+                </span>
               </div>
-              <h3 className="text-sm font-bold text-white">Unhandled Promise Rejection</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed font-mono">
+              <h3 className="text-sm font-semibold text-zinc-100">Unhandled Promise Rejection</h3>
+              <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
                 Rejects an unhandled asynchronous Promise to test global window event listeners.
               </p>
             </div>
             <button
               onClick={handleAsyncRejection}
-              className="w-full py-2.5 bg-amber-950/50 hover:bg-amber-900/70 border border-amber-800/60 text-amber-200 text-xs font-bold rounded-xl transition cursor-pointer font-mono"
+              className="w-full py-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 hover:border-zinc-600 text-zinc-200 hover:text-white text-xs font-semibold rounded-lg transition cursor-pointer font-mono flex items-center justify-center gap-1.5"
             >
-              Trigger Promise Rejection →
+              <span>Trigger Promise Rejection</span>
+              <span>→</span>
             </button>
           </div>
 
           {/* Card 3: PII Scrubbing */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl flex flex-col justify-between hover:border-blue-400/40 transition">
-            <div className="space-y-1.5">
+          <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between transition group">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-lg">🔒</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-950 text-blue-400">PRIVACY</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">
+                  PRIVACY
+                </span>
               </div>
-              <h3 className="text-sm font-bold text-white">Client-Side PII Firewall</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed font-mono">
-                Fires an error with passwords and emails to prove client regex masks them to <code className="text-emerald-400 font-bold">[REDACTED]</code>.
+              <h3 className="text-sm font-semibold text-zinc-100">Client-Side PII Firewall</h3>
+              <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+                Fires an error with passwords and emails to prove client regex masks them to <code className="text-emerald-400 font-mono font-medium">[REDACTED]</code>.
               </p>
             </div>
             <button
               onClick={handlePiiLeakTest}
-              className="w-full py-2.5 bg-blue-950/50 hover:bg-blue-900/70 border border-blue-800/60 text-blue-200 text-xs font-bold rounded-xl transition cursor-pointer font-mono"
+              className="w-full py-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 hover:border-zinc-600 text-zinc-200 hover:text-white text-xs font-semibold rounded-lg transition cursor-pointer font-mono flex items-center justify-center gap-1.5"
             >
-              Test PII Redaction →
+              <span>Test PII Redaction</span>
+              <span>→</span>
             </button>
           </div>
 
           {/* Card 4: Infinite Loop Flood */}
-          <div className="bg-[#090D16] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl flex flex-col justify-between hover:border-emerald-400/40 transition">
-            <div className="space-y-1.5">
+          <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between transition group">
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-lg">🔇</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400">NOISE ENGINE</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+                  NOISE ENGINE
+                </span>
               </div>
-              <h3 className="text-sm font-bold text-white">Infinite Loop Flood (50x)</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed font-mono">
-                Fires 50 rapid crashes in 2 seconds to prove the SDK suppresses spam into 1 notification tagged <code className="text-yellow-300">[x50]</code>.
+              <h3 className="text-sm font-semibold text-zinc-100">Infinite Loop Flood (50x)</h3>
+              <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+                Fires 50 rapid crashes in 2 seconds to prove the SDK suppresses spam into 1 notification tagged <code className="text-zinc-300 font-mono font-medium">[x50]</code>.
               </p>
             </div>
             <button
               onClick={handleLoopFloodTest}
-              className="w-full py-2.5 bg-emerald-950/50 hover:bg-emerald-900/70 border border-emerald-800/60 text-emerald-200 text-xs font-bold rounded-xl transition cursor-pointer font-mono"
+              className="w-full py-2 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 hover:border-zinc-600 text-zinc-200 hover:text-white text-xs font-semibold rounded-lg transition cursor-pointer font-mono flex items-center justify-center gap-1.5"
             >
-              Trigger 50x Loop Flood →
+              <span>Trigger 50x Loop Flood</span>
+              <span>→</span>
             </button>
           </div>
 
         </div>
 
-        {/* 🌟 LIVE IN-PAGE TELEMETRY INSPECTOR CONSOLE WITH HIGH-CONVERSION CTA */}
-        <div className="bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl p-6 shadow-2xl space-y-4 font-mono">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-2">
+        {/* LIVE IN-PAGE TELEMETRY INSPECTOR CONSOLE */}
+        <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 sm:p-6 shadow-sm space-y-4 font-mono">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-800/80 gap-2">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <h2 className="text-xs font-bold text-white uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <h2 className="text-xs font-semibold text-zinc-100 uppercase tracking-wider font-mono">
                 Live Captured Telemetry Inspector
               </h2>
             </div>
-            <span className="text-[10px] text-slate-500">
+            <span className="text-[10px] text-zinc-500 font-mono">
               Updates in real-time as you click the buttons above
             </span>
           </div>
 
           {capturedEvents.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs border border-dashed border-slate-800 rounded-2xl space-y-2">
-              <div className="text-2xl">👆</div>
-              <p className="text-slate-300 font-semibold">No telemetry fired yet.</p>
-              <p className="text-[11px]">Click any test button above to watch the live payload appear here!</p>
+            <div className="p-8 text-center text-zinc-500 text-xs border border-dashed border-zinc-800 rounded-lg space-y-2">
+              <div className="text-xl">👆</div>
+              <p className="text-zinc-300 font-medium">No telemetry fired yet.</p>
+              <p className="text-[11px] text-zinc-500">Click any test button above to watch the live payload appear here!</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {capturedEvents.map((evt) => (
                 <div
                   key={evt.id}
-                  className="p-4 bg-[#05070E] border border-slate-800 rounded-2xl space-y-2 text-xs animate-in fade-in slide-in-from-top-2 duration-150"
+                  className="p-3.5 bg-zinc-950/60 border border-zinc-800/80 rounded-lg space-y-2 text-xs animate-in fade-in slide-in-from-top-2 duration-150"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="px-2 py-0.5 rounded bg-yellow-400/10 text-yellow-300 font-bold text-[10px]">
+                    <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 font-medium text-[10px] font-mono">
                       {evt.type}
                     </span>
-                    <span className="text-slate-500 text-[10px]">{evt.timestamp}</span>
+                    <span className="text-zinc-500 text-[10px] font-mono">{evt.timestamp}</span>
                   </div>
 
-                  <div className="space-y-1 pt-1">
-                    <div className="text-slate-400 text-[11px]">
-                      Payload: <span className="text-emerald-400 font-semibold">{evt.sanitizedMessage}</span>
+                  <div className="space-y-1 pt-1 font-mono">
+                    <div className="text-zinc-400 text-[11px]">
+                      Payload: <span className="text-emerald-400 font-medium">{evt.sanitizedMessage}</span>
                     </div>
-                    <div className="text-slate-500 text-[10px] flex items-center gap-3 pt-1">
-                      <span>Delivery: <strong className="text-slate-300">{evt.deliveryMethod}</strong></span>
-                      <span>Status: <strong className="text-emerald-400">{evt.status}</strong></span>
+                    <div className="text-zinc-500 text-[10px] flex items-center gap-3 pt-0.5">
+                      <span>Delivery: <strong className="text-zinc-300 font-medium">{evt.deliveryMethod}</strong></span>
+                      <span>Status: <strong className="text-emerald-400 font-medium">{evt.status}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -310,20 +328,19 @@ export default function TestPlaygroundPage() {
             </div>
           )}
 
-          {/* HIGH-CONVERTING CONVERSION CARD (Marketer Spec) */}
-          <div className="p-5 bg-gradient-to-r from-[#0e1424] to-[#070b14] border border-yellow-400/40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4">
+          {/* Clean Callout Card */}
+          <div className="p-4 sm:p-5 bg-zinc-950 border border-zinc-800 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-sm font-bold text-white">Want this live crash tracking in your own app?</p>
-              <p className="text-xs text-yellow-300 font-semibold">
-                ⚡ Free Pro Beta Pass Unlocked Until Oct 31, 2026 (No credit card required).
+              <p className="text-xs sm:text-sm font-semibold text-zinc-100 font-sans">
+                Want this live crash tracking in your own app?
               </p>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-xs text-zinc-400 font-mono">
                 Sub-5KB SDK • On-device PII masking • 1-click AI fix for Cursor & Claude.
               </p>
             </div>
             <Link
               href="/signup"
-              className="px-6 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20 transition transform hover:-translate-y-0.5 whitespace-nowrap self-start sm:self-auto"
+              className="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg transition whitespace-nowrap self-start sm:self-auto shrink-0"
             >
               Claim Free Pro Account →
             </Link>

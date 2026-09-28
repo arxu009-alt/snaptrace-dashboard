@@ -150,10 +150,10 @@ export default function DashboardOnboardingTour() {
       {/* 1. Backdrop */}
       <div
         onClick={handleComplete}
-        className="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-50 transition-opacity duration-300"
+        className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-50 transition-opacity duration-300"
       />
 
-      {/* 2. Glowing Yellow Spotlight Ring on the Active Target Element */}
+      {/* 2. Sleek Spotlight Ring on the Active Target Element */}
       {targetRect && (
         <div
           style={{
@@ -162,26 +162,26 @@ export default function DashboardOnboardingTour() {
             width: `${targetRect.width + 8}px`,
             height: `${targetRect.height + 8}px`,
           }}
-          className="fixed z-50 pointer-events-none rounded-2xl border-2 border-yellow-400 shadow-[0_0_25px_rgba(250,204,21,0.45)] transition-all duration-300 ease-out"
+          className="fixed z-50 pointer-events-none rounded-xl border-2 border-zinc-400/90 shadow-[0_0_20px_rgba(255,255,255,0.12)] ring-4 ring-zinc-500/20 transition-all duration-300 ease-out"
         />
       )}
 
       {/* 3. Anchored Compact Tooltip Card */}
       <div
         style={getPopoverStyle()}
-        className="fixed z-50 w-full max-w-[340px] bg-[#090D16]/95 border-2 border-yellow-400/50 rounded-3xl p-5 space-y-4 shadow-2xl shadow-yellow-500/20 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-150 font-sans"
+        className="fixed z-50 w-full max-w-[340px] bg-zinc-950/95 border border-zinc-800 rounded-xl p-5 space-y-4 shadow-2xl shadow-black/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150 font-sans"
       >
         {/* Card Header with Skip Button */}
-        <div className="flex items-start justify-between border-b border-slate-800/80 pb-3 gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-base p-1.5 bg-yellow-400/10 border border-yellow-400/20 rounded-xl text-yellow-400">
+        <div className="flex items-start justify-between border-b border-zinc-800/80 pb-3 gap-2">
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm p-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-200">
               {current.icon}
             </span>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-yellow-400 font-mono block">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 font-mono block">
                 {current.badge}
               </span>
-              <h3 className="text-xs font-bold text-white tracking-tight">
+              <h3 className="text-xs font-semibold text-zinc-100 tracking-tight">
                 {current.title}
               </h3>
             </div>
@@ -189,7 +189,7 @@ export default function DashboardOnboardingTour() {
 
           <button
             onClick={handleComplete}
-            className="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 rounded-lg hover:bg-slate-800 transition cursor-pointer"
+            className="text-[11px] text-zinc-400 hover:text-zinc-200 px-2 py-0.5 rounded-md hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition cursor-pointer font-mono"
             title="Dismiss tour"
           >
             Skip
@@ -197,32 +197,32 @@ export default function DashboardOnboardingTour() {
         </div>
 
         {/* Description */}
-        <p className="text-[11px] text-slate-300 leading-relaxed">
+        <p className="text-xs text-zinc-400 leading-relaxed font-sans">
           {current.description}
         </p>
 
         {/* Footer Navigation */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
+        <div className="flex items-center justify-between pt-3 border-t border-zinc-800/80">
           
           {/* Step Dots */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1.5">
             {steps.map((_, idx) => (
               <span
                 key={idx}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  idx === currentStep ? 'w-4 bg-yellow-400' : 'w-1.5 bg-slate-700'
+                  idx === currentStep ? 'w-4 bg-zinc-100' : 'w-1.5 bg-zinc-700'
                 }`}
               />
             ))}
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-1.5">
+          <div className="flex items-center space-x-2">
             {currentStep > 0 && (
               <button
                 type="button"
                 onClick={handlePrev}
-                className="px-2.5 py-1 text-xs font-semibold text-slate-400 hover:text-white rounded-lg transition cursor-pointer"
+                className="px-2.5 py-1 text-xs font-medium text-zinc-400 hover:text-zinc-200 rounded-lg transition cursor-pointer"
               >
                 ← Back
               </button>
@@ -231,7 +231,7 @@ export default function DashboardOnboardingTour() {
             <button
               type="button"
               onClick={handleNext}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition shadow-md shadow-yellow-500/20 cursor-pointer"
+              className="px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg transition cursor-pointer"
             >
               {currentStep === steps.length - 1 ? 'Got it! 🎉' : 'Next →'}
             </button>
