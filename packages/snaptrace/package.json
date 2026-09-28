@@ -1,0 +1,24 @@
+{
+  "name": "snaptrace",
+  "version": "1.0.0",
+  "description": "Featherweight (<5KB) noise-free crash telemetry and error tracking for Next.js, React, and modern web apps",
+  "main": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
+  "keywords": [
+    "sentry-alternative",
+    "error-tracking",
+    "crash-reporting",
+    "telemetry",
+    "nextjs",
+    "react",
+    "performance"
+  ],
+  "author": "Muhammad Arsalan <hello@snaptrace.space>",
+  "license": "MIT",
+  "homepage": "https://snaptrace.space",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arxu009-alt/snaptrace-dashboard"
+  }
+}
