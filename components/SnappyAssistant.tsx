@@ -330,37 +330,37 @@ export default function SnappyAssistant() {
         {/* Tooltip on Hover */}
         {!isDragging && !isOpen && (
           <div
-            className={`absolute top-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-[#090D16] border border-yellow-400/40 text-yellow-300 text-[11px] font-bold font-mono px-3 py-1 rounded-xl shadow-2xl whitespace-nowrap ${
+            className={`absolute top-2 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-zinc-900 border border-zinc-700 text-zinc-200 text-[11px] font-medium font-mono px-3 py-1 rounded-lg shadow-xl whitespace-nowrap ${
               dockedSide === 'right' ? 'right-16' : 'left-16'
             }`}
           >
-            {isMinimized ? 'Click to show Snappy' : '⚡ Drag or Click Snappy'}
+            {isMinimized ? 'Click to show Snappy' : '⚡ Snappy AI Copilot'}
           </div>
         )}
 
         <button
           type="button"
           aria-label="Snappy AI Copilot"
-          className={`relative h-14 w-14 rounded-2xl bg-gradient-to-br from-[#1c2333] via-[#0e1424] to-[#060911] border-2 text-yellow-400 flex items-center justify-center font-black shadow-2xl transition-all duration-300 ${
+          className={`relative h-13 w-13 rounded-2xl bg-zinc-900/90 border border-zinc-700/80 hover:border-zinc-500 text-zinc-100 flex items-center justify-center shadow-2xl transition-all duration-300 backdrop-blur-md ${
             isOpen
-              ? 'border-yellow-300 shadow-yellow-500/40'
+              ? 'border-zinc-400 bg-zinc-800'
               : isMinimized
-              ? 'border-yellow-400/50 opacity-60 hover:opacity-100 hover:border-yellow-400 shadow-yellow-500/20'
-              : 'border-yellow-400 shadow-yellow-500/25 hover:scale-105'
+              ? 'border-zinc-800 opacity-60 hover:opacity-100 hover:border-zinc-700'
+              : 'hover:scale-105'
           }`}
           title="Drag anywhere or click to chat with Snappy"
         >
           {/* Active Emerald Pulse Dot */}
-          <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 pointer-events-none">
+          <span className="absolute -top-1 -right-1 flex h-3 w-3 pointer-events-none">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-[#05070E]" />
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-zinc-950" />
           </span>
 
           {isOpen ? (
-            <span className="text-white text-base font-mono font-bold pointer-events-none">✕</span>
+            <span className="text-zinc-300 text-sm font-mono font-bold pointer-events-none">✕</span>
           ) : (
             <svg
-              className="w-7 h-7 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.7)] pointer-events-none"
+              className="w-5 h-5 text-zinc-200 pointer-events-none"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -368,19 +368,18 @@ export default function SnappyAssistant() {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <rect x="3" y="11" width="18" height="10" rx="2" fill="#090D16" />
-              <circle cx="12" cy="5" r="2" fill="#FACC15" />
-              <path d="M12 7v4" />
-              <line x1="8" y1="16" x2="8" y2="16.01" strokeWidth="3" stroke="#FACC15" />
-              <line x1="16" y1="16" x2="16" y2="16.01" strokeWidth="3" stroke="#FACC15" />
-              <path d="M9 19h6" stroke="#10B981" />
+              <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
+              <rect x="4" y="8" width="16" height="12" rx="3" />
+              <circle cx="9" cy="13" r="1.5" fill="currentColor" />
+              <circle cx="15" cy="13" r="1.5" fill="currentColor" />
+              <path d="M10 17h4" />
             </svg>
           )}
 
           {/* Minimized Peek Indicator */}
           {isMinimized && !isOpen && (
             <span
-              className={`absolute top-1/2 -translate-y-1/2 text-[9px] font-mono font-black text-yellow-400 bg-yellow-400/20 px-1 py-0.5 rounded ${
+              className={`absolute top-1/2 -translate-y-1/2 text-[9px] font-mono font-bold text-zinc-400 bg-zinc-800 px-1 py-0.5 rounded ${
                 dockedSide === 'right' ? 'left-1' : 'right-1'
               }`}
             >
@@ -394,20 +393,20 @@ export default function SnappyAssistant() {
       {isOpen && (
         <div
           style={getChatWindowStyle()}
-          className="fixed z-50 w-[360px] max-w-[calc(100vw-32px)] bg-[#090D16] border-2 border-yellow-400/40 rounded-3xl shadow-2xl shadow-yellow-500/20 overflow-hidden flex flex-col font-sans animate-in fade-in zoom-in-95 duration-150"
+          className="fixed z-50 w-[360px] max-w-[calc(100vw-32px)] bg-zinc-950/95 border border-zinc-800 rounded-2xl shadow-2xl shadow-black/80 overflow-hidden flex flex-col font-sans backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
         >
           {/* Header */}
-          <div className="p-3.5 bg-[#060911] border-b border-slate-800 flex items-center justify-between cursor-default">
+          <div className="p-3.5 bg-zinc-900/60 border-b border-zinc-800/80 flex items-center justify-between cursor-default">
             <div className="flex items-center space-x-2.5">
-              <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-yellow-400 to-amber-500 text-slate-950 font-black text-xs flex items-center justify-center shadow-md">
+              <div className="h-7 w-7 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs flex items-center justify-center font-bold">
                 ⚡
               </div>
               <div>
-                <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+                <h3 className="text-xs font-semibold text-zinc-100 flex items-center gap-1.5">
                   <span>Snappy AI Copilot</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 </h3>
-                <p className="text-[9.5px] text-slate-400 font-mono">Moveable Telemetry Assistant</p>
+                <p className="text-[10px] text-zinc-400 font-mono">Moveable Telemetry Assistant</p>
               </div>
             </div>
 
@@ -416,7 +415,7 @@ export default function SnappyAssistant() {
                 <button
                   type="button"
                   onClick={handleResetChat}
-                  className="chat-control text-[10px] text-slate-400 hover:text-yellow-300 px-2 py-1 bg-slate-800/80 rounded-lg transition"
+                  className="chat-control text-[10px] text-zinc-400 hover:text-zinc-200 px-2 py-1 bg-zinc-800/80 hover:bg-zinc-800 rounded-md transition cursor-pointer font-mono"
                   title="Reset conversation"
                 >
                   Clear ↺
@@ -425,7 +424,7 @@ export default function SnappyAssistant() {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="chat-control text-slate-400 hover:text-white text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-lg transition cursor-pointer"
+                className="chat-control text-zinc-400 hover:text-zinc-100 text-xs bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded-md transition cursor-pointer font-mono"
               >
                 ✕
               </button>
@@ -433,17 +432,17 @@ export default function SnappyAssistant() {
           </div>
 
           {/* Messages Feed (Auto-Scrolling) */}
-          <div className="p-3.5 space-y-3 max-h-[290px] overflow-y-auto text-xs leading-relaxed bg-[#05070E]/90 st-scroll">
+          <div className="p-3.5 space-y-3 max-h-[290px] overflow-y-auto text-xs leading-relaxed bg-zinc-950">
             {messages.map((m, idx) => (
               <div
                 key={idx}
                 className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`p-3 rounded-2xl max-w-[85%] leading-relaxed ${
+                  className={`p-3 rounded-xl max-w-[85%] leading-relaxed ${
                     m.sender === 'user'
-                      ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-semibold shadow-md'
-                      : 'bg-[#090D16] border border-slate-800 text-slate-200 shadow-sm'
+                      ? 'bg-zinc-100 text-zinc-950 font-medium'
+                      : 'bg-zinc-900 border border-zinc-800 text-zinc-200 font-sans'
                   }`}
                 >
                   {m.text}
@@ -455,7 +454,7 @@ export default function SnappyAssistant() {
 
           {/* Quick Questions */}
           {messages.length <= 1 && (
-            <div className="px-3 py-2 bg-[#060911] border-t border-slate-800/80 flex flex-wrap gap-1.5">
+            <div className="px-3 py-2 bg-zinc-900/60 border-t border-zinc-800/80 flex flex-wrap gap-1.5">
               {[
                 'Incident Velocity Pulse',
                 'Connect Next.js SDK',
@@ -467,7 +466,7 @@ export default function SnappyAssistant() {
                   key={i}
                   type="button"
                   onClick={() => handleAsk(chip)}
-                  className="chat-control px-2 py-1 bg-[#090D16] hover:bg-slate-800 border border-slate-800 hover:border-yellow-400/30 rounded-lg text-[10px] text-yellow-300 font-medium transition cursor-pointer"
+                  className="chat-control px-2 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 rounded-md text-[10px] text-zinc-300 font-medium transition cursor-pointer font-mono"
                 >
                   {chip}
                 </button>
@@ -481,18 +480,18 @@ export default function SnappyAssistant() {
               e.preventDefault();
               handleAsk(inputQuery);
             }}
-            className="p-2.5 bg-[#090D16] border-t border-slate-800 flex items-center gap-2"
+            className="p-2.5 bg-zinc-900/40 border-t border-zinc-800/80 flex items-center gap-2"
           >
             <input
               type="text"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               placeholder="Ask Snappy anything..."
-              className="flex-1 bg-[#05070E] border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-yellow-400 transition font-mono"
+              className="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-700 transition font-mono"
             />
             <button
               type="submit"
-              className="chat-control px-3.5 py-1.5 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-bold text-xs rounded-xl transition cursor-pointer"
+              className="chat-control px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg transition cursor-pointer"
             >
               Send
             </button>

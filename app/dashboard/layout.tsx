@@ -25,6 +25,7 @@ import SnapTraceLogo from '@/components/SnapTraceLogo';
 import SnapTraceLoading from '@/components/SnapTraceLoading';
 import FeedbackModal from '@/components/FeedbackModal';
 import DashboardOnboardingTour from '@/components/DashboardOnboardingTour';
+import SnappyAssistant from '@/components/SnappyAssistant';
 
 interface NavItem {
   id: string;
@@ -410,6 +411,7 @@ export default function DashboardLayout({
       />
 
       <DashboardOnboardingTour />
+      <SnappyAssistant />
     </div>
   );
 }
