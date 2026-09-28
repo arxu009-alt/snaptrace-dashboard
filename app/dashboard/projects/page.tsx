@@ -20,10 +20,12 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // User Tier & Project Limits (All early beta users get Pro with 5 projects!)
-  const [userPlanTier, setUserPlanTier] = useState<string>('pro');
+  // User Tier & Project Limits
+  const [userPlanTier, setUserPlanTier] = useState<string>('free');
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [limitErrorModal, setLimitErrorModal] = useState<string | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeMessage, setUpgradeMessage] = useState<string>('');
 
   // Create Project State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -54,15 +56,21 @@ export default function ProjectsPage() {
     const ownerCheck = email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com';
     setIsOwner(ownerCheck);
 
-    // During Public Beta, all registered accounts receive Pro Builder (5 projects) or Unlimited (Owner)
-    const activeTier = ownerCheck ? 'agency' : 'pro';
-    setUserPlanTier(activeTier);
-
     const { data: projectList, error } = await supabase
       .from('projects')
       .select('*')
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
+
+    // Inspect user's active tier (plan_tier from projects or profile)
+    let activeTier = 'free';
+    if (ownerCheck) {
+      activeTier = 'agency';
+    } else if (projectList && projectList.length > 0) {
+      const paidProject = projectList.find((p) => p.plan_tier && p.plan_tier !== 'free');
+      activeTier = paidProject?.plan_tier || projectList[0]?.plan_tier || 'free';
+    }
+    setUserPlanTier(activeTier);
 
     if (!error && projectList) {
       const { data: errors } = await supabase
@@ -104,16 +112,26 @@ export default function ProjectsPage() {
     return 'sk_live_' + randomHex;
   };
 
-  // 🌟 CHECK PROJECT CREATION LIMIT: Pro Beta users get 5 projects!
+  // 🌟 CHECK PROJECT CREATION LIMIT: Free = 1, Pro = 5, Agency/Owner = Unlimited
   const handleOpenCreateModal = () => {
     if (isOwner || userPlanTier === 'agency' || userPlanTier === 'team') {
       setIsCreateModalOpen(true);
       return;
     }
 
-    // Pro tier limit: 5 projects
-    if (projects.length >= 5) {
-      setLimitErrorModal('You have reached the Pro limit of 5 active projects. To manage unlimited client projects, request Agency Studio access.');
+    // Free tier: max 1 project
+    if (userPlanTier === 'free' || !userPlanTier) {
+      if (projects.length >= 1) {
+        setUpgradeMessage('Free tier is limited to 1 project. Upgrade to Pro Builder ($19/mo) for up to 5 projects.');
+        setShowUpgradeModal(true);
+        return;
+      }
+    }
+
+    // Pro tier: max 5 projects
+    if (userPlanTier === 'pro' && projects.length >= 5) {
+      setUpgradeMessage('You have reached the Pro limit of 5 active projects. Upgrade to Agency Studio ($49/mo) for unlimited projects.');
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -123,6 +141,12 @@ export default function ProjectsPage() {
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProjectName.trim()) return;
+
+    if (!isOwner && (userPlanTier === 'free' || !userPlanTier) && projects.length >= 1) {
+      setUpgradeMessage('Free tier is limited to 1 project. Upgrade to Pro Builder ($19/mo) for up to 5 projects.');
+      setShowUpgradeModal(true);
+      return;
+    }
 
     setCreating(true);
     const { data: { session } } = await supabase.auth.getSession();
@@ -254,7 +278,9 @@ export default function ProjectsPage() {
 
   const projectCapLabel = isOwner || userPlanTier === 'agency' || userPlanTier === 'team'
     ? 'Unlimited'
-    : '5 Projects (Beta Pro)';
+    : userPlanTier === 'pro'
+    ? '5 Projects (Pro)'
+    : '1 Project (Free)';
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans">
@@ -573,6 +599,66 @@ export default function ProjectsPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: TIER UPGRADE MODAL */}
+        {showUpgradeModal && (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-100 uppercase tracking-wider font-mono">
+                    Project Limit Reached
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-700">
+                    {userPlanTier === 'pro' ? 'Pro Builder' : 'Developer Free'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="text-zinc-500 hover:text-zinc-300 text-xs p-1 rounded transition cursor-pointer"
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className="text-xs text-zinc-300 leading-relaxed font-mono">
+                {upgradeMessage || 'Free tier is limited to 1 project. Upgrade to Pro Builder ($19/mo) for up to 5 projects.'}
+              </p>
+
+              <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-lg p-3 text-[11px] text-zinc-400 space-y-1.5 font-mono">
+                <div className="flex justify-between">
+                  <span>Current Tier</span>
+                  <span className="text-zinc-200 capitalize">{userPlanTier === 'pro' ? 'Pro Builder' : userPlanTier === 'agency' ? 'Agency Studio' : 'Developer Free'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Active Projects</span>
+                  <span className="text-zinc-200">{projects.length} / {userPlanTier === 'pro' ? '5' : userPlanTier === 'agency' ? 'Unlimited' : '1'}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="px-3.5 py-1.5 text-zinc-400 hover:text-zinc-200 text-xs rounded-lg transition cursor-pointer font-mono"
+                >
+                  Dismiss
+                </button>
+                <a
+                  href={userPlanTier === 'pro' ? 'https://buy.polar.sh/polar_cl_jtE6KA0k5GWeMhuFWQGB9fsDhRt8rdTwDteFS0Qr44g' : 'https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition cursor-pointer font-mono flex items-center gap-1.5"
+                >
+                  <span>{userPlanTier === 'pro' ? 'Upgrade to Agency' : 'Upgrade to Pro'}</span>
+                  <span>→</span>
+                </a>
+              </div>
             </div>
           </div>
         )}

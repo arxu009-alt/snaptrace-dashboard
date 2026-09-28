@@ -17,11 +17,16 @@ export default function AlertsPage() {
   const [testingAlert, setTestingAlert] = useState<boolean>(false);
   const [testAlertMsg, setTestAlertMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const [planTier, setPlanTier] = useState<string>('free');
+
   useEffect(() => {
     async function loadAlertSettings() {
       setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) { setLoading(false); return; }
+
+      const email = session.user.email || '';
+      const ownerCheck = email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com';
 
       const { data: userProjects } = await supabase
         .from('projects')
@@ -37,6 +42,9 @@ export default function AlertsPage() {
         setEmail(p.recipient_email || p.alert_email || session.user.email || '');
         setDiscordWebhook(p.discord_webhook_url || p.discord_webhook || '');
 
+        const tier = ownerCheck ? 'agency' : (p.plan_tier || 'free');
+        setPlanTier(tier);
+
         const savedSlack = p.slack_webhook_url || (typeof window !== 'undefined' ? localStorage.getItem('snaptrace_slack_' + p.id) : '') || '';
         setSlackWebhook(savedSlack);
 
@@ -45,6 +53,8 @@ export default function AlertsPage() {
           (typeof window !== 'undefined' && localStorage.getItem('snaptrace_only_prod_' + p.id) === 'true')
         );
         setOnlyProdAlerts(savedOnlyProd);
+      } else {
+        setPlanTier(ownerCheck ? 'agency' : 'free');
       }
       setLoading(false);
     }
@@ -148,6 +158,33 @@ export default function AlertsPage() {
             Configure Discord webhooks, Slack routing, and email alert channels for live exception notifications.
           </p>
         </div>
+
+        {planTier === 'free' && (
+          <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-semibold tracking-wide uppercase">
+                  Pro Feature
+                </span>
+                <span className="text-xs font-medium text-zinc-200">
+                  Discord & Slack instant alerts are unlocked on Pro Builder ($19/mo).
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-500 font-mono">
+                Upgrade to forward critical crash events directly into your developer team channels.
+              </p>
+            </div>
+            <a
+              href="https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition font-mono shrink-0 self-start sm:self-auto cursor-pointer"
+            >
+              <span>Unlock Webhooks</span>
+              <span>→</span>
+            </a>
+          </div>
+        )}
 
         {loading ? (
           <div className="p-16 flex items-center justify-center">

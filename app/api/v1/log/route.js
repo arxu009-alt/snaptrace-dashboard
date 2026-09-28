@@ -104,9 +104,16 @@ export async function POST(req) {
       project.email ||
       project.owner_email;
       
-    // Resolve tier strictly from database plan_tier (defaults to 'pro' during public beta)
-const projectTier = project.plan_tier || "pro";
-    const activePlan = (PLANS && PLANS[projectTier]) ? PLANS[projectTier] : { monthlyEventCap: 75000 };
+    // Resolve tier strictly from database plan_tier (defaults to 'free' for unpaid projects)
+    const projectTier = project.plan_tier || "free";
+    const activePlan = (PLANS && PLANS[projectTier]) ? PLANS[projectTier] : PLANS.free;
+
+    const ownerEmail = process.env.OWNER_EMAIL || "arxu1045@gmail.com";
+    const isOwner = Boolean(
+      recipientEmail &&
+      (recipientEmail.toLowerCase() === ownerEmail.toLowerCase() ||
+       recipientEmail.toLowerCase() === "arxu009@gmail.com")
+    );
 
     if (!isOwner) {
       const startOfMonth = typeof getStartOfCurrentMonth === "function"
@@ -189,9 +196,11 @@ const projectTier = project.plan_tier || "pro";
       process.env.GMAIL_APP_PASSWORD ||
       process.env.SMTP_PASS;
 
-    // 3. Dispatch Discord Webhook Alert (Skipped if muted)
+    // 3. Dispatch Discord Webhook Alert (Skipped if muted or webhooks disabled on Free tier)
     let discordSent = false;
-    if (discordWebhookUrl && !muteAlerts) {
+    if (!activePlan?.webhooks) {
+      debugLogs.push("Webhooks disabled on Free tier. Upgrade to Pro required.");
+    } else if (discordWebhookUrl && !muteAlerts) {
       try {
         const discordRes = await fetch(discordWebhookUrl, {
           method: "POST",
@@ -238,9 +247,11 @@ const projectTier = project.plan_tier || "pro";
       debugLogs.push("Discord skipped: No webhook URL configured.");
     }
 
-    // 4. Dispatch Native Slack Webhook Alert (Skipped if muted)
+    // 4. Dispatch Native Slack Webhook Alert (Skipped if muted or webhooks disabled on Free tier)
     let slackSent = false;
-    if (slackWebhookUrl && !muteAlerts) {
+    if (!activePlan?.webhooks) {
+      debugLogs.push("Webhooks disabled on Free tier. Upgrade to Pro required.");
+    } else if (slackWebhookUrl && !muteAlerts) {
       try {
         const slackPayload = {
           text: "🚨 *[SnapTrace Incident]* " + slackEscape(message || "New Exception Event"),

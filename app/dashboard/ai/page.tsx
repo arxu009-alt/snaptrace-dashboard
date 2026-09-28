@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import { Cpu, CheckCircle2 } from 'lucide-react';
 
 export default function AiCopilotPage() {
@@ -10,6 +11,7 @@ export default function AiCopilotPage() {
   const [aiKeySaved, setAiKeySaved] = useState<boolean>(false);
   const [savingAi, setSavingAi] = useState<boolean>(false);
   const [aiSavedMsg, setAiSavedMsg] = useState<string | null>(null);
+  const [planTier, setPlanTier] = useState<string>('free');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -20,6 +22,30 @@ export default function AiCopilotPage() {
       setAiKey(savedKey);
       setAiKeySaved(true);
     }
+
+    async function loadUserTier() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const email = session.user.email || '';
+      const ownerCheck = email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com';
+
+      const { data: userProjects } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+
+      if (userProjects && userProjects.length > 0) {
+        const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
+        const p = userProjects.find((proj) => proj.id === savedProjectId) || userProjects[0];
+        const tier = ownerCheck ? 'agency' : (p.plan_tier || 'free');
+        setPlanTier(tier);
+      } else {
+        setPlanTier(ownerCheck ? 'agency' : 'free');
+      }
+    }
+    loadUserTier();
   }, []);
 
   const handleSaveAiKey = (e: React.FormEvent) => {
@@ -57,6 +83,34 @@ export default function AiCopilotPage() {
             Bring your own API key to power the in-dashboard AI diagnostics and 1-click Cursor/Claude prompt exports.
           </p>
         </div>
+
+        {/* Free Tier Feature Gating Banner */}
+        {planTier === 'free' && (
+          <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-semibold tracking-wide uppercase">
+                  Pro Feature
+                </span>
+                <span className="text-xs font-medium text-zinc-200">
+                  1-Click Cursor &amp; Claude AI prompt exports are unlocked on Pro Builder ($19/mo).
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-500 font-mono">
+                Upgrade to export automated diagnostic context straight into your AI coding assistant.
+              </p>
+            </div>
+            <a
+              href="https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition font-mono shrink-0 self-start sm:self-auto cursor-pointer"
+            >
+              <span>Upgrade to Pro</span>
+              <span>→</span>
+            </a>
+          </div>
+        )}
 
         {/* Provider & Key Configuration */}
         <form onSubmit={handleSaveAiKey} className="space-y-6">
