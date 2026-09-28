@@ -54,7 +54,7 @@ export default function FeedbackModal({ isOpen, onClose, userEmail }: FeedbackMo
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div className="space-y-0.5">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <span>💡</span> Share Beta Feedback
+              <span>💡</span> Share Feedback
             </h3>
             <p className="text-xs text-slate-400 font-mono">Help us shape the future of SnapTrace</p>
           </div>

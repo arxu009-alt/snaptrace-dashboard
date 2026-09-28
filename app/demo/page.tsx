@@ -432,7 +432,7 @@ export default function DemoSandboxPage() {
             href="/signup"
             className="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg shadow-sm transition active:scale-95 whitespace-nowrap self-start sm:self-auto"
           >
-            Start Free Beta →
+            Start Free →
           </Link>
         </div>
 

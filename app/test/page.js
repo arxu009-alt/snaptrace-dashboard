@@ -155,7 +155,7 @@ export default function TestPlaygroundPage() {
               href="/signup"
               className="bg-zinc-100 text-zinc-950 hover:bg-white text-xs font-semibold px-3.5 py-1.5 rounded-lg transition"
             >
-              Start Free Beta →
+              Start Free →
             </Link>
           </div>
         </div>

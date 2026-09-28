@@ -50,6 +50,7 @@ export default function DashboardLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [feedbackOpen, setFeedbackOpen] = useState<boolean>(false);
   const [activeErrorCount, setActiveErrorCount] = useState<number>(0);
+  const [userTier, setUserTier] = useState<string>('FREE');
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -64,10 +65,16 @@ export default function DashboardLayout({
 
     const { data: userProjects } = await supabase
       .from('projects')
-      .select('id')
+      .select('id, plan_tier')
       .eq('user_id', session.user.id);
 
     if (userProjects && userProjects.length > 0) {
+      const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
+      const selectedProj = savedProjectId && savedProjectId !== 'all' ? userProjects.find((p) => p.id === savedProjectId) : null;
+      const activeProj = selectedProj || userProjects.find((p) => p.plan_tier && p.plan_tier !== 'free') || userProjects[0];
+      const tier = (activeProj?.plan_tier || 'free').toUpperCase();
+      setUserTier(tier);
+
       const projectIds = userProjects.map((p) => p.id);
       const { count } = await supabase
         .from('errors')
@@ -75,6 +82,8 @@ export default function DashboardLayout({
         .in('project_id', projectIds);
 
       setActiveErrorCount(count || 0);
+    } else {
+      setUserTier('FREE');
     }
   }, [supabaseUrl, supabaseAnonKey]);
 
@@ -341,7 +350,7 @@ export default function DashboardLayout({
                 </span>
 
                 <span className="bg-zinc-800 text-zinc-300 border border-zinc-700 text-xs px-2 py-0.5 rounded">
-                  {isOwner ? 'OWNER' : 'BETA PRO'}
+                  {isOwner ? 'OWNER' : userTier}
                 </span>
 
                 <ChevronDown className="w-3 h-3 text-zinc-500" />

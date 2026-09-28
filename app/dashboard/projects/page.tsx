@@ -478,7 +478,7 @@ export default function ProjectsPage() {
                   Plan Quota
                 </div>
                 <h3 className="text-sm font-semibold text-zinc-100">
-                  Pro Beta Project Limit
+                  Project Limit Reached
                 </h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">
                   {limitErrorModal}

@@ -27,14 +27,14 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           embeds: [
             {
-              title: `📣 SnapTrace Beta Feedback: ${typeIcons[type] || 'User Feedback'}`,
+              title: `📣 SnapTrace Feedback: ${typeIcons[type] || 'User Feedback'}`,
               color: type === 'bug' ? 15158332 : 16434440, // Red for bugs, Yellow for features
               fields: [
                 { name: 'Submitted By', value: email || 'Anonymous Developer', inline: true },
                 { name: 'Category', value: type?.toUpperCase() || 'GENERAL', inline: true },
                 { name: 'Feedback / Suggestion', value: message },
               ],
-              footer: { text: 'SnapTrace Feedback Engine • v1.0 Beta' },
+              footer: { text: 'SnapTrace Feedback Engine • v1.0' },
               timestamp: new Date().toISOString(),
             },
           ],

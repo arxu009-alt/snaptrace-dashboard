@@ -96,7 +96,7 @@ button, a { touch-action: manipulation; }
 .st-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
 .st-scroll::-webkit-scrollbar-track { background: transparent; }
 .st-scroll::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.2); border-radius: 999px; }
-.st-beta-pill {
+.st-pill {
   font: 700 9.5px/1 ui-monospace, monospace;
   letter-spacing: 0.08em;
   padding: 3px 6px;

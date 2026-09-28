@@ -37,7 +37,7 @@ export default function AboutPage() {
               href="/signup"
               className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-bold rounded-xl shadow-md transition transform hover:-translate-y-0.5"
             >
-              Start Free Beta →
+              Start Free →
             </Link>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function AboutPage() {
             <span className="text-2xl">📬</span>
             <h3 className="text-xl font-bold text-white font-mono">Get in Touch with Us</h3>
             <p className="text-xs text-slate-400 leading-relaxed font-sans">
-              Have questions about SDK integration, custom enterprise scale, or early beta feedback? Reach out directly to our engineering desk.
+              Have questions about SDK integration, custom enterprise scale, or general feedback? Reach out directly to our engineering desk.
             </p>
           </div>
 

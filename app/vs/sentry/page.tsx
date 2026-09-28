@@ -19,7 +19,7 @@ export default function SentryComparisonPage() {
               href="/signup"
               className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black rounded-xl shadow-md"
             >
-              Start Free Beta →
+              Start Free →
             </Link>
           </div>
         </div>
@@ -126,14 +126,14 @@ export default function SentryComparisonPage() {
             Switch to lightweight, noise-free monitoring in 60 seconds
           </h2>
           <p className="text-xs text-slate-400 max-w-lg mx-auto font-mono">
-            Public Beta is live. The first 50 developers get a Free Lifetime Starter Pro pass with 150,000 monthly events and full AI diagnostics.
+            Get started with 150,000 monthly events and full AI diagnostics.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 font-mono">
             <Link
               href="/signup"
               className="px-8 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-yellow-500/20"
             >
-              Claim Free Pro Beta Pass →
+              Get Started Free →
             </Link>
             <Link
               href="/test"

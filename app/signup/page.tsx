@@ -85,7 +85,7 @@ export default function SignUpPage() {
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-[11px] font-medium font-mono text-zinc-400">
               <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>v1.0 Public Beta &middot; Telemetry Infrastructure</span>
+              <span>v1.0 &middot; Telemetry Infrastructure</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-100 leading-[1.15]">
