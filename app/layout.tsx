@@ -1,6 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import React from 'react';
 import { SnapTraceProvider } from '@/components/SnapTraceProvider';
 import { Analytics } from '@vercel/analytics/react';
@@ -10,6 +10,13 @@ const inter = Inter({
   variable: '--font-inter',
   display: 'swap',
   weight: ['400', '500', '600', '700', '800', '900'],
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -126,7 +133,7 @@ export default function RootLayout({
   ];
 
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} dark scroll-smooth`}>
+    <html lang="en" className={`${jakarta.variable} ${inter.variable} ${jetbrainsMono.variable} dark scroll-smooth`}>
       <head>
         <meta name="msvalidate.01" content="EC1C00F550C23BCFCF6A5FB131492203" />
         <script

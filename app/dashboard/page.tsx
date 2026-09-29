@@ -18,7 +18,7 @@ interface ErrorLog {
 }
 
 type TimeRange = '12h' | '24h' | '7d';
-type QuickstartTab = 'curl' | 'nextjs' | 'js' | 'python';
+type QuickstartTab = 'ai' | 'nextjs' | 'curl' | 'js' | 'python';
 
 function extractRoute(err: ErrorLog): string {
   if (err.url) {
@@ -131,14 +131,15 @@ export default function DashboardOverviewPage() {
 
   // Activation, Live Ping & Demo Mode States
   const [demoMode, setDemoMode] = useState(false);
-  const [quickTab, setQuickTab] = useState<QuickstartTab>('curl');
+  const [quickTab, setQuickTab] = useState<QuickstartTab>('ai');
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedCurl, setCopiedCurl] = useState(false);
   const [firingPing, setFiringPing] = useState(false);
   const [pingSuccessMsg, setPingSuccessMsg] = useState<string | null>(null);
-  const [quickstartMode, setQuickstartMode] = useState<'npm' | 'curl'>('npm');
+  const [quickstartMode, setQuickstartMode] = useState<'ai' | 'npm' | 'curl'>('ai');
   const [copiedNpmInstall, setCopiedNpmInstall] = useState(false);
   const [copiedNpmSnippet, setCopiedNpmSnippet] = useState(false);
+  const [copiedAiPrompt, setCopiedAiPrompt] = useState(false);
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
@@ -391,8 +392,16 @@ export default function DashboardOverviewPage() {
     router.push(`/dashboard/errors?errorId=${err.id}`);
   };
 
+  const aiPromptText = `Install and configure SnapTrace error telemetry in this project:
+1. Run: npm install snaptrace
+2. In root client layout or app entry (e.g. app/layout.tsx for Next.js, or src/main.tsx), initialize SnapTrace:
+   import { initSnapTrace } from 'snaptrace';
+   initSnapTrace({ apiKey: '${projectKey || 'YOUR_PROJECT_API_KEY'}' });
+3. Wrap any critical unhandled exceptions or error boundaries to call captureException(error).
+Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build passes cleanly.`;
+
   const quickstartSnippets: Record<QuickstartTab, string> = {
-    curl: curlCommand,
+    ai: aiPromptText,
     nextjs: `// 1. Install via npm:
 npm install snaptrace
 
@@ -411,17 +420,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }`,
+    curl: curlCommand,
     js: `<script 
-  src="https://snaptrace-dashboard.vercel.app/snaptrace.js"
-  data-api-key="${projectKey}"
+  src="https://snaptrace.space/snaptrace.js"
+  data-api-key="${projectKey || 'YOUR_API_KEY'}"
   async
 ></script>`,
-    python: `import requests
-requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
-    "apiKey": "${projectKey}",
-    "message": "Crash test",
-    "environment": "production"
-})`,
+    python: `import requests, traceback
+
+def capture_snaptrace(err, route="production"):
+    try:
+        requests.post("https://snaptrace.space/api/v1/log", json={
+            "apiKey": "${projectKey || 'YOUR_API_KEY'}",
+            "message": str(err),
+            "stackTrace": traceback.format_exc(),
+            "environment": "production",
+            "url": route
+        }, timeout=2)
+    except Exception:
+        pass`,
   };
 
   const deliveryRate = totalErrors > 0 ? `${((totalErrors / (totalErrors + 0)) * 100).toFixed(1)}%` : '99.9%';
@@ -534,25 +551,51 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
               </div>
 
               <div className="lg:col-span-7 bg-zinc-900/60 border border-zinc-800 rounded-lg p-3.5 space-y-2.5 font-mono">
-                <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
-                  <div className="flex items-center space-x-2">
-                    {(['curl', 'nextjs', 'js', 'python'] as const).map((tab) => (
+                <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2 gap-2 flex-wrap">
+                  <div className="flex items-center space-x-1.5 flex-wrap">
+                    {(['ai', 'nextjs', 'curl', 'js', 'python'] as const).map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setQuickTab(tab)}
-                        className={`px-2 py-0.5 rounded text-xs font-semibold transition uppercase cursor-pointer ${
+                        className={`px-2.5 py-1 rounded text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
                           quickTab === tab
-                            ? 'bg-zinc-800 text-zinc-100 border border-zinc-700'
+                            ? tab === 'ai'
+                              ? 'bg-purple-600/30 text-purple-200 border border-purple-500/50 shadow-sm'
+                              : 'bg-zinc-800 text-zinc-100 border border-zinc-700'
                             : 'text-zinc-400 hover:text-white'
                         }`}
                       >
-                        {tab === 'nextjs' ? 'Next.js' : tab === 'js' ? 'HTML / JS' : tab}
+                        {tab === 'ai' ? '🤖 Install with AI' : tab === 'nextjs' ? 'Next.js' : tab === 'curl' ? 'cURL' : tab === 'js' ? 'HTML / JS' : 'Python'}
+                        {tab === 'ai' && <span className="text-[9px] px-1 bg-purple-500/30 rounded text-purple-200 font-bold">10s</span>}
                       </button>
                     ))}
                   </div>
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(quickstartSnippets[quickTab]);
+                      if (quickTab === 'ai') {
+                        setCopiedAiPrompt(true);
+                        setTimeout(() => setCopiedAiPrompt(false), 2000);
+                      } else {
+                        setCopiedNpmSnippet(true);
+                        setTimeout(() => setCopiedNpmSnippet(false), 2000);
+                      }
+                    }}
+                    className="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-mono transition cursor-pointer shrink-0 flex items-center gap-1"
+                  >
+                    <span>{(quickTab === 'ai' ? copiedAiPrompt : copiedNpmSnippet) ? '✓ Copied' : quickTab === 'ai' ? 'Copy AI Prompt' : 'Copy'}</span>
+                  </button>
                 </div>
 
-                <pre className="text-xs text-zinc-300 overflow-x-auto leading-relaxed p-1 font-mono">
+                {quickTab === 'ai' && (
+                  <div className="text-[11px] text-purple-300/90 font-mono bg-purple-950/20 border border-purple-500/30 p-2 rounded-lg flex items-center justify-between">
+                    <span>Paste into Cursor Composer (Cmd+I) or Claude Code CLI.</span>
+                    <span className="text-zinc-500 text-[10px]">Auto-wires API key &amp; SDK</span>
+                  </div>
+                )}
+
+                <pre className="text-xs text-zinc-200 overflow-x-auto leading-relaxed p-2 font-mono bg-zinc-950/60 rounded-lg border border-zinc-800/80 whitespace-pre-wrap">
                   <code>{quickstartSnippets[quickTab]}</code>
                 </pre>
               </div>
@@ -891,6 +934,17 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                     <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-0.5 rounded-md font-mono text-[10px]">
                       <button
                         type="button"
+                        onClick={() => setQuickstartMode('ai')}
+                        className={`px-2 py-0.5 rounded transition cursor-pointer font-semibold ${
+                          quickstartMode === 'ai'
+                            ? 'bg-purple-600/30 text-purple-200 border border-purple-500/50'
+                            : 'text-zinc-400 hover:text-zinc-200'
+                        }`}
+                      >
+                        ✨ AI Agent
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setQuickstartMode('npm')}
                         className={`px-2 py-0.5 rounded transition cursor-pointer font-semibold ${
                           quickstartMode === 'npm'
@@ -914,7 +968,33 @@ requests.post("https://snaptrace-dashboard.vercel.app/api/v1/log", json={
                     </div>
                   </div>
 
-                  {quickstartMode === 'npm' ? (
+                  {quickstartMode === 'ai' ? (
+                    <div className="space-y-2">
+                      <div className="p-2.5 bg-gradient-to-b from-purple-950/20 to-zinc-900/60 border border-purple-500/30 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between text-[11px] font-mono text-purple-200">
+                          <span className="flex items-center gap-1.5 font-bold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+                            Cursor / Claude Prompt
+                          </span>
+                          <span className="text-[10px] text-zinc-400">10s setup</span>
+                        </div>
+                        <pre className="text-[10.5px] font-mono text-zinc-300 leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-32 bg-zinc-950/70 p-2 rounded border border-zinc-800/80">
+                          {aiPromptText}
+                        </pre>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(aiPromptText);
+                            setCopiedAiPrompt(true);
+                            setTimeout(() => setCopiedAiPrompt(false), 2000);
+                          }}
+                          className="w-full py-1.5 px-3 bg-purple-600 hover:bg-purple-500 text-white font-mono text-xs font-semibold rounded-md transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <span>{copiedAiPrompt ? '✓ Prompt Copied!' : 'Copy AI Prompt'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : quickstartMode === 'npm' ? (
                     <div className="space-y-2">
                       {/* npm install box with 1-click copy */}
                       <div className="flex items-center justify-between bg-zinc-900/80 border border-zinc-800 rounded-lg px-2.5 py-1.5 font-mono text-xs text-zinc-200">

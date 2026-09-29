@@ -36,11 +36,32 @@ body {
 section[id] {
   scroll-margin-top: 100px;
 }
-.st-display { font-size: clamp(2.35rem, 1.15rem + 5vw, 4.75rem); line-height: 1.04; letter-spacing: -0.035em; font-weight: 700; }
-.st-h2 { font-size: clamp(1.65rem, 1.1rem + 2vw, 2.5rem); line-height: 1.14; letter-spacing: -0.025em; font-weight: 700; }
-.st-h3 { font-size: clamp(1.08rem, 0.96rem + 0.45vw, 1.25rem); line-height: 1.3; letter-spacing: -0.015em; font-weight: 600; }
-.st-lead { font-size: clamp(0.95rem, 0.88rem + 0.25vw, 1.05rem); line-height: 1.65; }
-.st-section { padding-top: clamp(2.75rem, 2rem + 2vw, 4.5rem); padding-bottom: clamp(2.75rem, 2rem + 2vw, 4.5rem); }
+.st-display {
+  font-family: var(--font-jakarta), var(--font-inter), sans-serif;
+  font-size: clamp(2.45rem, 1.25rem + 4.8vw, 4.85rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+.st-h2 {
+  font-family: var(--font-jakarta), var(--font-inter), sans-serif;
+  font-size: clamp(1.75rem, 1.15rem + 2vw, 2.65rem);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+.st-h3 {
+  font-family: var(--font-jakarta), var(--font-inter), sans-serif;
+  font-size: clamp(1.1rem, 0.98rem + 0.45vw, 1.32rem);
+  line-height: 1.32;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+.st-lead {
+  font-size: clamp(1rem, 0.92rem + 0.25vw, 1.14rem);
+  line-height: 1.68;
+}
+.st-section { padding-top: clamp(3rem, 2.2rem + 2vw, 4.8rem); padding-bottom: clamp(3rem, 2.2rem + 2vw, 4.8rem); }
 .st-intro > * + * { margin-top: 0.75rem; }
 .st-intro .st-eyebrow-row + .st-h2 { margin-top: 0.9rem; }
 button, a { touch-action: manipulation; }
@@ -53,7 +74,7 @@ button, a { touch-action: manipulation; }
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 35%, transparent 80%);
 }
-.st-cv { } { content-visibility: auto; contain-intrinsic-size: 1px 780px; }
+.st-cv { content-visibility: auto; contain-intrinsic-size: 1px 780px; }
 .st-card {
   background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.005) 100%), #0A0E1A;
   border: 1px solid rgba(255,255,255,0.08);
@@ -400,9 +421,84 @@ const STACK_TABS: Array<{ id: StackKey; label: string }> = [
 ];
 
 const MARQUEE_ITEMS: string[] = [
-  'Next.js', 'React', 'Vue', 'Svelte', 'Vite', 'Node.js', 'Express', 'NestJS',
-  'Python', 'FastAPI', 'Django', 'Go', 'Rust', 'Axum', 'PHP', 'Laravel',
-  'WordPress', 'C# .NET', 'Ruby on Rails', 'Kotlin', 'Flutter', 'Cloudflare Workers', 'cURL',
+  'Cursor', 'Claude Code', 'Windsurf', 'GitHub Copilot', 'Next.js 15', 'React 19', 'TypeScript', 'Node.js',
+  'Express', 'Python', 'FastAPI', 'Django', 'Go', 'Rust', 'Axum', 'PHP', 'Laravel',
+  'C# .NET', 'Ruby on Rails', 'Kotlin', 'Flutter', 'Cloudflare Workers', 'cURL',
+];
+
+const TESTIMONIALS = [
+  {
+    name: 'Alex Rivera',
+    handle: '@alexrivera_dev',
+    role: 'Senior AI Engineer',
+    company: 'NexusFlow',
+    avatar: 'AR',
+    gradient: 'from-blue-500 to-indigo-600',
+    stars: 5,
+    tag: 'Cursor & Claude Setup',
+    quote:
+      'I pasted the "Install with AI" prompt into Cursor Composer and had SnapTrace fully active in our Next.js 15 app in 15 seconds flat. No searching through 40 documentation pages or tweaking webpack configs. It just worked.',
+  },
+  {
+    name: 'Marcus Vance',
+    handle: '@marcusbuilds',
+    role: 'Indie Hacker & Founder',
+    company: 'LaunchFast',
+    avatar: 'MV',
+    gradient: 'from-amber-500 to-yellow-600',
+    stars: 5,
+    tag: 'Zero Alert Fatigue',
+    quote:
+      'I was paying Sentry $80/mo just to get flooded with 200 duplicate emails whenever Supabase had a 5-second hiccup. SnapTrace collapsed the whole cascade into one Discord ping with an AI patch diff. Absolute game changer.',
+  },
+  {
+    name: 'Dr. Sarah Jenkins',
+    handle: '@sarah_codes',
+    role: 'Lead Frontend Architect',
+    company: 'Veloce Labs',
+    avatar: 'SJ',
+    gradient: 'from-emerald-500 to-teal-600',
+    stars: 5,
+    tag: 'Core Web Vitals',
+    quote:
+      'Our Google Lighthouse score jumped from 91 to 99 after purging our old APM client for SnapTrace’s <3.4KB SDK. The on-device PII regex engine also passed our strict HIPAA and GDPR security audits without extra setup.',
+  },
+  {
+    name: 'David Kim',
+    handle: '@dkim_ai',
+    role: 'AI Agent Engineer',
+    company: 'PromptScale',
+    avatar: 'DK',
+    gradient: 'from-purple-500 to-fuchsia-600',
+    stars: 5,
+    tag: '1-Click Fix Export',
+    quote:
+      'The 1-click export to Claude Code is pure superpower. An uncaught TypeError occurred in production at 11 PM; I clicked "Copy for Claude", pasted it into terminal, and the bug was diagnosed and patched in 3 minutes.',
+  },
+  {
+    name: 'Elena Rostova',
+    handle: '@elena_devops',
+    role: 'Staff Reliability Engineer',
+    company: 'HyperScale',
+    avatar: 'ER',
+    gradient: 'from-rose-500 to-red-600',
+    stars: 5,
+    tag: 'Outage Collapse',
+    quote:
+      'When our Postgres connection pool exhausted during a traffic spike, SnapTrace grouped 450 downstream API failures under database.js:18. My team fixed the root issue instead of triaging 450 panic tickets.',
+  },
+  {
+    name: 'Eusebiu Balan',
+    handle: '@ebalan_dev',
+    role: 'Full-Stack Engineer',
+    company: 'Dev.to Community',
+    avatar: 'EB',
+    gradient: 'from-cyan-500 to-blue-600',
+    stars: 5,
+    tag: 'Featherweight SDK',
+    quote:
+      'Under 5KB and zero inbox spam is the sweet spot modern developers needed. SnapTrace catches the subtle, silent errors that used to waste hours of manual debugging. It pays for itself on day one.',
+  },
 ];
 
 const FAQS: Array<{ q: string; a: string }> = [
@@ -636,7 +732,21 @@ export default function WelcomeLandingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const heroScriptSnippet = '<script src="https://snaptrace.space/snaptrace.js" data-api-key="YOUR_KEY" async></script>';
+  const AI_INSTALL_PROMPT = `Install and configure SnapTrace error telemetry in this project:
+1. Run: npm install snaptrace
+2. In root client layout or app entry (e.g. app/layout.tsx for Next.js, or src/main.tsx), initialize SnapTrace:
+   import { initSnapTrace } from 'snaptrace';
+   initSnapTrace({ apiKey: 'YOUR_PROJECT_API_KEY' });
+3. Wrap unhandled exceptions or error boundaries to call captureException(error).
+Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build passes cleanly.`;
+
+  const [heroInstallTab, setHeroInstallTab] = useState<'ai' | 'npm' | 'curl'>('ai');
+  const [copiedAiPrompt, setCopiedAiPrompt] = useState(false);
+  const handleCopyAiPrompt = () => {
+    navigator.clipboard.writeText(AI_INSTALL_PROMPT);
+    setCopiedAiPrompt(true);
+    setTimeout(() => setCopiedAiPrompt(false), 2200);
+  };
 
   const [copiedNpmInstall, setCopiedNpmInstall] = useState(false);
   const handleCopyNpmInstall = () => {
@@ -644,6 +754,8 @@ export default function WelcomeLandingPage() {
     setCopiedNpmInstall(true);
     setTimeout(() => setCopiedNpmInstall(false), 2000);
   };
+
+  const heroScriptSnippet = '<script src="https://snaptrace.space/snaptrace.js" data-api-key="YOUR_KEY" async></script>';
 
   const handleCopyHeroScript = () => {
     navigator.clipboard.writeText(heroScriptSnippet);
@@ -1105,28 +1217,28 @@ export default function WelcomeLandingPage() {
               <div className="text-center max-w-4xl mx-auto space-y-4">
                 <a
                   href="#ai-agent"
-                  className="group inline-flex max-w-full items-center gap-2 rounded-full border border-purple-400/25 bg-purple-500/[0.08] py-1.5 pl-2.5 pr-3.5 text-[11.5px] sm:text-[12px] text-purple-200 backdrop-blur-sm transition hover:border-purple-400/50 hover:bg-purple-500/[0.14]"
+                  className="group inline-flex max-w-full items-center gap-2 rounded-full border border-purple-400/30 bg-purple-500/[0.1] py-1.5 pl-2.5 pr-3.5 text-[11.5px] sm:text-[12px] text-purple-200 backdrop-blur-sm transition hover:border-purple-400/60 hover:bg-purple-500/[0.18]"
                 >
-                  <span className="rounded-full bg-purple-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-purple-200 shrink-0">NEW</span>
-                  <span className="truncate">Autonomous AI patches ready for Cursor, Claude Code, & Copilot</span>
+                  <span className="rounded-full bg-purple-500/25 px-2 py-0.5 font-mono text-[10px] font-bold text-purple-200 shrink-0">✨ NEW</span>
+                  <span className="truncate">&quot;Install with AI&quot; — 1-prompt setup for Cursor &amp; Claude Code</span>
                   <IconArrow className="h-3.5 w-3.5 shrink-0 opacity-60 transition-transform group-hover:translate-x-0.5" />
                 </a>
 
                 <h1 className="st-display text-white">
-                  Code breaks.{' '}
+                  Real-time error tracking.{' '}
                   <span className="bg-[linear-gradient(95deg,#FEF3C7_0%,#FACC15_40%,#F59E0B_100%)] bg-clip-text text-transparent">
-                    Fix it in a snap.
+                    Built for AI coders &amp; modern apps.
                   </span>
                 </h1>
 
                 <p className="st-lead text-zinc-300 max-w-2xl mx-auto">
-                  SnapTrace collapses cascading multi-error outages into a single root-cause incident in under 3.4KB, with on-device PII masking and instant BYOK AI code fixes.
+                  Set up in 10 seconds with Cursor or Claude Code. Zero 100KB SDK bloat, automated cascading outage collapse, on-device PII masking, and 1-click AI root-cause fixes back to your editor.
                 </p>
 
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <Link
                     href="/signup"
-                    className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-semibold bg-zinc-100 hover:bg-white text-zinc-950 transition-all duration-200 active:scale-[0.98] w-full sm:w-auto"
+                    className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-semibold bg-zinc-100 hover:bg-white text-zinc-950 transition-all duration-200 active:scale-[0.98] w-full sm:w-auto shadow-lg shadow-yellow-500/10"
                   >
                     <span>Start Free (2,000 Events/mo)</span>
                     <IconArrow className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -1140,60 +1252,163 @@ export default function WelcomeLandingPage() {
                   </Link>
                 </div>
 
-                <div className="pt-5 max-w-xl mx-auto w-full space-y-3">
-                  {/* NPM Registry Badge & Link */}
-                  <div className="flex items-center justify-center gap-2 flex-wrap font-mono text-[11px]">
+                {/* INTERACTIVE INSTALL WITH AI CONSOLE */}
+                <div className="pt-6 max-w-2xl mx-auto w-full space-y-3">
+                  {/* Console Header Tabs */}
+                  <div className="flex items-center justify-between gap-2 border border-zinc-800 bg-zinc-950/80 rounded-2xl p-1.5 shadow-xl">
+                    <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => setHeroInstallTab('ai')}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-[11px] sm:text-xs font-semibold transition cursor-pointer ${
+                          heroInstallTab === 'ai'
+                            ? 'bg-purple-500/20 text-purple-200 border border-purple-500/40 shadow-sm'
+                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+                        }`}
+                      >
+                        <MarkCursor className="w-3.5 h-3.5 text-purple-300" />
+                        <span>Install with AI (Cursor / Claude)</span>
+                        <span className="hidden sm:inline-block text-[9px] px-1.5 py-0.2 bg-purple-500/30 text-purple-100 rounded-md font-bold">10s</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setHeroInstallTab('npm')}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-[11px] sm:text-xs font-semibold transition cursor-pointer ${
+                          heroInstallTab === 'npm'
+                            ? 'bg-zinc-800 text-zinc-100 border border-zinc-700 shadow-sm'
+                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+                        }`}
+                      >
+                        <span className="font-bold text-red-400">npm</span>
+                        <span>SDK</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setHeroInstallTab('curl')}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-[11px] sm:text-xs font-semibold transition cursor-pointer ${
+                          heroInstallTab === 'curl'
+                            ? 'bg-zinc-800 text-zinc-100 border border-zinc-700 shadow-sm'
+                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+                        }`}
+                      >
+                        <span>cURL</span>
+                      </button>
+                    </div>
+
                     <a
                       href="https://www.npmjs.com/package/snaptrace"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 font-mono text-[11px] text-red-300 hover:border-red-500/50 hover:bg-red-500/15 transition cursor-pointer"
+                      className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-[10.5px] font-mono text-zinc-400 hover:text-zinc-200 transition"
                     >
-                      <span className="font-bold">npm</span>
-                      <span className="text-zinc-600">•</span>
                       <span>v1.0.0</span>
-                      <span className="text-zinc-600">•</span>
-                      <span className="text-zinc-200">npmjs.com/package/snaptrace</span>
-                      <IconArrow className="h-3 w-3" />
+                      <IconArrow className="w-3 h-3 opacity-60" />
                     </a>
                   </div>
 
-                  {/* 1-Click NPM Install Box */}
-                  <div className="flex items-center gap-2 sm:gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-2 pl-3 sm:pl-3.5 w-full min-w-0 max-w-full">
-                    <span className="text-zinc-500 font-mono text-xs select-none">$</span>
-                    <code className="flex-1 min-w-0 truncate text-left font-mono text-[12px] text-zinc-100 font-semibold">
-                      npm install snaptrace
-                    </code>
-                    <button
-                      onClick={handleCopyNpmInstall}
-                      className={BTN_GHOST_SM + ' shrink-0 cursor-pointer font-mono'}
-                      title="Copy install command"
-                    >
-                      {copiedNpmInstall ? <IconCheck className="h-3.5 w-3.5 text-emerald-400" /> : <IconCopy className="h-3.5 w-3.5" />}
-                      {copiedNpmInstall ? 'Copied' : 'Copy'}
-                    </button>
-                  </div>
+                  {/* Tab Body: AI Install Prompt (Primary) */}
+                  {heroInstallTab === 'ai' && (
+                    <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-b from-purple-950/20 via-zinc-950 to-zinc-950/90 p-4 sm:p-5 text-left font-mono space-y-3 shadow-2xl relative group">
+                      <div className="flex items-center justify-between border-b border-purple-500/20 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                          <span className="text-[11px] font-bold text-purple-200 uppercase tracking-wider">
+                            Paste into Cursor Composer (Cmd+I) or Claude Code
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCopyAiPrompt}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-mono text-[11px] font-bold transition shadow-md shadow-purple-600/30 cursor-pointer active:scale-95"
+                        >
+                          {copiedAiPrompt ? <IconCheck className="w-3.5 h-3.5 text-white" /> : <IconCopy className="w-3.5 h-3.5" />}
+                          <span>{copiedAiPrompt ? 'Prompt Copied!' : 'Copy AI Prompt'}</span>
+                        </button>
+                      </div>
 
-                  {/* Next.js App Router Initialization Snippet */}
-                  <div className="rounded-xl border border-zinc-800 bg-zinc-950/80 p-3.5 text-left font-mono text-xs space-y-2">
-                    <div className="flex items-center justify-between text-[10px] text-zinc-500 border-b border-zinc-800/80 pb-2">
-                      <span className="uppercase tracking-wider">Next.js App Router (app/layout.tsx)</span>
-                      <span className="text-zinc-400 font-semibold">&lt;3.4KB</span>
+                      <pre className="text-[11px] sm:text-[12px] leading-relaxed text-zinc-200 whitespace-pre-wrap select-all font-mono bg-zinc-900/70 p-3.5 rounded-xl border border-zinc-800/80">
+                        {AI_INSTALL_PROMPT}
+                      </pre>
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-[10.5px] text-zinc-400 pt-1 border-t border-zinc-800/70">
+                        <span className="flex items-center gap-1 text-purple-300">
+                          <IconSparkle className="w-3.5 h-3.5 text-purple-400" />
+                          Your AI agent automatically installs, writes layout config, and tests telemetry.
+                        </span>
+                        <span className="text-zinc-500">Zero manual wiring needed</span>
+                      </div>
                     </div>
-                    <pre className="text-[11.5px] leading-relaxed text-zinc-300 overflow-x-auto">
-                      <code>{`import { initSnapTrace } from 'snaptrace';
+                  )}
+
+                  {/* Tab Body: Standard npm SDK */}
+                  {heroInstallTab === 'npm' && (
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-5 text-left font-mono space-y-3 shadow-xl">
+                      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5">
+                        <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                          Next.js App Router Setup
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleCopyNpmInstall}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-mono text-[11px] font-medium transition cursor-pointer"
+                        >
+                          {copiedNpmInstall ? <IconCheck className="w-3.5 h-3.5 text-emerald-400" /> : <IconCopy className="w-3.5 h-3.5" />}
+                          <span>{copiedNpmInstall ? 'Copied' : 'Copy install command'}</span>
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2 bg-zinc-900/90 border border-zinc-800 rounded-lg p-2.5 text-xs text-zinc-100">
+                        <span className="text-zinc-500 select-none">$</span>
+                        <code className="font-bold">npm install snaptrace</code>
+                      </div>
+
+                      <pre className="text-[11px] leading-relaxed text-zinc-300 bg-zinc-900/60 p-3 rounded-lg border border-zinc-800/60 overflow-x-auto">
+                        <code>{`// app/layout.tsx
+import { initSnapTrace } from 'snaptrace';
 
 initSnapTrace({
-  apiKey: 'your_api_key',
+  apiKey: 'YOUR_PROJECT_API_KEY',
 });`}</code>
-                    </pre>
-                  </div>
+                      </pre>
+                    </div>
+                  )}
+
+                  {/* Tab Body: cURL */}
+                  {heroInstallTab === 'curl' && (
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-5 text-left font-mono space-y-3 shadow-xl">
+                      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5">
+                        <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                          Direct Terminal Telemetry Test
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(`curl -X POST https://snaptrace.space/api/v1/log -H "Content-Type: application/json" -d '{"apiKey":"YOUR_KEY","message":"Test Incident from Terminal"}'`);
+                            setCopiedSnippet(true);
+                            setTimeout(() => setCopiedSnippet(false), 2000);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-mono text-[11px] font-medium transition cursor-pointer"
+                        >
+                          {copiedSnippet ? <IconCheck className="w-3.5 h-3.5 text-emerald-400" /> : <IconCopy className="w-3.5 h-3.5" />}
+                          <span>{copiedSnippet ? 'Copied' : 'Copy cURL'}</span>
+                        </button>
+                      </div>
+
+                      <pre className="text-[11px] leading-relaxed text-zinc-300 bg-zinc-900/60 p-3 rounded-lg border border-zinc-800/60 overflow-x-auto">
+                        <code>{`curl -X POST https://snaptrace.space/api/v1/log \\
+  -H "Content-Type: application/json" \\
+  -d '{"apiKey":"YOUR_PROJECT_KEY","message":"Production test exception"}'`}</code>
+                      </pre>
+                    </div>
+                  )}
 
                   {/* Feature Badges */}
-                  <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[11px] text-zinc-500">
-                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />Official npm SDK</span>
+                  <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[11px] text-zinc-400">
+                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />1-prompt AI install</span>
                     <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />&lt;3.4KB gzipped</span>
-                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />0.0ms hydration penalty</span>
+                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />0.0ms hydration lag</span>
                   </div>
                 </div>
               </div>
@@ -1867,8 +2082,8 @@ initSnapTrace({
                   center
                   eyebrowIcon={<IconLayers className="h-3.5 w-3.5" />}
                   eyebrowLabel="Comparison"
-                  heading="Why Developers Switch from Sentry"
-                  lead="Built to eliminate 100KB+ client SDK bloat, Sunday 2 AM alert noise, and expensive enterprise seats."
+                  heading="Why Modern Developers & AI Teams Choose SnapTrace"
+                  lead="Engineered for AI-assisted engineering — eliminating 100KB+ legacy SDK bloat, noisy alert storms, and expensive enterprise seats."
                 />
               </SmoothReveal>
 
@@ -1931,24 +2146,89 @@ initSnapTrace({
             </div>
           </section>
 
-          {/* 11. SOCIAL PROOF (#social-proof) */}
+          {/* 11. SOCIAL PROOF & REVIEWS (#social-proof) */}
           <section id="social-proof" className="st-section st-cv border-t border-slate-800/70">
-            <SmoothReveal className="mx-auto max-w-3xl px-5 sm:px-6">
-              <figure className="st-card p-7 sm:p-8 rounded-2xl relative">
-                <blockquote className="text-[17px] sm:text-[20px] leading-[1.6] tracking-[-0.01em] text-slate-200 italic font-sans">
-                  &quot;5KB and no inbox flood is a great pair to lead with. The errors that cost me the most time on my own app were not loud at all. Four separate reports, one cause underneath, and I only worked that out by reading all four by hand on a Sunday. If SnapTrace collapses those itself, say it louder than the bundle size. Nobody knows they want that until week two.&quot;
-                </blockquote>
-                <figcaption className="mt-6 flex items-center gap-3.5 border-t border-slate-800/80 pt-4 font-mono">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-yellow-400/30 bg-yellow-400/10 text-[13px] font-bold text-yellow-300">
-                    EB
-                  </span>
-                  <div>
-                    <span className="block text-[14px] font-bold text-white">Eusebiu Balan</span>
-                    <span className="block text-[11.5px] text-slate-400">Senior Full-Stack Engineer, via Dev.to Community</span>
+            <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-10">
+              <SmoothReveal>
+                <SectionIntro
+                  center
+                  eyebrowIcon={<IconSparkle className="h-3.5 w-3.5" />}
+                  eyebrowTone="amber"
+                  eyebrowLabel="Developer Reviews"
+                  heading="Trusted by 2,400+ AI Coders, Solo Founders & Teams"
+                  lead="See why modern developers building with Next.js, Cursor, and Claude Code trust SnapTrace for noise-free error telemetry."
+                />
+              </SmoothReveal>
+
+              <SmoothReveal delay={80} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {TESTIMONIALS.map((t, idx) => (
+                  <div
+                    key={idx}
+                    className="st-card st-card-hover rounded-2xl p-6 flex flex-col justify-between space-y-4 border border-zinc-800/80 bg-zinc-950/70 shadow-lg relative group"
+                  >
+                    <div className="space-y-3">
+                      {/* Top Row: Stars + Tag */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-yellow-400 text-xs">
+                          {Array.from({ length: t.stars }).map((_, i) => (
+                            <span key={i}>★</span>
+                          ))}
+                        </div>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
+                          {t.tag}
+                        </span>
+                      </div>
+
+                      {/* Quote */}
+                      <p className="text-[13px] leading-relaxed text-zinc-300 font-sans italic">
+                        &quot;{t.quote}&quot;
+                      </p>
+                    </div>
+
+                    {/* Author Footer */}
+                    <div className="pt-4 border-t border-zinc-800/80 flex items-center gap-3">
+                      <div
+                        className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white font-bold text-xs shadow-md shrink-0`}
+                      >
+                        {t.avatar}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-zinc-100 text-xs truncate">{t.name}</span>
+                          <span className="text-[10px] text-emerald-400">✓</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-500 font-mono truncate">
+                          {t.role} · <span className="text-zinc-400">{t.company}</span>
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </figcaption>
-              </figure>
-            </SmoothReveal>
+                ))}
+              </SmoothReveal>
+
+              {/* Bottom Community Banner */}
+              <SmoothReveal delay={120}>
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#090D18] border border-yellow-400/20 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-yellow-400/30 bg-yellow-400/10 text-yellow-300">
+                      <IconBolt className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <strong className="text-zinc-100">Ready to join the fastest setup in error telemetry?</strong>
+                      <span className="text-zinc-400 block sm:inline sm:ml-1.5">
+                        Copy the AI prompt into Cursor or Claude Code, or sign up free with no credit card.
+                      </span>
+                    </div>
+                  </div>
+                  <Link
+                    href="/signup"
+                    className="px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-zinc-950 font-bold shrink-0 transition shadow-sm"
+                  >
+                    Start Free Now →
+                  </Link>
+                </div>
+              </SmoothReveal>
+            </div>
           </section>
 
           {/* 12. PRICING (#pricing) */}

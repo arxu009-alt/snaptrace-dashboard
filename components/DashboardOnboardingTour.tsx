@@ -32,10 +32,10 @@ export default function DashboardOnboardingTour() {
     },
     {
       targetId: 'tour-nav-integrations',
-      badge: 'Step 3 of 5 • SDK Snippets',
+      badge: 'Step 3 of 5 • SDK & AI Setup',
       icon: '⚡',
-      title: 'Language Integration Hub',
-      description: 'Copy drop-in setup code for Next.js, Python, Node.js, PHP, Ruby, Kotlin, and cURL with your live project API key pre-injected.',
+      title: 'Language Integration & AI Install Hub',
+      description: 'Copy our 1-prompt "Install with AI" text for Cursor and Claude Code, or grab drop-in snippets for Next.js, Python, Node.js, and cURL with your live API key pre-injected.',
     },
     {
       targetId: 'tour-nav-settings',

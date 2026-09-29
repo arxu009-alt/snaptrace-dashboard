@@ -85,6 +85,7 @@ export default function LanguageIntegrationsPage() {
   const [copiedInstall, setCopiedInstall] = useState<boolean>(false);
   const [copiedInit, setCopiedInit] = useState<boolean>(false);
   const [copiedCatch, setCopiedCatch] = useState<boolean>(false);
+  const [copiedAiPrompt, setCopiedAiPrompt] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchApiKey = useCallback(async () => {
@@ -543,6 +544,51 @@ end`,
           <code className="bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800 font-mono text-xs text-zinc-300 truncate max-w-md">
             {loading ? 'Fetching active key...' : apiKey}
           </code>
+        </div>
+
+        {/* Featured: 10-Second Install with AI (Cursor & Claude Code) */}
+        <div className="rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-950/30 via-zinc-950 to-zinc-950 p-5 space-y-3 font-mono shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-500/20 pb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+              <div>
+                <h2 className="text-sm font-bold text-purple-200">
+                  ⚡ 1-Prompt Setup: Install with AI (Cursor &amp; Claude Code)
+                </h2>
+                <p className="text-xs text-zinc-400 font-sans mt-0.5">
+                  Paste this into Cursor Composer (Cmd+I) or Claude Code. Your AI agent installs the package, adds initialization with your key, and configures error boundaries in 10s.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const prompt = `Install and configure SnapTrace error telemetry in this project:
+1. Run: npm install snaptrace
+2. In root client layout or app entry (e.g. app/layout.tsx for Next.js, or src/main.tsx), initialize SnapTrace:
+   import { initSnapTrace } from 'snaptrace';
+   initSnapTrace({ apiKey: '${apiKey || 'YOUR_PROJECT_API_KEY'}' });
+3. Wrap any critical unhandled exceptions or error boundaries to call captureException(error).
+Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build passes cleanly.`;
+                navigator.clipboard.writeText(prompt);
+                setCopiedAiPrompt(true);
+                setTimeout(() => setCopiedAiPrompt(false), 2000);
+              }}
+              className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-mono text-xs font-bold transition shadow-md shadow-purple-600/20 flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <span>{copiedAiPrompt ? '✓ AI Prompt Copied!' : 'Copy AI Prompt'}</span>
+            </button>
+          </div>
+
+          <pre className="text-xs text-zinc-200 overflow-x-auto leading-relaxed p-3 font-mono bg-zinc-900/70 rounded-lg border border-purple-500/20 whitespace-pre-wrap select-all">
+{`Install and configure SnapTrace error telemetry in this project:
+1. Run: npm install snaptrace
+2. In root client layout or app entry (e.g. app/layout.tsx for Next.js, or src/main.tsx), initialize SnapTrace:
+   import { initSnapTrace } from 'snaptrace';
+   initSnapTrace({ apiKey: '${apiKey || 'YOUR_PROJECT_API_KEY'}' });
+3. Wrap unhandled exceptions or error boundaries to call captureException(error).
+Keep it featherweight (<5KB) with 0ms hydration lag and ensure the build passes cleanly.`}
+          </pre>
         </div>
 
         {/* Grid: Language Selector + Code Box */}
