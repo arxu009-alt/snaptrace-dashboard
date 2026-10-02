@@ -1,30 +1,8 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import React from 'react';
 import { SnapTraceProvider } from '@/components/SnapTraceProvider';
 import { Analytics } from '@vercel/analytics/react';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-  weight: ['400', '500', '600', '700', '800', '900'],
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-jakarta',
-  display: 'swap',
-  weight: ['400', '500', '600', '700', '800'],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-  weight: ['400', '500', '600', '700', '800'],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://snaptrace.space'),
@@ -133,8 +111,14 @@ export default function RootLayout({
   ];
 
   return (
-    <html lang="en" className={`${jakarta.variable} ${inter.variable} ${jetbrainsMono.variable} dark scroll-smooth`}>
+    <html lang="en" className="dark scroll-smooth">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
         <meta name="msvalidate.01" content="EC1C00F550C23BCFCF6A5FB131492203" />
         <script
           type="application/ld+json"
