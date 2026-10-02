@@ -15,7 +15,7 @@ type FeedbackCategory = 'bug' | 'feature' | 'ux' | 'general';
 type TriageTab = 'stack' | 'timeline' | 'pii' | 'aifix';
 type IconProps = { className?: string };
 
-const SUPPORT_EMAIL = 'hello.snaptrace@gmail.com';
+const SUPPORT_EMAIL = 'hello@snaptrace.space';
 
 const GLOBAL_CSS = `
 html {
@@ -1037,7 +1037,7 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
               className="st-h3 border-b border-slate-800/60 py-3.5 text-left text-yellow-300 flex items-center justify-between"
             >
               <span>Give Feedback</span>
-              <span className="text-xs font-mono">hello.snaptrace@gmail.com</span>
+              <span className="text-xs font-mono">{SUPPORT_EMAIL}</span>
             </button>
             <Link href="/demo" onClick={() => setMobileNavOpen(false)} className="st-h3 py-3.5 text-slate-200">Live Demo</Link>
           </nav>
@@ -1057,7 +1057,7 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
 
      {/* VIEW 1: RAW DEV TERMINAL */}
       {!marketingMode ? (
-        <section className="st-grain relative min-h-[calc(100vh-7rem)] w-full max-w-full overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24">
+        <section className="st-grain relative min-h-[calc(100vh-7rem)] w-full max-w-full overflow-hidden pt-6 pb-12 lg:pt-10 lg:pb-16">
           <div className="st-grid pointer-events-none absolute inset-0" />
           <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-start gap-8 lg:gap-12 px-5 sm:px-6 lg:grid-cols-12">
             <div className="space-y-6 lg:col-span-5 pt-2">
@@ -1198,7 +1198,7 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
           <section
               ref={heroRef}
               onMouseMove={handleHeroMouseMove}
-              className="st-grain relative overflow-hidden pb-14 pt-12 sm:pb-20 sm:pt-16"
+              className="st-grain relative overflow-hidden pb-12 pt-6 sm:pb-16 sm:pt-8 lg:pt-10"
             >
             <TelemetryBeamBackground />
             <div className="st-grid pointer-events-none absolute inset-0" />
@@ -1214,12 +1214,12 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
             </div>
 
             <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6">
-              <div className="text-center max-w-4xl mx-auto space-y-4">
+              <div className="text-center max-w-4xl mx-auto space-y-3 sm:space-y-3.5">
                 <a
                   href="#ai-agent"
-                  className="group inline-flex max-w-full items-center gap-2 rounded-full border border-purple-400/30 bg-purple-500/[0.1] py-1.5 pl-2.5 pr-3.5 text-[11.5px] sm:text-[12px] text-purple-200 backdrop-blur-sm transition hover:border-purple-400/60 hover:bg-purple-500/[0.18]"
+                  className="group inline-flex max-w-full items-center gap-2 rounded-full border border-purple-400/30 bg-purple-500/[0.1] py-1 pl-2.5 pr-3 text-[11px] sm:text-[12px] text-purple-200 backdrop-blur-sm transition hover:border-purple-400/60 hover:bg-purple-500/[0.18]"
                 >
-                  <span className="rounded-full bg-purple-500/25 px-2 py-0.5 font-mono text-[10px] font-bold text-purple-200 shrink-0">✨ NEW</span>
+                  <span className="rounded-full bg-purple-500/25 px-2 py-0.5 font-mono text-[9.5px] font-bold text-purple-200 shrink-0">✨ NEW</span>
                   <span className="truncate">&quot;Install with AI&quot; — 1-prompt setup for Cursor &amp; Claude Code</span>
                   <IconArrow className="h-3.5 w-3.5 shrink-0 opacity-60 transition-transform group-hover:translate-x-0.5" />
                 </a>
@@ -1235,17 +1235,17 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
                   Set up in 10 seconds with Cursor or Claude Code. Zero 100KB SDK bloat, automated cascading outage collapse, on-device PII masking, and 1-click AI root-cause fixes back to your editor.
                 </p>
 
-                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <div className="pt-1 sm:pt-1.5 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
                   <Link
                     href="/signup"
-                    className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-3 text-[13px] font-semibold bg-zinc-100 hover:bg-white text-zinc-950 transition-all duration-200 active:scale-[0.98] w-full sm:w-auto shadow-lg shadow-yellow-500/10"
+                    className="group inline-flex min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-2.5 sm:py-3 text-[13px] font-semibold bg-zinc-100 hover:bg-white text-zinc-950 transition-all duration-200 active:scale-[0.98] w-full sm:w-auto shadow-lg shadow-yellow-500/10"
                   >
                     <span>Start Free (2,000 Events/mo)</span>
                     <IconArrow className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                   </Link>
                   <Link
                     href="/demo"
-                    className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-800 text-zinc-200 px-5 py-3 text-[13px] font-medium transition-all duration-200 active:scale-[0.98] w-full sm:w-auto"
+                    className="group inline-flex min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-800 text-zinc-200 px-5 py-2.5 sm:py-3 text-[13px] font-medium transition-all duration-200 active:scale-[0.98] w-full sm:w-auto"
                   >
                     <IconTerminal className="h-4 w-4 text-zinc-400" />
                     Open Live Demo (No Signup)
@@ -1253,7 +1253,7 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
                 </div>
 
                 {/* INTERACTIVE INSTALL WITH AI CONSOLE */}
-                <div className="pt-6 max-w-2xl mx-auto w-full space-y-3">
+                <div className="pt-4 sm:pt-5 max-w-2xl mx-auto w-full space-y-3">
                   {/* Console Header Tabs */}
                   <div className="flex items-center justify-between gap-2 border border-zinc-800 bg-zinc-950/80 rounded-2xl p-1.5 shadow-xl">
                     <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
@@ -1301,10 +1301,11 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
                       href="https://www.npmjs.com/package/snaptrace"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-[10.5px] font-mono text-zinc-400 hover:text-zinc-200 transition"
+                      title="View snaptrace on npm"
+                      className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 hover:border-zinc-700 px-2.5 py-1 text-[11px] font-mono text-zinc-300 hover:text-yellow-300 transition shadow-sm group shrink-0"
                     >
                       <span>v1.0.0</span>
-                      <IconArrow className="w-3 h-3 opacity-60" />
+                      <span aria-hidden="true" className="text-zinc-500 transition-transform group-hover:translate-x-0.5 group-hover:text-yellow-300">→</span>
                     </a>
                   </div>
 
