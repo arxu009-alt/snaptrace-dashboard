@@ -27,6 +27,7 @@ import SnapTraceLogo from '@/components/SnapTraceLogo';
 import SnapTraceLoading from '@/components/SnapTraceLoading';
 import FeedbackModal from '@/components/FeedbackModal';
 import DashboardOnboardingTour from '@/components/DashboardOnboardingTour';
+import { ensureDefaultProject } from '@/lib/projects';
 
 interface NavItem {
   id: string;
@@ -116,6 +117,9 @@ export default function DashboardLayout({
         if (email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com') {
           setIsOwner(true);
         }
+
+        // Auto-initialize default project if new user has 0 projects
+        await ensureDefaultProject(session.user.id);
 
         setAuthChecking(false);
         fetchBadgeCount();

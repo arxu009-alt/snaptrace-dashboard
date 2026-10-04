@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { ensureDefaultProject } from '@/lib/projects';
 import { Bell, Send, CheckCircle2, XCircle, ArrowUpRight } from 'lucide-react';
 
 interface ClientProject {
@@ -74,6 +75,14 @@ export default function AlertsPage() {
           .order('created_at', { ascending: false });
         if (fallback.data && fallback.data.length > 0) {
           data = fallback.data;
+        }
+      }
+
+      // Auto-initialize Default Project if 0 projects found for logged-in user
+      if ((!data || data.length === 0) && currentUser?.id) {
+        const defaultProj = await ensureDefaultProject(currentUser.id);
+        if (defaultProj) {
+          data = [defaultProj];
         }
       }
 

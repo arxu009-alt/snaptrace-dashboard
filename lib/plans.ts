@@ -35,13 +35,13 @@ export const PLANS: Record<string, PlanConfig> = {
   },
   beta_founder: {
     name: 'Beta Founder Pass',
-    monthlyEventCap: 10000,
-    projectLimit: 2,
-    retentionDays: 14,
+    monthlyEventCap: 50000,
+    projectLimit: 5,
+    retentionDays: 30,
     webhooks: true,
     aiCopilot: true,
-    clientReports: false,
-    unlimitedSeats: false,
+    clientReports: true,
+    unlimitedSeats: true,
     priceMonthly: 0,
   },
   agency_studio: {
@@ -68,15 +68,15 @@ export const PLANS: Record<string, PlanConfig> = {
   },
   // Maintain backward-compatibility alias for legacy 'pro' and 'agency'
   pro: {
-    name: 'Agency Studio',
-    monthlyEventCap: 100000,
-    projectLimit: 15,
+    name: 'Beta Founder Pass',
+    monthlyEventCap: 50000,
+    projectLimit: 5,
     retentionDays: 30,
     webhooks: true,
     aiCopilot: true,
     clientReports: true,
     unlimitedSeats: true,
-    priceMonthly: 49,
+    priceMonthly: 0,
   },
   agency: {
     name: 'Agency Scale',

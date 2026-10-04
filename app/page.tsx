@@ -2394,12 +2394,14 @@ initSnapTrace({
                     </ul>
                   </div>
 
-                  <Link
-                    href="/signup"
+                  <a
+                    href="https://buy.polar.sh/polar_cl_jtE6KA0k5GWeMhuFWQGB9fsDhRt8rdTwDteFS0Qr44g"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="mt-8 flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-100 px-5 py-3 text-[13px] font-semibold transition font-mono w-full active:scale-[0.98]"
                   >
                     Start 14-Day Free Trial →
-                  </Link>
+                  </a>
                 </div>
 
                 {/* 2. AGENCY SCALE */}
@@ -2446,12 +2448,14 @@ initSnapTrace({
                     </ul>
                   </div>
 
-                  <Link
-                    href="/signup"
+                  <a
+                    href="https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="mt-8 flex items-center justify-center gap-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-5 py-3 text-[13px] font-bold transition font-mono w-full shadow-lg shadow-yellow-400/10 active:scale-[0.98]"
                   >
                     Start 14-Day Free Trial →
-                  </Link>
+                  </a>
                 </div>
               </SmoothReveal>
 

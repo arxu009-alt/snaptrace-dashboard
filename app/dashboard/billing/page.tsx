@@ -177,7 +177,7 @@ export default function BillingPage() {
             <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 px-4 py-3 text-xs font-mono text-zinc-400 flex items-center justify-between flex-wrap gap-2">
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-yellow-400 shrink-0" />
-                <span>Beta Founder Pass users receive 10,000 free monthly events and 2 client projects.</span>
+                <span>Beta Founder Pass users receive 50,000 free monthly events and up to 5 client projects.</span>
               </span>
               <span className="text-[11px] text-zinc-500 font-semibold">Grandfathered Quota</span>
             </div>

@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
 import { PLANS, PlanConfig } from '@/lib/plans';
+import { ensureDefaultProject } from '@/lib/projects';
 
 interface Project {
   id: string;
@@ -57,11 +58,19 @@ export default function ProjectsPage() {
     const ownerCheck = email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com';
     setIsOwner(ownerCheck);
 
-    const { data: projectList, error } = await supabase
+    let { data: projectList, error } = await supabase
       .from('projects')
       .select('*')
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
+
+    // Auto-initialize Default Project if user has 0 projects
+    if (!error && (!projectList || projectList.length === 0)) {
+      const defaultProj = await ensureDefaultProject(session.user.id);
+      if (defaultProj) {
+        projectList = [defaultProj];
+      }
+    }
 
     // Inspect user's active tier (plan_tier from projects or profile)
     let activeTier = 'free';

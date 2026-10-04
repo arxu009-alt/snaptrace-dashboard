@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { ensureDefaultProject } from '@/lib/projects';
 
 interface Project {
   id: string;
@@ -14,44 +15,61 @@ export default function ProjectSwitcher() {
   const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    async function fetchUserProjects() {
-      setLoading(true);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  const fetchUserProjects = useCallback(async () => {
+    setLoading(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('projects')
-        .select('id, name, api_key')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (!error && data && data.length > 0) {
-        setProjects(data);
-
-        const savedId =
-          typeof window !== 'undefined'
-            ? localStorage.getItem('snaptrace_selected_project_id')
-            : null;
-
-        if (savedId && (savedId === 'all' || data.some((p) => p.id === savedId))) {
-          setSelectedProjectId(savedId);
-        } else {
-          setSelectedProjectId('all');
-          localStorage.setItem('snaptrace_selected_project_id', 'all');
-        }
-      }
+    if (!user) {
       setLoading(false);
+      return;
     }
 
-    fetchUserProjects();
+    let { data, error } = await supabase
+      .from('projects')
+      .select('id, name, api_key')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    // Auto-initialize Default Project if 0 projects found
+    if (!error && (!data || data.length === 0)) {
+      const defaultProj = await ensureDefaultProject(user.id);
+      if (defaultProj) {
+        data = [defaultProj];
+      }
+    }
+
+    if (data && data.length > 0) {
+      setProjects(data);
+
+      const savedId =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('snaptrace_selected_project_id')
+          : null;
+
+      if (savedId && (savedId === 'all' || data.some((p) => p.id === savedId))) {
+        setSelectedProjectId(savedId);
+      } else {
+        setSelectedProjectId('all');
+        localStorage.setItem('snaptrace_selected_project_id', 'all');
+      }
+    }
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetchUserProjects();
+
+    const handleProjectChange = () => {
+      fetchUserProjects();
+    };
+
+    window.addEventListener('snaptrace_project_change', handleProjectChange);
+    return () => {
+      window.removeEventListener('snaptrace_project_change', handleProjectChange);
+    };
+  }, [fetchUserProjects]);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const projectId = e.target.value;
