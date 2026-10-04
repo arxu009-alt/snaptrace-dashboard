@@ -20,6 +20,7 @@ import {
   ChevronDown,
   LogOut,
   RotateCcw,
+  FileText,
 } from 'lucide-react';
 import ProjectSwitcher from '@/components/ProjectSwitcher';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
@@ -190,6 +191,7 @@ export default function DashboardLayout({
         { id: 'tour-nav-overview',  name: 'Overview',        href: '/dashboard',           icon: LayoutDashboard },
         { id: 'tour-nav-errors',    name: 'Exception Logs',  href: '/dashboard/errors',    icon: AlertCircle, hasBadge: true },
         { id: 'tour-nav-analytics', name: 'Crash Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+        { id: 'tour-nav-reports',   name: 'Client Reports',  href: '/dashboard/reports',   icon: FileText },
       ],
     },
     {
@@ -214,6 +216,7 @@ export default function DashboardLayout({
     if (pathname === '/dashboard')             return 'System Overview';
     if (pathname === '/dashboard/errors')      return 'Exception Logs Stream';
     if (pathname === '/dashboard/analytics')   return 'Crash & Endpoint Analytics';
+    if (pathname === '/dashboard/reports')     return 'Client Reports';
     if (pathname === '/dashboard/projects')    return 'Projects & API Keys';
     if (pathname === '/dashboard/integrations') return 'SDK Integrations';
     if (pathname === '/dashboard/alerts')      return 'Alert Destinations';
@@ -238,7 +241,7 @@ export default function DashboardLayout({
       
       {/* 1. Left Sidebar Navigation */}
       <aside
-        className={`bg-zinc-950/70 backdrop-blur-xl border-r border-white/[0.06] flex-shrink-0 flex flex-col transition-all duration-200 ${
+        className={`bg-zinc-950/70 backdrop-blur-xl border-r border-white/[0.06] flex-shrink-0 flex flex-col transition-all duration-200 print:hidden ${
           sidebarCollapsed ? 'w-0 md:w-16 overflow-hidden' : 'w-full md:w-64'
         }`}
       >
@@ -314,7 +317,7 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col min-w-0 bg-transparent">
         
         {/* Top Header */}
-        <header className="h-14 border-b border-white/[0.06] bg-zinc-950/70 backdrop-blur-xl px-5 flex items-center justify-between z-40">
+        <header className="h-14 border-b border-white/[0.06] bg-zinc-950/70 backdrop-blur-xl px-5 flex items-center justify-between z-40 print:hidden">
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}

@@ -105,7 +105,7 @@ export async function POST(req) {
       project.owner_email;
       
     // Resolve tier strictly from database plan_tier (defaults to 'free' for unpaid projects)
-    const projectTier = project.plan_tier || "free";
+    const projectTier = (project.plan_tier || "free").toString().trim().toLowerCase();
     const activePlan = (PLANS && PLANS[projectTier]) ? PLANS[projectTier] : PLANS.free;
 
     const ownerEmail = process.env.OWNER_EMAIL || "arxu1045@gmail.com";
@@ -134,6 +134,7 @@ export async function POST(req) {
           {
             error: "Monthly event quota exceeded for your current plan.",
             limit: activePlan.monthlyEventCap,
+            plan: activePlan.name,
             upgrade_url: "https://snaptrace-dashboard.vercel.app/dashboard/settings",
           },
           { status: 429 }
@@ -196,10 +197,10 @@ export async function POST(req) {
       process.env.GMAIL_APP_PASSWORD ||
       process.env.SMTP_PASS;
 
-    // 3. Dispatch Discord Webhook Alert (Skipped if muted or webhooks disabled on Free tier)
+    // 3. Dispatch Discord Webhook Alert (Skipped if muted or webhooks disabled on plan)
     let discordSent = false;
     if (!activePlan?.webhooks) {
-      debugLogs.push("Webhooks disabled on Free tier. Upgrade to Pro required.");
+      debugLogs.push("Webhooks disabled on " + (activePlan?.name || "Free") + " tier. Upgrade required.");
     } else if (discordWebhookUrl && !muteAlerts) {
       try {
         const discordRes = await fetch(discordWebhookUrl, {
@@ -247,10 +248,10 @@ export async function POST(req) {
       debugLogs.push("Discord skipped: No webhook URL configured.");
     }
 
-    // 4. Dispatch Native Slack Webhook Alert (Skipped if muted or webhooks disabled on Free tier)
+    // 4. Dispatch Native Slack Webhook Alert (Skipped if muted or webhooks disabled on plan)
     let slackSent = false;
     if (!activePlan?.webhooks) {
-      debugLogs.push("Webhooks disabled on Free tier. Upgrade to Pro required.");
+      debugLogs.push("Webhooks disabled on " + (activePlan?.name || "Free") + " tier. Upgrade required.");
     } else if (slackWebhookUrl && !muteAlerts) {
       try {
         const slackPayload = {

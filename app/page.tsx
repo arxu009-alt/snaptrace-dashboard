@@ -816,30 +816,13 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
             : 'border-slate-800/80 bg-[#080C15] text-slate-300')
         }
       >
-        <span className="inline-flex items-center gap-1.5 font-semibold text-yellow-300 shrink-0">
-          <IconBolt className="h-3.5 w-3.5" />
-          {marketingMode ? 'v1.0 General Availability Active' : 'Architecture Spec'}
-        </span>
-        <span className="hidden sm:inline text-slate-500">·</span>
-        <span className="hidden sm:inline text-slate-300">
-          {marketingMode ? 'Sub-5KB Telemetry' : 'RFC-9110 asynchronous ingestion engine active'}
-        </span>
-        <span className="text-slate-500">·</span>
-        <span className="text-slate-300">
-          {marketingMode ? 'Zero Hydration Delay' : 'Zero hydration penalty'}
-        </span>
-        <span className="text-slate-500">·</span>
-        {marketingMode ? (
-          <Link
-            href="/signup"
-            className="inline-flex items-center gap-1 font-semibold text-yellow-300 underline decoration-yellow-400/40 underline-offset-4 transition hover:text-yellow-200 shrink-0"
-          >
-            Free Starter Tier Included
-            <IconArrow className="h-3 w-3" />
-          </Link>
-        ) : (
-          <span className="text-slate-400 shrink-0">under 3.4KB gzipped</span>
-        )}
+        <Link
+          href="/signup"
+          className="inline-flex items-center gap-1.5 font-semibold text-yellow-300 hover:text-white transition group"
+        >
+          <IconBolt className="h-3.5 w-3.5 text-yellow-400 shrink-0" />
+          <span>Agency Fleet Telemetry · Sub-40ms Ingestion · 14-Day Free Trial Available →</span>
+        </Link>
       </div>
 
      {/* HEADER */}
@@ -1215,41 +1198,66 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
 
             <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6">
               <div className="text-center max-w-4xl mx-auto space-y-3 sm:space-y-3.5">
-                <a
-                  href="#ai-agent"
-                  className="group inline-flex max-w-full items-center gap-2 rounded-full border border-purple-400/30 bg-purple-500/[0.1] py-1 pl-2.5 pr-3 text-[11px] sm:text-[12px] text-purple-200 backdrop-blur-sm transition hover:border-purple-400/60 hover:bg-purple-500/[0.18]"
+                <Link
+                  href="/signup"
+                  className="group inline-flex max-w-full items-center gap-2 rounded-full border border-yellow-400/30 bg-yellow-400/[0.08] py-1 pl-2.5 pr-3 text-[11px] sm:text-[12px] text-yellow-200 backdrop-blur-sm transition hover:border-yellow-400/60 hover:bg-yellow-400/[0.15]"
                 >
-                  <span className="rounded-full bg-purple-500/25 px-2 py-0.5 font-mono text-[9.5px] font-bold text-purple-200 shrink-0">✨ NEW</span>
-                  <span className="truncate">&quot;Install with AI&quot; — 1-prompt setup for Cursor &amp; Claude Code</span>
-                  <IconArrow className="h-3.5 w-3.5 shrink-0 opacity-60 transition-transform group-hover:translate-x-0.5" />
-                </a>
+                  <span className="rounded-full bg-yellow-400/25 px-2 py-0.5 font-mono text-[9.5px] font-bold text-yellow-200 shrink-0">AGENCY FLEET</span>
+                  <span className="truncate">Agency Fleet Telemetry · Sub-40ms Ingestion · 14-Day Free Trial Available →</span>
+                </Link>
 
                 <h1 className="st-display text-white">
-                  Real-time error tracking.{' '}
+                  Centralized crash telemetry.{' '}
                   <span className="bg-[linear-gradient(95deg,#FEF3C7_0%,#FACC15_40%,#F59E0B_100%)] bg-clip-text text-transparent">
-                    Built for AI coders &amp; modern apps.
+                    Built for web agencies &amp; dev studios.
                   </span>
                 </h1>
 
                 <p className="st-lead text-zinc-300 max-w-2xl mx-auto">
-                  Set up in 10 seconds with Cursor or Claude Code. Zero 100KB SDK bloat, automated cascading outage collapse, on-device PII masking, and 1-click AI root-cause fixes back to your editor.
+                  Monitor 10 to 50+ client applications under one flat dashboard. Zero 100KB SDK bloat, 0.0ms Core Web Vitals penalty, and automated client retainer reports ready in 1 click.
                 </p>
 
                 <div className="pt-1 sm:pt-1.5 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
                   <Link
                     href="/signup"
-                    className="group inline-flex min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-2.5 sm:py-3 text-[13px] font-semibold bg-zinc-100 hover:bg-white text-zinc-950 transition-all duration-200 active:scale-[0.98] w-full sm:w-auto shadow-lg shadow-yellow-500/10"
+                    className="px-5 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-sm transition-all"
                   >
-                    <span>Start Free (2,000 Events/mo)</span>
-                    <IconArrow className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    Start 14-Day Agency Trial →
                   </Link>
                   <Link
                     href="/demo"
-                    className="group inline-flex min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-800 text-zinc-200 px-5 py-2.5 sm:py-3 text-[13px] font-medium transition-all duration-200 active:scale-[0.98] w-full sm:w-auto"
+                    className="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-200 text-sm font-medium transition-all"
                   >
-                    <IconTerminal className="h-4 w-4 text-zinc-400" />
-                    Open Live Demo (No Signup)
+                    Explore Live Demo
                   </Link>
+                </div>
+
+                {/* 1-Click NPM Copy Pill */}
+                <div className="pt-2 flex items-center justify-center">
+                  <div className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs font-mono text-zinc-300 backdrop-blur-sm">
+                    <span className="text-zinc-500 select-none">$</span>
+                    <span className="text-zinc-200 font-semibold">npm i snaptrace</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText('npm i snaptrace');
+                        setCopiedNpmInstall(true);
+                        setTimeout(() => setCopiedNpmInstall(false), 2000);
+                      }}
+                      className="ml-1 inline-flex items-center justify-center p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition cursor-pointer"
+                      title="Copy install command"
+                      aria-label="Copy install command"
+                    >
+                      {copiedNpmInstall ? (
+                        <IconCheck className="h-3.5 w-3.5 text-emerald-400" />
+                      ) : (
+                        <IconCopy className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                    <span className="ml-1.5 border-l border-zinc-700/80 pl-2 text-[10.5px] font-medium text-emerald-400">
+                      &lt;3.4KB gzipped
+                    </span>
+                  </div>
                 </div>
 
                 {/* INTERACTIVE INSTALL WITH AI CONSOLE */}
@@ -2239,9 +2247,9 @@ initSnapTrace({
                 <SectionIntro
                   center
                   eyebrowIcon={<IconLayers className="h-3.5 w-3.5" />}
-                  eyebrowLabel="Pricing"
-                  heading="Simple, developer-first plans"
-                  lead="No surprise overage bills. Generous headroom for solo builders, micro-SaaS, and client studios."
+                  eyebrowLabel="Agency Fleet Pricing"
+                  heading="Predictable pricing for web agencies &amp; studios"
+                  lead="No per-seat seat-tax penalties. Flat monthly fleet pricing with 14-day free trial on all agency tiers."
                 />
 
                 <div className="mt-6 flex justify-center px-2">
@@ -2288,35 +2296,38 @@ initSnapTrace({
                 )}
               </SmoothReveal>
 
-              <SmoothReveal delay={100} className="grid grid-cols-1 md:grid-cols-3 items-stretch gap-4.5 lg:gap-6 pt-2">
-                {/* 1. DEVELOPER FREE */}
-                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-5 sm:p-6 lg:p-7 h-full">
+              <SmoothReveal delay={100} className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto items-stretch gap-6 pt-2">
+                {/* 1. AGENCY STUDIO */}
+                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6 sm:p-7 lg:p-8 h-full">
                   <div>
                     <div className="flex items-center justify-between gap-2 min-h-[26px]">
-                      <span className="font-mono text-[11px] tracking-[0.1em] text-slate-400 font-bold uppercase">DEVELOPER FREE</span>
-                      <span className="rounded-full border border-slate-700/60 bg-slate-800/60 px-2 py-0.5 font-mono text-[9.5px] font-semibold text-slate-400">
-                        SIDE PROJECTS
+                      <span className="font-mono text-[11px] tracking-[0.1em] text-slate-300 font-bold uppercase">AGENCY STUDIO</span>
+                      <span className="rounded-full border border-slate-700/60 bg-slate-800/60 px-2.5 py-0.5 font-mono text-[9.5px] font-semibold text-slate-300">
+                        BOUTIQUE STUDIOS
                       </span>
                     </div>
 
-                    <div className="mt-3.5 flex items-baseline gap-1.5">
-                      <span className="text-[34px] sm:text-[36px] lg:text-[40px] font-black tracking-tight text-white">$0</span>
-                      <span className="font-mono text-[12px] text-slate-500">/ month</span>
+                    <div className="mt-4 flex items-baseline gap-1.5">
+                      <span className="text-[36px] sm:text-[42px] font-black tracking-tight text-white">
+                        {billingInterval === 'annual' ? '$39' : '$49'}
+                      </span>
+                      <span className="font-mono text-[12px] text-slate-400">/ month</span>
                     </div>
 
-                    <p className="mt-1 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
-                      For side projects, indie hack experiments, and personal sites.
+                    <p className="mt-1.5 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
+                      {billingInterval === 'annual'
+                        ? 'Billed annually at $468/yr (save $120). For boutique web agencies and dev studios managing up to 15 client apps.'
+                        : 'For boutique web agencies and dev studios managing up to 15 client apps.'}
                     </p>
 
-                    <ul className="mt-5 space-y-2.5 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-300 font-mono">
+                    <ul className="mt-6 space-y-3 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-300 font-mono">
                       {[
-                        '2,000 events / month',
-                        '7-day log retention',
-                        '1 active project',
-                        'Sub-5KB SDK, 0ms delay',
-                        'In-dashboard inspection',
-                        'Client-side regex PII firewall',
-                        'Email & in-app alerts (no webhooks)',
+                        '100,000 error events / month',
+                        'Up to 15 active client projects',
+                        'UNLIMITED team seats (no per-seat fees)',
+                        'Dedicated Discord, Slack & Email alerts per client',
+                        'Monthly Client Retainer Value Reports (PDF / Invoice summary)',
+                        '30-day telemetry retention',
                       ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
                           <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
@@ -2326,45 +2337,49 @@ initSnapTrace({
                     </ul>
                   </div>
 
-                  <Link href="/signup" className={BTN_SECONDARY + ' mt-6 w-full font-mono text-center justify-center'}>
-                    Start Free Forever →
+                  <Link
+                    href="/signup"
+                    className="mt-8 flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-100 px-5 py-3 text-[13px] font-semibold transition font-mono w-full active:scale-[0.98]"
+                  >
+                    Start 14-Day Free Trial →
                   </Link>
                 </div>
 
-                {/* 2. PRO BUILDER */}
-                <div className="st-glow-amber relative flex flex-col justify-between rounded-2xl border-2 border-yellow-400/60 bg-[linear-gradient(180deg,rgba(250,204,21,0.07),rgba(11,16,29,1)_45%)] p-5 sm:p-6 lg:p-7 h-full mt-3 md:mt-0 md:-translate-y-1 lg:-translate-y-2">
-                  <span className="absolute -top-3 left-5 sm:left-6 rounded-full bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3 py-0.5 sm:py-1 font-mono text-[9.5px] sm:text-[10px] font-black tracking-wider text-slate-950 shadow-md">
-                    POPULAR FOR SOLO DEVS
+                {/* 2. AGENCY SCALE */}
+                <div className="st-glow-amber relative flex flex-col justify-between rounded-2xl border-2 border-yellow-400/60 bg-[linear-gradient(180deg,rgba(250,204,21,0.07),rgba(11,16,29,1)_45%)] p-6 sm:p-7 lg:p-8 h-full md:-translate-y-1">
+                  <span className="absolute -top-3 left-6 rounded-full bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3 py-0.5 font-mono text-[9.5px] sm:text-[10px] font-black tracking-wider text-slate-950 shadow-md">
+                    POPULAR FOR GROWING FLEETS
                   </span>
 
                   <div>
                     <div className="flex items-center justify-between gap-2 min-h-[26px]">
-                      <span className="font-mono text-[11px] tracking-[0.1em] text-yellow-400 font-bold uppercase">PRO BUILDER</span>
-                      <span className="rounded-full border border-yellow-400/30 bg-yellow-400/10 px-2 py-0.5 font-mono text-[9.5px] font-bold text-yellow-300">
-                        SOLO DEVS & SAAS
+                      <span className="font-mono text-[11px] tracking-[0.1em] text-yellow-400 font-bold uppercase">AGENCY SCALE</span>
+                      <span className="rounded-full border border-yellow-400/30 bg-yellow-400/10 px-2.5 py-0.5 font-mono text-[9.5px] font-bold text-yellow-300">
+                        HIGH-VOLUME FLEET
                       </span>
                     </div>
 
-                    <div className="mt-3.5 flex items-baseline gap-1.5">
-                      <span className="text-[34px] sm:text-[36px] lg:text-[40px] font-black tracking-tight text-white">
-                        {billingInterval === 'annual' ? '$15' : '$19'}
+                    <div className="mt-4 flex items-baseline gap-1.5">
+                      <span className="text-[36px] sm:text-[42px] font-black tracking-tight text-white">
+                        {billingInterval === 'annual' ? '$79' : '$99'}
                       </span>
                       <span className="font-mono text-[12px] text-slate-400">/ month</span>
                     </div>
 
-                    <p className="mt-1 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
-                      {billingInterval === 'annual' ? 'Billed annually at $180/yr (save $48).' : 'For solo developers, freelancers & production micro-SaaS.'}
+                    <p className="mt-1.5 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
+                      {billingInterval === 'annual'
+                        ? 'Billed annually at $948/yr (save $240). For high-volume digital agencies managing large client fleets.'
+                        : 'For high-volume digital agencies managing large client fleets.'}
                     </p>
 
-                    <ul className="mt-5 space-y-2.5 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-200 font-mono">
+                    <ul className="mt-6 space-y-3 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-200 font-mono">
                       {[
-                        '75,000 events / month',
-                        '30-day log retention',
-                        'Up to 5 active projects',
-                        'Instant Discord & Slack webhooks',
-                        '1-click Cursor & Claude AI prompts',
-                        '60s loop throttling ([x50])',
-                        'BYOK AI Copilot (Gemini & OpenAI)',
+                        '500,000 error events / month',
+                        'UNLIMITED client projects and API keys',
+                        'UNLIMITED team seats',
+                        'Priority edge ingestion pipeline',
+                        '90-day telemetry retention',
+                        'Dedicated Slack channel support',
                       ].map((f: string) => (
                         <li key={f} className="flex items-start gap-2.5">
                           <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-yellow-400" />
@@ -2374,63 +2389,77 @@ initSnapTrace({
                     </ul>
                   </div>
 
-                  <a
-                    href="https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={BTN_PRIMARY + " mt-7 w-full font-mono text-center justify-center"}
+                  <Link
+                    href="/signup"
+                    className="mt-8 flex items-center justify-center gap-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-5 py-3 text-[13px] font-bold transition font-mono w-full shadow-lg shadow-yellow-400/10 active:scale-[0.98]"
                   >
-                    Upgrade to Pro ($19/mo) →
-                  </a>
+                    Start 14-Day Free Trial →
+                  </Link>
                 </div>
+              </SmoothReveal>
 
-                {/* 3. AGENCY STUDIO */}
-                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-5 sm:p-6 lg:p-7 h-full">
-                  <div>
-                    <div className="flex items-center justify-between gap-2 min-h-[26px]">
-                      <span className="font-mono text-[11px] tracking-[0.1em] text-purple-300 font-bold uppercase">AGENCY STUDIO</span>
-                      <span className="rounded-full border border-purple-400/25 bg-purple-500/15 px-2 py-0.5 font-mono text-[9.5px] font-bold text-purple-300">
-                        CLIENT STUDIOS
-                      </span>
-                    </div>
-
-                    <div className="mt-3.5 flex items-baseline gap-1.5">
-                      <span className="text-[34px] sm:text-[36px] lg:text-[40px] font-black tracking-tight text-white">
-                        {billingInterval === 'annual' ? '$39' : '$49'}
-                      </span>
-                      <span className="font-mono text-[12px] text-slate-500">/ month</span>
-                    </div>
-
-                    <p className="mt-1 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
-                      {billingInterval === 'annual' ? 'Billed annually at $468/yr (save $120).' : 'For agencies and teams managing multiple client sites.'}
+              {/* Agency Economics Comparison Card */}
+              <SmoothReveal delay={120} className="max-w-4xl mx-auto pt-4">
+                <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 sm:p-8 backdrop-blur-sm shadow-xl">
+                  <div className="text-center max-w-xl mx-auto mb-6">
+                    <span className="font-mono text-[11px] font-bold text-yellow-400 uppercase tracking-widest">
+                      Agency Economics
+                    </span>
+                    <h3 className="text-lg sm:text-xl font-bold text-zinc-100 mt-1">
+                      Why Agencies Are Replacing Sentry
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Legacy monitoring tools punish agency growth with per-seat seat-tax penalties and client bundle bloat.
                     </p>
-
-                    <ul className="mt-5 space-y-2.5 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-300 font-mono">
-                      {[
-                        '500,000 events / month',
-                        '90-day telemetry retention',
-                        'UNLIMITED projects & API keys',
-                        'Multi-seat client invites',
-                        'Cascading outage collapse',
-                        'Priority edge ingestion',
-                        'Raw log CSV & JSON exports',
-                      ].map((f: string) => (
-                        <li key={f} className="flex items-start gap-2.5">
-                          <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-purple-400" />
-                          <span className="leading-snug">{f}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </div>
 
-                  <a
-                    href="https://buy.polar.sh/polar_cl_jtE6KA0k5GWeMhuFWQGB9fsDhRt8rdTwDteFS0Qr44g"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={BTN_PRIMARY + " mt-7 w-full font-mono text-center justify-center"}
-                  >
-                    Start Agency Studio ($49/mo) →
-                  </a>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="rounded-xl border border-red-500/20 bg-red-950/10 p-5 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold text-red-400 uppercase tracking-wider">Legacy Observability (Sentry)</span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 font-semibold">Costly &amp; Bloated</span>
+                      </div>
+                      <ul className="space-y-2.5 text-xs text-zinc-400 font-mono">
+                        <li className="flex items-start gap-2">
+                          <span className="text-red-400 font-bold shrink-0">✕</span>
+                          <span>Charges $26-$29/user/month in seat licenses</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-red-400 font-bold shrink-0">✕</span>
+                          <span>Bills every client project separately or forces multi-account chaos</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-red-400 font-bold shrink-0">✕</span>
+                          <span>Injects 150KB of JS that hurts client Google Core Web Vitals</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/10 p-5 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold text-emerald-400 uppercase tracking-wider">SnapTrace Agency Fleet</span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">Built for Studios</span>
+                      </div>
+                      <ul className="space-y-2.5 text-xs text-zinc-200 font-mono">
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
+                          <span>Flat monthly agency pricing — zero surprise overages</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
+                          <span>UNLIMITED team seats with zero per-seat fees</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
+                          <span>UNLIMITED client projects with dedicated webhook alerts</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <IconCheck className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
+                          <span>&lt;3.4KB SDK via navigator.sendBeacon with 0.0ms CWV penalty</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </SmoothReveal>
 

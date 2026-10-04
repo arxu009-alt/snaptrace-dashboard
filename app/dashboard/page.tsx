@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { PLANS } from '@/lib/plans';
 
 interface ErrorLog {
   id: number;
@@ -15,6 +16,17 @@ interface ErrorLog {
   url?: string;
   stack_trace?: string;
   route?: string;
+}
+
+interface FleetProject {
+  id: string;
+  name: string;
+  api_key: string;
+  created_at?: string;
+  plan_tier?: string;
+  crashes24h: number;
+  monthlyUsage: number;
+  monthlyCap: number;
 }
 
 type TimeRange = '12h' | '24h' | '7d';
@@ -113,9 +125,51 @@ const MOCK_DEMO_ERRORS: ErrorLog[] = [
   },
 ];
 
+const MOCK_DEMO_FLEET: FleetProject[] = [
+  {
+    id: 'demo-fleet-1',
+    name: 'Acme SaaS Client Production',
+    api_key: 'sk_live_demo_acme_prod_9921',
+    plan_tier: 'agency_studio',
+    crashes24h: 0,
+    monthlyUsage: 1420,
+    monthlyCap: 100000,
+  },
+  {
+    id: 'demo-fleet-2',
+    name: 'Fintech Payments Gateway',
+    api_key: 'sk_live_demo_fintech_gw_4412',
+    plan_tier: 'agency_studio',
+    crashes24h: 3,
+    monthlyUsage: 18450,
+    monthlyCap: 100000,
+  },
+  {
+    id: 'demo-fleet-3',
+    name: 'Retail Checkout App',
+    api_key: 'sk_live_demo_retail_app_7719',
+    plan_tier: 'agency_scale',
+    crashes24h: 9,
+    monthlyUsage: 94200,
+    monthlyCap: 500000,
+  },
+  {
+    id: 'demo-fleet-4',
+    name: 'Healthcare Client Portal',
+    api_key: 'sk_live_demo_health_portal_3310',
+    plan_tier: 'agency_studio',
+    crashes24h: 0,
+    monthlyUsage: 480,
+    monthlyCap: 100000,
+  },
+];
+
 export default function DashboardOverviewPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [fleetProjects, setFleetProjects] = useState<FleetProject[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('all');
+  const [copiedFleetId, setCopiedFleetId] = useState<string | null>(null);
   const [totalErrors, setTotalErrors] = useState(0);
   const [prodErrors, setProdErrors] = useState(0);
   const [devErrors, setDevErrors] = useState(0);
@@ -155,7 +209,7 @@ export default function DashboardOverviewPage() {
     // Fetch projects belonging to this user
     let { data: userProjects } = await supabase
       .from('projects')
-      .select('id, name, api_key')
+      .select('id, name, api_key, created_at, plan_tier')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
@@ -184,6 +238,7 @@ export default function DashboardOverviewPage() {
     }
 
     if (!userProjects || userProjects.length === 0) {
+      setFleetProjects([]);
       setLoading(false);
       return;
     }
@@ -192,6 +247,55 @@ export default function DashboardOverviewPage() {
     const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : 'all';
     const isValidProject = savedProjectId && savedProjectId !== 'all' && userProjectIds.includes(savedProjectId);
     const isAll = !isValidProject;
+    setSelectedProjectId(isAll ? 'all' : (savedProjectId as string));
+
+    // Calculate 24h crashes and monthly usage across all fleet projects
+    const now = Date.now();
+    const twentyFourHoursAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+    const startOfMonth = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString();
+    const earliestTime = new Date(Math.min(new Date(twentyFourHoursAgo).getTime(), new Date(startOfMonth).getTime())).toISOString();
+
+    const { data: fleetErrors } = await supabase
+      .from('errors')
+      .select('project_id, created_at, occurrence_count')
+      .in('project_id', userProjectIds)
+      .gte('created_at', earliestTime);
+
+    const crashes24hMap: Record<string, number> = {};
+    const monthlyMap: Record<string, number> = {};
+
+    if (fleetErrors) {
+      fleetErrors.forEach((err) => {
+        const pId = err.project_id;
+        if (!pId) return;
+        const occ = err.occurrence_count && err.occurrence_count > 0 ? err.occurrence_count : 1;
+        const errTime = new Date(err.created_at).getTime();
+
+        if (errTime >= new Date(twentyFourHoursAgo).getTime()) {
+          crashes24hMap[pId] = (crashes24hMap[pId] || 0) + occ;
+        }
+        if (errTime >= new Date(startOfMonth).getTime()) {
+          monthlyMap[pId] = (monthlyMap[pId] || 0) + occ;
+        }
+      });
+    }
+
+    const compiledFleet: FleetProject[] = userProjects.map((p) => {
+      const tierKey = (p.plan_tier || 'free').toString().trim().toLowerCase();
+      const planConfig = (PLANS && PLANS[tierKey]) ? PLANS[tierKey] : PLANS.free;
+      return {
+        id: p.id,
+        name: p.name,
+        api_key: p.api_key,
+        created_at: p.created_at,
+        plan_tier: p.plan_tier,
+        crashes24h: crashes24hMap[p.id] || 0,
+        monthlyUsage: monthlyMap[p.id] || 0,
+        monthlyCap: planConfig.monthlyEventCap || 2000,
+      };
+    });
+
+    setFleetProjects(compiledFleet);
 
     let errorQuery = supabase
       .from('errors')
@@ -362,6 +466,7 @@ export default function DashboardOverviewPage() {
       setDevErrors((prev) => prev + 1);
       setSuppressedCount((prev) => prev + 29);
       setRecentErrors(MOCK_DEMO_ERRORS);
+      setFleetProjects(MOCK_DEMO_FLEET);
       setImpactedRoutes(computeImpactedRoutes(MOCK_DEMO_ERRORS));
       setDistribution((prev) =>
         prev.map((d, i) => (i === prev.length - 1 ? { ...d, count: d.count + 5 } : d))
@@ -370,6 +475,40 @@ export default function DashboardOverviewPage() {
       setDemoMode(false);
       loadDashboardData();
     }
+  };
+
+  const handleCopyFleetToken = (token: string, id: string) => {
+    navigator.clipboard.writeText(token);
+    setCopiedFleetId(id);
+    setTimeout(() => setCopiedFleetId(null), 2000);
+  };
+
+  const handleSelectFleetProject = (projectId: string) => {
+    if (demoMode) {
+      const demoProj = fleetProjects.find((p) => p.id === projectId);
+      if (demoProj) {
+        setSelectedProjectId(projectId);
+        setSelectedProjectLabel(demoProj.name);
+        setProjectKey(demoProj.api_key);
+      }
+      return;
+    }
+    localStorage.setItem('snaptrace_selected_project_id', projectId);
+    setSelectedProjectId(projectId);
+    window.dispatchEvent(new Event('snaptrace_project_change'));
+    loadDashboardData();
+  };
+
+  const handleSelectAllProjects = () => {
+    if (demoMode) {
+      setSelectedProjectId('all');
+      setSelectedProjectLabel('All Projects');
+      return;
+    }
+    localStorage.setItem('snaptrace_selected_project_id', 'all');
+    setSelectedProjectId('all');
+    window.dispatchEvent(new Event('snaptrace_project_change'));
+    loadDashboardData();
   };
 
   const handleCopyKey = () => {
@@ -495,6 +634,129 @@ def capture_snaptrace(err, route="production"):
           <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-xs font-mono text-emerald-300 flex items-center justify-between animate-in fade-in duration-150 backdrop-blur-md">
             <span>{pingSuccessMsg}</span>
             <span className="text-[10px] text-zinc-400">WebSocket Ping: 200 Ingested</span>
+          </div>
+        )}
+
+        {/* CLIENT FLEET HEALTH (MULTI-CLIENT STATUS BOARD) */}
+        {!loading && fleetProjects.length > 0 && (
+          <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl p-5 space-y-4 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800/80 pb-3">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-zinc-100 font-mono tracking-tight uppercase">
+                    Client Fleet Health
+                  </h2>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                    {fleetProjects.length} {fleetProjects.length === 1 ? 'Build' : 'Builds'}
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400 font-mono">
+                  Multi-client operational telemetry, 24-hour crash density, and active fleet switching.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {selectedProjectId !== 'all' && (
+                  <button
+                    onClick={handleSelectAllProjects}
+                    className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition cursor-pointer"
+                  >
+                    View All Fleets
+                  </button>
+                )}
+                <Link
+                  href="/dashboard/projects"
+                  className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 transition"
+                >
+                  Manage Fleet Keys →
+                </Link>
+              </div>
+            </div>
+
+            {/* High-Density Fleet Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {fleetProjects.map((p) => {
+                const isSelected = selectedProjectId === p.id;
+                const isHealthy = p.crashes24h === 0;
+                const isWarning = p.crashes24h >= 1 && p.crashes24h <= 5;
+                const isCritical = p.crashes24h > 5;
+
+                return (
+                  <div
+                    key={p.id}
+                    className={`p-4 rounded-xl border transition-all duration-150 flex flex-col justify-between gap-3 ${
+                      isSelected
+                        ? 'bg-zinc-900/70 border-zinc-700 shadow-md ring-1 ring-zinc-700/50'
+                        : 'bg-zinc-900/30 hover:bg-zinc-900/60 border-zinc-800/80 hover:border-zinc-700'
+                    }`}
+                  >
+                    {/* Project Name + Traffic Dot */}
+                    <div className="flex items-start justify-between gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        {/* Traffic Light Dot */}
+                        {isHealthy ? (
+                          <span className="relative flex h-2.5 w-2.5 shrink-0" title="Healthy: 0 crashes in past 24 hours">
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                          </span>
+                        ) : isWarning ? (
+                          <span className="relative flex h-2.5 w-2.5 shrink-0" title="Warning: 1 to 5 crashes in past 24 hours">
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" />
+                          </span>
+                        ) : (
+                          <span className="relative flex h-2.5 w-2.5 shrink-0" title="Critical: >5 crashes or active loop in past 24 hours">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 animate-pulse" />
+                          </span>
+                        )}
+
+                        <span className="text-sm font-semibold text-zinc-100 truncate" title={p.name}>
+                          {p.name}
+                        </span>
+                      </div>
+
+                      {isSelected && (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 shrink-0">
+                          Active
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 24-Hour Incident Count & Monthly Usage pill */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="px-2 py-0.5 rounded bg-zinc-950/80 border border-zinc-800 text-xs font-mono text-zinc-400">
+                        {p.crashes24h} {p.crashes24h === 1 ? 'crash' : 'crashes'} (24h)
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-zinc-950/80 border border-zinc-800 text-xs font-mono text-zinc-400">
+                        {p.monthlyUsage.toLocaleString()} / {p.monthlyCap >= 999999 ? 'Unlimited' : p.monthlyCap.toLocaleString()} mo
+                      </span>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="flex items-center justify-between gap-2 pt-2 border-t border-zinc-800/60 font-mono">
+                      <button
+                        onClick={() => handleCopyFleetToken(p.api_key, p.id)}
+                        className="px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-mono transition cursor-pointer shrink-0"
+                        title="Copy project ingestion API token"
+                      >
+                        {copiedFleetId === p.id ? 'Copied' : 'Copy Token'}
+                      </button>
+
+                      <button
+                        onClick={() => handleSelectFleetProject(p.id)}
+                        className={`px-3 py-1 rounded text-xs font-mono transition cursor-pointer shrink-0 ${
+                          isSelected
+                            ? 'bg-zinc-800 text-zinc-200 border border-zinc-700 cursor-default'
+                            : 'bg-zinc-100 hover:bg-white text-zinc-950 font-medium'
+                        }`}
+                        title="Set as active project in dashboard overview"
+                      >
+                        {isSelected ? 'Active Fleet' : 'Inspect Fleet'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 

@@ -1,67 +1,127 @@
-export type PlanTier = 'free' | 'pro' | 'agency' | 'team';
+export type PlanTier =
+  | 'free'
+  | 'beta_founder'
+  | 'agency_studio'
+  | 'agency_scale'
+  | 'pro'
+  | 'agency'
+  | 'team'
+  | 'starter_pro'
+  | 'team_scale';
 
 export interface PlanConfig {
-  id: PlanTier;
   name: string;
   monthlyEventCap: number;
   projectLimit: number;
   retentionDays: number;
-  aiCopilot: boolean;
   webhooks: boolean;
-  cascadingCollapse: boolean;
-  priorityIngestion: boolean;
-  rawExport: boolean;
+  aiCopilot: boolean;
+  clientReports: boolean;
+  unlimitedSeats: boolean;
+  priceMonthly: number;
 }
 
 export const PLANS: Record<string, PlanConfig> = {
   free: {
-    id: 'free',
     name: 'Developer Free',
     monthlyEventCap: 2000,
     projectLimit: 1,
     retentionDays: 7,
-    aiCopilot: false,
     webhooks: false,
-    cascadingCollapse: false,
-    priorityIngestion: false,
-    rawExport: false,
+    aiCopilot: false,
+    clientReports: false,
+    unlimitedSeats: false,
+    priceMonthly: 0,
   },
-  pro: {
-    id: 'pro',
-    name: 'Pro Builder',
-    monthlyEventCap: 75000,
-    projectLimit: 5,
-    retentionDays: 30,
-    aiCopilot: true,
+  beta_founder: {
+    name: 'Beta Founder Pass',
+    monthlyEventCap: 10000,
+    projectLimit: 2,
+    retentionDays: 14,
     webhooks: true,
-    cascadingCollapse: false,
-    priorityIngestion: false,
-    rawExport: false,
+    aiCopilot: true,
+    clientReports: false,
+    unlimitedSeats: false,
+    priceMonthly: 0,
+  },
+  agency_studio: {
+    name: 'Agency Studio',
+    monthlyEventCap: 100000,
+    projectLimit: 15,
+    retentionDays: 30,
+    webhooks: true,
+    aiCopilot: true,
+    clientReports: true,
+    unlimitedSeats: true,
+    priceMonthly: 49,
+  },
+  agency_scale: {
+    name: 'Agency Scale',
+    monthlyEventCap: 500000,
+    projectLimit: 999999, // Unlimited
+    retentionDays: 90,
+    webhooks: true,
+    aiCopilot: true,
+    clientReports: true,
+    unlimitedSeats: true,
+    priceMonthly: 99,
+  },
+  // Maintain backward-compatibility alias for legacy 'pro' and 'agency'
+  pro: {
+    name: 'Agency Studio',
+    monthlyEventCap: 100000,
+    projectLimit: 15,
+    retentionDays: 30,
+    webhooks: true,
+    aiCopilot: true,
+    clientReports: true,
+    unlimitedSeats: true,
+    priceMonthly: 49,
   },
   agency: {
-    id: 'agency',
-    name: 'Agency Studio',
+    name: 'Agency Scale',
     monthlyEventCap: 500000,
-    projectLimit: Infinity,
+    projectLimit: 999999,
     retentionDays: 90,
-    aiCopilot: true,
     webhooks: true,
-    cascadingCollapse: true,
-    priorityIngestion: true,
-    rawExport: true,
+    aiCopilot: true,
+    clientReports: true,
+    unlimitedSeats: true,
+    priceMonthly: 99,
   },
-  // Backward compatibility alias for existing 'team' references
+  // Additional backward-compatibility aliases
   team: {
-    id: 'agency',
-    name: 'Agency Studio',
+    name: 'Agency Scale',
     monthlyEventCap: 500000,
-    projectLimit: Infinity,
+    projectLimit: 999999,
     retentionDays: 90,
-    aiCopilot: true,
     webhooks: true,
-    cascadingCollapse: true,
-    priorityIngestion: true,
-    rawExport: true,
+    aiCopilot: true,
+    clientReports: true,
+    unlimitedSeats: true,
+    priceMonthly: 99,
+  },
+  starter_pro: {
+    name: 'Agency Studio',
+    monthlyEventCap: 100000,
+    projectLimit: 15,
+    retentionDays: 30,
+    webhooks: true,
+    aiCopilot: true,
+    clientReports: true,
+    unlimitedSeats: true,
+    priceMonthly: 49,
+  },
+  team_scale: {
+    name: 'Agency Scale',
+    monthlyEventCap: 500000,
+    projectLimit: 999999,
+    retentionDays: 90,
+    webhooks: true,
+    aiCopilot: true,
+    clientReports: true,
+    unlimitedSeats: true,
+    priceMonthly: 99,
   },
 };
 

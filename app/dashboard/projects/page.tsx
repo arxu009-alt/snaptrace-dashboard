@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
+import { PLANS, PlanConfig } from '@/lib/plans';
 
 interface Project {
   id: string;
@@ -65,10 +66,10 @@ export default function ProjectsPage() {
     // Inspect user's active tier (plan_tier from projects or profile)
     let activeTier = 'free';
     if (ownerCheck) {
-      activeTier = 'agency';
+      activeTier = 'agency_scale';
     } else if (projectList && projectList.length > 0) {
       const paidProject = projectList.find((p) => p.plan_tier && p.plan_tier !== 'free');
-      activeTier = paidProject?.plan_tier || projectList[0]?.plan_tier || 'free';
+      activeTier = (paidProject?.plan_tier || projectList[0]?.plan_tier || 'free').toLowerCase();
     }
     setUserPlanTier(activeTier);
 
@@ -112,25 +113,15 @@ export default function ProjectsPage() {
     return 'sk_live_' + randomHex;
   };
 
-  // 🌟 CHECK PROJECT CREATION LIMIT: Free = 1, Pro = 5, Agency/Owner = Unlimited
+  // Resolve workspace tier limit via PLANS[currentTier]?.projectLimit
+  const currentPlan: PlanConfig = (PLANS && PLANS[userPlanTier]) ? PLANS[userPlanTier] : PLANS.free;
+  const projectLimit = isOwner ? Infinity : (currentPlan?.projectLimit ?? 1);
+
   const handleOpenCreateModal = () => {
-    if (isOwner || userPlanTier === 'agency' || userPlanTier === 'team') {
-      setIsCreateModalOpen(true);
-      return;
-    }
-
-    // Free tier: max 1 project
-    if (userPlanTier === 'free' || !userPlanTier) {
-      if (projects.length >= 1) {
-        setUpgradeMessage('Free tier is limited to 1 project. Upgrade to Pro Builder ($19/mo) for up to 5 projects.');
-        setShowUpgradeModal(true);
-        return;
-      }
-    }
-
-    // Pro tier: max 5 projects
-    if (userPlanTier === 'pro' && projects.length >= 5) {
-      setUpgradeMessage('You have reached the Pro limit of 5 active projects. Upgrade to Agency Studio ($49/mo) for unlimited projects.');
+    if (!isOwner && projects.length >= projectLimit) {
+      setUpgradeMessage(
+        `You have reached your active limit of ${projectLimit} client projects. Upgrade to Agency Studio ($49/mo) for 15 projects or Agency Scale ($99/mo) for unlimited client builds.`
+      );
       setShowUpgradeModal(true);
       return;
     }
@@ -142,8 +133,10 @@ export default function ProjectsPage() {
     e.preventDefault();
     if (!newProjectName.trim()) return;
 
-    if (!isOwner && (userPlanTier === 'free' || !userPlanTier) && projects.length >= 1) {
-      setUpgradeMessage('Free tier is limited to 1 project. Upgrade to Pro Builder ($19/mo) for up to 5 projects.');
+    if (!isOwner && projects.length >= projectLimit) {
+      setUpgradeMessage(
+        `You have reached your active limit of ${projectLimit} client projects. Upgrade to Agency Studio ($49/mo) for 15 projects or Agency Scale ($99/mo) for unlimited client builds.`
+      );
       setShowUpgradeModal(true);
       return;
     }
@@ -276,11 +269,9 @@ export default function ProjectsPage() {
     setRevealedKeys((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const projectCapLabel = isOwner || userPlanTier === 'agency' || userPlanTier === 'team'
+  const projectCapLabel = isOwner || projectLimit >= 999999
     ? 'Unlimited'
-    : userPlanTier === 'pro'
-    ? '5 Projects (Pro)'
-    : '1 Project (Free)';
+    : `${projectLimit} Client Projects (${currentPlan.name})`;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans">
@@ -290,13 +281,13 @@ export default function ProjectsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800/80 pb-5 gap-4">
           <div className="space-y-1">
             <h1 className="text-xl font-semibold tracking-tight text-zinc-100 flex items-center gap-2.5 flex-wrap">
-              <span>API Keys & Projects</span>
+              <span>Client Projects & Fleet API Keys</span>
               <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 font-mono uppercase tracking-wider">
                 {projects.length} / {projectCapLabel}
               </span>
             </h1>
             <p className="text-xs text-zinc-500 font-mono">
-              Manage telemetry tokens, rename repositories, rotate credentials, and verify endpoints.
+              Manage API tokens, client environments, and dedicated alert routing across your agency builds.
             </p>
           </div>
 
@@ -305,7 +296,7 @@ export default function ProjectsPage() {
             className="px-3 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition cursor-pointer flex items-center gap-1.5 self-start sm:self-auto font-mono shrink-0"
           >
             <span>+</span>
-            <span>New Project</span>
+            <span>New Client Project</span>
           </button>
         </div>
 
@@ -319,16 +310,16 @@ export default function ProjectsPage() {
         ) : projects.length === 0 ? (
           <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-12 text-center space-y-4">
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-zinc-100">No Projects Found</h3>
+              <h3 className="text-sm font-semibold text-zinc-100">No Client Projects Found</h3>
               <p className="text-xs text-zinc-400 max-w-sm mx-auto">
-                Create your first project to generate a secret key and start ingesting crash telemetry.
+                Create your first client project to generate an ingestion token and start monitoring fleet telemetry.
               </p>
             </div>
             <button
               onClick={handleOpenCreateModal}
               className="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition cursor-pointer font-mono"
             >
-              + Create First Project
+              + Create First Client Project
             </button>
           </div>
         ) : (
@@ -357,10 +348,9 @@ export default function ProjectsPage() {
                             setRenameData({ id: project.id, name: project.name });
                             setRenameInput(project.name);
                           }}
-                          className="px-1.5 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 text-[10px] font-mono transition border border-zinc-800 flex items-center gap-1 cursor-pointer"
+                          className="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 text-[10px] font-mono transition border border-zinc-800 flex items-center gap-1 cursor-pointer"
                           title="Rename Project"
                         >
-                          <span>✎</span>
                           <span>Rename</span>
                         </button>
 
@@ -561,20 +551,20 @@ export default function ProjectsPage() {
             <div className="bg-zinc-950 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
               <div className="space-y-0.5">
                 <h3 className="text-sm font-semibold text-zinc-100">
-                  Create New Project
+                  Create New Client Project
                 </h3>
                 <p className="text-xs text-zinc-400">
-                  Enter a project name to generate a dedicated API key and telemetry endpoint.
+                  Enter a client application name to generate a dedicated API key and telemetry endpoint.
                 </p>
               </div>
 
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-zinc-400 block font-mono">Project Name</label>
+                  <label className="text-xs font-medium text-zinc-400 block font-mono">Client Project Name</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Python Backend API, Next.js Store"
+                    placeholder="e.g. Acme SaaS Backend, Mobile Client App"
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-600 transition font-mono"
@@ -582,7 +572,7 @@ export default function ProjectsPage() {
                   />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-1">
+                <div className="flex justify-end gap-2 pt-1 font-mono">
                   <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(false)}
@@ -595,7 +585,7 @@ export default function ProjectsPage() {
                     disabled={creating}
                     className="px-4 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition disabled:opacity-50 cursor-pointer"
                   >
-                    {creating ? 'Generating...' : 'Create Project'}
+                    {creating ? 'Generating...' : 'Create Client Project'}
                   </button>
                 </div>
               </form>
@@ -606,20 +596,20 @@ export default function ProjectsPage() {
         {/* MODAL: TIER UPGRADE MODAL */}
         {showUpgradeModal && (
           <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-            <div className="bg-zinc-950 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl">
               <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-zinc-100 uppercase tracking-wider font-mono">
                     Project Limit Reached
                   </span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-700">
-                    {userPlanTier === 'pro' ? 'Pro Builder' : 'Developer Free'}
+                    {currentPlan.name}
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowUpgradeModal(false)}
-                  className="text-zinc-500 hover:text-zinc-300 text-xs p-1 rounded transition cursor-pointer"
+                  className="text-zinc-500 hover:text-zinc-300 text-xs p-1 rounded transition cursor-pointer font-mono"
                   title="Close"
                 >
                   ✕
@@ -627,35 +617,35 @@ export default function ProjectsPage() {
               </div>
 
               <p className="text-xs text-zinc-300 leading-relaxed font-mono">
-                {upgradeMessage || 'Free tier is limited to 1 project. Upgrade to Pro Builder ($19/mo) for up to 5 projects.'}
+                {upgradeMessage || `You have reached your active limit of ${projectLimit} client projects. Upgrade to Agency Studio ($49/mo) for 15 projects or Agency Scale ($99/mo) for unlimited client builds.`}
               </p>
 
               <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-lg p-3 text-[11px] text-zinc-400 space-y-1.5 font-mono">
                 <div className="flex justify-between">
                   <span>Current Tier</span>
-                  <span className="text-zinc-200 capitalize">{userPlanTier === 'pro' ? 'Pro Builder' : userPlanTier === 'agency' ? 'Agency Studio' : 'Developer Free'}</span>
+                  <span className="text-zinc-200">{currentPlan.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Active Projects</span>
-                  <span className="text-zinc-200">{projects.length} / {userPlanTier === 'pro' ? '5' : userPlanTier === 'agency' ? 'Unlimited' : '1'}</span>
+                  <span>Active Client Projects</span>
+                  <span className="text-zinc-200">{projects.length} / {projectLimit >= 999999 ? 'Unlimited' : projectLimit}</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-1">
+              <div className="flex items-center justify-end gap-2 pt-1 font-mono">
                 <button
                   type="button"
                   onClick={() => setShowUpgradeModal(false)}
-                  className="px-3.5 py-1.5 text-zinc-400 hover:text-zinc-200 text-xs rounded-lg transition cursor-pointer font-mono"
+                  className="px-3.5 py-1.5 text-zinc-400 hover:text-zinc-200 text-xs rounded-lg transition cursor-pointer"
                 >
                   Dismiss
                 </button>
                 <a
-                  href={userPlanTier === 'pro' ? 'https://buy.polar.sh/polar_cl_jtE6KA0k5GWeMhuFWQGB9fsDhRt8rdTwDteFS0Qr44g' : 'https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq'}
+                  href="https://buy.polar.sh/polar_cl_jtE6KA0k5GWeMhuFWQGB9fsDhRt8rdTwDteFS0Qr44g"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition cursor-pointer font-mono flex items-center gap-1.5"
+                  className="px-4 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs rounded-lg transition cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>{userPlanTier === 'pro' ? 'Upgrade to Agency' : 'Upgrade to Pro'}</span>
+                  <span>Upgrade to Agency</span>
                   <span>→</span>
                 </a>
               </div>
