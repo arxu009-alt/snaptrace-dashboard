@@ -11,6 +11,7 @@ export default function BillingPage() {
   const [isOwner, setIsOwner] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
   const [stats, setStats] = useState({ accepted_count: 0 });
+  const [userEmail, setUserEmail] = useState<string>('');
 
   useEffect(() => {
     async function loadBilling() {
@@ -19,6 +20,7 @@ export default function BillingPage() {
       if (!session?.user) { setLoading(false); return; }
 
       const email = session.user.email || '';
+      setUserEmail(email);
       const ownerCheck = email.toLowerCase() === 'arxu1045@gmail.com' || email.toLowerCase() === 'arxu009@gmail.com';
       setIsOwner(ownerCheck);
 
@@ -76,6 +78,14 @@ export default function BillingPage() {
     usagePct >= 90 ? 'bg-red-500' :
     usagePct >= 70 ? 'bg-yellow-400' :
     'bg-emerald-500';
+
+  const studioTrialUrl = userEmail
+    ? `https://buy.polar.sh/polar_cl_jtE6KA0k5GWeMhuFWQGB9fsDhRt8rdTwDteFS0Qr44g?customer_email=${encodeURIComponent(userEmail)}`
+    : 'https://buy.polar.sh/polar_cl_jtE6KA0k5GWeMhuFWQGB9fsDhRt8rdTwDteFS0Qr44g';
+
+  const scaleTrialUrl = userEmail
+    ? `https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq?customer_email=${encodeURIComponent(userEmail)}`
+    : 'https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq';
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 sm:p-8 font-sans">
@@ -251,7 +261,7 @@ export default function BillingPage() {
                   </div>
 
                   <a
-                    href="https://buy.polar.sh/polar_cl_jtE6KA0k5GWeMhuFWQGB9fsDhRt8rdTwDteFS0Qr44g"
+                    href={studioTrialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold rounded-lg transition font-mono active:scale-[0.98] shadow-sm"
@@ -321,7 +331,7 @@ export default function BillingPage() {
                   </div>
 
                   <a
-                    href="https://buy.polar.sh/polar_cl_AyVTujI4KmZOysk4v2mQhTfmQ7RPyvrJEFZbL2aN3iq"
+                    href={scaleTrialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-zinc-950 text-xs font-bold rounded-lg transition font-mono active:scale-[0.98] shadow-md shadow-yellow-400/10"

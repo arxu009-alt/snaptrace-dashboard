@@ -1148,10 +1148,10 @@ initSnapTrace({
 
                 <div className="pt-1 sm:pt-1.5 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
                   <Link
-                    href="/signup"
+                    href="/signup?intent=agency_studio"
                     className="px-5 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-sm transition-all"
                   >
-                    Start Free (No Card Needed) →
+                    Start 14-Day Agency Trial →
                   </Link>
                   <Link
                     href="/demo"
