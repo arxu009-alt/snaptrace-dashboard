@@ -426,80 +426,6 @@ const MARQUEE_ITEMS: string[] = [
   'C# .NET', 'Ruby on Rails', 'Kotlin', 'Flutter', 'Cloudflare Workers', 'cURL',
 ];
 
-const TESTIMONIALS = [
-  {
-    name: 'Alex Rivera',
-    handle: '@alexrivera_dev',
-    role: 'Senior AI Engineer',
-    company: 'NexusFlow',
-    avatar: 'AR',
-    gradient: 'from-blue-500 to-indigo-600',
-    stars: 5,
-    tag: 'Cursor & Claude Setup',
-    quote:
-      'I pasted the "Install with AI" prompt into Cursor Composer and had SnapTrace fully active in our Next.js 15 app in 15 seconds flat. No searching through 40 documentation pages or tweaking webpack configs. It just worked.',
-  },
-  {
-    name: 'Marcus Vance',
-    handle: '@marcusbuilds',
-    role: 'Indie Hacker & Founder',
-    company: 'LaunchFast',
-    avatar: 'MV',
-    gradient: 'from-amber-500 to-yellow-600',
-    stars: 5,
-    tag: 'Zero Alert Fatigue',
-    quote:
-      'I was paying Sentry $80/mo just to get flooded with 200 duplicate emails whenever Supabase had a 5-second hiccup. SnapTrace collapsed the whole cascade into one Discord ping with an AI patch diff. Absolute game changer.',
-  },
-  {
-    name: 'Dr. Sarah Jenkins',
-    handle: '@sarah_codes',
-    role: 'Lead Frontend Architect',
-    company: 'Veloce Labs',
-    avatar: 'SJ',
-    gradient: 'from-emerald-500 to-teal-600',
-    stars: 5,
-    tag: 'Core Web Vitals',
-    quote:
-      'Our Google Lighthouse score jumped from 91 to 99 after purging our old APM client for SnapTrace’s <3.4KB SDK. The on-device PII regex engine also passed our strict HIPAA and GDPR security audits without extra setup.',
-  },
-  {
-    name: 'David Kim',
-    handle: '@dkim_ai',
-    role: 'AI Agent Engineer',
-    company: 'PromptScale',
-    avatar: 'DK',
-    gradient: 'from-purple-500 to-fuchsia-600',
-    stars: 5,
-    tag: '1-Click Fix Export',
-    quote:
-      'The 1-click export to Claude Code is pure superpower. An uncaught TypeError occurred in production at 11 PM; I clicked "Copy for Claude", pasted it into terminal, and the bug was diagnosed and patched in 3 minutes.',
-  },
-  {
-    name: 'Elena Rostova',
-    handle: '@elena_devops',
-    role: 'Staff Reliability Engineer',
-    company: 'HyperScale',
-    avatar: 'ER',
-    gradient: 'from-rose-500 to-red-600',
-    stars: 5,
-    tag: 'Outage Collapse',
-    quote:
-      'When our Postgres connection pool exhausted during a traffic spike, SnapTrace grouped 450 downstream API failures under database.js:18. My team fixed the root issue instead of triaging 450 panic tickets.',
-  },
-  {
-    name: 'Eusebiu Balan',
-    handle: '@ebalan_dev',
-    role: 'Full-Stack Engineer',
-    company: 'Dev.to Community',
-    avatar: 'EB',
-    gradient: 'from-cyan-500 to-blue-600',
-    stars: 5,
-    tag: 'Featherweight SDK',
-    quote:
-      'Under 5KB and zero inbox spam is the sweet spot modern developers needed. SnapTrace catches the subtle, silent errors that used to waste hours of manual debugging. It pays for itself on day one.',
-  },
-];
 
 const FAQS: Array<{ q: string; a: string }> = [
   {
@@ -732,20 +658,23 @@ export default function WelcomeLandingPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const AI_INSTALL_PROMPT = `Install and configure SnapTrace error telemetry in this project:
-1. Run: npm install snaptrace
-2. In root client layout or app entry (e.g. app/layout.tsx for Next.js, or src/main.tsx), initialize SnapTrace:
-   import { initSnapTrace } from 'snaptrace';
-   initSnapTrace({ apiKey: 'YOUR_PROJECT_API_KEY' });
-3. Wrap unhandled exceptions or error boundaries to call captureException(error).
-Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build passes cleanly.`;
+  const CLIENT_QUICKSTART_SNIPPET = `// 1. Install SDK in client application
+npm i snaptrace
+
+// 2. Initialize in app/layout.tsx (Next.js App Router) or src/main.tsx
+import { initSnapTrace } from 'snaptrace';
+
+initSnapTrace({
+  apiKey: process.env.NEXT_PUBLIC_SNAPTRACE_KEY || 'st_live_client_key',
+  environment: process.env.NODE_ENV,
+});`;
 
   const [heroInstallTab, setHeroInstallTab] = useState<'ai' | 'npm' | 'curl'>('ai');
-  const [copiedAiPrompt, setCopiedAiPrompt] = useState(false);
-  const handleCopyAiPrompt = () => {
-    navigator.clipboard.writeText(AI_INSTALL_PROMPT);
-    setCopiedAiPrompt(true);
-    setTimeout(() => setCopiedAiPrompt(false), 2200);
+  const [copiedQuickstart, setCopiedQuickstart] = useState(false);
+  const handleCopyQuickstart = () => {
+    navigator.clipboard.writeText(CLIENT_QUICKSTART_SNIPPET);
+    setCopiedQuickstart(true);
+    setTimeout(() => setCopiedQuickstart(false), 2200);
   };
 
   const [copiedNpmInstall, setCopiedNpmInstall] = useState(false);
@@ -1270,13 +1199,12 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
                         onClick={() => setHeroInstallTab('ai')}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-[11px] sm:text-xs font-semibold transition cursor-pointer ${
                           heroInstallTab === 'ai'
-                            ? 'bg-purple-500/20 text-purple-200 border border-purple-500/40 shadow-sm'
+                            ? 'bg-zinc-800 text-zinc-100 border border-zinc-700 shadow-sm'
                             : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
                         }`}
                       >
-                        <MarkCursor className="w-3.5 h-3.5 text-purple-300" />
-                        <span>Install with AI (Cursor / Claude)</span>
-                        <span className="hidden sm:inline-block text-[9px] px-1.5 py-0.2 bg-purple-500/30 text-purple-100 rounded-md font-bold">10s</span>
+                        <IconCode className="w-3.5 h-3.5 text-yellow-400" />
+                        <span>Client App Quickstart (Next.js / React)</span>
                       </button>
 
                       <button
@@ -1317,36 +1245,36 @@ Keep the bundle featherweight (<5KB) with 0ms hydration lag and ensure the build
                     </a>
                   </div>
 
-                  {/* Tab Body: AI Install Prompt (Primary) */}
+                  {/* Tab Body: Client App Quickstart (Primary) */}
                   {heroInstallTab === 'ai' && (
-                    <div className="rounded-2xl border border-purple-500/30 bg-gradient-to-b from-purple-950/20 via-zinc-950 to-zinc-950/90 p-4 sm:p-5 text-left font-mono space-y-3 shadow-2xl relative group">
-                      <div className="flex items-center justify-between border-b border-purple-500/20 pb-2.5">
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-5 text-left font-mono space-y-3 shadow-2xl relative group">
+                      <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                          <span className="text-[11px] font-bold text-purple-200 uppercase tracking-wider">
-                            Paste into Cursor Composer (Cmd+I) or Claude Code
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                          <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">
+                            Clean Client Layout Initialization
                           </span>
                         </div>
                         <button
                           type="button"
-                          onClick={handleCopyAiPrompt}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-mono text-[11px] font-bold transition shadow-md shadow-purple-600/30 cursor-pointer active:scale-95"
+                          onClick={handleCopyQuickstart}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-mono text-[11px] font-medium transition cursor-pointer active:scale-95"
                         >
-                          {copiedAiPrompt ? <IconCheck className="w-3.5 h-3.5 text-white" /> : <IconCopy className="w-3.5 h-3.5" />}
-                          <span>{copiedAiPrompt ? 'Prompt Copied!' : 'Copy AI Prompt'}</span>
+                          {copiedQuickstart ? <IconCheck className="w-3.5 h-3.5 text-emerald-400" /> : <IconCopy className="w-3.5 h-3.5" />}
+                          <span>{copiedQuickstart ? 'Copied!' : 'Copy snippet'}</span>
                         </button>
                       </div>
 
-                      <pre className="text-[11px] sm:text-[12px] leading-relaxed text-zinc-200 whitespace-pre-wrap select-all font-mono bg-zinc-900/70 p-3.5 rounded-xl border border-zinc-800/80">
-                        {AI_INSTALL_PROMPT}
+                      <pre className="text-[11px] sm:text-[12px] leading-relaxed text-zinc-200 whitespace-pre-wrap select-all font-mono bg-zinc-900/70 p-3.5 rounded-xl border border-zinc-800/80 overflow-x-auto">
+                        {CLIENT_QUICKSTART_SNIPPET}
                       </pre>
 
                       <div className="flex flex-wrap items-center justify-between gap-2 text-[10.5px] text-zinc-400 pt-1 border-t border-zinc-800/70">
-                        <span className="flex items-center gap-1 text-purple-300">
-                          <IconSparkle className="w-3.5 h-3.5 text-purple-400" />
-                          Your AI agent automatically installs, writes layout config, and tests telemetry.
+                        <span className="flex items-center gap-1 text-emerald-400">
+                          <IconSparkle className="w-3.5 h-3.5 text-emerald-400" />
+                          Featherweight &lt;3.4KB client SDK with 0.0ms main thread blocking.
                         </span>
-                        <span className="text-zinc-500">Zero manual wiring needed</span>
+                        <span className="text-zinc-500">Next.js 14/15 App Router &amp; React 19</span>
                       </div>
                     </div>
                   )}
@@ -1415,7 +1343,7 @@ initSnapTrace({
 
                   {/* Feature Badges */}
                   <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[11px] text-zinc-400">
-                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />1-prompt AI install</span>
+                    <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />Drop-in client quickstart</span>
                     <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />&lt;3.4KB gzipped</span>
                     <span className="inline-flex items-center gap-1.5"><IconCheck className="h-3 w-3 text-emerald-400" />0.0ms hydration lag</span>
                   </div>
@@ -2155,85 +2083,214 @@ initSnapTrace({
             </div>
           </section>
 
-          {/* 11. SOCIAL PROOF & REVIEWS (#social-proof) */}
-          <section id="social-proof" className="st-section st-cv border-t border-slate-800/70">
-            <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-10">
+          {/* 11. AGENCY FLEET WORKFLOW SECTION (#fleet-workflow) */}
+          <section id="fleet-workflow" className="st-section st-cv border-t border-slate-800/70 bg-[#070B14]/40">
+            <div className="mx-auto max-w-6xl px-5 sm:px-6 space-y-12">
               <SmoothReveal>
                 <SectionIntro
                   center
-                  eyebrowIcon={<IconSparkle className="h-3.5 w-3.5" />}
+                  eyebrowIcon={<IconLayers className="h-3.5 w-3.5 text-yellow-400" />}
                   eyebrowTone="amber"
-                  eyebrowLabel="Developer Reviews"
-                  heading="Trusted by 2,400+ AI Coders, Solo Founders & Teams"
-                  lead="See why modern developers building with Next.js, Cursor, and Claude Code trust SnapTrace for noise-free error telemetry."
+                  eyebrowLabel="Agency Fleet Architecture"
+                  heading="Engineered for Multi-Client Web Fleets"
+                  lead="Everything boutique dev studios and digital agencies need to monitor client production builds without per-seat penalties."
                 />
               </SmoothReveal>
 
-              <SmoothReveal delay={80} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {TESTIMONIALS.map((t, idx) => (
-                  <div
-                    key={idx}
-                    className="st-card st-card-hover rounded-2xl p-6 flex flex-col justify-between space-y-4 border border-zinc-800/80 bg-zinc-950/70 shadow-lg relative group"
-                  >
-                    <div className="space-y-3">
-                      {/* Top Row: Stars + Tag */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-yellow-400 text-xs">
-                          {Array.from({ length: t.stars }).map((_, i) => (
-                            <span key={i}>★</span>
-                          ))}
-                        </div>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 font-medium">
-                          {t.tag}
-                        </span>
+              {/* 3 High-Value Agency Pillars */}
+              <SmoothReveal delay={80} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Pillar 1: Client Fleet Health Board */}
+                <div className="st-card st-card-hover rounded-2xl p-6 sm:p-7 border border-zinc-800/80 bg-zinc-950/80 shadow-xl flex flex-col justify-between space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <IconTarget className="w-5 h-5" />
                       </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-semibold tracking-wider uppercase">
+                        Pillar 01
+                      </span>
+                    </div>
 
-                      {/* Quote */}
-                      <p className="text-[13px] leading-relaxed text-zinc-300 font-sans italic">
-                        &quot;{t.quote}&quot;
+                    <div className="space-y-1.5">
+                      <h3 className="text-base font-bold text-zinc-100 font-sans tracking-tight">
+                        Client Fleet Health Board
+                      </h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed font-mono">
+                        Monitor 10 to 50+ client domains with real-time green/amber/red operational status dots.
                       </p>
                     </div>
 
-                    {/* Author Footer */}
-                    <div className="pt-4 border-t border-zinc-800/80 flex items-center gap-3">
-                      <div
-                        className={`w-9 h-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-white font-bold text-xs shadow-md shrink-0`}
-                      >
-                        {t.avatar}
+                    {/* Simulated Fleet Health Board UI */}
+                    <div className="rounded-xl border border-zinc-800/90 bg-zinc-900/50 p-3 space-y-2 font-mono text-[11px]">
+                      <div className="flex items-center justify-between text-[10px] text-zinc-500 uppercase tracking-wider px-1 pb-1 border-b border-zinc-800/60 font-semibold">
+                        <span>Client Domain</span>
+                        <span>Status · Uptime</span>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-zinc-100 text-xs truncate">{t.name}</span>
-                          <span className="text-[10px] text-emerald-400">✓</span>
+
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-zinc-950/70 border border-zinc-800/50">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                          <span className="text-zinc-200 truncate font-medium">store.acme-client.com</span>
                         </div>
-                        <p className="text-[11px] text-zinc-500 font-mono truncate">
-                          {t.role} · <span className="text-zinc-400">{t.company}</span>
-                        </p>
+                        <span className="text-emerald-400 text-[10.5px] font-bold shrink-0">99.98% · Operational</span>
+                      </div>
+
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-zinc-950/70 border border-zinc-800/50">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+                          <span className="text-zinc-200 truncate font-medium">portal.nexus-app.io</span>
+                        </div>
+                        <span className="text-amber-400 text-[10.5px] font-bold shrink-0">Investigating</span>
+                      </div>
+
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-zinc-950/70 border border-zinc-800/50">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                          <span className="text-zinc-200 truncate font-medium">app.fin-tech-ops.de</span>
+                        </div>
+                        <span className="text-emerald-400 text-[10.5px] font-bold shrink-0">100% · Operational</span>
                       </div>
                     </div>
                   </div>
-                ))}
+
+                  <div className="pt-3 border-t border-zinc-800/60 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                    <span className="text-zinc-500">Fleet Scope</span>
+                    <span className="text-emerald-400 font-semibold">Live Status Dots</span>
+                  </div>
+                </div>
+
+                {/* Pillar 2: Isolated Webhook Routing */}
+                <div className="st-card st-card-hover rounded-2xl p-6 sm:p-7 border border-zinc-800/80 bg-zinc-950/80 shadow-xl flex flex-col justify-between space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                        <IconPlug className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-semibold tracking-wider uppercase">
+                        Pillar 02
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <h3 className="text-base font-bold text-zinc-100 font-sans tracking-tight">
+                        Isolated Webhook Routing
+                      </h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed font-mono">
+                        Send Client A&apos;s checkout crashes to their dedicated Discord/Slack channel, completely separate from Client B.
+                      </p>
+                    </div>
+
+                    {/* Isolated Routing Simulation UI */}
+                    <div className="rounded-xl border border-zinc-800/90 bg-zinc-900/50 p-3 space-y-2 font-mono text-[11px]">
+                      <div className="space-y-1.5 p-2 rounded-lg bg-zinc-950/70 border border-zinc-800/50">
+                        <div className="flex items-center justify-between text-[10.5px]">
+                          <span className="text-zinc-300 font-semibold">Client A (Ecommerce)</span>
+                          <span className="text-purple-400 text-[10px]">Discord</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 bg-zinc-900 px-2 py-1 rounded border border-zinc-800/70">
+                          <span className="text-emerald-400">→</span>
+                          <span className="truncate text-zinc-400">#acme-checkout-alerts</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 p-2 rounded-lg bg-zinc-950/70 border border-zinc-800/50">
+                        <div className="flex items-center justify-between text-[10.5px]">
+                          <span className="text-zinc-300 font-semibold">Client B (Healthcare SaaS)</span>
+                          <span className="text-cyan-400 text-[10px]">Slack</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 bg-zinc-900 px-2 py-1 rounded border border-zinc-800/70">
+                          <span className="text-emerald-400">→</span>
+                          <span className="truncate text-zinc-400">#client-b-production-incidents</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-zinc-800/60 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                    <span className="text-zinc-500">Cross-client alert bleed</span>
+                    <span className="text-purple-400 font-semibold">Zero Exposure</span>
+                  </div>
+                </div>
+
+                {/* Pillar 3: Monthly Retainer Proof */}
+                <div className="st-card st-card-hover rounded-2xl p-6 sm:p-7 border border-zinc-800/80 bg-zinc-950/80 shadow-xl flex flex-col justify-between space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center text-yellow-400">
+                        <IconShield className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-semibold tracking-wider uppercase">
+                        Pillar 03
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <h3 className="text-base font-bold text-zinc-100 font-sans tracking-tight">
+                        Monthly Retainer Proof
+                      </h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed font-mono">
+                        Export 1-click client maintenance statements to attach to monthly retainer invoices.
+                      </p>
+                    </div>
+
+                    {/* Retainer Proof Preview UI */}
+                    <div className="rounded-xl border border-zinc-800/90 bg-zinc-900/50 p-3 space-y-2 font-mono text-[11px]">
+                      <div className="p-2.5 rounded-lg bg-zinc-950/70 border border-zinc-800/50 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-zinc-200 font-semibold text-[11px]">Client Maintenance Statement</span>
+                          <span className="text-[9.5px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                            VERIFIED
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[10px] text-zinc-400 pt-1 border-t border-zinc-800/60">
+                          <div>
+                            <span className="text-zinc-500 block">Resolved:</span>
+                            <span className="text-zinc-200 font-bold">14 Incidents</span>
+                          </div>
+                          <div>
+                            <span className="text-zinc-500 block">Fleet Uptime:</span>
+                            <span className="text-emerald-400 font-bold">99.98%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[10.5px]">
+                        <span className="text-zinc-400">Retainer Value Delivered</span>
+                        <span className="text-yellow-400 font-bold font-mono">1-Click Export</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-zinc-800/60 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                    <span className="text-zinc-500">Invoice attachment</span>
+                    <span className="text-yellow-400 font-semibold">1-Click Reports</span>
+                  </div>
+                </div>
+
               </SmoothReveal>
 
-              {/* Bottom Community Banner */}
+              {/* Bottom Community / Fleet Action Banner */}
               <SmoothReveal delay={120}>
-                <div className="p-4 sm:p-5 rounded-2xl bg-[#090D18] border border-yellow-400/20 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-yellow-400/30 bg-yellow-400/10 text-yellow-300">
+                <div className="p-5 sm:p-6 rounded-2xl bg-[#090D18] border border-yellow-400/20 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+                  <div className="flex items-center gap-3.5">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-yellow-400/30 bg-yellow-400/10 text-yellow-300">
                       <IconBolt className="h-5 w-5" />
                     </span>
                     <div>
-                      <strong className="text-zinc-100">Ready to join the fastest setup in error telemetry?</strong>
+                      <strong className="text-zinc-100 text-[13px] block sm:inline">
+                        Built for Web Agencies, Dev Studios, and Multi-App Teams.
+                      </strong>
                       <span className="text-zinc-400 block sm:inline sm:ml-1.5">
-                        Copy the AI prompt into Cursor or Claude Code, or sign up free with no credit card.
+                        Connect 10 to 50+ client domains with isolated routing, unlimited team seats, and zero per-seat fees.
                       </span>
                     </div>
                   </div>
                   <Link
                     href="/signup"
-                    className="px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-zinc-950 font-bold shrink-0 transition shadow-sm"
+                    className="px-5 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-zinc-950 font-bold shrink-0 transition shadow-sm"
                   >
-                    Start Free Now →
+                    Start Agency Trial →
                   </Link>
                 </div>
               </SmoothReveal>
@@ -2560,7 +2617,7 @@ initSnapTrace({
               <div className="mx-auto max-w-xl text-center space-y-3">
                 <h2 className="st-h2 text-white">Ready to catch bugs in a snap?</h2>
                 <p className="text-[14px] leading-relaxed text-slate-400 font-mono">
-                  Join developers catching crashes in real time, with zero noise and instant AI diagnoses.
+                  Join Web Agencies, Dev Studios, and Multi-App Teams monitoring client production builds with zero noise and instant crash routing.
                 </p>
                 <div className="pt-2 font-mono">
                   <Link href="/signup" className={BTN_PRIMARY}>

@@ -35,57 +35,95 @@ export default function AlertsPage() {
 
   const [planTier, setPlanTier] = useState<string>('free');
   const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [selectedProject, setSelectedProject] = useState<ClientProject | null>(null);
 
   const bindProject = useCallback((p: ClientProject) => {
+    setSelectedProject(p);
     setSelectedProjectId(p.id);
-    setEmail(p.recipient_email || '');
-    setDiscordWebhook(p.discord_webhook_url || '');
-    setSlackWebhook(p.slack_webhook_url || '');
+    setEmail(p.recipient_email || (p as unknown as Record<string, string>).alert_email || '');
+    setDiscordWebhook(p.discord_webhook_url || (p as unknown as Record<string, string>).discord_webhook || '');
+    setSlackWebhook(p.slack_webhook_url || (p as unknown as Record<string, string>).slack_webhook || '');
     setOnlyProdAlerts(Boolean(p.only_production_alerts));
     setDiscordTestMsg(null);
     setSlackTestMsg(null);
   }, []);
 
-  const loadAlertSettings = useCallback(async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) { setLoading(false); return; }
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user;
 
-    const userEmail = session.user.email || '';
-    const ownerCheck = userEmail.toLowerCase() === 'arxu1045@gmail.com' || userEmail.toLowerCase() === 'arxu009@gmail.com';
-    setIsOwner(ownerCheck);
+      if (currentUser?.email) {
+        const ownerEmail = currentUser.email.toLowerCase();
+        setIsOwner(ownerEmail === 'arxu1045@gmail.com' || ownerEmail === 'arxu009@gmail.com');
+      }
 
-    const { data: userProjects } = await supabase
-      .from('projects')
-      .select('id, name, api_key, discord_webhook_url, slack_webhook_url, recipient_email, only_production_alerts, plan_tier')
-      .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false });
+      // Query Supabase projects table for the authenticated user
+      let query = supabase.from('projects').select('*').order('created_at', { ascending: false });
+      if (currentUser?.id) {
+        query = query.eq('user_id', currentUser.id);
+      }
+      let { data, error } = await query;
 
-    if (userProjects && userProjects.length > 0) {
-      setProjects(userProjects);
+      // Fallback query if no projects found with eq('user_id') (e.g. RLS handles auth filtering automatically)
+      if ((!data || data.length === 0) && !error) {
+        const fallback = await supabase
+          .from('projects')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (fallback.data && fallback.data.length > 0) {
+          data = fallback.data;
+        }
+      }
 
-      const paidProject = userProjects.find((p) => p.plan_tier && p.plan_tier !== 'free');
-      const resolvedTier = ownerCheck ? 'agency_scale' : (paidProject?.plan_tier || userProjects[0]?.plan_tier || 'free').toLowerCase();
-      setPlanTier(resolvedTier);
+      if (data && data.length > 0) {
+        const projectList = data as ClientProject[];
+        setProjects(projectList);
 
-      const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
-      const target = userProjects.find((proj) => proj.id === savedProjectId) || userProjects[0];
-      bindProject(target);
-    } else {
-      setPlanTier(ownerCheck ? 'agency_scale' : 'free');
+        const paidProject = projectList.find((p) => p.plan_tier && p.plan_tier !== 'free');
+        const ownerCheck = currentUser?.email && (currentUser.email.toLowerCase() === 'arxu1045@gmail.com' || currentUser.email.toLowerCase() === 'arxu009@gmail.com');
+        const resolvedTier = ownerCheck ? 'agency_scale' : (paidProject?.plan_tier || projectList[0]?.plan_tier || 'free').toLowerCase();
+        setPlanTier(resolvedTier);
+
+        // If projects exist, automatically select the first project by default so webhook cards immediately display that client project's settings
+        const savedProjectId = typeof window !== 'undefined' ? localStorage.getItem('snaptrace_selected_project_id') : null;
+        const target = (savedProjectId && projectList.find((proj) => proj.id === savedProjectId)) || projectList[0];
+        
+        setSelectedProject(target);
+        bindProject(target);
+      } else {
+        setProjects([]);
+        setSelectedProject(null);
+        setSelectedProjectId('');
+      }
+    } catch (err) {
+      console.error('Failed to fetch projects in alerts:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [bindProject]);
 
   useEffect(() => {
-    loadAlertSettings();
-  }, [loadAlertSettings]);
+    fetchProjects();
 
-  const selectedProject = projects.find((p) => p.id === selectedProjectId) || projects[0];
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchProjects();
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [fetchProjects]);
+
+  const activeProject = selectedProject || projects.find((p) => p.id === selectedProjectId) || projects[0];
 
   const handleSelectProject = (projectId: string) => {
     const target = projects.find((p) => p.id === projectId);
     if (!target) return;
+    setSelectedProject(target);
     bindProject(target);
     if (typeof window !== 'undefined') {
       localStorage.setItem('snaptrace_selected_project_id', projectId);
@@ -95,7 +133,7 @@ export default function AlertsPage() {
 
   const handleSaveNotifications = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProjectId || !selectedProject) {
+    if (!selectedProjectId || !activeProject) {
       alert('Please select a client project first.');
       return;
     }
@@ -135,7 +173,19 @@ export default function AlertsPage() {
         )
       );
 
-      setNotifSavedMsg(`Alert destinations updated for ${selectedProject.name}`);
+      setSelectedProject((prev) =>
+        prev && prev.id === selectedProjectId
+          ? {
+              ...prev,
+              recipient_email: email.trim() || undefined,
+              discord_webhook_url: discordWebhook.trim() || undefined,
+              slack_webhook_url: slackWebhook.trim() || undefined,
+              only_production_alerts: onlyProdAlerts,
+            }
+          : prev
+      );
+
+      setNotifSavedMsg(`Alert destinations updated for ${activeProject.name}`);
       setTimeout(() => setNotifSavedMsg(null), 4000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
