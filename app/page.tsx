@@ -1151,7 +1151,7 @@ initSnapTrace({
                     href="/signup"
                     className="px-5 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-sm transition-all"
                   >
-                    Start 14-Day Agency Trial →
+                    Start Free (No Card Needed) →
                   </Link>
                   <Link
                     href="/demo"
@@ -2353,14 +2353,59 @@ initSnapTrace({
                 )}
               </SmoothReveal>
 
-              <SmoothReveal delay={100} className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto items-stretch gap-6 pt-2">
-                {/* 1. AGENCY STUDIO */}
-                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6 sm:p-7 lg:p-8 h-full">
+              <SmoothReveal delay={100} className="grid grid-cols-1 lg:grid-cols-3 max-w-6xl mx-auto items-stretch gap-6 pt-2">
+                {/* 1. DEVELOPER FREE */}
+                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6 sm:p-7 h-full">
+                  <div>
+                    <div className="flex items-center justify-between gap-2 min-h-[26px]">
+                      <span className="font-mono text-[11px] tracking-[0.1em] text-zinc-400 font-bold uppercase">DEVELOPER FREE</span>
+                      <span className="rounded-full border border-zinc-800 bg-zinc-900/60 px-2.5 py-0.5 font-mono text-[9.5px] font-semibold text-zinc-400">
+                        FREE TIER
+                      </span>
+                    </div>
+
+                    <div className="mt-4 flex items-baseline gap-1.5">
+                      <span className="text-[36px] sm:text-[42px] font-black tracking-tight text-white">
+                        $0
+                      </span>
+                      <span className="font-mono text-[12px] text-slate-400">/ month</span>
+                    </div>
+
+                    <p className="mt-1.5 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
+                      For testing, staging builds, and verifying telemetry.
+                    </p>
+
+                    <ul className="mt-6 space-y-3 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-300 font-mono">
+                      {[
+                        '2,000 error events / month',
+                        '1 active client project',
+                        '7-day log retention',
+                        'Universal Ingestion API (<3.4KB SDK)',
+                        'In-dashboard error triage',
+                      ].map((f: string) => (
+                        <li key={f} className="flex items-start gap-2.5">
+                          <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                          <span className="leading-snug">{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <Link
+                    href="/signup"
+                    className="mt-8 flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-100 px-5 py-3 text-[13px] font-semibold transition font-mono w-full active:scale-[0.98]"
+                  >
+                    Start Free →
+                  </Link>
+                </div>
+
+                {/* 2. AGENCY STUDIO */}
+                <div className="st-card st-card-hover flex flex-col justify-between rounded-2xl p-6 sm:p-7 h-full">
                   <div>
                     <div className="flex items-center justify-between gap-2 min-h-[26px]">
                       <span className="font-mono text-[11px] tracking-[0.1em] text-slate-300 font-bold uppercase">AGENCY STUDIO</span>
-                      <span className="rounded-full border border-slate-700/60 bg-slate-800/60 px-2.5 py-0.5 font-mono text-[9.5px] font-semibold text-slate-300">
-                        BOUTIQUE STUDIOS
+                      <span className="rounded-full border border-purple-500/30 bg-purple-500/10 px-2.5 py-0.5 font-mono text-[9.5px] font-semibold text-purple-300">
+                        14-Day Free Trial
                       </span>
                     </div>
 
@@ -2373,14 +2418,14 @@ initSnapTrace({
 
                     <p className="mt-1.5 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
                       {billingInterval === 'annual'
-                        ? 'Billed annually at $468/yr (save $120). For boutique web agencies and dev studios managing up to 15 client apps.'
-                        : 'For boutique web agencies and dev studios managing up to 15 client apps.'}
+                        ? 'Billed annually at $468/yr (save $120). For boutique dev studios managing up to 15 client apps.'
+                        : 'For boutique dev studios managing up to 15 client apps.'}
                     </p>
 
                     <ul className="mt-6 space-y-3 border-t border-slate-800/80 pt-5 text-[12px] sm:text-[12.5px] text-slate-300 font-mono">
                       {[
                         '100,000 error events / month',
-                        'Up to 15 active client projects',
+                        'Up to 15 client projects',
                         'UNLIMITED team seats (no per-seat fees)',
                         'Dedicated Discord, Slack & Email alerts per client',
                         'Monthly Client Retainer Value Reports (PDF / Invoice summary)',
@@ -2404,10 +2449,10 @@ initSnapTrace({
                   </a>
                 </div>
 
-                {/* 2. AGENCY SCALE */}
-                <div className="st-glow-amber relative flex flex-col justify-between rounded-2xl border-2 border-yellow-400/60 bg-[linear-gradient(180deg,rgba(250,204,21,0.07),rgba(11,16,29,1)_45%)] p-6 sm:p-7 lg:p-8 h-full md:-translate-y-1">
+                {/* 3. AGENCY SCALE */}
+                <div className="st-glow-amber relative flex flex-col justify-between rounded-2xl border-2 border-yellow-400/60 bg-[linear-gradient(180deg,rgba(250,204,21,0.07),rgba(11,16,29,1)_45%)] p-6 sm:p-7 h-full md:-translate-y-1">
                   <span className="absolute -top-3 left-6 rounded-full bg-[linear-gradient(180deg,#FDE68A,#FACC15_46%,#EAB308)] px-3 py-0.5 font-mono text-[9.5px] sm:text-[10px] font-black tracking-wider text-slate-950 shadow-md">
-                    POPULAR FOR GROWING FLEETS
+                    Popular Agency Fleet · 14-Day Free Trial
                   </span>
 
                   <div>
@@ -2460,7 +2505,7 @@ initSnapTrace({
               </SmoothReveal>
 
               {/* Agency Economics Comparison Card */}
-              <SmoothReveal delay={120} className="max-w-4xl mx-auto pt-4">
+              <SmoothReveal delay={120} className="max-w-5xl mx-auto pt-4">
                 <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 sm:p-8 backdrop-blur-sm shadow-xl">
                   <div className="text-center max-w-xl mx-auto mb-6">
                     <span className="font-mono text-[11px] font-bold text-yellow-400 uppercase tracking-widest">
