@@ -7,38 +7,27 @@ import { Analytics } from '@vercel/analytics/react';
 export const metadata: Metadata = {
   metadataBase: new URL('https://snaptrace.space'),
   title: {
-    default: 'SnapTrace | The Featherweight Error Tracker & Sentry Alternative',
+    default: 'SnapTrace — Centralized Crash Telemetry for Web Agencies',
     template: '%s | SnapTrace',
   },
   description:
-    'Lightweight <5KB error monitoring and crash telemetry for Next.js, Python, Node, and JavaScript with zero alert fatigue, client-side PII scrubbing, and BYOK AI root-cause diagnostics.',
+    'Featherweight (<3.4KB) noise-free crash telemetry and error tracking for web agencies, dev studios, and multi-client fleets. Zero Core Web Vitals penalty.',
   keywords: [
-    'Sentry alternative',
-    'GlitchTip alternative',
-    'Honeybadger alternative',
-    'error tracking',
-    'crash monitoring',
-    'Next.js error logging',
-    'telemetry APM',
-    'BYOK AI error diagnosis',
-    'lightweight error tracker',
-    'noise deduplication APM',
+    'SnapTrace',
+    'Snap Trace',
+    'error tracking for agencies',
+    'Next.js crash telemetry',
+    'Sentry alternative for agencies',
+    'client fleet error monitoring',
+    'lightweight error monitoring',
   ],
-  authors: [{ name: 'SnapTrace Team' }],
-  creator: 'SnapTrace',
+  authors: [{ name: 'Muhammad Arsalan' }],
+  creator: 'Muhammad Arsalan',
   publisher: 'SnapTrace',
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
+  alternates: {
+    canonical: 'https://snaptrace.space',
   },
-icons: {
+  icons: {
     icon: [
       { url: '/icon.png?v=2', type: 'image/png', sizes: '192x192' },
       { url: '/icon', sizes: 'any' },
@@ -53,24 +42,27 @@ icons: {
     locale: 'en_US',
     url: 'https://snaptrace.space',
     siteName: 'SnapTrace',
-    title: 'SnapTrace | Code breaks, fix it in a snap',
+    title: 'SnapTrace — Centralized Crash Telemetry for Web Agencies',
     description:
-      'Featherweight <5KB error tracker with zero alert fatigue, client PII firewall, and 1-click Cursor/Claude AI prompts.',
-    images: [
-      {
-        url: '/globe.svg',
-        width: 1200,
-        height: 630,
-        alt: 'SnapTrace Developer Telemetry Platform',
-      },
-    ],
+      'Monitor 10 to 50+ client applications under one flat dashboard. Zero 100KB SDK bloat, 0.0ms Core Web Vitals penalty.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SnapTrace | The Featherweight Sentry Alternative',
+    title: 'SnapTrace — Centralized Crash Telemetry for Web Agencies',
     description:
-      'Catch crashes in real time with <5KB SDK overhead, client-side PII scrubbing, and BYOK AI root-cause fixes.',
-    creator: '@snaptrace',
+      'Featherweight (<3.4KB) crash telemetry for web agencies and multi-client fleets.',
+    creator: '@Arslan009a',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   verification: {
     other: {
@@ -84,31 +76,36 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Official Google Search Site Name & Software Application Schemas
-  const structuredData = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: 'SnapTrace',
-      alternateName: ['SnapTrace Telemetry', 'SnapTrace APM'],
-      url: 'https://snaptrace.space',
+  const softwareApplicationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'SnapTrace',
+    alternateName: ['Snap Trace', 'SnapTrace Telemetry'],
+    url: 'https://snaptrace.space',
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'All',
+    description:
+      'Featherweight (<3.4KB) noise-free crash telemetry and error tracking for web agencies and dev studios.',
+    offers: {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'USD',
+      lowPrice: '0',
+      highPrice: '99',
+      offerCount: '3',
     },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'SnapTrace',
-      operatingSystem: 'Any',
-      applicationCategory: 'DeveloperApplication',
-      offers: {
-        '@type': 'Offer',
-        price: '0.00',
-        priceCurrency: 'USD',
-      },
-      description:
-        'Featherweight error tracking and crash telemetry platform with noise deduplication and BYOK AI diagnostics.',
-      url: 'https://snaptrace.space',
+    author: {
+      '@type': 'Person',
+      name: 'Muhammad Arsalan',
     },
-  ];
+  };
+
+  const webSiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'SnapTrace',
+    alternateName: ['Snap Trace', 'SnapTrace Telemetry'],
+    url: 'https://snaptrace.space',
+  };
 
   return (
     <html lang="en" className="dark scroll-smooth">
@@ -122,7 +119,15 @@ export default function RootLayout({
         <meta name="msvalidate.01" content="EC1C00F550C23BCFCF6A5FB131492203" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(webSiteSchema),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(softwareApplicationSchema),
+          }}
         />
       </head>
       <body className="min-h-screen bg-[#05070E] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-slate-950">
