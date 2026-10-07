@@ -139,6 +139,9 @@ button, a { touch-action: manipulation; }
   .st-marquee-track { animation: none; }
   .st-ring::before { animation: none; opacity: 0; }
 }
+.hover\:bg-zinc-850:hover {
+  background-color: #1f1f24;
+}
 `;
 
 const stroke = (className: string) => ({
@@ -405,6 +408,33 @@ function getDevBotAnswer(prompt: string): string {
   return 'SnapTrace is a featherweight, noise-free crash telemetry platform. It runs asynchronously on navigator.sendBeacon (<3.4KB gzipped) and exports 1-click AI prompts for Cursor, Claude Code, and Copilot.';
 }
 
+const HERO_SLIDES = [
+  {
+    id: 'fleet',
+    badge: 'Agency Fleet Telemetry',
+    titleLine1: 'Centralized crash telemetry.',
+    titleHighlight: 'Built for web agencies & dev studios.',
+    subheadline:
+      'Monitor 10 to 50+ client applications under one flat dashboard. Zero 100KB SDK bloat, 0.0ms Core Web Vitals penalty, and automated client retainer reports ready in 1 click.',
+  },
+  {
+    id: 'performance',
+    badge: 'Client Performance Shield',
+    titleLine1: 'Zero Core Web Vitals penalty.',
+    titleHighlight: 'Protect client SEO with <3.4KB telemetry.',
+    subheadline:
+      "Never compromise your client's Google Lighthouse score. Native asynchronous dispatch via navigator.sendBeacon with 0.0ms main-thread hydration delay.",
+  },
+  {
+    id: 'retainer',
+    badge: 'Retainer Proof of Work',
+    titleLine1: 'Prove monthly maintenance value.',
+    titleHighlight: 'Generate 1-click retainer proof for clients.',
+    subheadline:
+      'Turn silent crash prevention into billable retainer proof. Export branded monthly health reports showing intercepted bugs and suppressed loop storms directly to client invoices.',
+  },
+];
+
 const STACK_TABS: Array<{ id: StackKey; label: string }> = [
   { id: 'nextjs', label: 'Next.js (npm)' },
   { id: 'js', label: 'JavaScript' },
@@ -507,6 +537,26 @@ export default function WelcomeLandingPage() {
   const [copiedCursorPrompt, setCopiedCursorPrompt] = useState(false);
   const [copiedHeroScript, setCopiedHeroScript] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
+  // Hero carousel state & 3000ms auto-advance
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [isPaused]);
+
+  const goToPrevSlide = () => {
+    setCurrentSlide((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1));
+  };
+
+  const goToNextSlide = () => {
+    setCurrentSlide((prev) => (prev === HERO_SLIDES.length - 1 ? 0 : prev + 1));
+  };
 
   const [marketingMode, setMarketingMode] = useState(true);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
@@ -1127,24 +1177,104 @@ initSnapTrace({
 
             <div className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6">
               <div className="text-center max-w-4xl mx-auto space-y-3 sm:space-y-3.5">
-                <Link
-                  href="/signup"
-                  className="group inline-flex max-w-full items-center gap-2 rounded-full border border-yellow-400/30 bg-yellow-400/[0.08] py-1 pl-2.5 pr-3 text-[11px] sm:text-[12px] text-yellow-200 backdrop-blur-sm transition hover:border-yellow-400/60 hover:bg-yellow-400/[0.15]"
+                {/* Sleek 3-Slide Auto-Rotating Hero Carousel with Linear/Vercel Glass Controls */}
+                <div
+                  className="relative w-full max-w-4xl mx-auto px-4 sm:px-14"
+                  onMouseEnter={() => setIsPaused(true)}
+                  onMouseLeave={() => setIsPaused(false)}
                 >
-                  <span className="rounded-full bg-yellow-400/25 px-2 py-0.5 font-mono text-[9.5px] font-bold text-yellow-200 shrink-0">AGENCY FLEET</span>
-                  <span className="truncate">Agency Fleet Telemetry · Sub-40ms Ingestion · 14-Day Free Trial Available →</span>
-                </Link>
+                  {/* Left Arrow (<) */}
+                  <button
+                    type="button"
+                    onClick={goToPrevSlide}
+                    aria-label="Previous slide"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-zinc-900/50 hover:bg-zinc-850 border border-zinc-800/80 text-zinc-400 hover:text-zinc-100 backdrop-blur-md transition-all shadow-sm cursor-pointer flex items-center justify-center focus:outline-none focus:ring-1 focus:ring-amber-400/50"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
 
-                <h1 className="st-display text-white">
-                  Centralized crash telemetry.{' '}
-                  <span className="bg-[linear-gradient(95deg,#FEF3C7_0%,#FACC15_40%,#F59E0B_100%)] bg-clip-text text-transparent">
-                    Built for web agencies &amp; dev studios.
-                  </span>
-                </h1>
+                  {/* Right Arrow (>) */}
+                  <button
+                    type="button"
+                    onClick={goToNextSlide}
+                    aria-label="Next slide"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-zinc-900/50 hover:bg-zinc-850 border border-zinc-800/80 text-zinc-400 hover:text-zinc-100 backdrop-blur-md transition-all shadow-sm cursor-pointer flex items-center justify-center focus:outline-none focus:ring-1 focus:ring-amber-400/50"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
 
-                <p className="st-lead text-zinc-300 max-w-2xl mx-auto">
-                  Monitor 10 to 50+ client applications under one flat dashboard. Zero 100KB SDK bloat, 0.0ms Core Web Vitals penalty, and automated client retainer reports ready in 1 click.
-                </p>
+                  {/* Slides Crossfade Display (CSS Grid ensures identical sizing, zero jitter/CLS) */}
+                  <div className="grid grid-cols-1 items-center">
+                    {HERO_SLIDES.map((slide, idx) => {
+                      const isActive = idx === currentSlide;
+                      return (
+                        <div
+                          key={slide.id}
+                          className={`col-start-1 row-start-1 flex flex-col items-center text-center space-y-3 sm:space-y-3.5 transition-all duration-500 ease-out ${
+                            isActive
+                              ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
+                              : 'opacity-0 translate-y-2 scale-[0.99] pointer-events-none'
+                          }`}
+                          aria-hidden={!isActive}
+                        >
+                          {/* Slide Badge Pill */}
+                          <Link
+                            href="/signup?intent=agency_studio"
+                            className="group inline-flex max-w-full items-center gap-2 rounded-full border border-yellow-400/30 bg-yellow-400/[0.08] py-1 pl-2.5 pr-3 text-[11px] sm:text-[12px] text-yellow-200 backdrop-blur-sm transition hover:border-yellow-400/60 hover:bg-yellow-400/[0.15]"
+                          >
+                            <span className="rounded-full bg-yellow-400/25 px-2 py-0.5 font-mono text-[9.5px] font-bold text-yellow-200 shrink-0 uppercase tracking-wide">
+                              {slide.badge}
+                            </span>
+                            <span className="truncate">Agency Fleet Telemetry · Sub-40ms Ingestion · 14-Day Free Trial Available →</span>
+                          </Link>
+
+                          {/* Slide H1 Headline */}
+                          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-white leading-[1.08] sm:leading-[1.12]">
+                            {slide.titleLine1}{' '}
+                            <span className="text-amber-400 bg-[linear-gradient(95deg,#FEF3C7_0%,#FACC15_40%,#F59E0B_100%)] bg-clip-text text-transparent">
+                              {slide.titleHighlight}
+                            </span>
+                          </h1>
+
+                          {/* Slide Subheadline */}
+                          <p className="st-lead text-zinc-300 max-w-2xl mx-auto">
+                            {slide.subheadline}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Slide Indicator Pills (Center-bottom of headline) */}
+                  <div
+                    className="flex items-center justify-center gap-1.5 pt-3.5 pb-1"
+                    role="tablist"
+                    aria-label="Hero slide indicators"
+                  >
+                    {HERO_SLIDES.map((slide, idx) => {
+                      const isActive = idx === currentSlide;
+                      return (
+                        <button
+                          key={slide.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={isActive}
+                          aria-label={`Slide ${idx + 1}: ${slide.badge}`}
+                          onClick={() => setCurrentSlide(idx)}
+                          className={
+                            isActive
+                              ? 'w-6 h-1 bg-amber-400/90 rounded-full transition-all duration-300 focus:outline-none'
+                              : 'w-1.5 h-1 bg-zinc-800 hover:bg-zinc-700 rounded-full transition-all duration-300 cursor-pointer focus:outline-none'
+                          }
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
 
                 <div className="pt-1 sm:pt-1.5 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
                   <Link
