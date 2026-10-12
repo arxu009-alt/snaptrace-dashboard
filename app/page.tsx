@@ -410,12 +410,12 @@ function getDevBotAnswer(prompt: string): string {
 
 const HERO_SLIDES = [
   {
-    id: 'fleet',
-    badge: 'Agency Fleet Telemetry',
-    titleLine1: 'Centralized crash telemetry.',
-    titleHighlight: 'Built for web agencies & dev studios.',
+    id: 'sentry-reports',
+    badge: 'White-Label Agency Reports',
+    titleLine1: 'Turn Sentry into',
+    titleHighlight: 'Billable Client Retainer Reports.',
     subheadline:
-      'Monitor 10 to 50+ client applications under one flat dashboard. Zero 100KB SDK bloat, 0.0ms Core Web Vitals penalty, and automated client retainer reports ready in 1 click.',
+      'Connect your Sentry projects in 30 seconds. Automatically generate white-label monthly maintenance PDFs with your agency logo to justify your client retainers.',
   },
   {
     id: 'performance',
@@ -1074,12 +1074,12 @@ initSnapTrace({
 
               <div className="flex flex-wrap items-center gap-3">
                 <Link href="/signup" className={BTN_PRIMARY}>
-                  Start for free
+                  Start Free Agency Trial →
                   <IconArrow className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>
                 <Link href="/demo" className={BTN_SECONDARY}>
                   <IconTerminal className="h-4 w-4 text-yellow-300" />
-                  Open demo workspace
+                  View Sample Client PDF
                 </Link>
               </div>
             </div>
@@ -1278,17 +1278,49 @@ initSnapTrace({
 
                 <div className="pt-1 sm:pt-1.5 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3">
                   <Link
-                    href="/signup?intent=agency_studio"
+                    href="/signup"
                     className="px-5 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-sm transition-all"
                   >
-                    Start 14-Day Agency Trial →
+                    Start Free Agency Trial →
                   </Link>
                   <Link
                     href="/demo"
                     className="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-200 text-sm font-medium transition-all"
                   >
-                    Explore Live Demo
+                    View Sample Client PDF
                   </Link>
+                </div>
+
+                {/* Features Superpower List */}
+                <div className="pt-3 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-left font-mono text-xs">
+                  <div className="flex items-start gap-2 bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-3 shadow-xs">
+                    <IconCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="space-y-0.5">
+                      <div className="text-zinc-200 font-semibold text-[12px]">Zero Code Migration</div>
+                      <div className="text-[11px] text-zinc-400 font-sans">Connects directly to your existing Sentry projects</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-3 shadow-xs">
+                    <IconCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="space-y-0.5">
+                      <div className="text-zinc-200 font-semibold text-[12px]">100% White-Label</div>
+                      <div className="text-[11px] text-zinc-400 font-sans">Your logo, your branding, zero Sentry badges</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-3 shadow-xs">
+                    <IconCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="space-y-0.5">
+                      <div className="text-zinc-200 font-semibold text-[12px]">Justify Retainers</div>
+                      <div className="text-[11px] text-zinc-400 font-sans">Justify $1,500/mo Client Retainers with proof of work</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-3 shadow-xs">
+                    <IconCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="space-y-0.5">
+                      <div className="text-zinc-200 font-semibold text-[12px]">Flat Pricing</div>
+                      <div className="text-[11px] text-zinc-400 font-sans">Flat Pricing ($29/mo Studio, $49/mo Scale)</div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* 1-Click NPM Copy Pill */}
@@ -1843,6 +1875,123 @@ initSnapTrace({
                     <blockquote className="border-t border-slate-800/80 pt-4 text-[13px] leading-relaxed text-slate-300 italic font-sans">
                       &quot;We dropped heavy tracking tools for SnapTrace and our Next.js bundle footprint dropped instantly. Zero hydration lag.&quot;
                     </blockquote>
+                  </div>
+                </div>
+              </SmoothReveal>
+            </div>
+          </section>
+
+          {/* 6.5. SENTRY-POWERED WHITE-LABEL RETAINER REPORTS */}
+          <section className="st-section st-cv border-t border-slate-800/70 bg-[#060912]/80">
+            <div className="mx-auto max-w-6xl px-5 sm:px-6">
+              <SmoothReveal className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+                <div className="lg:col-span-6 space-y-6">
+                  <SectionIntro
+                    eyebrowIcon={<IconShield className="h-3.5 w-3.5" />}
+                    eyebrowLabel="White-Label Agency Retainers"
+                    heading="Turn Sentry into Billable Client Retainer Reports"
+                    lead="Connect your Sentry projects in 30 seconds. Automatically generate white-label monthly maintenance PDFs with your agency logo to justify your client retainers."
+                  />
+
+                  <div className="space-y-3 font-mono text-xs">
+                    <div className="flex items-start gap-3 rounded-xl border border-slate-800 bg-[#0B101D] p-3.5 shadow-sm">
+                      <IconCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="text-zinc-100 font-bold">Zero Code Migration</div>
+                        <div className="text-zinc-400 font-sans text-xs mt-0.5">Connects directly to your existing Sentry projects with read-only tokens. Zero custom ingestion or code changes.</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 rounded-xl border border-slate-800 bg-[#0B101D] p-3.5 shadow-sm">
+                      <IconCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="text-zinc-100 font-bold">100% White-Label</div>
+                        <div className="text-zinc-400 font-sans text-xs mt-0.5">Your logo, your custom brand color, and certified reliability statements with zero Sentry badges.</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 rounded-xl border border-slate-800 bg-[#0B101D] p-3.5 shadow-sm">
+                      <IconCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="text-zinc-100 font-bold">Justify $1,500/mo Client Retainers</div>
+                        <div className="text-zinc-400 font-sans text-xs mt-0.5">Turn behind-the-scenes crash interception into tangible, executive PDF deliverables clients eagerly renew.</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 rounded-xl border border-slate-800 bg-[#0B101D] p-3.5 shadow-sm">
+                      <IconCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="text-zinc-100 font-bold">Flat Pricing</div>
+                        <div className="text-zinc-400 font-sans text-xs mt-0.5">Predictable agency fleet tiers: $29/mo Studio and $49/mo Scale with zero surprise event overages.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 pt-2">
+                    <Link
+                      href="/signup"
+                      className="px-5 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs transition-all font-mono shadow-sm"
+                    >
+                      Start Free Agency Trial →
+                    </Link>
+                    <Link
+                      href="/demo"
+                      className="px-5 py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium transition-all font-mono"
+                    >
+                      View Sample Client PDF
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-6">
+                  {/* Visual Mockup Deliverable Card */}
+                  <div className="st-card rounded-2xl p-6 sm:p-7 space-y-4 shadow-2xl border border-zinc-800">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-6 px-2 rounded bg-emerald-500 flex items-center justify-center font-bold text-[10px] text-zinc-950 font-mono">
+                          DS
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-zinc-100">Digital Studio</div>
+                          <div className="text-[10px] text-zinc-400 font-mono">Client Reliability Statement</div>
+                        </div>
+                      </div>
+                      <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-[9.5px] font-bold text-emerald-400">
+                        Certified Deliverable
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2.5 font-mono">
+                      <div className="rounded-lg border border-zinc-800 bg-[#070B13] p-3 text-center">
+                        <div className="text-xl font-bold text-zinc-100">24</div>
+                        <div className="text-[10px] text-zinc-400 mt-0.5">Exceptions Handled</div>
+                      </div>
+                      <div className="rounded-lg border border-zinc-800 bg-[#070B13] p-3 text-center">
+                        <div className="text-xl font-bold text-emerald-400">99.8%</div>
+                        <div className="text-[10px] text-zinc-400 mt-0.5">Health Score</div>
+                      </div>
+                      <div className="rounded-lg border border-zinc-800 bg-[#070B13] p-3 text-center">
+                        <div className="text-xl font-bold text-emerald-400">0.0ms</div>
+                        <div className="text-[10px] text-zinc-400 mt-0.5">Core Web Vitals Delay</div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-zinc-800/80 bg-[#070B13] p-3.5 space-y-2 font-mono text-xs">
+                      <div className="flex items-center justify-between text-[11px] text-zinc-400 border-b border-zinc-800/60 pb-1.5">
+                        <span>Protected Endpoint</span>
+                        <span>Resolved Telemetry</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-zinc-200 truncate">/checkout/step-2</span>
+                        <span className="text-emerald-400">78 events (42%)</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-zinc-200 truncate">/api/v1/cart/sync</span>
+                        <span className="text-emerald-400">46 events (25%)</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                      <span>Certified by Digital Studio Production Monitoring</span>
+                      <span>1-Click PDF Export</span>
+                    </div>
                   </div>
                 </div>
               </SmoothReveal>
@@ -2541,14 +2690,14 @@ initSnapTrace({
 
                     <div className="mt-4 flex items-baseline gap-1.5">
                       <span className="text-[36px] sm:text-[42px] font-black tracking-tight text-white">
-                        {billingInterval === 'annual' ? '$39' : '$49'}
+                        {billingInterval === 'annual' ? '$24' : '$29'}
                       </span>
                       <span className="font-mono text-[12px] text-slate-400">/ month</span>
                     </div>
 
                     <p className="mt-1.5 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
                       {billingInterval === 'annual'
-                        ? 'Billed annually at $468/yr (save $120). For boutique dev studios managing up to 15 client apps.'
+                        ? 'Billed annually at $288/yr (save $60). For boutique dev studios managing up to 15 client apps.'
                         : 'For boutique dev studios managing up to 15 client apps.'}
                     </p>
 
@@ -2595,14 +2744,14 @@ initSnapTrace({
 
                     <div className="mt-4 flex items-baseline gap-1.5">
                       <span className="text-[36px] sm:text-[42px] font-black tracking-tight text-white">
-                        {billingInterval === 'annual' ? '$79' : '$99'}
+                        {billingInterval === 'annual' ? '$39' : '$49'}
                       </span>
                       <span className="font-mono text-[12px] text-slate-400">/ month</span>
                     </div>
 
                     <p className="mt-1.5 text-[12.5px] sm:text-[13px] leading-relaxed text-slate-400 min-h-[38px]">
                       {billingInterval === 'annual'
-                        ? 'Billed annually at $948/yr (save $240). For high-volume digital agencies managing large client fleets.'
+                        ? 'Billed annually at $468/yr (save $120). For high-volume digital agencies managing large client fleets.'
                         : 'For high-volume digital agencies managing large client fleets.'}
                     </p>
 

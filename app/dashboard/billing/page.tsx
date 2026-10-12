@@ -207,7 +207,7 @@ export default function BillingPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 1. Agency Studio Card */}
                 <div className={`p-5 sm:p-6 border rounded-xl flex flex-col justify-between space-y-5 transition ${
-                  currentTier === 'agency_studio'
+                  currentTier === 'agency_studio' || currentTier === 'pro'
                     ? 'border-purple-400/40 bg-purple-950/10'
                     : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
                 }`}>
@@ -215,7 +215,7 @@ export default function BillingPage() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <Building2 className="w-4 h-4 text-purple-400" />
-                        <span className="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider">Agency Studio</span>
+                        <span className="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider">Agency Studio (Sentry)</span>
                       </div>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-medium">
                         Boutique Fleets
@@ -224,11 +224,11 @@ export default function BillingPage() {
 
                     <div>
                       <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl font-black text-white tracking-tight">$49</span>
+                        <span className="text-3xl font-black text-white tracking-tight">$29</span>
                         <span className="text-xs font-mono text-zinc-400">/month</span>
                       </div>
                       <p className="text-xs text-zinc-400 mt-1">
-                        For boutique web agencies and dev studios managing up to 15 client apps.
+                        For boutique dev studios connecting Sentry projects to white-label PDF retainers.
                       </p>
                     </div>
 
@@ -239,7 +239,11 @@ export default function BillingPage() {
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
-                        <span>Up to 15 active client projects</span>
+                        <span>Up to 10 active Sentry client projects</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
+                        <span>White-Label Monthly Retainer Reports (PDF / Invoice note)</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
@@ -248,10 +252,6 @@ export default function BillingPage() {
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
                         <span>Dedicated Discord, Slack &amp; Email alerts</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Check className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
-                        <span>Monthly Client Retainer Value Reports (PDF)</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
@@ -264,7 +264,7 @@ export default function BillingPage() {
                     href={studioTrialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold rounded-lg transition font-mono active:scale-[0.98] shadow-sm"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold rounded-lg transition font-mono active:scale-[0.98] shadow-sm cursor-pointer"
                   >
                     <span>Start 14-Day Free Trial</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -273,7 +273,7 @@ export default function BillingPage() {
 
                 {/* 2. Agency Scale Card */}
                 <div className={`p-5 sm:p-6 border rounded-xl flex flex-col justify-between space-y-5 relative transition ${
-                  currentTier === 'agency_scale'
+                  currentTier === 'agency_scale' || currentTier === 'agency'
                     ? 'border-yellow-400/50 bg-yellow-400/[0.04]'
                     : 'border-yellow-400/30 bg-zinc-950 hover:border-yellow-400/60'
                 }`}>
@@ -285,7 +285,7 @@ export default function BillingPage() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <Zap className="w-4 h-4 text-yellow-400" />
-                        <span className="text-xs font-mono font-bold text-yellow-400 uppercase tracking-wider">Agency Scale</span>
+                        <span className="text-xs font-mono font-bold text-yellow-400 uppercase tracking-wider">Agency Scale (Sentry)</span>
                       </div>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 font-medium">
                         High Volume
@@ -294,11 +294,11 @@ export default function BillingPage() {
 
                     <div>
                       <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl font-black text-white tracking-tight">$99</span>
+                        <span className="text-3xl font-black text-white tracking-tight">$49</span>
                         <span className="text-xs font-mono text-zinc-400">/month</span>
                       </div>
                       <p className="text-xs text-zinc-400 mt-1">
-                        For high-volume digital agencies managing large client fleets.
+                        For growing digital agencies managing large client fleets with unlimited Sentry sync.
                       </p>
                     </div>
 
@@ -309,7 +309,11 @@ export default function BillingPage() {
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-yellow-400 mt-0.5 shrink-0" />
-                        <span>UNLIMITED client projects &amp; API keys</span>
+                        <span>UNLIMITED Sentry client projects &amp; API keys</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-3.5 h-3.5 text-yellow-400 mt-0.5 shrink-0" />
+                        <span>100% White-Label PDF Client Deliverables &amp; Custom Branding</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-yellow-400 mt-0.5 shrink-0" />
@@ -334,7 +338,7 @@ export default function BillingPage() {
                     href={scaleTrialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-zinc-950 text-xs font-bold rounded-lg transition font-mono active:scale-[0.98] shadow-md shadow-yellow-400/10"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-zinc-950 text-xs font-bold rounded-lg transition font-mono active:scale-[0.98] shadow-md shadow-yellow-400/10 cursor-pointer"
                   >
                     <span>Start 14-Day Free Trial</span>
                     <ExternalLink className="w-3.5 h-3.5" />

@@ -1,452 +1,556 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import SnapTraceLogo from '@/components/SnapTraceLogo';
-import InspectErrorModal from '@/components/InspectErrorModal';
+import {
+  ShieldCheck,
+  Activity,
+  Clock,
+  Printer,
+  Copy,
+  Check,
+  ArrowRight,
+  ExternalLink,
+  Layers,
+  Sparkles,
+} from 'lucide-react';
 
-interface ErrorLog {
-  id: number;
-  message: string;
-  stack_trace?: string;
-  stack?: string;
-  environment: string;
-  url?: string;
-  user_agent?: string;
-  created_at: string;
-  status?: string;
+type ProjectOption = 'Shopify E-Commerce Store (Acme Corp)' | 'Next.js SaaS Platform (PulseHQ)';
+
+interface ProjectData {
+  clientName: string;
+  projectName: string;
+  endpoints: Array<{
+    route: string;
+    incidents: number;
+    description: string;
+    status: string;
+  }>;
 }
 
-type TimeRange = '12h' | '24h' | '7d';
+const PROJECTS_DATA: Record<ProjectOption, ProjectData> = {
+  'Shopify E-Commerce Store (Acme Corp)': {
+    clientName: 'Acme Corp',
+    projectName: 'Shopify E-Commerce Store (Acme Corp)',
+    endpoints: [
+      {
+        route: '/api/checkout',
+        incidents: 18,
+        description: 'Payment gateway timeout and inventory concurrency lock',
+        status: 'Intercepted & Resolved by Agency Engineering',
+      },
+      {
+        route: '/cart/sync',
+        incidents: 14,
+        description: 'Redis cart cache deserialization mismatch',
+        status: 'Intercepted & Resolved by Agency Engineering',
+      },
+      {
+        route: '/auth/callback',
+        incidents: 6,
+        description: 'Customer OAuth state nonce expiration',
+        status: 'Intercepted & Resolved by Agency Engineering',
+      },
+      {
+        route: '/dashboard',
+        incidents: 4,
+        description: 'Hydration payload boundary reconciliation',
+        status: 'Intercepted & Resolved by Agency Engineering',
+      },
+    ],
+  },
+  'Next.js SaaS Platform (PulseHQ)': {
+    clientName: 'PulseHQ',
+    projectName: 'Next.js SaaS Platform (PulseHQ)',
+    endpoints: [
+      {
+        route: '/api/checkout',
+        incidents: 21,
+        description: 'Stripe subscription webhook idempotency collision',
+        status: 'Intercepted & Resolved by Agency Engineering',
+      },
+      {
+        route: '/auth/callback',
+        incidents: 11,
+        description: 'Enterprise SSO SAML clock-skew tolerance adjustment',
+        status: 'Intercepted & Resolved by Agency Engineering',
+      },
+      {
+        route: '/dashboard',
+        incidents: 7,
+        description: 'Edge SSR streaming chunk termination error',
+        status: 'Intercepted & Resolved by Agency Engineering',
+      },
+      {
+        route: '/cart/sync',
+        incidents: 3,
+        description: 'KV store rate-limit exponential backoff retry',
+        status: 'Intercepted & Resolved by Agency Engineering',
+      },
+    ],
+  },
+};
 
-const MOCK_INCIDENTS: ErrorLog[] = [
-  {
-    id: 1041,
-    message: 'ReferenceError: Connection pool exhausted at database.js:18:11',
-    stack_trace: 'ReferenceError: Connection pool exhausted\n    at pool.connect (database.js:18:11)\n    at handleCheckout (checkout.js:45:9)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async routeHandler (app/api/charge/route.ts:24:5)',
-    environment: 'production',
-    url: 'https://demo-ecommerce.com/api/v1/checkout',
-    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-    created_at: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
-    status: 'unresolved',
-  },
-  {
-    id: 1042,
-    message: 'UnhandledPromiseRejection: Stripe API 504 Gateway Timeout on /v1/charge',
-    stack_trace: 'Error: Gateway timeout 504\n    at fetchWithRetry (stripe-client.js:102:15)\n    at processPayment (billing.js:28:7)\n    at handleWebhookEvent (webhooks.js:52:11)',
-    environment: 'production',
-    url: 'https://demo-ecommerce.com/billing',
-    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
-    created_at: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-    status: 'unresolved',
-  },
-  {
-    id: 1043,
-    message: 'RenderLoopError: Maximum update depth exceeded in CheckoutComponent',
-    stack_trace: 'Error: Maximum update depth exceeded in CheckoutComponent\n    at setState (react-dom.js:312:12)\n    at useEffect (CheckoutComponent.tsx:19:5)\n    at commitHookEffectListMount (react-dom.development.js:23150:26)',
-    environment: 'development',
-    url: 'http://localhost:3000/cart',
-    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15',
-    created_at: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
-    status: 'unresolved',
-  },
-  {
-    id: 1044,
-    message: 'AuthTokenExpiredError: JWT signature verification failed on /api/v1/user/session',
-    stack_trace: 'AuthTokenExpiredError: jwt expired\n    at verifyToken (auth.js:84:12)\n    at authMiddleware (middleware.js:19:9)\n    at next (node_modules/express/lib/router/route.js:144:13)',
-    environment: 'production',
-    url: 'https://demo-ecommerce.com/api/v1/user/session',
-    user_agent: 'SnapTrace <5KB Ingestion Daemon',
-    created_at: new Date(Date.now() - 65 * 60 * 1000).toISOString(),
-    status: 'unresolved',
-  },
+const COLOR_PRESETS = [
+  { name: 'Emerald', hex: '#10B981' },
+  { name: 'Indigo', hex: '#6366F1' },
+  { name: 'Amber', hex: '#F59E0B' },
 ];
 
 export default function DemoSandboxPage() {
-  const [incidents, setIncidents] = useState<ErrorLog[]>(MOCK_INCIDENTS);
-  const [selectedLog, setSelectedLog] = useState<ErrorLog | null>(null);
-  const [timeRange, setTimeRange] = useState<TimeRange>('12h');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'development'>('all');
+  const [agencyName, setAgencyName] = useState<string>('Apex Digital Agency');
+  const [selectedProject, setSelectedProject] = useState<ProjectOption>(
+    'Shopify E-Commerce Store (Acme Corp)'
+  );
+  const [accentColor, setAccentColor] = useState<string>('#10B981');
+  const [copiedInvoiceNote, setCopiedInvoiceNote] = useState<boolean>(false);
 
-  // Realistic mock distribution chart
-  const distributionData = useMemo(() => {
-    if (timeRange === '12h') {
-      return [
-        { label: '-11h', count: 0 },
-        { label: '-9h', count: 0 },
-        { label: '-7h', count: 1 },
-        { label: '-5h', count: 0 },
-        { label: '-3h', count: 0 },
-        { label: '-2h', count: 1 },
-        { label: '-1h', count: 1 },
-        { label: 'Now', count: 2 },
-      ];
-    }
-    if (timeRange === '24h') {
-      return [
-        { label: '-22h', count: 0 },
-        { label: '-18h', count: 1 },
-        { label: '-14h', count: 0 },
-        { label: '-10h', count: 0 },
-        { label: '-6h', count: 1 },
-        { label: '-2h', count: 2 },
-        { label: 'Now', count: 3 },
-      ];
-    }
-    return [
-      { label: '-6d', count: 4 },
-      { label: '-5d', count: 2 },
-      { label: '-4d', count: 1 },
-      { label: '-3d', count: 6 },
-      { label: '-2d', count: 0 },
-      { label: '-1d', count: 3 },
-      { label: 'Today', count: 4 },
-    ];
-  }, [timeRange]);
+  const activeProject = PROJECTS_DATA[selectedProject];
+  const displayAgency = agencyName.trim() || 'Apex Digital Agency';
 
-  const maxCount = Math.max(...distributionData.map((d) => d.count), 1);
+  const handleCopyInvoiceNote = () => {
+    const note = `[Monthly Maintenance Statement - ${activeProject.clientName}]
+• Reliability Index: 99.94%
+• Production Exceptions Neutralized: 42
+• Core Web Vitals Status: 100/100 (0.0ms delay)
+Maintained & Monitored by ${displayAgency}`;
 
-  const filteredIncidents = useMemo(() => {
-    return incidents.filter((item) => {
-      const matchEnv = envFilter === 'all' ? true : item.environment === envFilter;
-      const matchSearch =
-        item.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.url && item.url.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchEnv && matchSearch;
-    });
-  }, [incidents, envFilter, searchQuery]);
-
-  const handleDelete = (id: number) => {
-    setIncidents((prev) => prev.filter((i) => i.id !== id));
-    if (selectedLog?.id === id) setSelectedLog(null);
+    navigator.clipboard.writeText(note);
+    setCopiedInvoiceNote(true);
+    setTimeout(() => setCopiedInvoiceNote(false), 2000);
   };
 
-  const handleToggleStatus = (id: number) => {
-    setIncidents((prev) =>
-      prev.map((i) =>
-        i.id === id
-          ? { ...i, status: i.status === 'resolved' ? 'unresolved' : 'resolved' }
-          : i
-      )
-    );
+  const handlePrint = () => {
+    window.print();
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-zinc-800 selection:text-zinc-100 pb-16">
-      
-      {/* 1. STICKY DEMO NOTICE TOP BAR - Styled to match Dashboard layout */}
-      <header className="sticky top-0 z-50 bg-zinc-950/80 border-b border-zinc-800/80 backdrop-blur-md px-4 sm:px-8 py-3">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono">
-          <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs text-zinc-300">
-              <strong className="text-zinc-100">Interactive Sandbox:</strong> Live production mock workspace. Zero configuration required.
+    <>
+      {/* High-Fidelity Distraction-Free Print Stylesheet */}
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 1cm;
+          }
+          html, body {
+            background-color: #ffffff !important;
+            color: #09090b !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          nav,
+          header,
+          .no-print {
+            display: none !important;
+          }
+          .print-canvas {
+            background: #ffffff !important;
+            color: #09090b !important;
+            border: 1px solid #e4e4e7 !important;
+            box-shadow: none !important;
+            padding: 24px !important;
+            margin: 0 !important;
+            width: 100% !important;
+          }
+          .print-canvas * {
+            color: #09090b !important;
+            border-color: #e4e4e7 !important;
+          }
+          .print-kpi-box {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+          }
+          .print-accent-text {
+            color: #059669 !important;
+          }
+          .print-badge-box {
+            background: #ecfdf5 !important;
+            border: 1px solid #a7f3d0 !important;
+            color: #047857 !important;
+          }
+          .print-table-bg {
+            background: #ffffff !important;
+          }
+          .print-invoice-note {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+          }
+        }
+      `}</style>
+
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-zinc-700 selection:text-zinc-100 antialiased flex flex-col">
+
+        {/* TOP BRAND BAR (Hidden on Print) */}
+        <header className="no-print border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between z-30">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition">
+              <SnapTraceLogo size="sm" showText={true} />
+            </Link>
+            <span className="text-zinc-700">/</span>
+            <span className="text-xs font-mono text-zinc-400">
+              Interactive Agency Report Sandbox
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <Link
-              href="/"
-              className="text-xs text-zinc-400 hover:text-zinc-200 transition font-sans"
+              href="/signup"
+              className="text-xs font-medium text-zinc-400 hover:text-zinc-100 transition hidden sm:inline"
             >
-              ← Back Home
+              Start Free Agency Trial
             </Link>
             <Link
-              href="/signup"
-              className="px-3.5 py-1.5 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg shadow-sm transition active:scale-95 whitespace-nowrap"
+              href="/login"
+              className="text-xs font-medium text-zinc-400 hover:text-zinc-100 transition hidden sm:inline"
             >
-              Claim Free Project & Key →
+              Sign In
             </Link>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="max-w-6xl mx-auto p-6 sm:p-8 space-y-6">
-        
-        {/* Navigation & Header matching Dashboard Overview */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-800/80 pb-4 gap-4">
-          <div className="flex items-center space-x-3">
-            <SnapTraceLogo size="md" showText={true} />
-            <span className="text-zinc-700">/</span>
-            <span className="text-xs font-mono font-medium text-zinc-300 bg-zinc-900 border border-zinc-800 px-2.5 py-0.5 rounded-md">
-              Demo Workspace
-            </span>
-          </div>
+        {/* A. INTERACTIVE CUSTOMIZER BAR (Sticky Top of Screen) */}
+        <div className="no-print sticky top-0 z-20 bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800 p-4 shadow-xl">
+          <div className="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            
+            {/* Customization Inputs */}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 flex-1">
+              
+              {/* Agency Name Input */}
+              <div className="flex items-center gap-2 bg-zinc-950/80 border border-zinc-800 rounded-lg px-2.5 py-1.5 focus-within:border-zinc-600 transition min-w-[220px]">
+                <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
+                  Agency:
+                </span>
+                <input
+                  type="text"
+                  value={agencyName}
+                  onChange={(e) => setAgencyName(e.target.value)}
+                  placeholder="Apex Digital Agency"
+                  className="bg-transparent text-xs text-zinc-100 font-medium placeholder:text-zinc-600 outline-none w-full font-sans"
+                />
+              </div>
 
-          <div className="flex items-center space-x-2 font-mono text-xs text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Ingestion Gateway: 200 OK (0ms overhead)</span>
-          </div>
-        </div>
+              {/* Client Project Selector */}
+              <div className="flex items-center bg-zinc-950/80 border border-zinc-800 rounded-lg p-0.5">
+                {(['Shopify E-Commerce Store (Acme Corp)', 'Next.js SaaS Platform (PulseHQ)'] as const).map(
+                  (project) => (
+                    <button
+                      key={project}
+                      type="button"
+                      onClick={() => setSelectedProject(project)}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium transition cursor-pointer ${
+                        selectedProject === project
+                          ? 'bg-zinc-800 text-zinc-100 shadow-xs'
+                          : 'text-zinc-400 hover:text-zinc-200'
+                      }`}
+                    >
+                      {project === 'Shopify E-Commerce Store (Acme Corp)' ? 'Shopify Store' : 'Next.js SaaS'}
+                    </button>
+                  )
+                )}
+              </div>
 
-        {/* Stat Cards Grid matching Dashboard Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-4 space-y-1.5 transition">
-            <div className="flex items-center justify-between">
-              <span className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">
-                Total Ingested
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            </div>
-            <div className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 tabular-nums">
-              {incidents.length}
-            </div>
-            <p className="text-[11px] text-zinc-500 font-sans">Live simulated exceptions</p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-4 space-y-1.5 transition">
-            <div className="flex items-center justify-between">
-              <span className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">
-                Production Issues
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-            </div>
-            <div className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 tabular-nums">
-              {incidents.filter((i) => i.environment === 'production').length}
-            </div>
-            <p className="text-[11px] text-zinc-500 font-sans">Critical client crashes</p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-4 space-y-1.5 transition">
-            <div className="flex items-center justify-between">
-              <span className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">
-                Development Logs
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-            </div>
-            <div className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 tabular-nums">
-              {incidents.filter((i) => i.environment === 'development').length}
-            </div>
-            <p className="text-[11px] text-zinc-500 font-sans">Staging & test traces</p>
-          </div>
-
-          <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700/80 rounded-xl p-4 space-y-1.5 transition">
-            <div className="flex items-center justify-between">
-              <span className="font-sans text-[11px] font-medium uppercase tracking-wider text-zinc-400">
-                Noise Firewall
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            </div>
-            <div className="font-mono text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
-              Active
-            </div>
-            <p className="text-[11px] text-zinc-500 font-sans">60s loop throttling active</p>
-          </div>
-        </div>
-
-        {/* Velocity Pulse Interactive Chart matching Dashboard Overview */}
-        <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 shadow-sm space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-3">
-            <div>
-              <h2 className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
-                <span>Incident Velocity Pulse</span>
-              </h2>
-              <p className="text-[11px] text-zinc-500 font-sans">Interactive time-window bucketing</p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="flex items-center bg-zinc-950 p-0.5 rounded-lg border border-zinc-800 font-mono text-xs">
-                {(['12h', '24h', '7d'] as const).map((range) => (
+              {/* Brand Accent Color Pills */}
+              <div className="flex items-center gap-1.5 bg-zinc-950/80 border border-zinc-800 rounded-lg px-2.5 py-1.5">
+                <span className="text-[11px] font-mono text-zinc-400 uppercase mr-1">
+                  Accent:
+                </span>
+                {COLOR_PRESETS.map((color) => (
                   <button
-                    key={range}
-                    onClick={() => setTimeRange(range)}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition uppercase cursor-pointer ${
-                      timeRange === range
-                        ? 'bg-zinc-800 text-zinc-100 font-semibold border border-zinc-700'
-                        : 'text-zinc-400 hover:text-zinc-200'
+                    key={color.hex}
+                    type="button"
+                    onClick={() => setAccentColor(color.hex)}
+                    title={color.name}
+                    className={`w-4 h-4 rounded-full transition-transform cursor-pointer ${
+                      accentColor === color.hex ? 'scale-125 ring-2 ring-white/40' : 'opacity-70 hover:opacity-100'
                     }`}
-                  >
-                    {range}
-                  </button>
+                    style={{ backgroundColor: color.hex }}
+                  />
                 ))}
               </div>
 
-              <span className="text-[11px] font-mono text-emerald-400 hidden sm:flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Live
-              </span>
             </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+              {/* Action Button 1: Print / Download Sample PDF */}
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-semibold transition cursor-pointer flex items-center gap-2 font-mono shadow-sm"
+              >
+                <Printer className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Print / Download Sample PDF</span>
+              </button>
+
+              {/* Action Button 2 (Conversion CTA) */}
+              <Link
+                href="/signup"
+                className="px-4 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition flex items-center gap-1.5 font-mono shadow-sm"
+              >
+                <span>Connect Your Sentry Account (14-Day Free Trial)</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
           </div>
+        </div>
 
-          <div className="pt-2 pb-1">
-            <div className="h-28 w-full flex items-end justify-between gap-1.5 sm:gap-2 px-1">
-              {distributionData.map((item, idx) => {
-                const heightPercent = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
-                const hasErrors = item.count > 0;
+        {/* B. THE SAMPLE DELIVERABLE CANVAS (Center) */}
+        <main className="flex-1 p-4 sm:p-8 max-w-5xl mx-auto w-full space-y-6">
 
-                return (
-                  <div key={idx} className="flex-1 h-full flex flex-col justify-end items-center gap-1.5 group relative">
-                    <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-zinc-900 border border-zinc-700 px-2 py-0.5 rounded text-[10px] font-mono text-zinc-200 whitespace-nowrap shadow-xl z-20">
-                      {item.count} {item.count === 1 ? 'incident' : 'incidents'} ({item.label})
-                    </div>
+          <div className="print-canvas bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 sm:p-9 space-y-7 shadow-2xl transition-all">
 
-                    <div className="w-full bg-zinc-950 rounded-sm h-full flex items-end overflow-hidden p-0.5 border border-zinc-800/60">
-                      <div
-                        style={{ height: `${hasErrors ? Math.max(heightPercent, 22) : 6}%` }}
-                        className={`w-full rounded-[2px] transition-all duration-300 ${
-                          hasErrors
-                            ? 'bg-gradient-to-t from-red-500/80 to-red-400 shadow-sm shadow-red-500/10'
-                            : 'bg-zinc-800/40'
-                        }`}
-                      />
-                    </div>
+            {/* Canvas Header */}
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 border-b border-zinc-800/80 pb-6">
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  {/* Agency Monogram Badge */}
+                  <div
+                    className="h-9 px-3 rounded-lg flex items-center justify-center font-bold text-xs tracking-wider uppercase text-zinc-950 font-mono shadow-xs"
+                    style={{ backgroundColor: accentColor }}
+                  >
+                    {displayAgency.slice(0, 3)}
+                  </div>
 
-                    <span className="text-[9px] font-mono text-zinc-500">
-                      {item.label}
+                  <div>
+                    <h1 className="text-xl sm:text-2xl font-bold text-zinc-100 tracking-tight">
+                      {displayAgency}
+                    </h1>
+                    <p className="text-xs text-zinc-400 font-mono">
+                      Client Reliability Statement
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-1">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-medium print-badge-box">
+                    <ShieldCheck className="w-3.5 h-3.5" style={{ color: accentColor }} />
+                    <span style={{ color: accentColor }}>
+                      Certified 24/7 Production Observability · SLA Verified
                     </span>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+                </div>
+              </div>
 
-        {/* Interactive Incidents Stream & Triage Table */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-zinc-900/40 border border-zinc-800 p-3 rounded-xl">
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                placeholder="Search mock errors, routes, or stack traces..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800/80 rounded-lg px-3.5 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 font-mono transition"
-              />
+              {/* Target Project & Period Metadata */}
+              <div className="text-left sm:text-right font-mono text-xs text-zinc-400 space-y-1 bg-zinc-950/60 sm:bg-transparent p-3 sm:p-0 rounded-xl border sm:border-0 border-zinc-800">
+                <div className="text-zinc-200 font-semibold">
+                  Client Application: {activeProject.projectName}
+                </div>
+                <div className="text-zinc-400">
+                  Period: September 2026
+                </div>
+                <div className="text-[11px] text-zinc-500">
+                  Evaluation Scope: Production Cloud Fleet
+                </div>
+                <div className="text-[11px] text-zinc-500">
+                  Target Account: {activeProject.clientName}
+                </div>
+              </div>
+
             </div>
 
-            <div className="flex items-center space-x-1 bg-zinc-950 border border-zinc-800/80 p-0.5 rounded-lg self-start sm:self-auto font-mono text-xs">
-              {(['all', 'production', 'development'] as const).map((env) => (
-                <button
-                  key={env}
-                  onClick={() => setEnvFilter(env)}
-                  className={`px-2.5 py-1 text-xs rounded-md capitalize transition cursor-pointer ${
-                    envFilter === env
-                      ? 'bg-zinc-800 text-zinc-100 font-medium'
-                      : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
+            {/* THE 3 CORE RETAINER METRICS (Executive KPI Strip) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+              
+              {/* Metric 1: System Health Score */}
+              <div className="print-kpi-box bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-5 space-y-2 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="font-mono text-[11px] font-medium uppercase tracking-wider">
+                    System Health Score
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[10px] font-mono text-emerald-400 uppercase">Live</span>
+                  </div>
+                </div>
+                <div
+                  className="font-mono text-3xl sm:text-4xl font-bold tabular-nums print-accent-text"
+                  style={{ color: accentColor }}
                 >
-                  {env}
-                </button>
-              ))}
-            </div>
-          </div>
+                  99.94%
+                </div>
+                <p className="text-xs text-zinc-500 font-mono">
+                  Operational uptime meeting and exceeding retainer SLA threshold.
+                </p>
+              </div>
 
-          <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-zinc-950/70 text-zinc-400 uppercase text-[10px] tracking-wider border-b border-zinc-800">
-                  <tr>
-                    <th className="py-2.5 px-4 w-12 text-center">Status</th>
-                    <th className="py-2.5 px-4">Timestamp</th>
-                    <th className="py-2.5 px-4">Exception Message</th>
-                    <th className="py-2.5 px-4">Environment</th>
-                    <th className="py-2.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-800/60 text-zinc-300">
-                  {filteredIncidents.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-zinc-500">
-                        No incidents match the selected filter.
-                      </td>
-                    </tr>
+              {/* Metric 2: Silent Exceptions Intercepted */}
+              <div className="print-kpi-box bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-5 space-y-2 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="font-mono text-[11px] font-medium uppercase tracking-wider">
+                    Silent Exceptions Intercepted
+                  </span>
+                  <Activity className="w-4 h-4 text-zinc-400" />
+                </div>
+                <div className="font-mono text-3xl sm:text-4xl font-bold text-zinc-100 tabular-nums">
+                  42
+                </div>
+                <p className="text-xs text-zinc-500 font-mono">
+                  Production outages neutralized before client customers noticed.
+                </p>
+              </div>
+
+              {/* Metric 3: Google Core Web Vitals Impact */}
+              <div className="print-kpi-box bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-5 space-y-2 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="font-mono text-[11px] font-medium uppercase tracking-wider">
+                    Core Web Vitals Impact
+                  </span>
+                  <Clock className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="font-mono text-3xl sm:text-4xl font-bold text-emerald-400 tabular-nums print-accent-text">
+                  0.0ms
+                </div>
+                <p className="text-xs text-zinc-500 font-mono">
+                  Guaranteed zero client performance delay · 100/100 Lighthouse audit score.
+                </p>
+              </div>
+
+            </div>
+
+            {/* PROTECTED ENDPOINTS TABLE */}
+            <div className="print-table-bg bg-zinc-950/40 border border-zinc-800/80 rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                <div>
+                  <h2 className="text-sm font-semibold text-zinc-100 font-mono tracking-tight uppercase">
+                    Protected Endpoints &amp; Subsystems
+                  </h2>
+                  <p className="text-xs text-zinc-400">
+                    Mission-critical routes monitored by {displayAgency} engineering.
+                  </p>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                  Telemetry Active
+                </span>
+              </div>
+
+              <div className="space-y-3 font-mono text-xs">
+                {activeProject.endpoints.map((ep, idx) => (
+                  <div
+                    key={ep.route}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-zinc-900/30 border border-zinc-800/50 hover:border-zinc-700/60 transition"
+                  >
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-zinc-500 font-semibold w-4 shrink-0">
+                          #{idx + 1}
+                        </span>
+                        <span className="text-zinc-200 font-bold">
+                          {ep.route}
+                        </span>
+                        <span
+                          className="text-[10px] px-2 py-0.5 rounded-full border font-medium"
+                          style={{
+                            borderColor: `${accentColor}40`,
+                            backgroundColor: `${accentColor}15`,
+                            color: accentColor,
+                          }}
+                        >
+                          {ep.incidents} Intercepted
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 font-sans pl-6">
+                        {ep.description}
+                      </p>
+                    </div>
+
+                    <div className="text-left sm:text-right text-[11px] font-medium text-emerald-400 shrink-0 pl-6 sm:pl-0">
+                      {ep.status}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* EXECUTIVE SUMMARY NOTE (For Invoices) */}
+            <div className="print-invoice-note bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-zinc-800/60 pb-2.5">
+                <div className="space-y-0.5">
+                  <h3 className="text-xs font-semibold text-zinc-200 font-mono uppercase tracking-wider">
+                    Executive Summary Note (For Monthly Retainer Invoices)
+                  </h3>
+                  <p className="text-[11px] text-zinc-500 font-mono">
+                    Pre-formatted 4-line snippet ready to paste directly into QuickBooks, Stripe, or Xero invoices.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleCopyInvoiceNote}
+                  className="no-print px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-200 text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5 font-mono shadow-xs"
+                  title="Copy retainer invoice note"
+                >
+                  {copiedInvoiceNote ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Copied!</span>
+                    </>
                   ) : (
-                    filteredIncidents.map((err) => {
-                      const isResolved = err.status === 'resolved';
-
-                      return (
-                        <tr key={err.id} className="hover:bg-zinc-900/50 transition">
-                          <td className="py-3 px-4 text-center">
-                            <button
-                              onClick={() => handleToggleStatus(err.id)}
-                              className={`w-5 h-5 rounded border flex items-center justify-center text-[10px] font-bold transition cursor-pointer mx-auto ${
-                                isResolved
-                                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400'
-                                  : 'border-zinc-700 hover:border-zinc-500 text-transparent'
-                              }`}
-                              title={isResolved ? 'Mark as unresolved' : 'Mark as resolved'}
-                            >
-                              ✓
-                            </button>
-                          </td>
-                          <td className="py-3 px-4 text-zinc-500 whitespace-nowrap text-[11px]">
-                            {new Date(err.created_at).toLocaleTimeString()}
-                          </td>
-                          <td className="py-3 px-4 font-sans text-xs text-zinc-200">
-                            <div className="truncate max-w-sm sm:max-w-md">
-                              <span className={isResolved ? 'line-through text-zinc-500' : 'text-zinc-200 font-medium'}>
-                                {err.message}
-                              </span>
-                            </div>
-                            {err.url && (
-                              <div className="text-[10px] text-zinc-500 font-mono truncate max-w-xs mt-0.5">
-                                {err.url}
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-3 px-4">
-                            <span
-                              className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase ${
-                                err.environment === 'production'
-                                  ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                  : 'bg-zinc-800 text-zinc-300 border border-zinc-700'
-                              }`}
-                            >
-                              {err.environment}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right space-x-2 whitespace-nowrap">
-                            <button
-                              onClick={() => setSelectedLog(err)}
-                              className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium rounded-md border border-zinc-700 transition cursor-pointer text-xs"
-                            >
-                              Inspect & Fix
-                            </button>
-                            <button
-                              onClick={() => handleDelete(err.id)}
-                              className="px-2 py-1 bg-transparent hover:bg-red-500/10 text-red-400 hover:text-red-300 font-medium rounded-md border border-transparent hover:border-red-500/20 transition cursor-pointer text-xs"
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>Copy Invoice Note</span>
+                    </>
                   )}
-                </tbody>
-              </table>
+                </button>
+              </div>
+
+              <pre className="p-3.5 rounded-lg bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap select-all">
+{`[Monthly Maintenance Statement - ${activeProject.clientName}]
+• Reliability Index: 99.94%
+• Production Exceptions Neutralized: 42
+• Core Web Vitals Status: 100/100 (0.0ms delay)
+Maintained & Monitored by ${displayAgency}`}
+              </pre>
+            </div>
+
+            {/* AGENCY SIGNATURE FOOTER */}
+            <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono text-zinc-500">
+              <div className="flex items-center gap-2">
+                <span className="text-zinc-300 font-medium">
+                  Verified by {displayAgency} 24/7 Production Observability
+                </span>
+                <span>·</span>
+                <span>Automated Retainer Certification</span>
+              </div>
+
+              <div>
+                Confidential Client Retainer Deliverable
+              </div>
+            </div>
+
+          </div>
+
+          {/* CONVERSION CALLOUT BELOW CANVAS (Hidden on Print) */}
+          <div className="no-print bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+            <div className="space-y-1.5 max-w-xl">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-semibold tracking-wide uppercase">
+                Zero Code Migration
+              </span>
+              <h2 className="text-lg sm:text-xl font-bold text-zinc-100">
+                Ready to turn Sentry into $1,500/mo retainer deliverables?
+              </h2>
+              <p className="text-xs text-zinc-400 leading-relaxed font-mono">
+                Connect your existing Sentry read-only tokens in 30 seconds. Your clients receive white-label branded PDF statements certifying the bugs you stopped before they noticed.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <Link
+                href="/signup"
+                className="px-5 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs transition font-mono shadow-sm"
+              >
+                Start Free Agency Trial →
+              </Link>
             </div>
           </div>
-        </div>
 
-        {/* Bottom Call to Action Box matching dashboard style */}
-        <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono shadow-sm">
-          <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-zinc-100 font-sans">Ready to monitor your actual application?</h3>
-            <p className="text-xs text-zinc-400 font-sans">
-              Drop our lightweight &lt;5KB script into Next.js, Node, React, or Python in under 60 seconds.
-            </p>
-          </div>
-          <Link
-            href="/signup"
-            className="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg shadow-sm transition active:scale-95 whitespace-nowrap self-start sm:self-auto"
-          >
-            Start Free →
-          </Link>
-        </div>
-
-      </main>
-
-      {/* Deep Inspect Modal */}
-      {selectedLog && (
-        <InspectErrorModal
-          log={selectedLog}
-          onClose={() => setSelectedLog(null)}
-          onDelete={handleDelete}
-        />
-      )}
-
-    </div>
+        </main>
+      </div>
+    </>
   );
 }
