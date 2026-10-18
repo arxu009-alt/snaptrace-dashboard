@@ -17,6 +17,7 @@
 - Ingestion Endpoint: POST https://snaptrace.space/api/v1/log
 
 ## Pricing & Tiers
-- Developer Free: $0/month (2,000 events/mo, 1 project, 7-day retention)
-- Pro Builder: $19/month or $15/month billed annually (75,000 events/mo, up to 5 projects, Discord/Slack alerts, Cursor AI fixes)
-- Agency Studio: $49/month or $39/month billed annually (500,000 events/mo, unlimited projects, cascading outage collapse, team seats)
+- Developer Starter: $0/month (2,000 events/mo, 1 project, 7-day retention)
+- Beta Founder Pass: $0/month (50,000 events/mo, 5 projects, 30-day retention)
+- Agency Studio: $49/month (100,000 events/mo, 15 client projects, unlimited seats, client reports)
+- Agency Scale: $99/month (500,000 events/mo, unlimited projects, priority edge ingestion, 90-day retention)

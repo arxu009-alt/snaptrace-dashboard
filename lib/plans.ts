@@ -18,6 +18,7 @@ export interface PlanConfig {
   aiCopilot: boolean;
   clientReports: boolean;
   unlimitedSeats: boolean;
+  priorityEdge?: boolean;
   priceMonthly: number;
 }
 
@@ -31,6 +32,7 @@ export const PLANS: Record<string, PlanConfig> = {
     aiCopilot: false,
     clientReports: false,
     unlimitedSeats: false,
+    priorityEdge: false,
     priceMonthly: 0,
   },
   beta_founder: {
@@ -42,21 +44,23 @@ export const PLANS: Record<string, PlanConfig> = {
     aiCopilot: true,
     clientReports: true,
     unlimitedSeats: true,
+    priorityEdge: false,
     priceMonthly: 0,
   },
   agency_studio: {
-    name: 'Agency Studio (Sentry)',
+    name: 'Agency Studio',
     monthlyEventCap: 100000,
-    projectLimit: 10,
+    projectLimit: 15,
     retentionDays: 30,
     webhooks: true,
     aiCopilot: true,
     clientReports: true,
     unlimitedSeats: true,
-    priceMonthly: 29,
+    priorityEdge: false,
+    priceMonthly: 49,
   },
   agency_scale: {
-    name: 'Agency Scale (Sentry)',
+    name: 'Agency Scale',
     monthlyEventCap: 500000,
     projectLimit: 999999, // Unlimited
     retentionDays: 90,
@@ -64,22 +68,24 @@ export const PLANS: Record<string, PlanConfig> = {
     aiCopilot: true,
     clientReports: true,
     unlimitedSeats: true,
-    priceMonthly: 49,
+    priorityEdge: true,
+    priceMonthly: 99,
   },
   // Backward compatibility aliases
   pro: {
-    name: 'Agency Studio (Sentry)',
+    name: 'Agency Studio',
     monthlyEventCap: 100000,
-    projectLimit: 10,
+    projectLimit: 15,
     retentionDays: 30,
     webhooks: true,
     aiCopilot: true,
     clientReports: true,
     unlimitedSeats: true,
-    priceMonthly: 29,
+    priorityEdge: false,
+    priceMonthly: 49,
   },
   agency: {
-    name: 'Agency Scale (Sentry)',
+    name: 'Agency Scale',
     monthlyEventCap: 500000,
     projectLimit: 999999,
     retentionDays: 90,
@@ -87,10 +93,11 @@ export const PLANS: Record<string, PlanConfig> = {
     aiCopilot: true,
     clientReports: true,
     unlimitedSeats: true,
-    priceMonthly: 49,
+    priorityEdge: true,
+    priceMonthly: 99,
   },
   team: {
-    name: 'Agency Scale (Sentry)',
+    name: 'Agency Scale',
     monthlyEventCap: 500000,
     projectLimit: 999999,
     retentionDays: 90,
@@ -98,21 +105,23 @@ export const PLANS: Record<string, PlanConfig> = {
     aiCopilot: true,
     clientReports: true,
     unlimitedSeats: true,
-    priceMonthly: 49,
+    priorityEdge: true,
+    priceMonthly: 99,
   },
   starter_pro: {
-    name: 'Agency Studio (Sentry)',
+    name: 'Agency Studio',
     monthlyEventCap: 100000,
-    projectLimit: 10,
+    projectLimit: 15,
     retentionDays: 30,
     webhooks: true,
     aiCopilot: true,
     clientReports: true,
     unlimitedSeats: true,
-    priceMonthly: 29,
+    priorityEdge: false,
+    priceMonthly: 49,
   },
   team_scale: {
-    name: 'Agency Scale (Sentry)',
+    name: 'Agency Scale',
     monthlyEventCap: 500000,
     projectLimit: 999999,
     retentionDays: 90,
@@ -120,7 +129,8 @@ export const PLANS: Record<string, PlanConfig> = {
     aiCopilot: true,
     clientReports: true,
     unlimitedSeats: true,
-    priceMonthly: 49,
+    priorityEdge: true,
+    priceMonthly: 99,
   },
 };
 

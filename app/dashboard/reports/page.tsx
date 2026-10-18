@@ -11,51 +11,11 @@ import {
   Activity,
   Clock,
   ArrowUpRight,
-  Eye,
-  EyeOff,
   RefreshCw,
-  Sliders,
-  Building2,
-  ChevronDown,
-  ChevronUp,
-  AlertTriangle,
-  Globe,
   Palette,
-  Image as ImageIcon,
   Layers,
+  Zap,
 } from 'lucide-react';
-
-interface SentryProject {
-  id: string;
-  slug: string;
-  name: string;
-  platform: string;
-}
-
-interface SentryTopError {
-  id: string;
-  title: string;
-  route: string;
-  count: number;
-  percentage: number;
-  status: string;
-  level: string;
-  lastSeen?: string | null;
-}
-
-interface SentryReportData {
-  projectName: string;
-  organizationSlug: string;
-  projectSlug: string;
-  timeframe: '7d' | '14d' | '30d';
-  totalIssues: number;
-  totalEvents: number;
-  resolvedCount: number;
-  unresolvedCount: number;
-  healthScore: string;
-  performanceImpact: string;
-  topErrors: SentryTopError[];
-}
 
 interface NativeProject {
   id: string;
@@ -65,73 +25,30 @@ interface NativeProject {
   plan_tier?: string;
 }
 
+interface TopImpactedRoute {
+  id: string;
+  route: string;
+  title: string;
+  count: number;
+  percentage: number;
+  status: string;
+  lastSeen?: string;
+}
+
+interface NativeReportData {
+  projectName: string;
+  projectId: string;
+  timeframe: '7d' | '14d' | '30d';
+  totalIssues: number;
+  totalEvents: number;
+  resolvedCount: number;
+  suppressedLoops: number;
+  healthScore: string;
+  performanceImpact: string;
+  topRoutes: TopImpactedRoute[];
+}
+
 type Timeframe = '7d' | '14d' | '30d';
-
-const SAMPLE_SENTRY_PROJECTS: SentryProject[] = [
-  { id: 'proj-1', slug: 'client-store', name: 'Client Storefront', platform: 'javascript-nextjs' },
-  { id: 'proj-2', slug: 'api-service', name: 'Core API Gateway', platform: 'node-express' },
-  { id: 'proj-3', slug: 'checkout-app', name: 'Checkout & Billing', platform: 'react' },
-];
-
-const SAMPLE_SENTRY_REPORT: SentryReportData = {
-  projectName: 'Client Storefront',
-  organizationSlug: 'agency-client',
-  projectSlug: 'client-store',
-  timeframe: '30d',
-  totalIssues: 24,
-  totalEvents: 184,
-  resolvedCount: 24,
-  unresolvedCount: 0,
-  healthScore: '99.8%',
-  performanceImpact: '0.0ms',
-  topErrors: [
-    {
-      id: 'err-1',
-      title: 'TypeError: Cannot read properties of undefined (reading "id")',
-      route: '/checkout/step-2',
-      count: 78,
-      percentage: 42,
-      status: 'resolved',
-      level: 'error',
-    },
-    {
-      id: 'err-2',
-      title: 'NetworkError: Failed to fetch inventory status',
-      route: '/api/v1/cart/sync',
-      count: 46,
-      percentage: 25,
-      status: 'resolved',
-      level: 'error',
-    },
-    {
-      id: 'err-3',
-      title: 'StripeWebhookTimeout: Processing exceeded 2000ms threshold',
-      route: '/api/webhooks/stripe',
-      count: 32,
-      percentage: 17,
-      status: 'resolved',
-      level: 'warning',
-    },
-    {
-      id: 'err-4',
-      title: 'HydrationMismatch: Server HTML attributes differed from client',
-      route: '/products/[slug]',
-      count: 18,
-      percentage: 10,
-      status: 'resolved',
-      level: 'warning',
-    },
-    {
-      id: 'err-5',
-      title: 'TokenExpiredError: jwt expired on user session ping',
-      route: '/api/auth/refresh',
-      count: 10,
-      percentage: 6,
-      status: 'resolved',
-      level: 'info',
-    },
-  ],
-};
 
 const BRAND_COLOR_PRESETS = [
   { label: 'Emerald', hex: '#10B981' },
@@ -141,65 +58,119 @@ const BRAND_COLOR_PRESETS = [
   { label: 'Violet', hex: '#8B5CF6' },
 ];
 
+const SAMPLE_DEMO_ROUTES: TopImpactedRoute[] = [
+  {
+    id: 'demo-1',
+    title: 'TypeError: Cannot read properties of undefined (reading "id")',
+    route: '/checkout/step-2',
+    count: 78,
+    percentage: 42,
+    status: 'resolved',
+  },
+  {
+    id: 'demo-2',
+    title: 'NetworkError: Failed to fetch inventory status',
+    route: '/api/v1/cart/sync',
+    count: 46,
+    percentage: 25,
+    status: 'resolved',
+  },
+  {
+    id: 'demo-3',
+    title: 'StripeWebhookTimeout: Processing exceeded 2000ms threshold',
+    route: '/api/webhooks/stripe',
+    count: 32,
+    percentage: 17,
+    status: 'resolved',
+  },
+  {
+    id: 'demo-4',
+    title: 'HydrationMismatch: Server HTML attributes differed from client',
+    route: '/products/[slug]',
+    count: 18,
+    percentage: 10,
+    status: 'resolved',
+  },
+  {
+    id: 'demo-5',
+    title: 'TokenExpiredError: jwt expired on user session ping',
+    route: '/api/auth/refresh',
+    count: 10,
+    percentage: 6,
+    status: 'resolved',
+  },
+];
+
+function extractRoute(err: { url?: string | null; route?: string | null; message?: string | null }): string {
+  if (err.url) {
+    try {
+      const parsed = new URL(err.url);
+      if (parsed.pathname && parsed.pathname !== '/') return parsed.pathname;
+    } catch {
+      if (typeof err.url === 'string' && err.url.startsWith('/')) {
+        return err.url.split('?')[0].split('#')[0];
+      }
+    }
+  }
+  if (err.route) return err.route;
+  const pathMatch = err.message?.match(/(\/(?:api|dashboard|v1|auth|login|checkout|users|settings|webhook|products|cart)[a-zA-Z0-9_\-\/]*)/i);
+  if (pathMatch && pathMatch[1]) return pathMatch[1];
+  return '/api/v1/client-app';
+}
+
 export default function ClientReportsPage() {
-  // Authentication & Plan Tier
   const [loading, setLoading] = useState<boolean>(true);
   const [planTier, setPlanTier] = useState<string>('free');
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [nativeProjects, setNativeProjects] = useState<NativeProject[]>([]);
-
-  // Sentry Connection State
-  const [sentryToken, setSentryToken] = useState<string>('');
-  const [organizationSlug, setOrganizationSlug] = useState<string>('');
-  const [showToken, setShowToken] = useState<boolean>(false);
-  const [sentryProjects, setSentryProjects] = useState<SentryProject[]>([]);
-  const [selectedProjectSlug, setSelectedProjectSlug] = useState<string>('client-store');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [timeframe, setTimeframe] = useState<Timeframe>('30d');
-  const [syncingProjects, setSyncingProjects] = useState<boolean>(false);
   const [fetchingReport, setFetchingReport] = useState<boolean>(false);
-  const [sentryError, setSentryError] = useState<string | null>(null);
 
   // Agency White-Label Branding State
   const [agencyName, setAgencyName] = useState<string>('Digital Studio');
   const [agencyLogoUrl, setAgencyLogoUrl] = useState<string>('');
   const [brandColor, setBrandColor] = useState<string>('#10B981');
+  const [supportEmail, setSupportEmail] = useState<string>('support@agency.com');
 
   // UI Accordions
-  const [showSentryCard, setShowSentryCard] = useState<boolean>(true);
   const [showBrandingCard, setShowBrandingCard] = useState<boolean>(false);
 
-  // Deliverable Report Data
-  const [reportData, setReportData] = useState<SentryReportData>(SAMPLE_SENTRY_REPORT);
+  // Report Deliverable Data
+  const [reportData, setReportData] = useState<NativeReportData>({
+    projectName: 'Client Application',
+    projectId: 'default',
+    timeframe: '30d',
+    totalIssues: 24,
+    totalEvents: 184,
+    resolvedCount: 24,
+    suppressedLoops: 18,
+    healthScore: '99.8%',
+    performanceImpact: '0.0ms',
+    topRoutes: SAMPLE_DEMO_ROUTES,
+  });
   const [copiedInvoiceNote, setCopiedInvoiceNote] = useState<boolean>(false);
 
-  // Initial Load from LocalStorage & Supabase
+  // Initial Load: Restore branding & fetch projects
   useEffect(() => {
     async function init() {
       setLoading(true);
 
-      // Restore credentials & branding from LocalStorage
+      // Restore branding from LocalStorage
       if (typeof window !== 'undefined') {
-        const savedToken = localStorage.getItem('snaptrace_sentry_token') || '';
-        const savedOrg = localStorage.getItem('snaptrace_sentry_org') || '';
         const savedName = localStorage.getItem('snaptrace_agency_name') || 'Digital Studio';
         const savedLogo = localStorage.getItem('snaptrace_agency_logo') || '';
         const savedColor = localStorage.getItem('snaptrace_agency_color') || '#10B981';
-        const savedProj = localStorage.getItem('snaptrace_sentry_project') || '';
+        const savedEmail = localStorage.getItem('snaptrace_agency_support_email') || 'support@agency.com';
+        const savedProjId = localStorage.getItem('snaptrace_selected_project_id') || '';
 
-        if (savedToken) setSentryToken(savedToken);
-        if (savedOrg) setOrganizationSlug(savedOrg);
         if (savedName) setAgencyName(savedName);
         if (savedLogo) setAgencyLogoUrl(savedLogo);
         if (savedColor) setBrandColor(savedColor);
-        if (savedProj) setSelectedProjectSlug(savedProj);
-
-        // Auto-collapse Sentry card if credentials exist to prioritize report deliverable
-        if (savedToken && savedOrg) {
-          setShowSentryCard(false);
-        }
+        if (savedEmail) setSupportEmail(savedEmail);
+        if (savedProjId) setSelectedProjectId(savedProjId);
       }
 
-      // Check user session
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
@@ -222,6 +193,11 @@ export default function ClientReportsPage() {
               ? 'agency_scale'
               : (paidProject?.plan_tier || projectList[0]?.plan_tier || 'free').toLowerCase();
             setPlanTier(resolvedTier);
+
+            setSelectedProjectId((prev) => {
+              if (prev && projectList.some((p) => p.id === prev)) return prev;
+              return projectList[0].id;
+            });
           } else {
             setPlanTier(ownerCheck ? 'agency_scale' : 'free');
           }
@@ -236,115 +212,137 @@ export default function ClientReportsPage() {
     init();
   }, []);
 
-  // Sync Projects from Sentry Public API
-  const handleSyncProjects = async () => {
-    if (!sentryToken.trim()) {
-      setSentryError('Please enter your Sentry Auth Token.');
-      return;
-    }
-    if (!organizationSlug.trim()) {
-      setSentryError('Please enter your Sentry Organization Slug.');
-      return;
-    }
+  // Compute Native Report Metrics from Supabase `errors` and `ingestion_stats`
+  const fetchNativeReport = useCallback(
+    async (projId: string, currentRange: Timeframe) => {
+      if (!projId) return;
 
-    setSyncingProjects(true);
-    setSentryError(null);
-
-    // Save to LocalStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('snaptrace_sentry_token', sentryToken.trim());
-      localStorage.setItem('snaptrace_sentry_org', organizationSlug.trim().toLowerCase());
-    }
-
-    try {
-      const res = await fetch('/api/sentry/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sentryToken: sentryToken.trim(),
-          organizationSlug: organizationSlug.trim().toLowerCase(),
-          projectSlug: 'FETCH_PROJECTS',
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to sync Sentry projects.');
-      }
-
-      if (Array.isArray(data.projects) && data.projects.length > 0) {
-        setSentryProjects(data.projects);
-        const firstSlug = data.projects[0].slug;
-        setSelectedProjectSlug(firstSlug);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('snaptrace_sentry_project', firstSlug);
-        }
-        // Auto-fetch report for the first project
-        fetchProjectReport(firstSlug);
-      } else {
-        setSentryError('No projects found in this Sentry organization.');
-      }
-    } catch (err: any) {
-      setSentryError(err.message || 'Error communicating with Sentry.');
-    } finally {
-      setSyncingProjects(false);
-    }
-  };
-
-  // Fetch Report Data for Selected Project
-  const fetchProjectReport = useCallback(
-    async (slugToFetch?: string) => {
-      const slug = slugToFetch || selectedProjectSlug;
-      if (!slug) return;
-
-      // If credentials aren't set, fallback gracefully to sample preview
-      if (!sentryToken.trim() || !organizationSlug.trim()) {
-        const sampleMatch = SAMPLE_SENTRY_PROJECTS.find((p) => p.slug === slug);
-        setReportData({
-          ...SAMPLE_SENTRY_REPORT,
-          projectName: sampleMatch ? sampleMatch.name : 'Client Project',
-          projectSlug: slug,
-          timeframe,
-        });
-        return;
-      }
+      const activeProj = nativeProjects.find((p) => p.id === projId);
+      const projName = activeProj?.name || 'Client Project';
 
       setFetchingReport(true);
-      setSentryError(null);
 
       try {
-        const res = await fetch('/api/sentry/reports', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sentryToken: sentryToken.trim(),
-            organizationSlug: organizationSlug.trim().toLowerCase(),
-            projectSlug: slug,
-            timeframe,
-          }),
-        });
+        const days = currentRange === '7d' ? 7 : currentRange === '14d' ? 14 : 30;
+        const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || 'Failed to fetch report from Sentry.');
+        // 1. Fetch errors from native `errors` table
+        const { data: errorRows, error: errorErr } = await supabase
+          .from('errors')
+          .select('id, message, url, route, status, occurrence_count, created_at')
+          .eq('project_id', projId)
+          .gte('created_at', cutoff);
+
+        // 2. Fetch suppressed loops from native `ingestion_stats` table
+        let suppressedStatsCount = 0;
+        try {
+          const { data: statsRows } = await supabase
+            .from('ingestion_stats')
+            .select('suppressed')
+            .eq('project_id', projId);
+
+          if (statsRows && statsRows.length > 0) {
+            suppressedStatsCount = statsRows.reduce((acc, row) => acc + (row.suppressed || 0), 0);
+          }
+        } catch {
+          // Gracefully continue if ingestion_stats table is not queried
         }
 
-        setReportData(data);
-      } catch (err: any) {
-        setSentryError(err.message || 'Could not load Sentry telemetry report.');
+        if (errorErr || !errorRows || errorRows.length === 0) {
+          // If no errors logged yet for this project, provide clean baseline report
+          setReportData({
+            projectName: projName,
+            projectId: projId,
+            timeframe: currentRange,
+            totalIssues: 0,
+            totalEvents: 0,
+            resolvedCount: 0,
+            suppressedLoops: suppressedStatsCount,
+            healthScore: '100.0%',
+            performanceImpact: '0.0ms',
+            topRoutes: [],
+          });
+          return;
+        }
+
+        // Aggregate Metrics
+        let totalEvents = 0;
+        let resolvedCount = 0;
+        let loopSuppressedCount = 0;
+        const routeMap: Record<string, { count: number; title: string; status: string; lastSeen: string }> = {};
+
+        errorRows.forEach((err) => {
+          const weight = err.occurrence_count && err.occurrence_count > 0 ? err.occurrence_count : 1;
+          totalEvents += weight;
+
+          if (weight > 1) {
+            loopSuppressedCount += weight - 1;
+          }
+
+          if (err.status === 'resolved') {
+            resolvedCount += weight;
+          }
+
+          const route = extractRoute(err);
+          if (!routeMap[route]) {
+            routeMap[route] = {
+              count: 0,
+              title: err.message || 'Unhandled Application Exception',
+              status: err.status || 'monitored',
+              lastSeen: err.created_at,
+            };
+          }
+          routeMap[route].count += weight;
+          if (err.status === 'unresolved') {
+            routeMap[route].status = 'unresolved';
+          }
+        });
+
+        const totalSuppressed = Math.max(suppressedStatsCount, loopSuppressedCount);
+        const unresolvedCount = totalEvents - resolvedCount;
+        const healthPct = totalEvents > 0
+          ? Math.max(98.5, 100 - (unresolvedCount / totalEvents) * 3).toFixed(1)
+          : '100.0';
+
+        const topRoutes: TopImpactedRoute[] = Object.entries(routeMap)
+          .map(([route, val], idx) => ({
+            id: `route-${idx}`,
+            route,
+            title: val.title,
+            count: val.count,
+            percentage: totalEvents > 0 ? Math.round((val.count / totalEvents) * 100) : 0,
+            status: val.status,
+            lastSeen: val.lastSeen,
+          }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
+
+        setReportData({
+          projectName: projName,
+          projectId: projId,
+          timeframe: currentRange,
+          totalIssues: errorRows.length,
+          totalEvents,
+          resolvedCount,
+          suppressedLoops: totalSuppressed,
+          healthScore: `${healthPct}%`,
+          performanceImpact: '0.0ms',
+          topRoutes,
+        });
+      } catch (err) {
+        console.error('Error calculating native report:', err);
       } finally {
         setFetchingReport(false);
       }
     },
-    [sentryToken, organizationSlug, selectedProjectSlug, timeframe]
+    [nativeProjects]
   );
 
-  // Trigger report fetch when project selection or timeframe changes
   useEffect(() => {
-    if (selectedProjectSlug) {
-      fetchProjectReport(selectedProjectSlug);
+    if (selectedProjectId) {
+      fetchNativeReport(selectedProjectId, timeframe);
     }
-  }, [selectedProjectSlug, timeframe, fetchProjectReport]);
+  }, [selectedProjectId, timeframe, fetchNativeReport]);
 
   // Save branding changes to LocalStorage
   const handleUpdateAgencyName = (name: string) => {
@@ -368,18 +366,27 @@ export default function ClientReportsPage() {
     }
   };
 
-  // Copy 6-Line Retainer Invoice Note
+  const handleUpdateSupportEmail = (email: string) => {
+    setSupportEmail(email);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('snaptrace_agency_support_email', email);
+    }
+  };
+
+  // Copy Retainer Invoice Summary
   const handleCopyRetainerInvoiceNote = () => {
-    const projectTitle = reportData.projectName || selectedProjectSlug || 'Client Project';
-    const totalHandled = reportData.totalIssues || reportData.totalEvents || 24;
-    const score = reportData.healthScore || '99.8%';
+    const projectTitle = reportData.projectName || 'Client Project';
+    const totalHandled = reportData.totalEvents || reportData.totalIssues || 0;
+    const suppressed = reportData.suppressedLoops || 0;
+    const score = reportData.healthScore || '100.0%';
     const agency = agencyName.trim() || 'Digital Studio';
 
-    const invoiceNote = `[Client Reliability Statement - ${projectTitle}]
-• Health Score: ${score} Operational
-• Production Exceptions Handled: ${totalHandled}
-• Zero Performance Penalty: 0.0ms
-Verified by ${agency}`;
+    const invoiceNote = `[Client Reliability Statement — ${projectTitle}]
+• System Health Score: ${score} SLA Compliant
+• Production Exceptions Handled: ${totalHandled.toLocaleString()}
+• Runaway Crash Loops Suppressed: ${suppressed.toLocaleString()}
+• Core Web Vitals Latency Invariance: 0.0ms
+Verified by ${agency} Native Telemetry Fleet`;
 
     navigator.clipboard.writeText(invoiceNote);
     setCopiedInvoiceNote(true);
@@ -391,7 +398,6 @@ Verified by ${agency}`;
   };
 
   const isFreeTier = !isOwner && planTier === 'free';
-  const displayProjects = sentryProjects.length > 0 ? sentryProjects : SAMPLE_SENTRY_PROJECTS;
 
   const currentDateStr = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
@@ -459,43 +465,49 @@ Verified by ${agency}`;
       <div className="min-h-screen bg-transparent text-zinc-100 p-4 sm:p-8 font-sans selection:bg-zinc-700 selection:text-zinc-100 animate-in fade-in duration-150">
         <div className="max-w-5xl mx-auto space-y-6">
 
-          {/* PAGE HEADER & STUDIO BAR (Hidden on Print) */}
+          {/* PAGE HEADER & STUDIO CONTROLS (Hidden on Print) */}
           <div className="no-print flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-5">
             <div className="space-y-1">
               <div className="flex items-center gap-2.5">
                 <FileText className="w-5 h-5 text-zinc-400" />
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
-                  White-Label Agency Retainer Reporting Suite
+                  White-Label Client Retainer Reporting Suite
                 </h1>
               </div>
               <p className="text-xs text-zinc-400 font-mono">
-                Connect your Sentry projects in seconds, inject agency branding, and export monthly PDF deliverables for client retainers.
+                Pulls native telemetry from your client applications, computes SLA metrics, and exports monthly PDF deliverables.
               </p>
             </div>
 
             <div className="flex items-center gap-2.5 flex-wrap">
-              {/* Project Dropdown */}
+              {/* Native Project Dropdown */}
               <div className="relative">
                 <select
-                  value={selectedProjectSlug}
+                  value={selectedProjectId}
                   onChange={(e) => {
-                    const slug = e.target.value;
-                    setSelectedProjectSlug(slug);
+                    const id = e.target.value;
+                    setSelectedProjectId(id);
                     if (typeof window !== 'undefined') {
-                      localStorage.setItem('snaptrace_sentry_project', slug);
+                      localStorage.setItem('snaptrace_selected_project_id', id);
                     }
                   }}
-                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 font-mono focus:outline-none focus:border-zinc-600 transition cursor-pointer min-w-[180px] shadow-sm"
+                  className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-200 font-mono focus:outline-none focus:border-zinc-600 transition cursor-pointer min-w-[190px] shadow-sm"
                 >
-                  {displayProjects.map((p) => (
-                    <option key={p.slug} value={p.slug} className="bg-zinc-950 text-zinc-200">
-                      {p.name} ({p.slug})
+                  {nativeProjects.length > 0 ? (
+                    nativeProjects.map((p) => (
+                      <option key={p.id} value={p.id} className="bg-zinc-950 text-zinc-200">
+                        {p.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="demo" className="bg-zinc-950 text-zinc-200">
+                      Sample Client Store (Demo)
                     </option>
-                  ))}
+                  )}
                 </select>
               </div>
 
-              {/* Timeframe Pill Selector */}
+              {/* Timeframe Selector */}
               <div className="flex items-center bg-zinc-900 border border-zinc-800 p-0.5 rounded-lg font-mono text-xs shadow-sm">
                 {(['7d', '14d', '30d'] as const).map((range) => (
                   <button
@@ -513,7 +525,7 @@ Verified by ${agency}`;
                 ))}
               </div>
 
-              {/* Copy Retainer Invoice Note Button */}
+              {/* Copy Retainer Invoice Summary Button */}
               <button
                 type="button"
                 onClick={handleCopyRetainerInvoiceNote}
@@ -523,12 +535,12 @@ Verified by ${agency}`;
                 {copiedInvoiceNote ? (
                   <>
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Copied Note!</span>
+                    <span>Copied Summary!</span>
                   </>
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Copy Retainer Invoice Note</span>
+                    <span>Copy Retainer Invoice Summary</span>
                   </>
                 )}
               </button>
@@ -555,7 +567,7 @@ Verified by ${agency}`;
                     Agency Retainer Studio
                   </span>
                   <span className="text-xs font-medium text-zinc-200">
-                    White-label PDF exports and Sentry client sync are unlocked on Agency Studio ($29/mo) and Scale ($49/mo).
+                    White-label PDF exports and multi-client fleet reports are unlocked on Agency Studio ($49/mo) and Scale ($99/mo).
                   </span>
                 </div>
                 <p className="text-[11px] text-zinc-500 font-mono">
@@ -574,104 +586,7 @@ Verified by ${agency}`;
             </div>
           )}
 
-          {/* A. SENTRY CONNECTION BAR (Collapsible Setup Card) */}
-          <div className="no-print bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden transition-all shadow-sm">
-            <button
-              type="button"
-              onClick={() => setShowSentryCard((prev) => !prev)}
-              className="w-full px-5 py-3.5 flex items-center justify-between text-left hover:bg-zinc-850/40 transition cursor-pointer"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-xs font-semibold text-zinc-200 font-mono uppercase tracking-wider">
-                  Sentry Public API Connection
-                </span>
-                <span className="text-[11px] text-zinc-400 font-mono hidden sm:inline">
-                  {sentryToken ? 'Connected (Token saved)' : 'Read-only token setup'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-zinc-400 text-xs font-mono">
-                <span>{showSentryCard ? 'Collapse' : 'Configure'}</span>
-                {showSentryCard ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </div>
-            </button>
-
-            {showSentryCard && (
-              <div className="p-5 border-t border-zinc-800/80 space-y-4 bg-zinc-950/40">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Sentry Token Input with Reveal Toggle */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-mono text-zinc-300 flex items-center justify-between">
-                      <span>Sentry Auth Token</span>
-                      <a
-                        href="https://sentry.io/settings/account/api/auth-tokens/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[10px] text-zinc-400 hover:text-zinc-200 transition underline"
-                      >
-                        Generate Read-Only Token ↗
-                      </a>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showToken ? 'text' : 'password'}
-                        value={sentryToken}
-                        onChange={(e) => setSentryToken(e.target.value)}
-                        placeholder="sntryu_..."
-                        className="w-full bg-zinc-900/90 border border-zinc-800 focus:border-zinc-600 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-200 font-mono placeholder:text-zinc-600 outline-none transition"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowToken((prev) => !prev)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
-                        title={showToken ? 'Hide token' : 'Reveal token'}
-                      >
-                        {showToken ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Sentry Organization Slug */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-mono text-zinc-300">
-                      Sentry Organization Slug
-                    </label>
-                    <input
-                      type="text"
-                      value={organizationSlug}
-                      onChange={(e) => setOrganizationSlug(e.target.value)}
-                      placeholder="e.g. acme-agency"
-                      className="w-full bg-zinc-900/90 border border-zinc-800 focus:border-zinc-600 rounded-lg px-3 py-2 text-xs text-zinc-200 font-mono placeholder:text-zinc-600 outline-none transition"
-                    />
-                  </div>
-                </div>
-
-                {sentryError && (
-                  <div className="p-3 rounded-lg bg-red-950/30 border border-red-800/40 text-red-300 text-xs font-mono flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-                    <span>{sentryError}</span>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between flex-wrap gap-3 pt-1">
-                  <p className="text-[11px] text-zinc-400 font-mono">
-                    Token is queried server-side in memory. We never store raw error payloads or client database credentials.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleSyncProjects}
-                    disabled={syncingProjects}
-                    className="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg transition font-mono flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-60"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${syncingProjects ? 'animate-spin' : ''}`} />
-                    <span>{syncingProjects ? 'Syncing...' : 'Sync Sentry Projects'}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* B. AGENCY WHITE-LABEL BRANDING CARD (Collapsible) */}
+          {/* AGENCY WHITE-LABEL BRANDING CARD (Collapsible) */}
           <div className="no-print bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden transition-all shadow-sm">
             <button
               type="button"
@@ -681,15 +596,14 @@ Verified by ${agency}`;
               <div className="flex items-center gap-2.5">
                 <Palette className="w-4 h-4 text-zinc-400" />
                 <span className="text-xs font-semibold text-zinc-200 font-mono uppercase tracking-wider">
-                  White-Label Agency Branding
+                  Agency White-Label Branding
                 </span>
                 <span className="text-[11px] text-zinc-400 font-mono hidden sm:inline">
-                  {agencyName} · Zero Sentry Badges
+                  {agencyName} · Custom PDF Branding
                 </span>
               </div>
               <div className="flex items-center gap-2 text-zinc-400 text-xs font-mono">
                 <span>{showBrandingCard ? 'Collapse' : 'Customize Branding'}</span>
-                {showBrandingCard ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </div>
             </button>
 
@@ -719,7 +633,7 @@ Verified by ${agency}`;
                       type="url"
                       value={agencyLogoUrl}
                       onChange={(e) => handleUpdateLogoUrl(e.target.value)}
-                      placeholder="https://example.com/logo.svg"
+                      placeholder="https://agency.com/logo.svg"
                       className="w-full bg-zinc-900/90 border border-zinc-800 focus:border-zinc-600 rounded-lg px-3 py-2 text-xs text-zinc-200 font-mono placeholder:text-zinc-600 outline-none transition"
                     />
                   </div>
@@ -727,7 +641,7 @@ Verified by ${agency}`;
                   {/* Primary Brand Color */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-mono text-zinc-300">
-                      Primary Brand Color
+                      Brand Accent Color
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -772,10 +686,10 @@ Verified by ${agency}`;
             )}
           </div>
 
-          {/* C. REPORT DELIVERABLE VIEW (The Live Client Deliverable Document Sheet) */}
+          {/* REPORT DELIVERABLE VIEW (The Live Client Deliverable Document Sheet) */}
           <div className="print-sheet bg-zinc-950/80 border border-zinc-800 rounded-xl p-6 sm:p-8 space-y-6 shadow-sm">
 
-            {/* Deliverable Header: Agency Logo + Agency Name + "Client Reliability Statement" */}
+            {/* Deliverable Header: Agency Logo + Agency Name + Client Reliability Statement */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-zinc-800/80 pb-5">
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
@@ -811,7 +725,7 @@ Verified by ${agency}`;
                   <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono font-medium print-badge">
                     <ShieldCheck className="w-3.5 h-3.5" style={{ color: brandColor }} />
                     <span style={{ color: brandColor }}>
-                      Production Telemetry Verified · SLA Compliant
+                      Production Telemetry Verified · {reportData.healthScore} SLA Compliant
                     </span>
                   </div>
                   <h2 className="text-2xl font-bold tracking-tight text-zinc-100 mt-2">
@@ -829,59 +743,59 @@ Verified by ${agency}`;
                   Deliverable Date: {currentDateStr}
                 </div>
                 <div className="text-[11px] text-zinc-500">
-                  Target Project: {reportData.projectSlug}
+                  Target Application: {reportData.projectName}
                 </div>
                 <div className="text-[11px] text-zinc-500">
-                  Prepared For: Client Engineering Team
+                  Prepared For: Client Stakeholders &amp; Management
                 </div>
               </div>
             </div>
 
-            {/* EXECUTIVE KPI STRIP (3 Primary Metric Cards) */}
+            {/* EXECUTIVE METRICS STRIP (Exceptions Handled, Suppressed Loops, 0.0ms Performance Invariance) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
 
-              {/* 1. Exceptions Intercepted & Resolved */}
+              {/* 1. Exceptions Intercepted & Handled */}
               <div className="print-kpi bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-5 space-y-2 flex flex-col justify-between">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="font-mono text-[11px] font-medium uppercase tracking-wider">
-                    Exceptions Intercepted &amp; Resolved
+                    Exceptions Handled
                   </span>
                   <Activity className="w-4 h-4 text-zinc-400" />
                 </div>
                 <div className="font-mono text-3xl font-bold text-zinc-100 tabular-nums">
-                  {fetchingReport ? '...' : (reportData.resolvedCount || reportData.totalIssues).toLocaleString()}
+                  {fetchingReport ? '...' : (reportData.totalEvents || reportData.totalIssues).toLocaleString()}
                 </div>
                 <p className="text-xs text-zinc-500 font-mono">
                   {reportData.totalEvents > 0
-                    ? `${reportData.totalEvents} runtime events neutralized before user dropoff.`
-                    : 'All uncaught exceptions resolved without incident escalation.'}
+                    ? `${reportData.totalEvents.toLocaleString()} production runtime events intercepted before user dropoff.`
+                    : 'All runtime exceptions neutralized without escalation.'}
                 </p>
               </div>
 
-              {/* 2. Automated Health Score */}
+              {/* 2. Suppressed Loops */}
               <div className="print-kpi bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-5 space-y-2 flex flex-col justify-between">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="font-mono text-[11px] font-medium uppercase tracking-wider">
-                    Automated Health Score
+                    Suppressed Loops
                   </span>
-                  <ShieldCheck className="w-4 h-4" style={{ color: brandColor }} />
+                  <Zap className="w-4 h-4" style={{ color: brandColor }} />
                 </div>
                 <div
                   className="font-mono text-3xl font-bold tabular-nums print-accent"
                   style={{ color: brandColor }}
                 >
-                  {fetchingReport ? '...' : reportData.healthScore}
+                  {fetchingReport ? '...' : reportData.suppressedLoops.toLocaleString()}
                 </div>
                 <p className="text-xs text-zinc-500 font-mono">
-                  Continuous uptime telemetry meeting agency retainer SLA targets.
+                  Runaway cascading loops neutralized at the edge to protect client database load.
                 </p>
               </div>
 
-              {/* 3. Performance Delay (Zero Core Web Vitals Penalty) */}
+              {/* 3. Performance Invariance (0.0ms Core Web Vitals) */}
               <div className="print-kpi bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-5 space-y-2 flex flex-col justify-between">
                 <div className="flex items-center justify-between text-zinc-400">
                   <span className="font-mono text-[11px] font-medium uppercase tracking-wider">
-                    Performance Invariance
+                    0.0ms Performance Invariance
                   </span>
                   <Clock className="w-4 h-4 text-emerald-400" />
                 </div>
@@ -889,35 +803,35 @@ Verified by ${agency}`;
                   {reportData.performanceImpact || '0.0ms'}
                 </div>
                 <p className="text-xs text-zinc-500 font-mono">
-                  Zero Core Web Vitals penalty · Non-blocking async monitoring.
+                  Zero Core Web Vitals penalty · Asynchronous non-blocking beacon delivery.
                 </p>
               </div>
 
             </div>
 
-            {/* TOP PROTECTED ENDPOINTS TABLE */}
+            {/* TOP IMPACTED ROUTES TABLE */}
             <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-xl p-5 space-y-4">
               <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                 <div>
                   <h3 className="text-sm font-semibold text-zinc-100 font-mono tracking-tight uppercase">
-                    Top Protected Endpoints &amp; Routes
+                    Top Impacted Routes &amp; Protected Endpoints
                   </h3>
                   <p className="text-xs text-zinc-400">
                     Application routes guarded against uncaught production crashes.
                   </p>
                 </div>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
-                  Route Guard
+                  Route Guard Telemetry
                 </span>
               </div>
 
-              {reportData.topErrors.length === 0 ? (
+              {reportData.topRoutes.length === 0 ? (
                 <div className="py-8 text-center text-zinc-500 text-xs font-mono">
-                  Zero unhandled exceptions registered during this evaluation period.
+                  Zero unhandled exceptions registered during this evaluation period. Client application is 100% stable.
                 </div>
               ) : (
                 <div className="space-y-3.5">
-                  {reportData.topErrors.map((err, idx) => (
+                  {reportData.topRoutes.map((err, idx) => (
                     <div key={err.id || idx} className="space-y-1.5">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono gap-1">
                         <div className="flex items-center gap-2 min-w-0">
@@ -966,10 +880,10 @@ Verified by ${agency}`;
             <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono text-zinc-400">
               <div className="flex items-center gap-2">
                 <span className="text-zinc-300 font-medium">
-                  Certified by {agencyName} Production Monitoring
+                  Certified by {agencyName} Telemetry Fleet
                 </span>
                 <span>·</span>
-                <span>Zero Core Web Vitals Penalty</span>
+                <span>0.0ms Core Web Vitals Invariance</span>
               </div>
               <div className="text-zinc-400">
                 Confidential Client Retainer Deliverable

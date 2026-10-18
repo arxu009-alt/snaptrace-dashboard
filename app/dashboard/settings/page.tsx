@@ -7,16 +7,12 @@ import SnapTraceLogo from '@/components/SnapTraceLogo';
 import {
   Settings,
   Trash2,
-  Shield,
-  ShieldCheck,
   Building2,
   Palette,
-  Eye,
-  EyeOff,
-  ExternalLink,
   Check,
   KeyRound,
   FileText,
+  Mail,
 } from 'lucide-react';
 
 const BRAND_COLOR_PRESETS = [
@@ -45,16 +41,9 @@ export default function SettingsPage() {
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
   const [copiedKey, setCopiedKey] = useState<boolean>(false);
 
-  // Sentry Integration Vault State
-  const [sentryToken, setSentryToken] = useState<string>('');
-  const [organizationSlug, setOrganizationSlug] = useState<string>('');
-  const [defaultProjectSlug, setDefaultProjectSlug] = useState<string>('');
-  const [showSentryToken, setShowSentryToken] = useState<boolean>(false);
-  const [savingSentry, setSavingSentry] = useState<boolean>(false);
-  const [sentrySavedMsg, setSentrySavedMsg] = useState<string | null>(null);
-
   // Agency White-Label Branding State
   const [agencyName, setAgencyName] = useState<string>('Digital Studio');
+  const [supportEmail, setSupportEmail] = useState<string>('support@agency.com');
   const [agencyLogoUrl, setAgencyLogoUrl] = useState<string>('');
   const [brandColor, setBrandColor] = useState<string>('#10B981');
   const [savingBranding, setSavingBranding] = useState<boolean>(false);
@@ -70,19 +59,15 @@ export default function SettingsPage() {
     async function loadSettings() {
       setLoading(true);
 
-      // Restore Sentry Vault & Agency Branding from LocalStorage
+      // Restore Agency Branding from LocalStorage
       if (typeof window !== 'undefined') {
-        const savedToken = localStorage.getItem('snaptrace_sentry_token') || '';
-        const savedOrg = localStorage.getItem('snaptrace_sentry_org') || '';
-        const savedProj = localStorage.getItem('snaptrace_sentry_project') || '';
         const savedName = localStorage.getItem('snaptrace_agency_name') || 'Digital Studio';
+        const savedEmail = localStorage.getItem('snaptrace_agency_support_email') || 'support@agency.com';
         const savedLogo = localStorage.getItem('snaptrace_agency_logo') || '';
         const savedColor = localStorage.getItem('snaptrace_agency_color') || '#10B981';
 
-        if (savedToken) setSentryToken(savedToken);
-        if (savedOrg) setOrganizationSlug(savedOrg);
-        if (savedProj) setDefaultProjectSlug(savedProj);
         if (savedName) setAgencyName(savedName);
+        if (savedEmail) setSupportEmail(savedEmail);
         if (savedLogo) setAgencyLogoUrl(savedLogo);
         if (savedColor) setBrandColor(savedColor);
       }
@@ -118,6 +103,7 @@ export default function SettingsPage() {
       }
       setLoading(false);
     }
+
     loadSettings();
   }, []);
 
@@ -173,27 +159,6 @@ export default function SettingsPage() {
     setTimeout(() => setCopiedKey(false), 2000);
   };
 
-  // Save Sentry Integration Vault
-  const handleSaveSentryVault = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavingSentry(true);
-    setSentrySavedMsg(null);
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('snaptrace_sentry_token', sentryToken.trim());
-      localStorage.setItem('snaptrace_sentry_org', organizationSlug.trim().toLowerCase());
-      if (defaultProjectSlug.trim()) {
-        localStorage.setItem('snaptrace_sentry_project', defaultProjectSlug.trim().toLowerCase());
-      }
-    }
-
-    setTimeout(() => {
-      setSavingSentry(false);
-      setSentrySavedMsg('Sentry credentials saved to vault.');
-      setTimeout(() => setSentrySavedMsg(null), 3500);
-    }, 400);
-  };
-
   // Save Agency White-Label Branding
   const handleSaveBranding = (e: React.FormEvent) => {
     e.preventDefault();
@@ -202,6 +167,7 @@ export default function SettingsPage() {
 
     if (typeof window !== 'undefined') {
       localStorage.setItem('snaptrace_agency_name', agencyName.trim() || 'Digital Studio');
+      localStorage.setItem('snaptrace_agency_support_email', supportEmail.trim() || 'support@agency.com');
       localStorage.setItem('snaptrace_agency_logo', agencyLogoUrl.trim());
       localStorage.setItem('snaptrace_agency_color', brandColor.trim());
     }
@@ -236,8 +202,6 @@ export default function SettingsPage() {
 
   const inputCls = 'w-full bg-zinc-900 border border-zinc-800 focus:border-zinc-600 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none font-mono transition';
 
-  const isSentryVaultConfigured = Boolean(sentryToken && organizationSlug);
-
   return (
     <div className="min-h-screen bg-transparent text-zinc-100 p-6 sm:p-8 font-sans">
       <div className="max-w-3xl mx-auto space-y-6">
@@ -249,7 +213,7 @@ export default function SettingsPage() {
             <h1 className="text-xl font-bold tracking-tight text-white">Account &amp; Agency Settings</h1>
           </div>
           <p className="text-xs text-zinc-400 font-mono">
-            Manage your developer profile, Sentry integration vault, white-label branding, and credentials.
+            Manage your developer profile, credentials, and white-label agency branding.
           </p>
         </div>
 
@@ -263,121 +227,11 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-6">
 
-            {/* SENTRY API CREDENTIALS VAULT */}
-            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-800/80 gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                    <Shield className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-semibold text-white">Sentry API Credentials Vault</h2>
-                    <p className="text-xs text-zinc-400 mt-0.5">
-                      Securely connects to Sentry&apos;s public API to generate monthly client retainer reports.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider font-semibold border ${
-                      isSentryVaultConfigured
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                        : 'bg-zinc-900 text-zinc-400 border-zinc-800'
-                    }`}
-                  >
-                    {isSentryVaultConfigured ? 'Vault Configured' : 'Awaiting Setup'}
-                  </span>
-                </div>
-              </div>
-
-              <form onSubmit={handleSaveSentryVault} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  
-                  {/* Sentry Auth Token Input */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block font-medium">
-                        Sentry Auth Token
-                      </label>
-                      <a
-                        href="https://sentry.io/settings/account/api/auth-tokens/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[10px] text-zinc-400 hover:text-zinc-200 transition font-mono underline flex items-center gap-1"
-                      >
-                        <span>Create Token</span>
-                        <ExternalLink className="w-2.5 h-2.5" />
-                      </a>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type={showSentryToken ? 'text' : 'password'}
-                        value={sentryToken}
-                        onChange={(e) => setSentryToken(e.target.value)}
-                        placeholder="sntryu_..."
-                        className="w-full bg-zinc-900 border border-zinc-800 focus:border-zinc-600 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none font-mono transition"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowSentryToken(!showSentryToken)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
-                        title={showSentryToken ? 'Hide token' : 'Reveal token'}
-                      >
-                        {showSentryToken ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Sentry Organization Slug */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block font-medium">
-                      Sentry Organization Slug
-                    </label>
-                    <input
-                      type="text"
-                      value={organizationSlug}
-                      onChange={(e) => setOrganizationSlug(e.target.value)}
-                      placeholder="e.g. acme-agency"
-                      className={inputCls}
-                    />
-                  </div>
-
-                </div>
-
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href="/dashboard/reports"
-                      className="text-xs font-mono text-zinc-400 hover:text-zinc-200 underline transition inline-flex items-center gap-1"
-                    >
-                      <FileText className="w-3 h-3" />
-                      <span>Open Client Retainer Studio</span>
-                    </Link>
-                    {sentrySavedMsg && (
-                      <span className="text-xs font-mono text-emerald-400 flex items-center gap-1 animate-in fade-in">
-                        <Check className="w-3.5 h-3.5" />
-                        <span>{sentrySavedMsg}</span>
-                      </span>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={savingSentry}
-                    className="px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs rounded-lg transition font-mono shrink-0 shadow-sm disabled:opacity-60 cursor-pointer self-start sm:self-auto"
-                  >
-                    {savingSentry ? 'Saving...' : 'Save Sentry Credentials'}
-                  </button>
-                </div>
-              </form>
-            </div>
-
             {/* AGENCY WHITE-LABEL BRANDING SETTINGS */}
             <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 space-y-4 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-800/80 gap-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                  <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                     <Palette className="w-4 h-4" />
                   </div>
                   <div>
@@ -388,13 +242,17 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider font-semibold border bg-zinc-900 text-zinc-300 border-zinc-800 self-start sm:self-auto">
-                  Zero Sentry Badges
-                </span>
+                <Link
+                  href="/dashboard/reports"
+                  className="text-xs font-mono text-zinc-400 hover:text-zinc-200 underline transition inline-flex items-center gap-1 self-start sm:self-auto"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Preview Client Reports</span>
+                </Link>
               </div>
 
               <form onSubmit={handleSaveBranding} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   
                   {/* Agency Name */}
                   <div className="space-y-1.5">
@@ -406,6 +264,20 @@ export default function SettingsPage() {
                       value={agencyName}
                       onChange={(e) => setAgencyName(e.target.value)}
                       placeholder="Digital Studio"
+                      className={inputCls}
+                    />
+                  </div>
+
+                  {/* Support Email */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block font-medium">
+                      Support Email
+                    </label>
+                    <input
+                      type="email"
+                      value={supportEmail}
+                      onChange={(e) => setSupportEmail(e.target.value)}
+                      placeholder="support@agency.com"
                       className={inputCls}
                     />
                   </div>
@@ -542,7 +414,7 @@ export default function SettingsPage() {
                       required
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="e.g. Muhammad Arslan"
+                      placeholder="e.g. Agency Lead"
                       className="flex-1 bg-zinc-900 border border-zinc-800 focus:border-zinc-600 rounded-lg px-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none font-mono transition"
                     />
                     <button
@@ -598,7 +470,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                 <div>
                   <h2 className="text-sm font-semibold text-white">Security &amp; Update Password</h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">Change your account password without logging out.</p>
+                  <p className="text-xs text-zinc-400 mt-0.5">Change your account password securely.</p>
                 </div>
                 <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded text-[10px] font-medium uppercase font-mono">
                   Encrypted
@@ -659,7 +531,7 @@ export default function SettingsPage() {
                   Database Maintenance
                 </h2>
                 <p className="text-xs text-zinc-400 mt-0.5 font-mono">
-                  Permanently deletes all exceptions marked as resolved.
+                  Permanently deletes all exceptions marked as resolved across your projects.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

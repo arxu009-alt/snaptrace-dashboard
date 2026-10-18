@@ -488,7 +488,7 @@ export default function AnalyticsPage() {
 
             <div className="pt-3 border-t border-zinc-800/80 text-[10px] font-mono text-zinc-500 flex justify-between">
               <span>Client Runtime Matrix</span>
-              <span>Sentry-Grade Fingerprinting</span>
+              <span>Deterministic SHA-256 Fingerprinting</span>
             </div>
           </div>
 

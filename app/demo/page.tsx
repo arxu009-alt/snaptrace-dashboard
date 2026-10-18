@@ -290,7 +290,7 @@ Maintained & Monitored by ${displayAgency}`;
                 href="/signup"
                 className="px-4 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition flex items-center gap-1.5 font-mono shadow-sm"
               >
-                <span>Connect Your Sentry Account (14-Day Free Trial)</span>
+                <span>Start 14-Day Free Agency Trial</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -529,13 +529,13 @@ Maintained & Monitored by ${displayAgency}`}
           <div className="no-print bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
             <div className="space-y-1.5 max-w-xl">
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-semibold tracking-wide uppercase">
-                Zero Code Migration
+                Native Fleet Telemetry
               </span>
               <h2 className="text-lg sm:text-xl font-bold text-zinc-100">
-                Ready to turn Sentry into $1,500/mo retainer deliverables?
+                Ready to turn client crash telemetry into $1,500/mo retainer deliverables?
               </h2>
               <p className="text-xs text-zinc-400 leading-relaxed font-mono">
-                Connect your existing Sentry read-only tokens in 30 seconds. Your clients receive white-label branded PDF statements certifying the bugs you stopped before they noticed.
+                Monitor your entire client fleet under one flat dashboard. Your clients receive white-label branded PDF statements certifying the bugs you stopped before they noticed.
               </p>
             </div>
 

@@ -187,7 +187,7 @@ export default function BillingPage() {
             <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 px-4 py-3 text-xs font-mono text-zinc-400 flex items-center justify-between flex-wrap gap-2">
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-yellow-400 shrink-0" />
-                <span>Beta Founder Pass users receive 50,000 free monthly events and up to 5 client projects.</span>
+                <span>Beta Founder Pass accounts receive 50,000 free monthly events and up to 5 client projects.</span>
               </span>
               <span className="text-[11px] text-zinc-500 font-semibold">Grandfathered Quota</span>
             </div>
@@ -215,7 +215,7 @@ export default function BillingPage() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <Building2 className="w-4 h-4 text-purple-400" />
-                        <span className="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider">Agency Studio (Sentry)</span>
+                        <span className="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider">Agency Studio</span>
                       </div>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-medium">
                         Boutique Fleets
@@ -224,11 +224,11 @@ export default function BillingPage() {
 
                     <div>
                       <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl font-black text-white tracking-tight">$29</span>
+                        <span className="text-3xl font-black text-white tracking-tight">$49</span>
                         <span className="text-xs font-mono text-zinc-400">/month</span>
                       </div>
                       <p className="text-xs text-zinc-400 mt-1">
-                        For boutique dev studios connecting Sentry projects to white-label PDF retainers.
+                        For boutique dev studios monitoring client applications with white-label PDF retainers.
                       </p>
                     </div>
 
@@ -239,11 +239,11 @@ export default function BillingPage() {
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
-                        <span>Up to 10 active Sentry client projects</span>
+                        <span>Up to 15 active client projects</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
-                        <span>White-Label Monthly Retainer Reports (PDF / Invoice note)</span>
+                        <span>White-Label Monthly Retainer Reports (PDF &amp; invoice summary)</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-purple-400 mt-0.5 shrink-0" />
@@ -285,7 +285,7 @@ export default function BillingPage() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <Zap className="w-4 h-4 text-yellow-400" />
-                        <span className="text-xs font-mono font-bold text-yellow-400 uppercase tracking-wider">Agency Scale (Sentry)</span>
+                        <span className="text-xs font-mono font-bold text-yellow-400 uppercase tracking-wider">Agency Scale</span>
                       </div>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 font-medium">
                         High Volume
@@ -294,11 +294,11 @@ export default function BillingPage() {
 
                     <div>
                       <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl font-black text-white tracking-tight">$49</span>
+                        <span className="text-3xl font-black text-white tracking-tight">$99</span>
                         <span className="text-xs font-mono text-zinc-400">/month</span>
                       </div>
                       <p className="text-xs text-zinc-400 mt-1">
-                        For growing digital agencies managing large client fleets with unlimited Sentry sync.
+                        For growing digital agencies managing large client fleets with priority edge ingestion.
                       </p>
                     </div>
 
@@ -309,7 +309,7 @@ export default function BillingPage() {
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-yellow-400 mt-0.5 shrink-0" />
-                        <span>UNLIMITED Sentry client projects &amp; API keys</span>
+                        <span>UNLIMITED client projects &amp; API keys</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <Check className="w-3.5 h-3.5 text-yellow-400 mt-0.5 shrink-0" />

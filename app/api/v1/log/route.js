@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 const TICK = String.fromCharCode(96);
 const FENCE = TICK + TICK + TICK;
 const DEFAULT_URL = "https://snaptrace-dashboard.vercel.app/";
+const MAX_PAYLOAD_BYTES = 64 * 1024; // 64KB limit for DoS defense
 
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -40,7 +41,7 @@ async function recordIngestionStats(supabase, projectId, accepted, throttled, su
 
 // Client-supplied text must never be trusted: escape it before it goes into an HTML email.
 function escapeHtml(value) {
-  return String(value)
+  return String(value || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -50,10 +51,18 @@ function escapeHtml(value) {
 
 // Slack requires & < > to be escaped, otherwise <!channel> and fake links can be injected.
 function slackEscape(value) {
-  return String(value)
+  return String(value || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+// Neutralizes Discord @everyone, @here, and raw role mention injections
+function discordEscape(value) {
+  return String(value || "")
+    .replace(/@everyone/gi, "@\u200Beveryone")
+    .replace(/@here/gi, "@\u200Bhere")
+    .replace(/<@&?[0-9]+>/g, "[mention]");
 }
 
 // Only real http(s) links are allowed to become clickable; anything else falls back.
@@ -71,11 +80,37 @@ export async function POST(req) {
   const debugLogs = [];
 
   try {
+    // 0. REQUEST SIZE GUARD: Reject payloads > 64KB to prevent memory exhaustion DoS
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength, 10) > MAX_PAYLOAD_BYTES) {
+      return NextResponse.json(
+        { error: "Payload Too Large: Telemetry payload exceeds 64KB threshold" },
+        { status: 413 }
+      );
+    }
+
+    const rawText = await req.text();
+    if (rawText.length > MAX_PAYLOAD_BYTES) {
+      return NextResponse.json(
+        { error: "Payload Too Large: Telemetry payload exceeds 64KB threshold" },
+        { status: 413 }
+      );
+    }
+
+    let body;
+    try {
+      body = JSON.parse(rawText);
+    } catch {
+      return NextResponse.json(
+        { error: "Malformed JSON payload" },
+        { status: 400 }
+      );
+    }
+
     const supabase = getSupabaseClient();
-    const body = await req.json();
     const { apiKey, message, stackTrace, environment, url, userAgent, occurrenceCount } = body;
 
-    if (!apiKey) {
+    if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
       return NextResponse.json(
         { error: "API Key is required" },
         { status: 400 }
@@ -86,7 +121,7 @@ export async function POST(req) {
     const { data: project, error: projectError } = await supabase
       .from("projects")
       .select("*")
-      .eq("api_key", apiKey)
+      .eq("api_key", apiKey.trim())
       .single();
 
     if (projectError || !project) {
@@ -96,14 +131,14 @@ export async function POST(req) {
       );
     }
 
-    // 🌟 1.5 TIER QUOTA ENFORCEMENT & RATE-LIMITING CIRCUIT BREAKER
+    // 1.5 TIER QUOTA ENFORCEMENT & RATE-LIMITING CIRCUIT BREAKER
     const recipientEmail =
       project.recipient_email ||
       project.alert_email ||
       project.alert_email_address ||
       project.email ||
       project.owner_email;
-      
+
     // Resolve tier strictly from database plan_tier (defaults to 'free' for unpaid projects)
     const projectTier = (project.plan_tier || "free").toString().trim().toLowerCase();
     const activePlan = (PLANS && PLANS[projectTier]) ? PLANS[projectTier] : PLANS.free;
@@ -142,7 +177,7 @@ export async function POST(req) {
       }
     }
 
-    // 🌟 1.8 ENVIRONMENT ALERT FILTER (Only Alert on Production)
+    // 1.8 ENVIRONMENT ALERT FILTER (Only Alert on Production)
     const envString = (environment || "production").toLowerCase();
     const isDevEnv = envString !== "production";
     const muteAlerts = Boolean(project.only_production_alerts) && isDevEnv;
@@ -156,11 +191,11 @@ export async function POST(req) {
       const { error: insertError } = await supabase.from("errors").insert([
         {
           project_id: project.id,
-          message: message || "Unknown Error",
-          stack_trace: stackTrace || null,
-          environment: environment || "production",
-          url: url || null,
-          user_agent: userAgent || null,
+          message: String(message || "Unknown Error").slice(0, 4000),
+          stack_trace: stackTrace ? String(stackTrace).slice(0, 16000) : null,
+          environment: String(environment || "production").slice(0, 100),
+          url: url ? String(url).slice(0, 2048) : null,
+          user_agent: userAgent ? String(userAgent).slice(0, 1024) : null,
         },
       ]);
       if (insertError) {
@@ -197,32 +232,35 @@ export async function POST(req) {
       process.env.GMAIL_APP_PASSWORD ||
       process.env.SMTP_PASS;
 
-    // 3. Dispatch Discord Webhook Alert (Skipped if muted or webhooks disabled on plan)
+    // 3. Dispatch Discord Webhook Alert (Escaped & Sanitized)
     let discordSent = false;
     if (!activePlan?.webhooks) {
       debugLogs.push("Webhooks disabled on " + (activePlan?.name || "Free") + " tier. Upgrade required.");
     } else if (discordWebhookUrl && !muteAlerts) {
       try {
+        const safeDiscordMessage = discordEscape(message || "New Exception Event").slice(0, 250);
+        const safeDiscordStack = stackTrace
+          ? FENCE + "\n" + discordEscape(stackTrace).slice(0, 1000) + "\n" + FENCE
+          : "No stack trace provided";
+
         const discordRes = await fetch(discordWebhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             embeds: [
               {
-                title: "🚨 " + (message || "New Exception Event"),
-                description: stackTrace
-                  ? FENCE + "\n" + stackTrace.slice(0, 1000) + "\n" + FENCE
-                  : "No stack trace provided",
+                title: "🚨 " + safeDiscordMessage,
+                description: safeDiscordStack,
                 color: 15158332,
                 fields: [
                   {
                     name: "Environment",
-                    value: environment || "production",
+                    value: discordEscape(environment || "production"),
                     inline: true,
                   },
                   {
                     name: "URL",
-                    value: url || DEFAULT_URL,
+                    value: safeHttpUrl(url, DEFAULT_URL),
                     inline: true,
                   },
                 ],
@@ -248,23 +286,28 @@ export async function POST(req) {
       debugLogs.push("Discord skipped: No webhook URL configured.");
     }
 
-    // 4. Dispatch Native Slack Webhook Alert (Skipped if muted or webhooks disabled on plan)
+    // 4. Dispatch Native Slack Webhook Alert (Escaped with slackEscape)
     let slackSent = false;
     if (!activePlan?.webhooks) {
       debugLogs.push("Webhooks disabled on " + (activePlan?.name || "Free") + " tier. Upgrade required.");
     } else if (slackWebhookUrl && !muteAlerts) {
       try {
+        const safeSlackMessage = slackEscape(message || "New Exception Event").slice(0, 250);
+        const safeSlackEnv = slackEscape(environment || "production");
+        const safeSlackUrl = slackEscape(url || "N/A");
+        const safeSlackStack = slackEscape((stackTrace || "No stack trace").slice(0, 800));
+
         const slackPayload = {
-          text: "🚨 *[SnapTrace Incident]* " + slackEscape(message || "New Exception Event"),
+          text: "🚨 *[SnapTrace Incident]* " + safeSlackMessage,
           attachments: [
             {
               color: "#EF4444",
-              title: "Crash captured in " + slackEscape(environment || "production"),
+              title: "Crash captured in " + safeSlackEnv,
               title_link: safeHttpUrl(url, "https://snaptrace-dashboard.vercel.app/dashboard/errors"),
               text:
-                "*Error:* " + TICK + slackEscape(message || "Unknown Exception") + TICK +
-                "\n*Route:* " + slackEscape(url || "N/A") +
-                "\n" + FENCE + slackEscape((stackTrace || "No stack trace").slice(0, 800)) + FENCE,
+                "*Error:* " + TICK + safeSlackMessage + TICK +
+                "\n*Route:* " + safeSlackUrl +
+                "\n" + FENCE + safeSlackStack + FENCE,
               footer: "SnapTrace Telemetry Monitor",
               ts: Math.floor(Date.now() / 1000),
             },
@@ -293,7 +336,7 @@ export async function POST(req) {
       debugLogs.push("Slack skipped: No Slack webhook URL configured.");
     }
 
-    // 5. Dispatch Email Alert via Nodemailer (SMTP) (Skipped if muted)
+    // 5. Dispatch Email Alert via Nodemailer (SMTP) (Escaped with escapeHtml)
     let emailSent = false;
     if (recipientEmail && smtpUser && smtpPass && !muteAlerts) {
       try {
@@ -307,7 +350,6 @@ export async function POST(req) {
           },
         });
 
-        // Everything that came from the client is escaped before entering the HTML below
         const safeMessage = escapeHtml(message || "Unknown Error");
         const safeEnvironment = escapeHtml(environment || "production");
         const safeUrlText = escapeHtml(url || DEFAULT_URL);
@@ -317,7 +359,7 @@ export async function POST(req) {
         await transporter.sendMail({
           from: '"SnapTrace System Alerts" <' + smtpUser + '>',
           to: recipientEmail,
-          subject: "[SnapTrace Error] " + (message || "New Exception Event"),
+          subject: "[SnapTrace Error] " + String(message || "New Exception Event").slice(0, 100),
           html: [
             '<div style="font-family: sans-serif; padding: 20px; background: #0f172a; color: #ffffff; border-radius: 8px;">',
             '  <h2 style="color: #ef4444; margin-top: 0;">🚨 New Exception Event</h2>',

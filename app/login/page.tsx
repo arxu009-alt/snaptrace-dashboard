@@ -134,7 +134,7 @@ export default function LoginPage() {
       {/* Main Split Grid */}
       <div className="flex-1 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 items-center p-6 sm:p-12 gap-12 sm:gap-16 relative z-10">
         
-        {/* Left Column: Sentry/Vercel Developer Showcase */}
+        {/* Left Column: Native Developer Showcase */}
         <div className="lg:col-span-7 space-y-8 py-4">
           <Link href="/" className="inline-block transition hover:opacity-90">
             <SnapTraceLogo size="lg" showText={true} />
